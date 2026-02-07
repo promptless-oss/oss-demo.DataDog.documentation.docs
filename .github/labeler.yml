@@ -1,0 +1,30 @@
+Github:
+- .github/**/*
+
+Images:
+- static/images/**/*
+
+Architecture:
+- local/**/*
+- layouts/**/*
+- config/**/*
+- assets/**/*
+
+$1:
+- content/en/([^/]+)/.*
+
+FAQ:
+- content/en/*/faq/*
+
+Guide:
+- content/en/*/guide/*
+
+eci: 
+# Emerging Cloud Integrations team
+- integrations-internal-core/oracle_cloud_infrastructure/**/*
+
+cdocs:
+- customization_config/
+- content/en/**/*.mdoc.md
+- layouts/shortcodes/**/*.mdoc.md
+- content/.gitignore

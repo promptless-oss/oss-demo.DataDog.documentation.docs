@@ -1,0 +1,214 @@
+heading: Welcome to Datadog Docs!
+
+guides:
+    # There can be only 3 guides in this section
+  - title: Install the Agent
+    desc: Collect events and metrics from your hosts that send data to Datadog.
+    link_text: Getting Started with the Agent
+    link: getting_started/agent/
+  - title: Set Up Integrations
+    desc: Gather metrics, traces, and logs with over 1,000+ built-in integrations to send to Datadog.
+    link_text: Getting Started with Integrations
+    link: getting_started/integrations/
+  - title: Get Started in App
+    desc: Visualize the data collected in Datadog and create dashboards, alerts, monitors, and more.
+    link_text: Getting Started in Datadog
+    link: getting_started/application/
+
+nav_sections:
+    # For a better rendering, sections should include sub-sections with multiple of 4.
+  - nav_section:
+    - name: 'Platform Services'
+    - navtiles:
+      - title: Agent
+        link: agent/
+        icon: agent-fill
+        desc: Install and configure the Datadog Agent to collect and send data
+      - title: Integrations
+        link: integrations/
+        icon: integrations
+        desc: Gather data about your applications, services, and systems
+      - title: OpenTelemetry
+        link: opentelemetry/
+        icon: open-telemetry
+        desc: Pipe your OpenTelemetry metrics, logs, and traces into Datadog
+      - title: Dashboards
+        link: dashboards/
+        icon: dashboard
+        desc: Visualize, analyze, and generate insights about your data
+      - title: Monitors and Alerting
+        link: monitors/
+        icon: monitor
+        desc: Create, edit, and manage your monitors and notifications
+      - title: Datadog Watchdog
+        link: watchdog/
+        icon: watchdog
+        desc: Detect and surface application and infrastructure anomalies
+      - title: Mobile Application
+        link: mobile/
+        icon: mobile
+        desc: View Datadog alerts, incidents, and more on your mobile device
+      - title: Incident Management
+        link: service_management/incident_management
+        icon: incidents
+        desc: Identify, analyze, and mitigate disruptive incidents in your organization
+      - title: Events
+        link: events/
+        icon: events
+        desc: Track notable changes and alerts in your applications and infrastructure
+      - title: Workflow Automation
+        link: service_management/workflows/
+        icon: workflows
+        desc: Automate and orchestrate processes across your tech stack
+      - title: App Builder
+        link: service_management/app_builder/
+        icon: app-builder
+        desc: Create low-code applications to streamline your internal tools
+  - nav_section:
+    - name: 'Products'
+    - navtiles:
+      - title: Infrastructure
+        link: infrastructure/
+        icon: host-map
+        desc: Track your hosts, containers, processes, and serverless functions
+      - title: Serverless
+        link: serverless/
+        icon: serverless
+        desc: Detect and resolve performance issues in your serverless applications
+      - title: Network Monitoring
+        link: network_monitoring/
+        icon: network
+        desc: Use tagged objects to collect and graph data about your network traffic
+      - title: Cloud Cost Management
+        link: cloud_cost_management/
+        icon: cloud-cost-management
+        desc: Take control of your cloud spend with unified observability and cost data
+      - title: APM
+        link: tracing/
+        icon: apm
+        desc: Explore out-of-the-box performance dashboards and distributed traces
+      - title: Continuous Profiler
+        link: profiler/
+        icon: profiling-1
+        desc: Compare performance snapshots and investigate bottlenecks
+      - title: Database Monitoring
+        link: database_monitoring/
+        icon: database-2
+        desc: Explore enriched dashboards, query metrics, and query samples
+      - title: Data Streams Monitoring
+        link: data_streams/
+        icon: datastreams-monitoring
+        desc: Track and improve performance of your data streaming pipelines
+      - title: Data Observability
+        link: data_observability/
+        icon: data-jobs-monitoring
+        desc: Monitor data quality, performance, and cost
+      - title: Universal Service Monitoring
+        link: universal_service_monitoring/
+        icon: usm
+        desc: Discover, map, and monitor services without changing code
+      - title: Synthetic Monitoring
+        link: synthetics/
+        icon: synthetics
+        desc: Ensure uptime, flag regional issues, and test application performance
+      - title: Error Tracking
+        link: error_tracking/
+        icon: error-tracking
+        desc: Identify critical errors and accelerate resolution across web, mobile, and backend
+      - title: Real User Monitoring
+        link: real_user_monitoring/
+        icon: rum
+        desc: Capture, observe, and analyze the user experience of your applications
+      - title: Product Analytics
+        link: product_analytics/
+        icon: product-analytics
+        desc: Gain insight into user behavior and make data-driven product decisions
+      - title: Session Replay
+        link: session_replay/
+        icon: session-replay
+        desc: Capture and visually replay the user experience of your users
+      - title: Mobile Application Testing
+        link: mobile_app_testing/
+        icon: mobile
+        desc: Monitor user journeys and business transactions in mobile applications
+      - title: Continuous Testing
+        link: continuous_testing/
+        icon: continuous-testing
+        desc: Perform codeless integration and end-to-end testing with CI/CD providers
+      - title: CI Visibility
+        link: continuous_integration/
+        icon: ci
+        desc: Monitor the health and performance of your CI pipelines
+      - title: Test Optimization
+        link: tests/
+        icon: ci
+        desc: Detect flaky tests and identify commits introducing flaky tests
+      - title: Code Coverage
+        link: code_coverage/
+        icon: ci
+        desc: Visualize coverage data trends and block PR merges based on coverage thresholds
+      - title: Security
+        link: security/
+        icon: security-platform
+        desc: Detect threats, vulnerabilities, and misconfigurations
+      - title: Metrics
+        link: metrics/
+        icon: metric
+        desc: Explore, search, and create distributions for your metrics
+      - title: Log Management
+        link: logs/
+        icon: log
+        desc: Process, monitor, and archive your ingested logs
+      - title: Observability Pipelines
+        link: observability_pipelines/
+        icon: pipelines
+        desc: Manage and monitor your telemetry pipelines
+      - title: LLM Observability
+        link: llm_observability/
+        icon: llm-observability
+        desc: Trace, monitor, and secure your LLM applications
+      - title: Internal Developer Portal
+        link: internal_developer_portal
+        icon: internal-developer-portal-wui
+        desc: Unify telemetry, metadata, and workflows to accelerate delivery
+      - title: On-Call
+        link: service_management/on-call/
+        icon: on-call
+        desc: Manage paging, escalation, and on-call schedules in one platform
+  - nav_section:
+    - name: 'Configuration'
+    - navtiles:
+      - title: API
+        link: api/latest/
+        icon: api
+        desc: Try the Datadog API
+      - title: Account Management
+        link: account_management/
+        icon: cog-2
+        desc: Access org-based settings and billing
+      - title: Data Security
+        link: data_security/
+        icon: security-lock
+        desc: Learn how Datadog protects your data
+      - title: Developers
+        link: developers/
+        icon: dev-code
+        desc: Develop on the Datadog platform
+      - title: Partners
+        link: partners/
+        icon: colab
+        desc: Learn about best practices and get started monitoring your clients' environments.
+
+popular_searches:
+  - title: API documentation
+    link: api/
+    weight: 10
+  - title: Agent Installation
+    link: getting_started/agent/
+    weight: 20
+  - title: Log Collection
+    link: logs/log_collection/
+    weight: 30
+  - title: Integration Setup
+    link: integrations/
+    weight: 40
