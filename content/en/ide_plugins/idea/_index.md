@@ -4,6 +4,7 @@ disable_toc: false
 is_beta: true
 aliases:
 - '/developers/ide_integrations/idea/'
+- '/developers/ide_plugins/idea/'
 - '/developers/ide_plugins/idea/continuous_profiler/'
 further_reading:
 - link: "/tracing/error_tracking/"
@@ -171,9 +172,9 @@ You can give feedback in the [discussion forum][1], or send an e-mail to [team-i
 [17]: https://www.datadoghq.com/legal/eula/
 [18]: /tests/
 [19]: /continuous_integration/
-[20]: /developers/ide_plugins/idea/live_debugger/
+[20]: /ide_plugins/idea/live_debugger/
 [21]: /tracing/live_debugger/
 [22]: /tracing/code_origin?tab=java
-[23]: /developers/ide_plugins/idea/logs/
-[24]: /developers/ide_plugins/idea/code_security/
-[25]: /developers/ide_plugins/idea/error_tracking/
+[23]: /ide_plugins/idea/logs/
+[24]: /ide_plugins/idea/code_security/
+[25]: /ide_plugins/idea/error_tracking/
