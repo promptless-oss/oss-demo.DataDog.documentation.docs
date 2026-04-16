@@ -29907,6 +29907,30 @@ components:
       required:
         - self
       type: object
+    GetIoCIndicatorResponse:
+      description: Response for the get indicator of compromise endpoint.
+      properties:
+        data:
+          $ref: "#/components/schemas/GetIoCIndicatorResponseData"
+      type: object
+    GetIoCIndicatorResponseAttributes:
+      description: Attributes of the get indicator response.
+      properties:
+        data:
+          $ref: "#/components/schemas/IoCIndicatorDetailed"
+      type: object
+    GetIoCIndicatorResponseData:
+      description: IoC indicator response data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GetIoCIndicatorResponseAttributes"
+        id:
+          description: Unique identifier for the response.
+          type: string
+        type:
+          description: Response type identifier.
+          type: string
+      type: object
     GetIssueIncludeQueryParameterItem:
       description: Relationship object that should be included in the response.
       enum:
@@ -35414,6 +35438,301 @@ components:
       type: string
       x-enum-varnames:
         - INVESTIGATION
+    IoCExplorerListResponse:
+      description: Response for the list indicators of compromise endpoint.
+      properties:
+        data:
+          $ref: "#/components/schemas/IoCExplorerListResponseData"
+      type: object
+    IoCExplorerListResponseAttributes:
+      description: Attributes of the IoC Explorer list response.
+      properties:
+        data:
+          description: List of indicators of compromise.
+          items:
+            $ref: "#/components/schemas/IoCIndicator"
+          type: array
+        metadata:
+          $ref: "#/components/schemas/IoCExplorerListResponseMetadata"
+        paging:
+          $ref: "#/components/schemas/IoCExplorerListResponsePaging"
+      type: object
+    IoCExplorerListResponseData:
+      description: IoC Explorer list response data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/IoCExplorerListResponseAttributes"
+        id:
+          description: Unique identifier for the response.
+          type: string
+        type:
+          description: Response type identifier.
+          type: string
+      type: object
+    IoCExplorerListResponseMetadata:
+      description: Response metadata.
+      properties:
+        count:
+          description: Total number of indicators matching the query.
+          format: int64
+          type: integer
+      type: object
+    IoCExplorerListResponsePaging:
+      description: Pagination information.
+      properties:
+        offset:
+          description: Current pagination offset.
+          format: int64
+          type: integer
+      type: object
+    IoCGeoLocation:
+      description: Geographic location information for an IP indicator.
+      properties:
+        city:
+          description: City name.
+          type: string
+        country_code:
+          description: ISO country code.
+          type: string
+        country_name:
+          description: Full country name.
+          type: string
+      type: object
+    IoCIndicator:
+      description: An indicator of compromise with threat intelligence data.
+      properties:
+        as_geo:
+          $ref: "#/components/schemas/IoCGeoLocation"
+        as_type:
+          description: Autonomous system type.
+          type: string
+        benign_sources:
+          description: Threat intelligence sources that flagged this indicator as benign.
+          items:
+            $ref: "#/components/schemas/IoCSource"
+          nullable: true
+          type: array
+        categories:
+          description: Threat categories associated with the indicator.
+          items:
+            type: string
+          type: array
+        first_seen:
+          description: Timestamp when the indicator was first seen.
+          format: date-time
+          type: string
+        id:
+          description: Unique identifier for the indicator.
+          type: string
+        indicator:
+          description: The indicator value (for example, an IP address or domain).
+          type: string
+        indicator_type:
+          description: Type of indicator (for example, IP address or domain).
+          type: string
+        last_seen:
+          description: Timestamp when the indicator was last seen.
+          format: date-time
+          type: string
+        log_matches:
+          description: Number of logs that matched this indicator.
+          format: int64
+          type: integer
+        m_as_type:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        m_persistence:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        m_signal:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        m_sources:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        malicious_sources:
+          description: Threat intelligence sources that flagged this indicator as malicious.
+          items:
+            $ref: "#/components/schemas/IoCSource"
+          nullable: true
+          type: array
+        max_trust_score:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        score:
+          description: Threat score for the indicator (0-100).
+          format: double
+          type: number
+        signal_matches:
+          description: Number of security signals that matched this indicator.
+          format: int64
+          type: integer
+        signal_tier:
+          description: Signal tier level.
+          format: int64
+          type: integer
+        suspicious_sources:
+          description: Threat intelligence sources that flagged this indicator as suspicious.
+          items:
+            $ref: "#/components/schemas/IoCSource"
+          nullable: true
+          type: array
+        tags:
+          description: Tags associated with the indicator.
+          items:
+            type: string
+          type: array
+      type: object
+    IoCIndicatorDetailed:
+      description: An indicator of compromise with extended context from your environment.
+      properties:
+        additional_data:
+          additionalProperties: {}
+          description: Additional domain-specific context from threat intelligence sources.
+          type: object
+        as_cidr_block:
+          description: Autonomous system CIDR block.
+          type: string
+        as_geo:
+          $ref: "#/components/schemas/IoCGeoLocation"
+        as_number:
+          description: Autonomous system number.
+          type: string
+        as_organization:
+          description: Autonomous system organization name.
+          type: string
+        as_type:
+          description: Autonomous system type.
+          type: string
+        benign_sources:
+          description: Threat intelligence sources that flagged this indicator as benign.
+          items:
+            $ref: "#/components/schemas/IoCSource"
+          nullable: true
+          type: array
+        categories:
+          description: Threat categories associated with the indicator.
+          items:
+            type: string
+          type: array
+        critical_assets:
+          description: Critical assets associated with this indicator.
+          items:
+            type: string
+          type: array
+        first_seen:
+          description: Timestamp when the indicator was first seen.
+          format: date-time
+          type: string
+        hosts:
+          description: Hosts associated with this indicator.
+          items:
+            type: string
+          type: array
+        id:
+          description: Unique identifier for the indicator.
+          type: string
+        indicator:
+          description: The indicator value (for example, an IP address or domain).
+          type: string
+        indicator_type:
+          description: Type of indicator (for example, IP address or domain).
+          type: string
+        last_seen:
+          description: Timestamp when the indicator was last seen.
+          format: date-time
+          type: string
+        log_matches:
+          description: Number of logs that matched this indicator.
+          format: int64
+          type: integer
+        log_sources:
+          description: Log sources where this indicator was observed.
+          items:
+            type: string
+          type: array
+        m_as_type:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        m_persistence:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        m_signal:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        m_sources:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        malicious_sources:
+          description: Threat intelligence sources that flagged this indicator as malicious.
+          items:
+            $ref: "#/components/schemas/IoCSource"
+          nullable: true
+          type: array
+        max_trust_score:
+          $ref: "#/components/schemas/IoCScoreEffect"
+        score:
+          description: Threat score for the indicator (0-100).
+          format: double
+          type: number
+        services:
+          description: Services where this indicator was observed.
+          items:
+            type: string
+          type: array
+        signal_matches:
+          description: Number of security signals that matched this indicator.
+          format: int64
+          type: integer
+        signal_severity:
+          description: Breakdown of security signals by severity.
+          items:
+            $ref: "#/components/schemas/IoCSignalSeverityCount"
+          type: array
+        signal_tier:
+          description: Signal tier level.
+          format: int64
+          type: integer
+        suspicious_sources:
+          description: Threat intelligence sources that flagged this indicator as suspicious.
+          items:
+            $ref: "#/components/schemas/IoCSource"
+          nullable: true
+          type: array
+        tags:
+          description: Tags associated with the indicator.
+          items:
+            type: string
+          type: array
+        users:
+          additionalProperties:
+            description: List of user identifiers in this category.
+            items:
+              type: string
+            type: array
+          description: Users associated with this indicator, grouped by category.
+          type: object
+      type: object
+    IoCScoreEffect:
+      description: Effect of a scoring factor on the indicator's threat score.
+      enum:
+        - RAISE_SCORE
+        - LOWER_SCORE
+        - NO_EFFECT
+      type: string
+      x-enum-varnames:
+        - RAISE_SCORE
+        - LOWER_SCORE
+        - NO_EFFECT
+    IoCSignalSeverityCount:
+      description: Count of security signals by severity level.
+      properties:
+        count:
+          description: Number of signals at this severity level.
+          format: int64
+          type: integer
+        severity:
+          description: Severity level (for example, critical, high, medium, low, info).
+          type: string
+      type: object
+    IoCSource:
+      description: A threat intelligence source that has flagged an indicator.
+      properties:
+        name:
+          description: Name of the threat intelligence source.
+          type: string
+      type: object
     Issue:
       description: The issue matching the request.
       properties:
@@ -112015,6 +112334,112 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is a private preview.
         If you are interested in accessing this API, [fill out this form](https://forms.gle/kMYC1sDr6WDUBDsx9).
+  /api/v2/security/siem/ioc-explorer:
+    get:
+      description: |-
+        Get a list of indicators of compromise (IoCs) matching the specified filters.
+      operationId: ListIndicatorsOfCompromise
+      parameters:
+        - description: Number of results per page.
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 50
+            format: int32
+            maximum: 2147483647
+            type: integer
+        - description: Pagination offset.
+          in: query
+          name: offset
+          required: false
+          schema:
+            default: 0
+            format: int32
+            maximum: 2147483647
+            type: integer
+        - description: Search/filter query (supports field:value syntax).
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: "Sort column: score, first_seen_ts_epoch, last_seen_ts_epoch, indicator, indicator_type, signal_count, log_count, category, as_type."
+          in: query
+          name: sort[column]
+          required: false
+          schema:
+            default: score
+            type: string
+        - description: "Sort order: asc or desc."
+          in: query
+          name: sort[order]
+          required: false
+          schema:
+            default: desc
+            type: string
+      responses:
+        "200":
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/IoCExplorerListResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_signals_read
+      summary: List indicators of compromise
+      tags: ["Security Monitoring"]
+      x-menu-order: 89
+      x-unstable: |-
+        **Note**: This endpoint is in beta and may be subject to changes.
+        Please check the documentation regularly for updates.
+  /api/v2/security/siem/ioc-explorer/indicator:
+    get:
+      description: |-
+        Get detailed information about a specific indicator of compromise (IoC).
+      operationId: GetIndicatorOfCompromise
+      parameters:
+        - description: The indicator value to look up (for example, an IP address or domain).
+          in: query
+          name: indicator
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/GetIoCIndicatorResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_signals_read
+      summary: Get an indicator of compromise
+      tags: ["Security Monitoring"]
+      x-menu-order: 90
+      x-unstable: |-
+        **Note**: This endpoint is in beta and may be subject to changes.
+        Please check the documentation regularly for updates.
   /api/v2/security/signals/notification_rules:
     get:
       description: Returns the list of notification rules for security signals.
