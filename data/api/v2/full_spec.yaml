@@ -796,6 +796,14 @@ components:
       required: true
       schema:
         type: string
+    LLMObsEvalNamePathParameter:
+      description: The name of the custom LLM Observability evaluator configuration.
+      example: "my-custom-evaluator"
+      in: path
+      name: eval_name
+      required: true
+      schema:
+        type: string
     LLMObsExperimentIDPathParameter:
       description: The ID of the LLM Observability experiment.
       example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
@@ -38233,6 +38241,418 @@ components:
         after:
           description: Cursor for the next page of results.
           nullable: true
+          type: string
+      type: object
+    LLMObsCustomEvalConfigAssessmentCriteria:
+      description: Criteria used to assess the pass/fail result of a custom evaluator.
+      properties:
+        max_threshold:
+          description: Maximum numeric threshold for a passing result.
+          example: 1.0
+          format: double
+          nullable: true
+          type: number
+        min_threshold:
+          description: Minimum numeric threshold for a passing result.
+          example: 0.7
+          format: double
+          nullable: true
+          type: number
+        pass_values:
+          description: Specific output values considered as a passing result.
+          example:
+            - "pass"
+            - "yes"
+          items:
+            description: A value considered as a passing result.
+            type: string
+          nullable: true
+          type: array
+        pass_when:
+          description: When true, a boolean output of true is treated as passing.
+          example: true
+          nullable: true
+          type: boolean
+      type: object
+    LLMObsCustomEvalConfigAttributes:
+      description: Attributes of a custom LLM Observability evaluator configuration.
+      properties:
+        category:
+          description: Category of the evaluator.
+          example: "Custom"
+          type: string
+        created_at:
+          description: Timestamp when the evaluator configuration was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        created_by:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigUser"
+        eval_name:
+          description: Name of the custom evaluator.
+          example: "my-custom-evaluator"
+          type: string
+        last_updated_by:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigUser"
+        llm_judge_config:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigLLMJudgeConfig"
+        llm_provider:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigLLMProvider"
+        target:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigTarget"
+        updated_at:
+          description: Timestamp when the evaluator configuration was last updated.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+      required:
+        - eval_name
+        - created_at
+        - updated_at
+      type: object
+    LLMObsCustomEvalConfigBedrockOptions:
+      description: AWS Bedrock-specific options for LLM provider configuration.
+      properties:
+        region:
+          description: AWS region for Bedrock.
+          example: "us-east-1"
+          type: string
+      type: object
+    LLMObsCustomEvalConfigData:
+      description: Data object for a custom LLM Observability evaluator configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigAttributes"
+        id:
+          description: Unique name identifier of the evaluator configuration.
+          example: "my-custom-evaluator"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsCustomEvalConfigEvalScope:
+      description: Scope at which to evaluate spans.
+      enum:
+        - span
+        - trace
+        - session
+      example: "span"
+      type: string
+      x-enum-varnames:
+        - SPAN
+        - TRACE
+        - SESSION
+    LLMObsCustomEvalConfigInferenceParams:
+      description: LLM inference parameters for a custom evaluator.
+      properties:
+        frequency_penalty:
+          description: Frequency penalty to reduce repetition.
+          example: 0.0
+          format: double
+          type: number
+        max_tokens:
+          description: Maximum number of tokens to generate.
+          example: 1024
+          format: int64
+          type: integer
+        presence_penalty:
+          description: Presence penalty to reduce repetition.
+          example: 0.0
+          format: double
+          type: number
+        temperature:
+          description: Sampling temperature for the LLM.
+          example: 0.7
+          format: double
+          type: number
+        top_k:
+          description: Top-k sampling parameter.
+          example: 50
+          format: int64
+          type: integer
+        top_p:
+          description: Top-p (nucleus) sampling parameter.
+          example: 1.0
+          format: double
+          type: number
+      type: object
+    LLMObsCustomEvalConfigIntegrationProvider:
+      description: Name of the LLM integration provider.
+      enum:
+        - openai
+        - amazon-bedrock
+        - anthropic
+        - azure-openai
+        - vertex-ai
+        - llm-proxy
+      example: "openai"
+      type: string
+      x-enum-varnames:
+        - OPENAI
+        - AMAZON_BEDROCK
+        - ANTHROPIC
+        - AZURE_OPENAI
+        - VERTEX_AI
+        - LLM_PROXY
+    LLMObsCustomEvalConfigLLMJudgeConfig:
+      description: LLM judge configuration for a custom evaluator.
+      properties:
+        assessment_criteria:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigAssessmentCriteria"
+        inference_params:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigInferenceParams"
+        last_used_library_prompt_template_name:
+          description: Name of the last library prompt template used.
+          example: "sentiment-analysis-v1"
+          nullable: true
+          type: string
+        modified_library_prompt_template:
+          description: Whether the library prompt template was modified.
+          example: false
+          nullable: true
+          type: boolean
+        output_schema:
+          additionalProperties: {}
+          description: JSON schema describing the expected output format of the LLM judge.
+          nullable: true
+          type: object
+        parsing_type:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigParsingType"
+        prompt_template:
+          description: List of messages forming the LLM judge prompt template.
+          items:
+            $ref: "#/components/schemas/LLMObsCustomEvalConfigPromptMessage"
+          type: array
+      required:
+        - inference_params
+      type: object
+    LLMObsCustomEvalConfigLLMProvider:
+      description: LLM provider configuration for a custom evaluator.
+      properties:
+        bedrock:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigBedrockOptions"
+        integration_account_id:
+          description: Integration account identifier.
+          example: "my-account-id"
+          type: string
+        integration_provider:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigIntegrationProvider"
+        model_name:
+          description: Name of the LLM model.
+          example: "gpt-4o"
+          type: string
+        vertex_ai:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigVertexAIOptions"
+      type: object
+    LLMObsCustomEvalConfigParsingType:
+      description: Output parsing type for a custom LLM judge evaluator.
+      enum:
+        - structured_output
+        - json
+      example: "structured_output"
+      type: string
+      x-enum-varnames:
+        - STRUCTURED_OUTPUT
+        - JSON
+    LLMObsCustomEvalConfigPromptContent:
+      description: A content block within a prompt message.
+      properties:
+        type:
+          description: Content block type.
+          example: "text"
+          type: string
+        value:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigPromptContentValue"
+      required:
+        - type
+        - value
+      type: object
+    LLMObsCustomEvalConfigPromptContentValue:
+      description: Value of a prompt message content block.
+      properties:
+        text:
+          description: Text content of the message block.
+          example: "What is the sentiment of this review?"
+          type: string
+        tool_call:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigPromptToolCall"
+        tool_call_result:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigPromptToolResult"
+      type: object
+    LLMObsCustomEvalConfigPromptMessage:
+      description: A message in the prompt template for a custom LLM judge evaluator.
+      properties:
+        content:
+          description: Text content of the message.
+          example: "Rate the quality of the following response:"
+          type: string
+        contents:
+          description: Multi-part content blocks for the message.
+          items:
+            $ref: "#/components/schemas/LLMObsCustomEvalConfigPromptContent"
+          type: array
+        role:
+          description: Role of the message author.
+          example: "user"
+          type: string
+      required:
+        - role
+      type: object
+    LLMObsCustomEvalConfigPromptToolCall:
+      description: A tool call within a prompt message.
+      properties:
+        arguments:
+          description: JSON-encoded arguments for the tool call.
+          example: '{"location": "San Francisco"}'
+          type: string
+        id:
+          description: Unique identifier of the tool call.
+          example: "call_abc123"
+          type: string
+        name:
+          description: Name of the tool being called.
+          example: "get_weather"
+          type: string
+        type:
+          description: Type of the tool call.
+          example: "function"
+          type: string
+      type: object
+    LLMObsCustomEvalConfigPromptToolResult:
+      description: A tool call result within a prompt message.
+      properties:
+        name:
+          description: Name of the tool that produced this result.
+          example: "get_weather"
+          type: string
+        result:
+          description: The result returned by the tool.
+          example: "sunny, 72F"
+          type: string
+        tool_id:
+          description: Identifier of the tool call this result corresponds to.
+          example: "call_abc123"
+          type: string
+        type:
+          description: Type of the tool result.
+          example: "function"
+          type: string
+      type: object
+    LLMObsCustomEvalConfigResponse:
+      description: Response containing a custom LLM Observability evaluator configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigData"
+      required:
+        - data
+      type: object
+    LLMObsCustomEvalConfigTarget:
+      description: Target application configuration for a custom evaluator.
+      properties:
+        application_name:
+          description: Name of the ML application this evaluator targets.
+          example: "my-llm-app"
+          type: string
+        enabled:
+          description: Whether the evaluator is active for the target application.
+          example: true
+          type: boolean
+        eval_scope:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigEvalScope"
+          nullable: true
+        filter:
+          description: Filter expression to select which spans to evaluate.
+          example: "@service:my-service"
+          nullable: true
+          type: string
+        root_spans_only:
+          description: When true, only root spans are evaluated.
+          example: true
+          nullable: true
+          type: boolean
+        sampling_percentage:
+          description: Percentage of traces to evaluate. Must be greater than 0 and at most 100.
+          example: 50.0
+          format: double
+          nullable: true
+          type: number
+      required:
+        - application_name
+        - enabled
+      type: object
+    LLMObsCustomEvalConfigType:
+      description: Type of the custom LLM Observability evaluator configuration resource.
+      enum:
+        - evaluator_config
+      example: "evaluator_config"
+      type: string
+      x-enum-varnames:
+        - EVALUATOR_CONFIG
+    LLMObsCustomEvalConfigUpdateAttributes:
+      description: Attributes for creating or updating a custom LLM Observability evaluator configuration.
+      properties:
+        category:
+          description: Category of the evaluator.
+          example: "Custom"
+          type: string
+        eval_name:
+          description: Name of the custom evaluator. If provided, must match the eval_name path parameter.
+          example: "my-custom-evaluator"
+          type: string
+        llm_judge_config:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigLLMJudgeConfig"
+        llm_provider:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigLLMProvider"
+        target:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigTarget"
+      required:
+        - target
+      type: object
+    LLMObsCustomEvalConfigUpdateData:
+      description: Data object for creating or updating a custom LLM Observability evaluator configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigUpdateAttributes"
+        id:
+          description: Name of the evaluator. If provided, must match the eval_name path parameter.
+          example: "my-custom-evaluator"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigType"
+      required:
+        - type
+        - attributes
+      type: object
+    LLMObsCustomEvalConfigUpdateRequest:
+      description: Request to create or update a custom LLM Observability evaluator configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsCustomEvalConfigUpdateData"
+      required:
+        - data
+      type: object
+    LLMObsCustomEvalConfigUser:
+      description: A Datadog user associated with a custom evaluator configuration.
+      properties:
+        email:
+          description: Email address of the user.
+          example: "user@example.com"
+          type: string
+      type: object
+    LLMObsCustomEvalConfigVertexAIOptions:
+      description: Google Vertex AI-specific options for LLM provider configuration.
+      properties:
+        location:
+          description: Google Cloud region.
+          example: "us-central1"
+          type: string
+        project:
+          description: Google Cloud project ID.
+          example: "my-gcp-project"
           type: string
       type: object
     LLMObsDatasetDataAttributesRequest:
@@ -81170,6 +81590,240 @@ paths:
           - hosts_read
       x-unstable: |-
         This endpoint is in Preview and may introduce breaking changes.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/unstable/llm-obs/config/evaluators/custom/{eval_name}:
+    delete:
+      description: Delete a custom LLM Observability evaluator configuration by its name.
+      operationId: DeleteLLMObsCustomEvalConfig
+      parameters:
+        - $ref: "#/components/parameters/LLMObsEvalNamePathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Delete a custom evaluator configuration
+      tags:
+        - LLM Observability
+      x-menu-order: 27
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Retrieve a custom LLM Observability evaluator configuration by its name.
+      operationId: GetLLMObsCustomEvalConfig
+      parameters:
+        - $ref: "#/components/parameters/LLMObsEvalNamePathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        category: "Custom"
+                        created_at: "2024-01-15T10:30:00Z"
+                        created_by:
+                          email: "user@example.com"
+                        eval_name: "my-custom-evaluator"
+                        last_updated_by:
+                          email: "user@example.com"
+                        llm_judge_config:
+                          inference_params:
+                            max_tokens: 1024
+                            temperature: 0.7
+                          parsing_type: "structured_output"
+                        llm_provider:
+                          integration_provider: "openai"
+                          model_name: "gpt-4o"
+                        target:
+                          application_name: "my-llm-app"
+                          enabled: true
+                          sampling_percentage: 50.0
+                        updated_at: "2024-01-15T10:30:00Z"
+                      id: "my-custom-evaluator"
+                      type: "evaluator_config"
+              schema:
+                $ref: "#/components/schemas/LLMObsCustomEvalConfigResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get a custom evaluator configuration
+      tags:
+        - LLM Observability
+      x-menu-order: 25
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: Create or update a custom LLM Observability evaluator configuration by its name.
+      operationId: UpdateLLMObsCustomEvalConfig
+      parameters:
+        - $ref: "#/components/parameters/LLMObsEvalNamePathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      llm_judge_config:
+                        inference_params:
+                          max_tokens: 1024
+                          temperature: 0.7
+                        parsing_type: "structured_output"
+                      llm_provider:
+                        integration_provider: "openai"
+                        model_name: "gpt-4o"
+                      target:
+                        application_name: "my-llm-app"
+                        enabled: true
+                        sampling_percentage: 50.0
+                    id: "my-custom-evaluator"
+                    type: "evaluator_config"
+              full:
+                summary: Full example with prompt template, output schema, and assessment criteria
+                value:
+                  data:
+                    attributes:
+                      category: "Custom"
+                      eval_name: "my-custom-evaluator"
+                      llm_judge_config:
+                        assessment_criteria:
+                          pass_when: false
+                        inference_params:
+                          frequency_penalty: 0
+                          max_tokens: 4096
+                          presence_penalty: 0
+                          temperature: 1
+                          top_p: 1
+                        output_schema:
+                          name: "boolean_eval"
+                          strict: true
+                        parsing_type: "structured_output"
+                        prompt_template:
+                          - content: "You are a judge LLM."
+                            role: "system"
+                          - content: "{{span_output}}"
+                            role: "user"
+                      llm_provider:
+                        integration_account_id: "your-account-uuid"
+                        integration_provider: "openai"
+                        model_name: "gpt-4o"
+                      target:
+                        application_name: "my-llm-app"
+                        enabled: true
+                        eval_scope: "span"
+                        filter: "@meta.span.kind:llm"
+                        root_spans_only: false
+                        sampling_percentage: 100
+                    id: "my-custom-evaluator"
+                    type: "evaluator_config"
+            schema:
+              $ref: "#/components/schemas/LLMObsCustomEvalConfigUpdateRequest"
+        description: Custom evaluator configuration payload.
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unprocessable Entity
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Create or update a custom evaluator configuration
+      tags:
+        - LLM Observability
+      x-menu-order: 26
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/actions-datastores:
     get:
