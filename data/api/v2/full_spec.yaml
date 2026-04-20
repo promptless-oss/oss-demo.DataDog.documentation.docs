@@ -64825,6 +64825,38 @@ components:
       type: string
       x-enum-varnames:
         - SIGNAL
+    SecurityMonitoringSignalUpdateAttributes:
+      description: Attributes for updating the triage state or assignee of a security signal.
+      properties:
+        archive_comment:
+          $ref: "#/components/schemas/SecurityMonitoringSignalArchiveComment"
+        archive_reason:
+          $ref: "#/components/schemas/SecurityMonitoringSignalArchiveReason"
+        assignee:
+          $ref: "#/components/schemas/SecurityMonitoringTriageUser"
+        state:
+          $ref: "#/components/schemas/SecurityMonitoringSignalState"
+        version:
+          $ref: "#/components/schemas/SecurityMonitoringSignalVersion"
+      type: object
+    SecurityMonitoringSignalUpdateData:
+      description: Data containing the triage state or assignee update for a security signal.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringSignalUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringSignalMetadataType"
+      required:
+        - attributes
+      type: object
+    SecurityMonitoringSignalUpdateRequest:
+      description: Request body for updating the triage state or assignee of a security signal.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringSignalUpdateData"
+      required:
+        - data
+      type: object
     SecurityMonitoringSignalVersion:
       description: Version of the updated signal. If server side version is higher, update will be rejected.
       format: int64
@@ -64977,6 +65009,33 @@ components:
       required:
         - count
         - events
+      type: object
+    SecurityMonitoringSignalsBulkUpdateData:
+      description: Data for updating a single security signal in a bulk update operation.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringSignalUpdateAttributes"
+        id:
+          description: The unique ID of the security signal.
+          example: AAAAAWgN8Xwgr1vKDQAAAABBV2dOOFh3ZzZobm1mWXJFYTR0OA
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringSignalType"
+      required:
+        - id
+        - attributes
+      type: object
+    SecurityMonitoringSignalsBulkUpdateRequest:
+      description: Request body for updating multiple attributes of multiple security signals.
+      properties:
+        data:
+          description: An array of signal updates.
+          items:
+            $ref: "#/components/schemas/SecurityMonitoringSignalsBulkUpdateData"
+          maxItems: 199
+          type: array
+      required:
+        - data
       type: object
     SecurityMonitoringSignalsListResponse:
       description: "The response object with all security signals matching the request\nand pagination information."
@@ -121073,6 +121132,52 @@ paths:
         operator: OR
         permissions:
           - security_monitoring_signals_write
+  /api/v2/security_monitoring/signals/bulk/update:
+    patch:
+      description: |-
+        Update the triage state or assignee of multiple security signals at once.
+        The maximum number of signals that can be updated in a single request is 199.
+      operationId: BulkEditSecurityMonitoringSignals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringSignalsBulkUpdateRequest"
+        description: Attributes describing the signal updates.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringSignalsBulkTriageUpdateResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ: []
+      summary: Bulk update security signals
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 95
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_signals_write
   /api/v2/security_monitoring/signals/search:
     post:
       description: |-
@@ -121402,6 +121507,59 @@ paths:
         permissions:
           - security_monitoring_rules_read
           - security_monitoring_signals_read
+  /api/v2/security_monitoring/signals/{signal_id}/update:
+    patch:
+      description: |-
+        Update the triage state or assignee of a security signal.
+      operationId: EditSecurityMonitoringSignal
+      parameters:
+        - $ref: "#/components/parameters/SignalID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringSignalUpdateRequest"
+        description: Attributes describing the signal triage state or assignee update.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringSignalTriageUpdateResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ: []
+      summary: Update security signal triage state or assignee
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 94
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_signals_write
   /api/v2/security_monitoring/terraform/{resource_type}/bulk:
     post:
       description: |-
