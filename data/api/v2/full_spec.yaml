@@ -62905,19 +62905,23 @@ components:
         - DONE
         - TIMEOUT
     SecurityMonitoringContentPackActivation:
-      description: The activation status of a content pack
+      description: The activation status of a content pack.
       enum:
         - never_activated
         - activated
         - deactivated
       example: activated
       type: string
+      x-enum-descriptions:
+        - Pack has never been activated for this organization.
+        - Pack is currently activated.
+        - Pack was previously activated but has since been deactivated.
       x-enum-varnames:
         - NEVER_ACTIVATED
         - ACTIVATED
         - DEACTIVATED
     SecurityMonitoringContentPackIntegrationStatus:
-      description: The installation status of the related integration
+      description: The installation status of the related integration.
       enum:
         - installed
         - available
@@ -62926,6 +62930,12 @@ components:
         - error
       example: installed
       type: string
+      x-enum-descriptions:
+        - Integration is fully installed.
+        - Integration exists in the catalog but is not installed.
+        - Integration is only partially configured.
+        - Integration detected (for example, logs are flowing) but not explicitly installed.
+        - Integration is in an error state.
       x-enum-varnames:
         - INSTALLED
         - AVAILABLE
@@ -62942,7 +62952,9 @@ components:
         cp_activation:
           $ref: "#/components/schemas/SecurityMonitoringContentPackActivation"
         filters_configured_for_logs:
-          description: Whether filters (Security Filters or Index Query depending on the pricing model) are configured for logs
+          description: |-
+            Whether filters (Security Filters or Index Query depending on the pricing model) are
+            present and correctly configured to route logs into Cloud SIEM.
           example: true
           type: boolean
         integration_installed_status:
@@ -62950,7 +62962,7 @@ components:
         logs_last_collected:
           $ref: "#/components/schemas/SecurityMonitoringContentPackTimestampBucket"
         logs_seen_from_any_index:
-          description: Whether logs have been seen from any index
+          description: Whether logs for this content pack have been seen in any Datadog index within the last 72 hours.
           example: true
           type: boolean
         state:
@@ -63015,7 +63027,7 @@ components:
         - meta
       type: object
     SecurityMonitoringContentPackStatus:
-      description: The current status of a content pack
+      description: The current operational status of a content pack.
       enum:
         - install
         - activate
@@ -63025,6 +63037,13 @@ components:
         - broken
       example: active
       type: string
+      x-enum-descriptions:
+        - Not activated; no logs detected in the last 72 hours.
+        - Not activated; logs are flowing into a Datadog index but not yet routed through Cloud SIEM.
+        - Activated; awaiting first log ingestion.
+        - Activated; logs received within the last 24 hours.
+        - Activated; integration not installed or logs last seen 24 to 72 hours ago.
+        - Activated; no logs for over 72 hours, filter missing, or Cloud SIEM index incorrectly ordered.
       x-enum-varnames:
         - INSTALL
         - ACTIVATE
@@ -63033,7 +63052,7 @@ components:
         - WARNING
         - BROKEN
     SecurityMonitoringContentPackTimestampBucket:
-      description: Timestamp bucket indicating when logs were last collected
+      description: Timestamp bucket indicating when logs were last collected.
       enum:
         - not_seen
         - within_24_hours
@@ -63042,6 +63061,12 @@ components:
         - over_30d
       example: within_24_hours
       type: string
+      x-enum-descriptions:
+        - No logs observed.
+        - Logs received within the last 24 hours.
+        - Logs last seen 24 to 72 hours ago.
+        - Logs last seen 3 to 30 days ago.
+        - Logs last seen more than 30 days ago.
       x-enum-varnames:
         - NOT_SEEN
         - WITHIN_24_HOURS
@@ -64132,7 +64157,7 @@ components:
         - $ref: "#/components/schemas/SecurityMonitoringSignalRulePayload"
         - $ref: "#/components/schemas/CloudConfigurationRulePayload"
     SecurityMonitoringSKU:
-      description: The SIEM pricing model (SKU) for the organization
+      description: The Cloud SIEM pricing model (SKU) for the organization.
       enum:
         - per_gb_analyzed
         - per_event_in_siem_index_2023
@@ -120226,9 +120251,8 @@ paths:
   /api/v2/security_monitoring/content_packs/states:
     get:
       description: |-
-        Get the activation and configuration states for all security monitoring content packs.
-        This endpoint returns status information about each content pack including activation state,
-        integration status, and log collection status.
+        Get the activation state, integration status, and log collection status
+        for all Cloud SIEM content packs.
       operationId: GetContentPacksStates
       responses:
         "200":
@@ -120251,22 +120275,32 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_read
       summary: Get content pack states
       tags:
         - Security Monitoring
       x-menu-order: 47
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_filters_read
+          - logs_read_index_data
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/content_packs/{content_pack_id}/activate:
     put:
       description: |-
-        Activate a security monitoring content pack. This operation configures the necessary
+        Activate a Cloud SIEM content pack. This operation configures the necessary
         log filters or security filters depending on the pricing model and updates the content
         pack activation state.
       operationId: ActivateContentPack
       parameters:
-        - description: The ID of the content pack to activate.
+        - description: The ID of the content pack to activate (for example, `aws-cloudtrail`).
           in: path
           name: content_pack_id
           required: true
@@ -120290,21 +120324,31 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_write
       summary: Activate content pack
       tags:
         - Security Monitoring
       x-menu-order: 48
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_filters_write
+          - logs_modify_indexes
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/content_packs/{content_pack_id}/deactivate:
     put:
       description: |-
-        Deactivate a security monitoring content pack. This operation removes the content pack's
+        Deactivate a Cloud SIEM content pack. This operation removes the content pack's
         configuration from log filters or security filters and updates the content pack activation state.
       operationId: DeactivateContentPack
       parameters:
-        - description: The ID of the content pack to deactivate.
+        - description: The ID of the content pack to deactivate (for example, `aws-cloudtrail`).
           in: path
           name: content_pack_id
           required: true
@@ -120328,10 +120372,20 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_write
       summary: Deactivate content pack
       tags:
         - Security Monitoring
       x-menu-order: 49
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_filters_write
+          - logs_modify_indexes
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
