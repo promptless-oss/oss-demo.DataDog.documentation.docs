@@ -62905,23 +62905,19 @@ components:
         - DONE
         - TIMEOUT
     SecurityMonitoringContentPackActivation:
-      description: The activation status of a content pack.
+      description: The activation status of a content pack
       enum:
         - never_activated
         - activated
         - deactivated
       example: activated
       type: string
-      x-enum-descriptions:
-        - Pack has never been activated for this organization.
-        - Pack is currently activated.
-        - Pack was previously activated but has since been deactivated.
       x-enum-varnames:
         - NEVER_ACTIVATED
         - ACTIVATED
         - DEACTIVATED
     SecurityMonitoringContentPackIntegrationStatus:
-      description: The installation status of the related integration.
+      description: The installation status of the related integration
       enum:
         - installed
         - available
@@ -62930,12 +62926,6 @@ components:
         - error
       example: installed
       type: string
-      x-enum-descriptions:
-        - Integration is fully installed.
-        - Integration exists in the catalog but is not installed.
-        - Integration is only partially configured.
-        - Integration detected (for example, logs are flowing) but not explicitly installed.
-        - Integration is in an error state.
       x-enum-varnames:
         - INSTALLED
         - AVAILABLE
@@ -62952,9 +62942,7 @@ components:
         cp_activation:
           $ref: "#/components/schemas/SecurityMonitoringContentPackActivation"
         filters_configured_for_logs:
-          description: |-
-            Whether filters (Security Filters or Index Query depending on the pricing model) are
-            present and correctly configured to route logs into Cloud SIEM.
+          description: Whether filters (Security Filters or Index Query depending on the pricing model) are configured for logs
           example: true
           type: boolean
         integration_installed_status:
@@ -62962,7 +62950,7 @@ components:
         logs_last_collected:
           $ref: "#/components/schemas/SecurityMonitoringContentPackTimestampBucket"
         logs_seen_from_any_index:
-          description: Whether logs for this content pack have been seen in any Datadog index within the last 72 hours.
+          description: Whether logs have been seen from any index
           example: true
           type: boolean
         state:
@@ -63027,7 +63015,7 @@ components:
         - meta
       type: object
     SecurityMonitoringContentPackStatus:
-      description: The current operational status of a content pack.
+      description: The current status of a content pack
       enum:
         - install
         - activate
@@ -63037,13 +63025,6 @@ components:
         - broken
       example: active
       type: string
-      x-enum-descriptions:
-        - Not activated; no logs detected in the last 72 hours.
-        - Not activated; logs are flowing into a Datadog index but not yet routed through Cloud SIEM.
-        - Activated; awaiting first log ingestion.
-        - Activated; logs received within the last 24 hours.
-        - Activated; integration not installed or logs last seen 24 to 72 hours ago.
-        - Activated; no logs for over 72 hours, filter missing, or Cloud SIEM index incorrectly ordered.
       x-enum-varnames:
         - INSTALL
         - ACTIVATE
@@ -63052,7 +63033,7 @@ components:
         - WARNING
         - BROKEN
     SecurityMonitoringContentPackTimestampBucket:
-      description: Timestamp bucket indicating when logs were last collected.
+      description: Timestamp bucket indicating when logs were last collected
       enum:
         - not_seen
         - within_24_hours
@@ -63061,12 +63042,6 @@ components:
         - over_30d
       example: within_24_hours
       type: string
-      x-enum-descriptions:
-        - No logs observed.
-        - Logs received within the last 24 hours.
-        - Logs last seen 24 to 72 hours ago.
-        - Logs last seen 3 to 30 days ago.
-        - Logs last seen more than 30 days ago.
       x-enum-varnames:
         - NOT_SEEN
         - WITHIN_24_HOURS
@@ -64157,7 +64132,7 @@ components:
         - $ref: "#/components/schemas/SecurityMonitoringSignalRulePayload"
         - $ref: "#/components/schemas/CloudConfigurationRulePayload"
     SecurityMonitoringSKU:
-      description: The Cloud SIEM pricing model (SKU) for the organization.
+      description: The SIEM pricing model (SKU) for the organization
       enum:
         - per_gb_analyzed
         - per_event_in_siem_index_2023
@@ -83760,6 +83735,10 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              default:
+                value:
+                  openapi_spec_file: openapi-spec.yaml
             schema:
               $ref: "#/components/schemas/OpenAPIFile"
         required: true
@@ -83816,6 +83795,10 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              default:
+                value:
+                  openapi_spec_file: openapi-spec.yaml
             schema:
               $ref: "#/components/schemas/OpenAPIFile"
         required: true
@@ -88147,6 +88130,34 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      attempt_to_fix:
+                        retries: 3
+                      disabled:
+                        enabled: false
+                      quarantined:
+                        auto_quarantine_rule:
+                          enabled: true
+                          window_seconds: 3600
+                        branch_rule:
+                          branches:
+                            - main
+                          enabled: true
+                          excluded_branches: []
+                          excluded_test_services: []
+                        enabled: true
+                        failure_rate_rule:
+                          branches:
+                            - main
+                          enabled: true
+                          min_runs: 10
+                          threshold: 0.5
+                      repository_id: "github.com/example-org/example-repo"
+                    type: test_optimization_update_flaky_tests_management_policies_request
             schema:
               $ref: "#/components/schemas/TestOptimizationFlakyTestsManagementPoliciesUpdateRequest"
         required: true
@@ -88188,6 +88199,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      repository_id: "github.com/example-org/example-repo"
+                    type: test_optimization_get_flaky_tests_management_policies_request
             schema:
               $ref: "#/components/schemas/TestOptimizationFlakyTestsManagementPoliciesGetRequest"
         required: true
@@ -91361,7 +91379,7 @@ paths:
         content:
           application/json:
             examples:
-              json-request-body:
+              default:
                 value:
                   data:
                     attributes:
@@ -91517,7 +91535,7 @@ paths:
         content:
           application/json:
             examples:
-              json-request-body:
+              default:
                 value:
                   data:
                     attributes:
@@ -101537,6 +101555,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: Queue for annotating customer support traces
+                      name: My annotation queue
+                      project_id: a33671aa-24fd-4dcd-9b33-a8ec7dde7751
+                    type: queues
             schema:
               $ref: "#/components/schemas/LLMObsAnnotationQueueRequest"
         description: Create annotation queue payload.
@@ -101626,6 +101653,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: Updated description
+                      name: Updated queue name
+                    type: queues
             schema:
               $ref: "#/components/schemas/LLMObsAnnotationQueueUpdateRequest"
         description: Update annotation queue payload.
@@ -101733,6 +101768,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      interactions:
+                        - content_id: trace-abc-123
+                          type: trace
+                    type: interactions
             schema:
               $ref: "#/components/schemas/LLMObsAnnotationQueueInteractionsRequest"
         description: Add interactions payload.
@@ -101789,6 +101833,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      interaction_ids:
+                        - 00000000-0000-0000-0000-000000000000
+                        - 00000000-0000-0000-0000-000000000001
+                    type: interactions
             schema:
               $ref: "#/components/schemas/LLMObsDeleteAnnotationQueueInteractionsRequest"
         description: Delete interactions payload.
@@ -110165,6 +110218,17 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      expires_at: "2025-12-31T23:59:59+00:00"
+                      name: My Personal Access Token
+                      scopes:
+                        - dashboards_read
+                        - dashboards_write
+                    type: personal_access_tokens
             schema:
               $ref: "#/components/schemas/PersonalAccessTokenCreateRequest"
         required: true
@@ -110273,6 +110337,17 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: Updated Personal Access Token
+                      scopes:
+                        - dashboards_read
+                        - dashboards_write
+                    id: 00112233-4455-6677-8899-aabbccddeeff
+                    type: personal_access_tokens
             schema:
               $ref: "#/components/schemas/PersonalAccessTokenUpdateRequest"
         required: true
@@ -120251,8 +120326,9 @@ paths:
   /api/v2/security_monitoring/content_packs/states:
     get:
       description: |-
-        Get the activation state, integration status, and log collection status
-        for all Cloud SIEM content packs.
+        Get the activation and configuration states for all security monitoring content packs.
+        This endpoint returns status information about each content pack including activation state,
+        integration status, and log collection status.
       operationId: GetContentPacksStates
       responses:
         "200":
@@ -120275,32 +120351,22 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      security:
-        - apiKeyAuth: []
-          appKeyAuth: []
-        - AuthZ:
-            - security_monitoring_filters_read
       summary: Get content pack states
       tags:
         - Security Monitoring
       x-menu-order: 47
-      "x-permission":
-        operator: OR
-        permissions:
-          - security_monitoring_filters_read
-          - logs_read_index_data
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/content_packs/{content_pack_id}/activate:
     put:
       description: |-
-        Activate a Cloud SIEM content pack. This operation configures the necessary
+        Activate a security monitoring content pack. This operation configures the necessary
         log filters or security filters depending on the pricing model and updates the content
         pack activation state.
       operationId: ActivateContentPack
       parameters:
-        - description: The ID of the content pack to activate (for example, `aws-cloudtrail`).
+        - description: The ID of the content pack to activate.
           in: path
           name: content_pack_id
           required: true
@@ -120324,31 +120390,21 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      security:
-        - apiKeyAuth: []
-          appKeyAuth: []
-        - AuthZ:
-            - security_monitoring_filters_write
       summary: Activate content pack
       tags:
         - Security Monitoring
       x-menu-order: 48
-      "x-permission":
-        operator: OR
-        permissions:
-          - security_monitoring_filters_write
-          - logs_modify_indexes
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/content_packs/{content_pack_id}/deactivate:
     put:
       description: |-
-        Deactivate a Cloud SIEM content pack. This operation removes the content pack's
+        Deactivate a security monitoring content pack. This operation removes the content pack's
         configuration from log filters or security filters and updates the content pack activation state.
       operationId: DeactivateContentPack
       parameters:
-        - description: The ID of the content pack to deactivate (for example, `aws-cloudtrail`).
+        - description: The ID of the content pack to deactivate.
           in: path
           name: content_pack_id
           required: true
@@ -120372,20 +120428,10 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      security:
-        - apiKeyAuth: []
-          appKeyAuth: []
-        - AuthZ:
-            - security_monitoring_filters_write
       summary: Deactivate content pack
       tags:
         - Security Monitoring
       x-menu-order: 49
-      "x-permission":
-        operator: OR
-        permissions:
-          - security_monitoring_filters_write
-          - logs_modify_indexes
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -120438,6 +120484,37 @@ paths:
       requestBody:
         content:
           "application/json":
+            examples:
+              default:
+                value:
+                  cases:
+                    - condition: "a > 0"
+                      name: ""
+                      notifications: []
+                      status: info
+                  filters: []
+                  hasExtendedTitle: true
+                  isEnabled: true
+                  message: Test rule
+                  name: My security monitoring rule.
+                  options:
+                    evaluationWindow: 900
+                    keepAlive: 3600
+                    maxSignalDuration: 86400
+                  queries:
+                    - aggregation: count
+                      distinctFields: []
+                      groupByFields: []
+                      metric: ""
+                      query: "@test:true"
+                  referenceTables:
+                    - checkPresence: true
+                      columnName: value
+                      logFieldPath: testtag
+                      ruleQueryName: a
+                      tableName: synthetics_test_reference_table_dont_delete
+                  tags: []
+                  type: log_detection
             schema:
               $ref: "#/components/schemas/SecurityMonitoringRuleCreatePayload"
         required: true
@@ -120893,6 +120970,29 @@ paths:
       requestBody:
         content:
           "application/json":
+            examples:
+              default:
+                value:
+                  cases:
+                    - condition: "a > 0"
+                      name: ""
+                      notifications: []
+                      status: info
+                  filters: []
+                  isEnabled: true
+                  message: Test rule
+                  name: My security monitoring rule.
+                  options:
+                    evaluationWindow: 900
+                    keepAlive: 3600
+                    maxSignalDuration: 86400
+                  queries:
+                    - aggregation: count
+                      distinctFields: []
+                      groupByFields: []
+                      metrics: []
+                      query: "@test:true"
+                  tags: []
             schema:
               $ref: "#/components/schemas/SecurityMonitoringRuleUpdatePayload"
         required: true
@@ -120976,6 +121076,47 @@ paths:
       requestBody:
         content:
           "application/json":
+            examples:
+              default:
+                value:
+                  rule:
+                    cases:
+                      - condition: "a > 0"
+                        name: ""
+                        notifications: []
+                        status: info
+                    hasExtendedTitle: true
+                    isEnabled: true
+                    message: My security monitoring rule message.
+                    name: My security monitoring rule.
+                    options:
+                      decreaseCriticalityBasedOnEnv: false
+                      detectionMethod: threshold
+                      evaluationWindow: 0
+                      keepAlive: 0
+                      maxSignalDuration: 0
+                    queries:
+                      - aggregation: count
+                        distinctFields: []
+                        groupByFields:
+                          - "@userIdentity.assumed_role"
+                        name: ""
+                        query: "source:source_here"
+                    tags:
+                      - "env:prod"
+                      - "team:security"
+                    type: log_detection
+                  ruleQueryPayloads:
+                    - expectedResult: true
+                      index: 0
+                      payload:
+                        ddsource: source_here
+                        ddtags: "env:staging,version:5.1"
+                        hostname: i-012345678
+                        message: "2019-11-19T14:37:58,995 INFO [process.name][20081] Hello World"
+                        service: payment
+                        userIdentity:
+                          assumed_role: fake assumed_role
             schema:
               $ref: "#/components/schemas/SecurityMonitoringRuleTestRequest"
         required: true
@@ -121195,6 +121336,15 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    - attributes:
+                        archive_reason: none
+                        state: archived
+                      id: AAAAAWgN8Xwgr1vKDQAAAABBV2dOOFh3ZzZobm1mWXJFYTR0OA
+                      type: signal
             schema:
               $ref: "#/components/schemas/SecurityMonitoringSignalsBulkUpdateRequest"
         description: Attributes describing the signal updates.
@@ -121571,6 +121721,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      archive_reason: none
+                      state: archived
+                    type: signal_metadata
             schema:
               $ref: "#/components/schemas/SecurityMonitoringSignalUpdateRequest"
         description: Attributes describing the signal triage state or assignee update.
@@ -121627,6 +121785,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      resource_ids:
+                        - abc-123-def
+                    type: bulk_export_resources
             schema:
               $ref: "#/components/schemas/SecurityMonitoringTerraformBulkExportRequest"
         description: The resource IDs to export.
@@ -121677,6 +121843,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      resource_json:
+                        enabled: true
+                        name: Example-Security-Monitoring
+                        rule_query: "source:cloudtrail"
+                        suppression_query: "env:test"
+                    id: abc-123
+                    type: convert_resource
             schema:
               $ref: "#/components/schemas/SecurityMonitoringTerraformConvertRequest"
         description: The resource JSON to convert.
@@ -122463,6 +122641,16 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: Service Account Access Token
+                      scopes:
+                        - dashboards_read
+                        - dashboards_write
+                    type: personal_access_tokens
             schema:
               $ref: "#/components/schemas/ServiceAccountAccessTokenCreateRequest"
         required: true
@@ -122578,6 +122766,17 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: Updated Personal Access Token
+                      scopes:
+                        - dashboards_read
+                        - dashboards_write
+                    id: 00112233-4455-6677-8899-aabbccddeeff
+                    type: personal_access_tokens
             schema:
               $ref: "#/components/schemas/PersonalAccessTokenUpdateRequest"
         required: true
@@ -123318,6 +123517,16 @@ paths:
       requestBody:
         content:
           "application/json":
+            examples:
+              default:
+                value:
+                  filter:
+                    from: "2019-01-02T09:42:36.320Z"
+                    query: "security:attack status:high"
+                    to: "2019-01-03T09:42:36.320Z"
+                  page:
+                    limit: 25
+                  sort: timestamp
             schema:
               $ref: "#/components/schemas/SecurityMonitoringSignalListRequest"
         required: false
@@ -123438,6 +123647,34 @@ paths:
       requestBody:
         content:
           "application/json":
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      jobDefinition:
+                        cases:
+                          - condition: "a > 1"
+                            name: Condition 1
+                            notifications: []
+                            status: info
+                        from: 1730387522611
+                        index: main
+                        message: "A large number of failed login attempts."
+                        name: "Excessive number of failed attempts."
+                        options:
+                          evaluationWindow: 900
+                          keepAlive: 3600
+                          maxSignalDuration: 86400
+                        queries:
+                          - aggregation: count
+                            distinctFields: []
+                            groupByFields: []
+                            query: "source:non_existing_src_weekend"
+                        tags: []
+                        to: 1730391122611
+                        type: log_detection
+                    type: historicalDetectionsJobCreate
             schema:
               $ref: "#/components/schemas/RunHistoricalJobRequest"
         required: true
@@ -123482,6 +123719,18 @@ paths:
       requestBody:
         content:
           "application/json":
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      jobResultIds:
+                        - ""
+                      notifications:
+                        - ""
+                      signalMessage: A large number of failed login attempts.
+                      signalSeverity: critical
+                    type: historicalDetectionsJobResultSignalConversion
             schema:
               $ref: "#/components/schemas/ConvertJobResultsToSignalsRequest"
         required: true
