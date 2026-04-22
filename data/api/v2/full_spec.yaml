@@ -31001,7 +31001,7 @@ components:
       properties:
         org_site:
           description: The site of the organization.
-          example: "datadoghq.com"
+          example: "us1"
           type: string
         org_uuid:
           description: The UUID of the organization.
@@ -51549,7 +51549,7 @@ components:
           type: string
         owner_org_site:
           description: The site of the organization that owns this org group.
-          example: "datadoghq.com"
+          example: "us1"
           type: string
         owner_org_uuid:
           description: The UUID of the organization that owns this org group.
@@ -51655,7 +51655,7 @@ components:
           type: string
         org_site:
           description: The site of the member organization.
-          example: "datadoghq.com"
+          example: "us1"
           type: string
         org_uuid:
           description: The UUID of the member organization.
@@ -51876,11 +51876,8 @@ components:
           example:
             value: "UTC"
           type: object
-        enforced_at:
-          description: Timestamp when the policy was enforced.
-          example: "2024-01-15T10:30:00Z"
-          format: date-time
-          type: string
+        enforcement_tier:
+          $ref: "#/components/schemas/OrgGroupPolicyEnforcementTier"
         modified_at:
           description: Timestamp when the policy was last modified.
           example: "2024-01-15T10:30:00Z"
@@ -51890,9 +51887,12 @@ components:
           description: The name of the policy.
           example: "monitor_timezone"
           type: string
+        policy_type:
+          $ref: "#/components/schemas/OrgGroupPolicyPolicyType"
       required:
         - policy_name
-        - enforced_at
+        - policy_type
+        - enforcement_tier
         - modified_at
       type: object
     OrgGroupPolicyConfigAttributes:
@@ -51963,7 +51963,8 @@ components:
       x-enum-varnames:
         - ORG_GROUP_POLICY_CONFIGS
     OrgGroupPolicyCreateAttributes:
-      description: Attributes for creating an org group policy.
+      description: >-
+        Attributes for creating an org group policy. If `policy_type` or `enforcement_tier` are not provided, they default to `org_config` and `DEFAULT` respectively.
       properties:
         content:
           additionalProperties: {}
@@ -51971,10 +51972,14 @@ components:
           example:
             value: "UTC"
           type: object
+        enforcement_tier:
+          $ref: "#/components/schemas/OrgGroupPolicyEnforcementTier"
         policy_name:
           description: The name of the policy.
           example: "monitor_timezone"
           type: string
+        policy_type:
+          $ref: "#/components/schemas/OrgGroupPolicyPolicyType"
       required:
         - policy_name
         - content
@@ -52028,6 +52033,20 @@ components:
         - type
         - attributes
       type: object
+    OrgGroupPolicyEnforcementTier:
+      default: DEFAULT
+      description: >-
+        The enforcement tier of the policy. `DEFAULT` means the policy is set but member orgs may mutate it. `ENFORCE` means the policy is strictly controlled and mutations are blocked for affected orgs. `DELEGATE` means each member org controls its own value.
+      enum:
+        - DEFAULT
+        - ENFORCE
+        - DELEGATE
+      example: DEFAULT
+      type: string
+      x-enum-varnames:
+        - DEFAULT
+        - ENFORCE
+        - DELEGATE
     OrgGroupPolicyListResponse:
       description: Response containing a list of org group policies.
       properties:
@@ -52060,7 +52079,7 @@ components:
           type: string
         org_site:
           description: The site of the organization that has the override.
-          example: "datadoghq.com"
+          example: "us1"
           type: string
         org_uuid:
           description: The UUID of the organization that has the override.
@@ -52078,7 +52097,7 @@ components:
       properties:
         org_site:
           description: The site of the organization.
-          example: "datadoghq.com"
+          example: "us1"
           type: string
         org_uuid:
           description: The UUID of the organization to grant the override.
@@ -52194,11 +52213,12 @@ components:
       x-enum-varnames:
         - ORG_GROUP_POLICY_OVERRIDES
     OrgGroupPolicyOverrideUpdateAttributes:
-      description: Attributes for updating a policy override.
+      description: >-
+        Attributes for updating a policy override. The `org_uuid` and `org_site` fields must match the existing override and cannot be changed.
       properties:
         org_site:
           description: The site of the organization.
-          example: "datadoghq.com"
+          example: "us1"
           type: string
         org_uuid:
           description: The UUID of the organization.
@@ -52234,6 +52254,16 @@ components:
       required:
         - data
       type: object
+    OrgGroupPolicyPolicyType:
+      default: org_config
+      description: >-
+        The type of the policy. Only `org_config` is supported, indicating a policy backed by an organization configuration setting.
+      enum:
+        - org_config
+      example: org_config
+      type: string
+      x-enum-varnames:
+        - ORG_CONFIG
     OrgGroupPolicyRelationshipToOne:
       description: Relationship to a single org group policy.
       properties:
@@ -52302,6 +52332,8 @@ components:
           example:
             value: "UTC"
           type: object
+        enforcement_tier:
+          $ref: "#/components/schemas/OrgGroupPolicyEnforcementTier"
       type: object
     OrgGroupPolicyUpdateData:
       description: Data for updating an org group policy.
@@ -62905,19 +62937,23 @@ components:
         - DONE
         - TIMEOUT
     SecurityMonitoringContentPackActivation:
-      description: The activation status of a content pack
+      description: The activation status of a content pack.
       enum:
         - never_activated
         - activated
         - deactivated
       example: activated
       type: string
+      x-enum-descriptions:
+        - Pack has never been activated for this organization.
+        - Pack is currently activated.
+        - Pack was previously activated but has since been deactivated.
       x-enum-varnames:
         - NEVER_ACTIVATED
         - ACTIVATED
         - DEACTIVATED
     SecurityMonitoringContentPackIntegrationStatus:
-      description: The installation status of the related integration
+      description: The installation status of the related integration.
       enum:
         - installed
         - available
@@ -62926,6 +62962,12 @@ components:
         - error
       example: installed
       type: string
+      x-enum-descriptions:
+        - Integration is fully installed.
+        - Integration exists in the catalog but is not installed.
+        - Integration is only partially configured.
+        - Integration detected (for example, logs are flowing) but not explicitly installed.
+        - Integration is in an error state.
       x-enum-varnames:
         - INSTALLED
         - AVAILABLE
@@ -62942,7 +62984,9 @@ components:
         cp_activation:
           $ref: "#/components/schemas/SecurityMonitoringContentPackActivation"
         filters_configured_for_logs:
-          description: Whether filters (Security Filters or Index Query depending on the pricing model) are configured for logs
+          description: |-
+            Whether filters (Security Filters or Index Query depending on the pricing model) are
+            present and correctly configured to route logs into Cloud SIEM.
           example: true
           type: boolean
         integration_installed_status:
@@ -62950,7 +62994,7 @@ components:
         logs_last_collected:
           $ref: "#/components/schemas/SecurityMonitoringContentPackTimestampBucket"
         logs_seen_from_any_index:
-          description: Whether logs have been seen from any index
+          description: Whether logs for this content pack have been seen in any Datadog index within the last 72 hours.
           example: true
           type: boolean
         state:
@@ -63015,7 +63059,7 @@ components:
         - meta
       type: object
     SecurityMonitoringContentPackStatus:
-      description: The current status of a content pack
+      description: The current operational status of a content pack.
       enum:
         - install
         - activate
@@ -63025,6 +63069,13 @@ components:
         - broken
       example: active
       type: string
+      x-enum-descriptions:
+        - Not activated; no logs detected in the last 72 hours.
+        - Not activated; logs are flowing into a Datadog index but not yet routed through Cloud SIEM.
+        - Activated; awaiting first log ingestion.
+        - Activated; logs received within the last 24 hours.
+        - Activated; integration not installed or logs last seen 24 to 72 hours ago.
+        - Activated; no logs for over 72 hours, filter missing, or Cloud SIEM index incorrectly ordered.
       x-enum-varnames:
         - INSTALL
         - ACTIVATE
@@ -63033,7 +63084,7 @@ components:
         - WARNING
         - BROKEN
     SecurityMonitoringContentPackTimestampBucket:
-      description: Timestamp bucket indicating when logs were last collected
+      description: Timestamp bucket indicating when logs were last collected.
       enum:
         - not_seen
         - within_24_hours
@@ -63042,6 +63093,12 @@ components:
         - over_30d
       example: within_24_hours
       type: string
+      x-enum-descriptions:
+        - No logs observed.
+        - Logs received within the last 24 hours.
+        - Logs last seen 24 to 72 hours ago.
+        - Logs last seen 3 to 30 days ago.
+        - Logs last seen more than 30 days ago.
       x-enum-varnames:
         - NOT_SEEN
         - WITHIN_24_HOURS
@@ -64132,7 +64189,7 @@ components:
         - $ref: "#/components/schemas/SecurityMonitoringSignalRulePayload"
         - $ref: "#/components/schemas/CloudConfigurationRulePayload"
     SecurityMonitoringSKU:
-      description: The SIEM pricing model (SKU) for the organization
+      description: The Cloud SIEM pricing model (SKU) for the organization.
       enum:
         - per_gb_analyzed
         - per_event_in_siem_index_2023
@@ -108930,7 +108987,7 @@ paths:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-15T10:30:00Z"
                           org_name: "Acme Corp"
-                          org_site: "datadoghq.com"
+                          org_site: "us1"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                         id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                         relationships:
@@ -108989,7 +109046,7 @@ paths:
                   data:
                     attributes:
                       orgs:
-                        - org_site: "datadoghq.com"
+                        - org_site: "us1"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                     relationships:
                       source_org_group:
@@ -109016,7 +109073,7 @@ paths:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-16T14:00:00Z"
                           org_name: "Acme Corp"
-                          org_site: "datadoghq.com"
+                          org_site: "us1"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                         id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                         relationships:
@@ -109082,7 +109139,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
                         org_name: "Acme Corp"
-                        org_site: "datadoghq.com"
+                        org_site: "us1"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                       relationships:
@@ -109164,7 +109221,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-16T14:00:00Z"
                         org_name: "Acme Corp"
-                        org_site: "datadoghq.com"
+                        org_site: "us1"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                       relationships:
@@ -109233,9 +109290,10 @@ paths:
                       - attributes:
                           content:
                             value: "UTC"
-                          enforced_at: "2024-01-15T10:30:00Z"
+                          enforcement_tier: "DEFAULT"
                           modified_at: "2024-01-15T10:30:00Z"
                           policy_name: "monitor_timezone"
+                          policy_type: "org_config"
                         id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                         relationships:
                           org_group:
@@ -109292,7 +109350,9 @@ paths:
                     attributes:
                       content:
                         value: "UTC"
+                      enforcement_tier: "DEFAULT"
                       policy_name: "monitor_timezone"
+                      policy_type: "org_config"
                     relationships:
                       org_group:
                         data:
@@ -109313,9 +109373,10 @@ paths:
                       attributes:
                         content:
                           value: "UTC"
-                        enforced_at: "2024-01-15T10:30:00Z"
+                        enforcement_tier: "DEFAULT"
                         modified_at: "2024-01-15T10:30:00Z"
                         policy_name: "monitor_timezone"
+                        policy_type: "org_config"
                       id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                       relationships:
                         org_group:
@@ -109354,7 +109415,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Create an org group policy
       tags: [Org Groups]
-      x-menu-order: 11
+      x-menu-order: 12
       "x-permission":
         operator: OR
         permissions:
@@ -109399,7 +109460,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Delete an org group policy
       tags: [Org Groups]
-      x-menu-order: 13
+      x-menu-order: 14
       "x-permission":
         operator: OR
         permissions:
@@ -109407,8 +109468,74 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Get a specific organization group policy by its ID.
+      operationId: GetOrgGroupPolicy
+      parameters:
+        - $ref: "#/components/parameters/OrgGroupPolicyId"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        content:
+                          value: "UTC"
+                        enforcement_tier: "DEFAULT"
+                        modified_at: "2024-01-15T10:30:00Z"
+                        policy_name: "monitor_timezone"
+                        policy_type: "org_config"
+                      id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
+                      relationships:
+                        org_group:
+                          data:
+                            id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
+                            type: org_groups
+                      type: org_group_policies
+              schema:
+                $ref: "#/components/schemas/OrgGroupPolicyResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get an org group policy
+      tags: [Org Groups]
+      x-menu-order: 11
+      "x-permission":
+        operator: OR
+        permissions:
+          - org_group_read
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     patch:
-      description: Update the content of an existing organization group policy.
+      description: Update an existing organization group policy.
       operationId: UpdateOrgGroupPolicy
       parameters:
         - $ref: "#/components/parameters/OrgGroupPolicyId"
@@ -109422,6 +109549,7 @@ paths:
                     attributes:
                       content:
                         value: "US/Eastern"
+                      enforcement_tier: "ENFORCE"
                     id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                     type: org_group_policies
             schema:
@@ -109438,9 +109566,10 @@ paths:
                       attributes:
                         content:
                           value: "US/Eastern"
-                        enforced_at: "2024-01-15T10:30:00Z"
+                        enforcement_tier: "ENFORCE"
                         modified_at: "2024-01-16T14:00:00Z"
                         policy_name: "monitor_timezone"
+                        policy_type: "org_config"
                       id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                       relationships:
                         org_group:
@@ -109479,7 +109608,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Update an org group policy
       tags: [Org Groups]
-      x-menu-order: 12
+      x-menu-order: 13
       "x-permission":
         operator: OR
         permissions:
@@ -109526,7 +109655,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: List org group policy configs
       tags: [Org Groups]
-      x-menu-order: 18
+      x-menu-order: 20
       "x-permission":
         operator: OR
         permissions:
@@ -109556,7 +109685,7 @@ paths:
                       - attributes:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-15T10:30:00Z"
-                          org_site: "datadoghq.com"
+                          org_site: "us1"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                         id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                         relationships:
@@ -109597,7 +109726,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: List org group policy overrides
       tags: [Org Groups]
-      x-menu-order: 14
+      x-menu-order: 15
       "x-permission":
         operator: OR
         permissions:
@@ -109616,7 +109745,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      org_site: "datadoghq.com"
+                      org_site: "us1"
                       org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                     relationships:
                       org_group:
@@ -109642,7 +109771,7 @@ paths:
                       attributes:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
-                        org_site: "datadoghq.com"
+                        org_site: "us1"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                       relationships:
@@ -109686,7 +109815,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Create an org group policy override
       tags: [Org Groups]
-      x-menu-order: 15
+      x-menu-order: 17
       "x-permission":
         operator: OR
         permissions:
@@ -109731,13 +109860,81 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Delete an org group policy override
       tags: [Org Groups]
-      x-menu-order: 17
+      x-menu-order: 19
       "x-permission":
         operator: OR
         permissions:
           - org_group_write
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Get a specific organization group policy override by its ID.
+      operationId: GetOrgGroupPolicyOverride
+      parameters:
+        - $ref: "#/components/parameters/OrgGroupPolicyOverrideId"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-15T10:30:00Z"
+                        modified_at: "2024-01-15T10:30:00Z"
+                        org_site: "us1"
+                        org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
+                      id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
+                      relationships:
+                        org_group:
+                          data:
+                            id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
+                            type: org_groups
+                        org_group_policy:
+                          data:
+                            id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
+                            type: org_group_policies
+                      type: org_group_policy_overrides
+              schema:
+                $ref: "#/components/schemas/OrgGroupPolicyOverrideResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get an org group policy override
+      tags: [Org Groups]
+      x-menu-order: 16
+      "x-permission":
+        operator: OR
+        permissions:
+          - org_group_read
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     patch:
       description: Update an existing organization group policy override.
@@ -109752,7 +109949,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      org_site: "datadoghq.com"
+                      org_site: "us1"
                       org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                     id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                     type: org_group_policy_overrides
@@ -109770,7 +109967,7 @@ paths:
                       attributes:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-16T14:00:00Z"
-                        org_site: "datadoghq.com"
+                        org_site: "us1"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                       relationships:
@@ -109814,7 +110011,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Update an org group policy override
       tags: [Org Groups]
-      x-menu-order: 16
+      x-menu-order: 18
       "x-permission":
         operator: OR
         permissions:
@@ -109843,7 +110040,7 @@ paths:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-15T10:30:00Z"
                           name: "My Org Group"
-                          owner_org_site: "datadoghq.com"
+                          owner_org_site: "us1"
                           owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                         id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                         type: org_groups
@@ -109911,7 +110108,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
                         name: "My Org Group"
-                        owner_org_site: "datadoghq.com"
+                        owner_org_site: "us1"
                         owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                       id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                       type: org_groups
@@ -110016,7 +110213,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
                         name: "My Org Group"
-                        owner_org_site: "datadoghq.com"
+                        owner_org_site: "us1"
                         owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                       id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                       type: org_groups
@@ -110090,7 +110287,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-16T14:00:00Z"
                         name: "Updated Org Group Name"
-                        owner_org_site: "datadoghq.com"
+                        owner_org_site: "us1"
                         owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                       id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                       type: org_groups
@@ -120326,9 +120523,8 @@ paths:
   /api/v2/security_monitoring/content_packs/states:
     get:
       description: |-
-        Get the activation and configuration states for all security monitoring content packs.
-        This endpoint returns status information about each content pack including activation state,
-        integration status, and log collection status.
+        Get the activation state, integration status, and log collection status
+        for all Cloud SIEM content packs.
       operationId: GetContentPacksStates
       responses:
         "200":
@@ -120351,22 +120547,32 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_read
       summary: Get content pack states
       tags:
         - Security Monitoring
       x-menu-order: 47
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_filters_read
+          - logs_read_index_data
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/content_packs/{content_pack_id}/activate:
     put:
       description: |-
-        Activate a security monitoring content pack. This operation configures the necessary
+        Activate a Cloud SIEM content pack. This operation configures the necessary
         log filters or security filters depending on the pricing model and updates the content
         pack activation state.
       operationId: ActivateContentPack
       parameters:
-        - description: The ID of the content pack to activate.
+        - description: The ID of the content pack to activate (for example, `aws-cloudtrail`).
           in: path
           name: content_pack_id
           required: true
@@ -120390,21 +120596,31 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_write
       summary: Activate content pack
       tags:
         - Security Monitoring
       x-menu-order: 48
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_filters_write
+          - logs_modify_indexes
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/content_packs/{content_pack_id}/deactivate:
     put:
       description: |-
-        Deactivate a security monitoring content pack. This operation removes the content pack's
+        Deactivate a Cloud SIEM content pack. This operation removes the content pack's
         configuration from log filters or security filters and updates the content pack activation state.
       operationId: DeactivateContentPack
       parameters:
-        - description: The ID of the content pack to deactivate.
+        - description: The ID of the content pack to deactivate (for example, `aws-cloudtrail`).
           in: path
           name: content_pack_id
           required: true
@@ -120428,10 +120644,20 @@ paths:
           description: Not Found
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_write
       summary: Deactivate content pack
       tags:
         - Security Monitoring
       x-menu-order: 49
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_filters_write
+          - logs_modify_indexes
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
