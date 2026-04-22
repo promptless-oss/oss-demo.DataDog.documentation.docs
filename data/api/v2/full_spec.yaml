@@ -1140,9 +1140,9 @@ components:
       schema:
         type: string
     PersonalAccessTokenID:
-      description: The UUID of the personal access token.
+      description: The ID of the personal access token.
       in: path
-      name: pat_uuid
+      name: pat_id
       required: true
       schema:
         example: "00000000-0000-1234-0000-000000000000"
@@ -29202,11 +29202,6 @@ components:
     FullPersonalAccessTokenAttributes:
       description: Attributes of a full personal access token, including the token key.
       properties:
-        alias:
-          description: The alias (short identifier) of the personal access token.
-          example: "2H9MCNMBM8FQjQ16YucXkX"
-          readOnly: true
-          type: string
         created_at:
           description: Creation date of the personal access token.
           example: "2024-01-01T00:00:00+00:00"
@@ -53698,11 +53693,6 @@ components:
     PersonalAccessTokenAttributes:
       description: Attributes of a personal access token.
       properties:
-        alias:
-          description: The alias (short identifier) of the personal access token.
-          example: "2H9MCNMBM8FQjQ16YucXkX"
-          readOnly: true
-          type: string
         created_at:
           description: Creation date of the personal access token.
           example: "2024-01-01T00:00:00+00:00"
@@ -78247,6 +78237,10 @@ components:
         title:
           description: Title of the user.
           nullable: true
+          type: string
+        uuid:
+          description: UUID of the user.
+          readOnly: true
           type: string
         verified:
           description: Whether the user is verified.
@@ -110459,7 +110453,7 @@ paths:
         operator: OR
         permissions:
           - user_app_keys
-  /api/v2/personal_access_tokens/{pat_uuid}:
+  /api/v2/personal_access_tokens/{pat_id}:
     delete:
       description: Revoke a specific personal access token.
       operationId: RevokePersonalAccessToken
@@ -122916,7 +122910,7 @@ paths:
         operator: OR
         permissions:
           - service_account_write
-  /api/v2/service_accounts/{service_account_id}/access_tokens/{pat_uuid}:
+  /api/v2/service_accounts/{service_account_id}/access_tokens/{pat_id}:
     delete:
       description: Revoke a specific access token for a service account.
       operationId: RevokeServiceAccountAccessToken
