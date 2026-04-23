@@ -71621,10 +71621,6 @@ components:
             $ref: "#/components/schemas/SyntheticsApiMultistepSubtestData"
           type: array
       type: object
-    SyntheticsFastTestAssertionResult:
-      additionalProperties: {}
-      description: Result of a single assertion evaluated during a fast test run.
-      type: object
     SyntheticsFastTestResult:
       description: |-
         Fast test result response. Returns `null` if the result is not yet available
@@ -71638,19 +71634,18 @@ components:
       description: Attributes of the fast test result.
       properties:
         device:
-          $ref: "#/components/schemas/SyntheticsFastTestResultDevice"
+          $ref: "#/components/schemas/SyntheticsTestResultDevice"
         location:
-          $ref: "#/components/schemas/SyntheticsFastTestResultLocation"
+          $ref: "#/components/schemas/SyntheticsTestResultLocation"
         result:
           $ref: "#/components/schemas/SyntheticsFastTestResultDetail"
         test_sub_type:
           $ref: "#/components/schemas/SyntheticsFastTestSubType"
         test_type:
-          description: The type of the Synthetic test that produced this result (for example, `api` or `browser`).
-          example: api
-          type: string
+          $ref: "#/components/schemas/SyntheticsFastTestType"
         test_version:
           description: Version of the test at the time the fast test was triggered.
+          example: 1
           format: int64
           type: integer
       type: object
@@ -71674,48 +71669,47 @@ components:
         assertions:
           description: Results of each assertion evaluated during the test.
           items:
-            $ref: "#/components/schemas/SyntheticsFastTestAssertionResult"
+            $ref: "#/components/schemas/SyntheticsTestResultAssertionResult"
           type: array
         call_type:
           description: gRPC call type (for example, `unary`, `healthCheck`, or `reflection`).
+          example: unary
           type: string
         cert:
-          additionalProperties: {}
-          description: TLS certificate details, present for SSL tests.
-          type: object
+          $ref: "#/components/schemas/SyntheticsTestResultCertificate"
         duration:
           description: Total duration of the test in milliseconds.
+          example: 150.5
           format: double
           type: number
         failure:
-          $ref: "#/components/schemas/SyntheticsFastTestResultFailure"
+          $ref: "#/components/schemas/SyntheticsTestResultFailure"
         finished_at:
           description: Unix timestamp (ms) of when the test finished.
+          example: 1679328001000
           format: int64
           type: integer
         id:
           description: The result ID. Set to the fast test UUID because no persistent result ID exists for fast tests.
+          example: abc12345-1234-1234-1234-abc123456789
           type: string
         is_fast_retry:
           description: Whether this result is from an automatic fast retry.
+          example: false
           type: boolean
         request:
-          additionalProperties: {}
-          description: Details of the outgoing request made during the test.
-          type: object
+          $ref: "#/components/schemas/SyntheticsTestResultRequestInfo"
         resolved_ip:
           description: IP address resolved for the target host.
           example: "1.2.3.4"
           type: string
         response:
-          additionalProperties: {}
-          description: Details of the response received during the test.
-          type: object
+          $ref: "#/components/schemas/SyntheticsTestResultResponseInfo"
         run_type:
-          description: Run type indicating how this test was triggered (for example, `fast`).
-          type: string
+          $ref: "#/components/schemas/SyntheticsTestResultRunType"
         started_at:
           description: Unix timestamp (ms) of when the test started.
+          example: 1679328000000
           format: int64
           type: integer
         status:
@@ -71725,66 +71719,33 @@ components:
         steps:
           description: Step results for multistep API tests.
           items:
-            $ref: "#/components/schemas/SyntheticsFastTestStepResult"
+            $ref: "#/components/schemas/SyntheticsTestResultStep"
           type: array
         timings:
           additionalProperties: {}
           description: Timing breakdown of the test request phases (for example, DNS, TCP, TLS, first byte).
+          example:
+            dns: 2.9
+            download: 2.1
+            firstByte: 95.2
+            ssl: 187.9
+            tcp: 92.6
+            total: 380.7
           type: object
         traceroute:
           description: Traceroute hop results, present for ICMP and TCP tests.
           items:
-            $ref: "#/components/schemas/SyntheticsFastTestTracerouteHop"
+            $ref: "#/components/schemas/SyntheticsTestResultTracerouteHop"
           type: array
         triggered_at:
           description: Unix timestamp (ms) of when the test was triggered.
+          example: 1679327999000
           format: int64
           type: integer
         tunnel:
           description: Whether the test was run through a Synthetics tunnel.
+          example: false
           type: boolean
-      type: object
-    SyntheticsFastTestResultDevice:
-      description: Device information for browser-based fast tests.
-      properties:
-        id:
-          description: Device identifier.
-          example: chrome.laptop_large
-          type: string
-        name:
-          description: Display name of the device.
-          example: Laptop Large
-          type: string
-      type: object
-    SyntheticsFastTestResultFailure:
-      description: Failure details if the fast test did not pass.
-      properties:
-        code:
-          description: Error code identifying the failure type.
-          example: TIMEOUT
-          type: string
-        message:
-          description: Human-readable description of the failure.
-          example: Connection timed out
-          type: string
-      type: object
-    SyntheticsFastTestResultLocation:
-      description: Location from which the fast test was executed.
-      properties:
-        id:
-          description: ID of the location.
-          example: aws:us-east-1
-          type: string
-        name:
-          description: Display name of the location.
-          example: N. Virginia (AWS)
-          type: string
-        version:
-          description: Agent version running at this location.
-          type: string
-        worker_id:
-          description: Identifier of the specific worker that ran the test.
-          type: string
       type: object
     SyntheticsFastTestResultType:
       default: result
@@ -71795,10 +71756,6 @@ components:
       type: string
       x-enum-varnames:
         - RESULT
-    SyntheticsFastTestStepResult:
-      additionalProperties: {}
-      description: Result of a single step in a multistep fast test run.
-      type: object
     SyntheticsFastTestSubType:
       description: Subtype of the Synthetic test that produced this result.
       enum:
@@ -71825,10 +71782,16 @@ components:
         - TCP
         - UDP
         - WEBSOCKET
-    SyntheticsFastTestTracerouteHop:
-      additionalProperties: {}
-      description: A single traceroute hop result from a fast test run.
-      type: object
+    SyntheticsFastTestType:
+      description: Type of the Synthetic fast test that produced this result.
+      enum:
+        - fast-api
+        - fast-browser
+      example: fast-api
+      type: string
+      x-enum-varnames:
+        - FAST_API
+        - FAST_BROWSER
     SyntheticsGlobalVariable:
       description: Synthetic global variable.
       properties:
@@ -72313,6 +72276,20 @@ components:
       type: string
       x-enum-varnames:
         - NETWORK
+    SyntheticsPollTestResultsResponse:
+      description: Response object for polling Synthetic test results.
+      properties:
+        data:
+          description: Array of Synthetic test results.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultData"
+          type: array
+        included:
+          description: Array of included related resources, such as the test definition.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultIncludedItem"
+          type: array
+      type: object
     SyntheticsRestrictedRoles:
       deprecated: true
       description: A list of role identifiers that can be pulled from the Roles API, for restricting read and write access. This field is deprecated. Use the restriction policies API to manage permissions.
@@ -72610,6 +72587,20 @@ components:
         multipart_presigned_urls_params:
           $ref: "#/components/schemas/SyntheticsTestFileMultipartPresignedUrlsParams"
       type: object
+    SyntheticsTestLatestResultsResponse:
+      description: Response object for a Synthetic test's latest result summaries.
+      properties:
+        data:
+          description: Array of Synthetic test result summaries.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultSummaryData"
+          type: array
+        included:
+          description: Array of included related resources, such as the test definition.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultIncludedItem"
+          type: array
+      type: object
     SyntheticsTestOptions:
       description: Object describing the extra options for a Synthetic test.
       properties:
@@ -72820,6 +72811,1910 @@ components:
       x-enum-varnames:
         - LIVE
         - PAUSED
+    SyntheticsTestResultAssertionResult:
+      description: An individual assertion result from a Synthetic test.
+      properties:
+        actual:
+          description: Actual value observed during the test. Its type depends on the assertion type.
+          example: 200
+        error_message:
+          description: Error message if the assertion failed.
+          example: "Assertion failed: expected 200 but got 500"
+          type: string
+        expected:
+          description: Expected value for the assertion. Its type depends on the assertion type.
+          example: "200"
+        operator:
+          description: Operator used for the assertion (for example, `is`, `contains`).
+          example: is
+          type: string
+        property:
+          description: Property targeted by the assertion, when applicable.
+          example: content-type
+          type: string
+        target:
+          description: Target value for the assertion. Its type depends on the assertion type.
+          example: 200
+        target_path:
+          description: JSON path or XPath evaluated for the assertion.
+          example: $.url
+          type: string
+        target_path_operator:
+          description: Operator used for the target path assertion.
+          example: contains
+          type: string
+        type:
+          description: Type of the assertion (for example, `responseTime`, `statusCode`, `body`).
+          example: statusCode
+          type: string
+        valid:
+          description: Whether the assertion passed.
+          example: true
+          type: boolean
+      type: object
+    SyntheticsTestResultAttributes:
+      description: Attributes of a Synthetic test result.
+      properties:
+        batch:
+          $ref: "#/components/schemas/SyntheticsTestResultBatch"
+        ci:
+          $ref: "#/components/schemas/SyntheticsTestResultCI"
+        device:
+          $ref: "#/components/schemas/SyntheticsTestResultDevice"
+        git:
+          $ref: "#/components/schemas/SyntheticsTestResultGit"
+        location:
+          $ref: "#/components/schemas/SyntheticsTestResultLocation"
+        result:
+          $ref: "#/components/schemas/SyntheticsTestResultDetail"
+        test_sub_type:
+          $ref: "#/components/schemas/SyntheticsTestSubType"
+        test_type:
+          $ref: "#/components/schemas/SyntheticsTestType"
+      type: object
+    SyntheticsTestResultBatch:
+      description: Batch information for the test result.
+      properties:
+        id:
+          description: Batch identifier.
+          example: batch-abc-123
+          type: string
+      type: object
+    SyntheticsTestResultBounds:
+      description: Bounding box of an element on the page.
+      properties:
+        height:
+          description: Height in pixels.
+          example: 37
+          format: int64
+          type: integer
+        width:
+          description: Width in pixels.
+          example: 343
+          format: int64
+          type: integer
+        x:
+          description: Horizontal position in pixels.
+          example: 16
+          format: int64
+          type: integer
+        y:
+          description: Vertical position in pixels.
+          example: 140
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultBrowserError:
+      description: A browser error captured during a browser test step.
+      properties:
+        description:
+          description: Error description.
+          example: Failed to fetch resource
+          type: string
+        method:
+          description: HTTP method associated with the error (for network errors).
+          example: GET
+          type: string
+        name:
+          description: Error name.
+          example: NetworkError
+          type: string
+        status:
+          description: HTTP status code associated with the error (for network errors).
+          example: 500
+          format: int64
+          type: integer
+        type:
+          description: Type of the browser error.
+          example: network
+          type: string
+        url:
+          additionalProperties: {}
+          description: URL associated with the error.
+          type: object
+      type: object
+    SyntheticsTestResultBucketKeys:
+      description: Storage bucket keys for artifacts produced during a step or test.
+      properties:
+        after_step_screenshot:
+          description: Key for the screenshot captured after the step (goal-based tests).
+          example: screenshots/after-step-1-1.png
+          type: string
+        after_turn_screenshot:
+          description: Key for the screenshot captured after the turn (goal-based tests).
+          example: screenshots/after-turn-1.png
+          type: string
+        artifacts:
+          description: Key for miscellaneous artifacts.
+          example: 2/e2e-tests/equ-jku-twc/results/6989498452827932222/edge.laptop_large/artifacts__1724521416257.json
+          type: string
+        before_step_screenshot:
+          description: Key for the screenshot captured before the step (goal-based tests).
+          example: screenshots/before-step-1-1.png
+          type: string
+        before_turn_screenshot:
+          description: Key for the screenshot captured before the turn (goal-based tests).
+          example: screenshots/before-turn-1.png
+          type: string
+        crash_report:
+          description: Key for a captured crash report.
+          example: 2/e2e-tests/d2z-32s-iax/results/1340718101990858549/synthetics:mobile:device:iphone_se_2020_ios_14/crash_report.log
+          type: string
+        device_logs:
+          description: Key for captured device logs.
+          example: 2/e2e-tests/d2z-32s-iax/results/1340718101990858549/synthetics:mobile:device:iphone_se_2020_ios_14/d2z-32s-iax_1340718101990858549_device_logs.log
+          type: string
+        email_messages:
+          description: Keys for email message payloads captured by the step.
+          items:
+            description: Storage bucket key for a captured email message.
+            type: string
+          type: array
+        screenshot:
+          description: Key for the captured screenshot.
+          example: 2/e2e-tests/equ-jku-twc/results/6989498452827932222/edge.laptop_large/step-0__1724521416269.jpeg
+          type: string
+        snapshot:
+          description: Key for the captured DOM snapshot.
+          example: 2/e2e-tests/equ-jku-twc/results/6989498452827932222/edge.laptop_large/snapshot.html
+          type: string
+        source:
+          description: Key for the page source or element source.
+          example: 2/e2e-tests/d2z-32s-iax/results/1340718101990858549/synthetics:mobile:device:iphone_se_2020_ios_14/step-0__1724445301832.xml
+          type: string
+      type: object
+    SyntheticsTestResultCI:
+      description: CI information associated with the test result.
+      properties:
+        pipeline:
+          $ref: "#/components/schemas/SyntheticsTestResultCIPipeline"
+        provider:
+          $ref: "#/components/schemas/SyntheticsTestResultCIProvider"
+        stage:
+          $ref: "#/components/schemas/SyntheticsTestResultCIStage"
+        workspace_path:
+          description: Path of the workspace that ran the CI job.
+          example: /home/runner/work/example
+          type: string
+      type: object
+    SyntheticsTestResultCIPipeline:
+      description: Details of the CI pipeline.
+      properties:
+        id:
+          description: Pipeline identifier.
+          example: pipeline-abc-123
+          type: string
+        name:
+          description: Pipeline name.
+          example: build-and-test
+          type: string
+        number:
+          description: Pipeline number.
+          example: 42
+          format: int64
+          type: integer
+        url:
+          description: Pipeline URL.
+          example: https://github.com/DataDog/example/actions/runs/42
+          type: string
+      type: object
+    SyntheticsTestResultCIProvider:
+      description: Details of the CI provider.
+      properties:
+        name:
+          description: Provider name.
+          example: github
+          type: string
+      type: object
+    SyntheticsTestResultCIStage:
+      description: Details of the CI stage.
+      properties:
+        name:
+          description: Stage name.
+          example: test
+          type: string
+      type: object
+    SyntheticsTestResultCdnCacheStatus:
+      description: Cache status reported by the CDN for the response.
+      properties:
+        cached:
+          description: Whether the response was served from the CDN cache.
+          example: true
+          type: boolean
+        status:
+          description: Raw cache status string reported by the CDN.
+          example: HIT
+          type: string
+      type: object
+    SyntheticsTestResultCdnProviderInfo:
+      description: CDN provider details inferred from response headers.
+      properties:
+        cache:
+          $ref: "#/components/schemas/SyntheticsTestResultCdnCacheStatus"
+        provider:
+          description: Name of the CDN provider.
+          example: google_cloud
+          type: string
+      type: object
+    SyntheticsTestResultCdnResource:
+      description: A CDN resource encountered while executing a browser step.
+      properties:
+        cdn:
+          $ref: "#/components/schemas/SyntheticsTestResultCdnProviderInfo"
+        resolved_ip:
+          description: Resolved IP address for the CDN resource.
+          example: 34.95.79.70
+          type: string
+        timestamp:
+          description: Unix timestamp (ms) of when the resource was fetched.
+          example: 1724521406576
+          format: int64
+          type: integer
+        timings:
+          additionalProperties: {}
+          description: Timing breakdown for fetching the CDN resource.
+          example:
+            firstByte: 99.7
+            tcp: 0.9
+          type: object
+      type: object
+    SyntheticsTestResultCertificate:
+      description: SSL/TLS certificate information returned from an SSL test.
+      properties:
+        cipher:
+          description: Cipher used for the TLS connection.
+          example: TLS_AES_256_GCM_SHA384
+          type: string
+        exponent:
+          description: RSA exponent of the certificate.
+          example: 65537
+          format: int64
+          type: integer
+        ext_key_usage:
+          description: Extended key usage extensions for the certificate.
+          example:
+            - 1.3.6.1.5.5.7.3.1
+          items:
+            description: Extended key usage value.
+            type: string
+          type: array
+        fingerprint:
+          description: SHA-1 fingerprint of the certificate.
+          example: D6:03:5A:9F:93:E1:B7:28:EC:90:C5:9F:72:30:55:7C:74:5F:53:92
+          type: string
+        fingerprint256:
+          description: SHA-256 fingerprint of the certificate.
+          example: 04:45:93:A9:4C:14:70:47:DB:3C:FC:05:F9:5A:50:4E:DA:DB:A1:C6:37:3D:15:C0:B2:7E:5D:93:5F:A2:02:C7
+          type: string
+        issuer:
+          additionalProperties:
+            type: string
+          description: Certificate issuer details.
+          example:
+            C: US
+            CN: WE2
+            O: Google Trust Services
+          type: object
+        modulus:
+          description: RSA modulus of the certificate.
+          example: C0FCE9F9...
+          type: string
+        protocol:
+          description: TLS protocol used (for example, `TLSv1.2`).
+          example: TLSv1.3
+          type: string
+        serial_number:
+          description: Serial number of the certificate.
+          example: 7B584A1A6670A1EB0941A9A121569D60
+          type: string
+        subject:
+          additionalProperties:
+            type: string
+          description: Certificate subject details.
+          example:
+            CN: "*.google.fr"
+            altName: "DNS:*.google.fr, DNS:google.fr"
+          type: object
+        tls_version:
+          description: TLS protocol version.
+          example: 1.3
+          format: double
+          type: number
+        valid:
+          $ref: "#/components/schemas/SyntheticsTestResultCertificateValidity"
+      type: object
+    SyntheticsTestResultCertificateValidity:
+      description: Validity window of a certificate.
+      properties:
+        from:
+          description: Unix timestamp (ms) of when the certificate became valid.
+          example: 1742469686000
+          format: int64
+          type: integer
+        to:
+          description: Unix timestamp (ms) of when the certificate expires.
+          example: 1749727285000
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultData:
+      description: Wrapper object for a Synthetic test result.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SyntheticsTestResultAttributes"
+        id:
+          description: The result ID.
+          example: "5158904793181869365"
+          type: string
+        relationships:
+          $ref: "#/components/schemas/SyntheticsTestResultRelationships"
+        type:
+          $ref: "#/components/schemas/SyntheticsTestResultType"
+      type: object
+    SyntheticsTestResultDetail:
+      description: Full result details for a Synthetic test execution.
+      properties:
+        assertions:
+          description: Assertion results produced by the test.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultAssertionResult"
+          type: array
+        bucket_keys:
+          $ref: "#/components/schemas/SyntheticsTestResultBucketKeys"
+        call_type:
+          description: gRPC call type (for example, `unary`, `healthCheck`, or `reflection`).
+          example: unary
+          type: string
+        cert:
+          $ref: "#/components/schemas/SyntheticsTestResultCertificate"
+        compressed_json_descriptor:
+          description: Compressed JSON descriptor for the test (internal format).
+          example: compressedJsonDescriptorValue
+          type: string
+        compressed_steps:
+          description: Compressed representation of the test steps (internal format).
+          example: eJzLSM3JyQcABiwCFQ==
+          type: string
+        connection_outcome:
+          description: Outcome of the connection attempt (for example, `established`, `refused`).
+          example: established
+          type: string
+        dns_resolution:
+          $ref: "#/components/schemas/SyntheticsTestResultDnsResolution"
+        duration:
+          description: Duration of the test execution (in milliseconds).
+          example: 380.7
+          format: double
+          type: number
+        exited_on_step_success:
+          description: Whether the test exited early because a step marked with `exitIfSucceed` passed.
+          example: false
+          type: boolean
+        failure:
+          $ref: "#/components/schemas/SyntheticsTestResultFailure"
+        finished_at:
+          description: Timestamp of when the test finished (in milliseconds).
+          example: 1723782422760
+          format: int64
+          type: integer
+        handshake:
+          $ref: "#/components/schemas/SyntheticsTestResultHandshake"
+        id:
+          description: The unique identifier for this result.
+          example: "5158904793181869365"
+          type: string
+        initial_id:
+          description: The initial result ID before any retries.
+          example: "5158904793181869365"
+          type: string
+        is_fast_retry:
+          description: Whether this result is from a fast retry.
+          example: true
+          type: boolean
+        is_last_retry:
+          description: Whether this result is from the last retry.
+          example: true
+          type: boolean
+        netpath:
+          $ref: "#/components/schemas/SyntheticsTestResultNetpath"
+        netstats:
+          $ref: "#/components/schemas/SyntheticsTestResultNetstats"
+        ocsp:
+          $ref: "#/components/schemas/SyntheticsTestResultOCSPResponse"
+        ping:
+          $ref: "#/components/schemas/SyntheticsTestResultTracerouteHop"
+        received_email_count:
+          description: Number of emails received during the test (email tests).
+          example: 1
+          format: int64
+          type: integer
+        received_message:
+          description: Message received from the target (for WebSocket/TCP/UDP tests).
+          example: "UDP echo: b'Test message'"
+          type: string
+        request:
+          $ref: "#/components/schemas/SyntheticsTestResultRequestInfo"
+        resolved_ip:
+          description: IP address resolved for the target host.
+          example: "54.243.255.141"
+          type: string
+        response:
+          $ref: "#/components/schemas/SyntheticsTestResultResponseInfo"
+        run_type:
+          $ref: "#/components/schemas/SyntheticsTestResultRunType"
+        sent_message:
+          description: Message sent to the target (for WebSocket/TCP/UDP tests).
+          example: udp mess
+          type: string
+        start_url:
+          description: Start URL for the test (browser tests).
+          example: http://34.95.79.70/prototype
+          type: string
+        started_at:
+          description: Timestamp of when the test started (in milliseconds).
+          example: 1723782422750
+          format: int64
+          type: integer
+        status:
+          $ref: "#/components/schemas/SyntheticsTestResultStatus"
+        steps:
+          description: Step results (for browser, mobile, and multistep API tests).
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultStep"
+          type: array
+        time_to_interactive:
+          description: Time to interactive in milliseconds (browser tests).
+          example: 183
+          format: int64
+          type: integer
+        timings:
+          additionalProperties: {}
+          description: Timing breakdown of the test request phases (for example, DNS, TCP, TLS, first byte).
+          example:
+            dns: 2.9
+            download: 2.1
+            firstByte: 95.2
+            ssl: 187.9
+            tcp: 92.6
+            total: 380.7
+          type: object
+        trace:
+          $ref: "#/components/schemas/SyntheticsTestResultTrace"
+        traceroute:
+          description: Traceroute hop results (for network tests).
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultTracerouteHop"
+          type: array
+        triggered_at:
+          description: Timestamp of when the test was triggered (in milliseconds).
+          example: 1723782422715
+          format: int64
+          type: integer
+        tunnel:
+          description: Whether the test was executed through a tunnel.
+          example: false
+          type: boolean
+        turns:
+          description: Turns executed by a goal-based browser test.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultTurn"
+          type: array
+        unhealthy:
+          description: Whether the test runner was unhealthy at the time of execution.
+          example: false
+          type: boolean
+        variables:
+          $ref: "#/components/schemas/SyntheticsTestResultVariables"
+      type: object
+    SyntheticsTestResultDevice:
+      description: Device information for the test result (browser and mobile tests).
+      properties:
+        browser:
+          $ref: "#/components/schemas/SyntheticsTestResultDeviceBrowser"
+        id:
+          description: Device identifier.
+          example: chrome.laptop_large
+          type: string
+        name:
+          description: Device name.
+          example: "Chrome - Laptop Large"
+          type: string
+        platform:
+          $ref: "#/components/schemas/SyntheticsTestResultDevicePlatform"
+        resolution:
+          $ref: "#/components/schemas/SyntheticsTestResultDeviceResolution"
+        type:
+          description: Device type.
+          example: browser
+          type: string
+      type: object
+    SyntheticsTestResultDeviceBrowser:
+      description: Browser information for the device used to run the test.
+      properties:
+        type:
+          description: Browser type (for example, `chrome`, `firefox`).
+          example: edge
+          type: string
+        user_agent:
+          description: User agent string reported by the browser.
+          example: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36 Edg/127.0.2651.105 DatadogSynthetics
+          type: string
+        version:
+          description: Browser version.
+          example: 127.0.2651.105
+          type: string
+      type: object
+    SyntheticsTestResultDevicePlatform:
+      description: Platform information for the device used to run the test.
+      properties:
+        name:
+          description: Platform name (for example, `linux`, `macos`).
+          example: ios
+          type: string
+        version:
+          description: Platform version.
+          example: "14.8"
+          type: string
+      type: object
+    SyntheticsTestResultDeviceResolution:
+      description: Screen resolution of the device used to run the test.
+      properties:
+        height:
+          description: Viewport height in pixels.
+          example: 1100
+          format: int64
+          type: integer
+        pixel_ratio:
+          description: Device pixel ratio.
+          example: 2
+          format: double
+          type: number
+        width:
+          description: Viewport width in pixels.
+          example: 1440
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultDnsRecord:
+      description: A DNS record returned in a DNS test response.
+      properties:
+        type:
+          description: DNS record type (for example, `A`, `AAAA`, `CNAME`).
+          example: A
+          type: string
+        values:
+          description: Values associated with the DNS record.
+          example:
+            - 213.186.33.19
+          items:
+            description: DNS record value.
+            type: string
+          type: array
+      type: object
+    SyntheticsTestResultDnsResolution:
+      description: DNS resolution details recorded during the test execution.
+      properties:
+        attempts:
+          description: DNS resolution attempts made during the test.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultDnsResolutionAttempt"
+          type: array
+        resolved_ip:
+          description: Resolved IP address for the target host.
+          example: 54.243.255.141
+          type: string
+        resolved_port:
+          description: Resolved port for the target service.
+          example: "443"
+          type: string
+        server:
+          description: DNS server used for the resolution.
+          example: 8.8.4.4
+          type: string
+      type: object
+    SyntheticsTestResultDnsResolutionAttempt:
+      additionalProperties:
+        type: string
+      description: A single DNS resolution attempt. Keys are provider-specific attempt fields.
+      type: object
+    SyntheticsTestResultDuration:
+      description: Total duration of a Synthetic test execution.
+      properties:
+        has_duration:
+          description: Whether a duration was recorded for this execution.
+          example: true
+          type: boolean
+        value:
+          description: Duration value in milliseconds.
+          example: 380
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultExecutionInfo:
+      description: Execution details for a Synthetic test result.
+      properties:
+        duration:
+          $ref: "#/components/schemas/SyntheticsTestResultDuration"
+        error_message:
+          description: Error message if the execution encountered an issue.
+          example: Connection timed out
+          type: string
+        is_fast_retry:
+          description: Whether this result is from a fast retry.
+          example: true
+          type: boolean
+        timings:
+          additionalProperties: {}
+          description: Timing breakdown of the test execution in milliseconds.
+          example:
+            dns: 2.9
+            download: 2.1
+            firstByte: 95.2
+            ssl: 187.9
+            tcp: 92.6
+            total: 380.7
+          type: object
+        tunnel:
+          description: Whether the test was executed through a tunnel.
+          example: false
+          type: boolean
+        unhealthy:
+          description: Whether the location was unhealthy during execution.
+          example: false
+          type: boolean
+      type: object
+    SyntheticsTestResultFailure:
+      description: Details about the failure of a Synthetic test.
+      properties:
+        code:
+          description: Error code for the failure.
+          example: TIMEOUT
+          type: string
+        internal_code:
+          description: Internal error code used for debugging.
+          example: INCORRECT_ASSERTION
+          type: string
+        internal_message:
+          description: Internal error message used for debugging.
+          example: Assertion failed on step 2
+          type: string
+        message:
+          description: Error message for the failure.
+          example: Connection timed out
+          type: string
+      type: object
+    SyntheticsTestResultFileRef:
+      description: Reference to a file attached to a Synthetic test request.
+      properties:
+        bucket_key:
+          description: Storage bucket key where the file is stored.
+          example: api-upload-file/s3v-msw-tp3/2024-08-20T12:18:27.628081_f433c953-a58a-4296-834b-0669e32ba55f.json
+          type: string
+        encoding:
+          description: Encoding of the file contents.
+          example: base64
+          type: string
+        name:
+          description: File name.
+          example: dd_logo_h_rgb.jpg
+          type: string
+        size:
+          description: File size in bytes.
+          example: 30294
+          format: int64
+          type: integer
+        type:
+          description: File MIME type.
+          example: image/jpeg
+          type: string
+      type: object
+    SyntheticsTestResultGit:
+      description: Git information associated with the test result.
+      properties:
+        branch:
+          description: Git branch name.
+          example: main
+          type: string
+        commit:
+          $ref: "#/components/schemas/SyntheticsTestResultGitCommit"
+        repository_url:
+          description: Git repository URL.
+          example: https://github.com/DataDog/example
+          type: string
+      type: object
+    SyntheticsTestResultGitCommit:
+      description: Details of the Git commit associated with the test result.
+      properties:
+        author:
+          $ref: "#/components/schemas/SyntheticsTestResultGitUser"
+        committer:
+          $ref: "#/components/schemas/SyntheticsTestResultGitUser"
+        message:
+          description: Commit message.
+          example: Fix bug in login flow
+          type: string
+        sha:
+          description: Commit SHA.
+          example: 9e107d9d372bb6826bd81d3542a419d6f0e1de56
+          type: string
+        url:
+          description: URL of the commit.
+          example: https://github.com/DataDog/example/commit/9e107d9d372bb6826bd81d3542a419d6f0e1de56
+          type: string
+      type: object
+    SyntheticsTestResultGitUser:
+      description: A Git user (author or committer).
+      properties:
+        date:
+          description: Timestamp of the commit action for this user.
+          example: "2024-08-15T14:23:00Z"
+          type: string
+        email:
+          description: Email address of the Git user.
+          example: jane.doe@example.com
+          type: string
+        name:
+          description: Name of the Git user.
+          example: Jane Doe
+          type: string
+      type: object
+    SyntheticsTestResultHandshake:
+      description: Handshake request and response for protocol-level tests.
+      properties:
+        request:
+          $ref: "#/components/schemas/SyntheticsTestResultRequestInfo"
+        response:
+          $ref: "#/components/schemas/SyntheticsTestResultResponseInfo"
+      type: object
+    SyntheticsTestResultHealthCheck:
+      description: Health check information returned from a gRPC health check call.
+      properties:
+        message:
+          additionalProperties:
+            type: string
+          description: Raw health check message payload.
+          type: object
+        status:
+          description: Health check status code.
+          example: 1
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultIncludedItem:
+      description: An included related resource.
+      properties:
+        attributes:
+          additionalProperties: {}
+          description: Attributes of the included resource.
+          type: object
+        id:
+          description: ID of the included resource.
+          example: abc-def-123
+          type: string
+        type:
+          description: Type of the included resource.
+          example: test
+          type: string
+      type: object
+    SyntheticsTestResultLocation:
+      description: Location information for a Synthetic test result.
+      properties:
+        id:
+          description: Identifier of the location.
+          example: aws:us-east-1
+          type: string
+        name:
+          description: Human-readable name of the location.
+          example: "N. Virginia (AWS)"
+          type: string
+        version:
+          description: Version of the worker that ran the test.
+          example: 1.0.0
+          type: string
+        worker_id:
+          description: Identifier of the specific worker that ran the test.
+          example: worker-abc-123
+          type: string
+      type: object
+    SyntheticsTestResultNetpath:
+      description: Network Path test result capturing the path between source and destination.
+      properties:
+        destination:
+          $ref: "#/components/schemas/SyntheticsTestResultNetpathDestination"
+        hops:
+          description: Hops along the network path.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultNetpathHop"
+          type: array
+        origin:
+          description: Origin of the network path (for example, probe source).
+          example: synthetics
+          type: string
+        pathtrace_id:
+          description: Identifier of the path trace.
+          example: 5d3cb978-533b-41ce-85a4-3661c8dd6a0b
+          type: string
+        protocol:
+          description: Protocol used for the path trace (for example, `tcp`, `udp`, `icmp`).
+          example: TCP
+          type: string
+        source:
+          $ref: "#/components/schemas/SyntheticsTestResultNetpathEndpoint"
+        tags:
+          description: Tags associated with the network path measurement.
+          example:
+            - synthetics.test_id:nja-epx-mg8
+          items:
+            description: Tag associated with the network path measurement.
+            type: string
+          type: array
+        timestamp:
+          description: Unix timestamp (ms) of the network path measurement.
+          example: 1744117822266
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultNetpathDestination:
+      description: Destination endpoint of a network path measurement.
+      properties:
+        hostname:
+          description: Hostname of the destination.
+          example: 34.95.79.70
+          type: string
+        ip_address:
+          description: IP address of the destination.
+          example: 34.95.79.70
+          type: string
+        port:
+          description: Port of the destination service.
+          example: 80
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultNetpathEndpoint:
+      description: Source endpoint of a network path measurement.
+      properties:
+        hostname:
+          description: Hostname of the endpoint.
+          example: edge-eu1.staging.dog
+          type: string
+      type: object
+    SyntheticsTestResultNetpathHop:
+      description: A single hop along a network path.
+      properties:
+        hostname:
+          description: Resolved hostname of the hop.
+          example: 70.79.95.34.bc.googleusercontent.com
+          type: string
+        ip_address:
+          description: IP address of the hop.
+          example: 10.240.134.15
+          type: string
+        reachable:
+          description: Whether this hop was reachable.
+          example: true
+          type: boolean
+        rtt:
+          description: Round-trip time to this hop in milliseconds.
+          example: 0.000346599
+          format: double
+          type: number
+        ttl:
+          description: Time-to-live value of the probe packet at this hop.
+          example: 2
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultNetstats:
+      description: Aggregated network statistics from the test execution.
+      properties:
+        hops:
+          $ref: "#/components/schemas/SyntheticsTestResultNetstatsHops"
+        jitter:
+          description: Network jitter in milliseconds.
+          example: 0.08
+          format: double
+          type: number
+        latency:
+          $ref: "#/components/schemas/SyntheticsTestResultNetworkLatency"
+        packet_loss_percentage:
+          description: Percentage of probe packets lost.
+          example: 0.0
+          format: double
+          type: number
+        packets_received:
+          description: Number of probe packets received.
+          example: 4
+          format: int64
+          type: integer
+        packets_sent:
+          description: Number of probe packets sent.
+          example: 4
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultNetstatsHops:
+      description: Statistics about the number of hops for a network test.
+      properties:
+        avg:
+          description: Average number of hops.
+          example: 11.0
+          format: double
+          type: number
+        max:
+          description: Maximum number of hops.
+          example: 11
+          format: int64
+          type: integer
+        min:
+          description: Minimum number of hops.
+          example: 11
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultNetworkLatency:
+      description: Latency statistics for a network probe.
+      properties:
+        avg:
+          description: Average latency in milliseconds.
+          example: 1.8805
+          format: double
+          type: number
+        max:
+          description: Maximum latency in milliseconds.
+          example: 1.97
+          format: double
+          type: number
+        min:
+          description: Minimum latency in milliseconds.
+          example: 1.76
+          format: double
+          type: number
+      type: object
+    SyntheticsTestResultOCSPCertificate:
+      description: Certificate details returned in an OCSP response.
+      properties:
+        revocation_reason:
+          description: Reason code for the revocation, when applicable.
+          example: unspecified
+          type: string
+        revocation_time:
+          description: Unix timestamp (ms) of the revocation.
+          example: 1749727285000
+          format: int64
+          type: integer
+        serial_number:
+          description: Serial number of the certificate.
+          example: 7B584A1A6670A1EB0941A9A121569D60
+          type: string
+      type: object
+    SyntheticsTestResultOCSPResponse:
+      description: OCSP response received while validating a certificate.
+      properties:
+        certificate:
+          $ref: "#/components/schemas/SyntheticsTestResultOCSPCertificate"
+        status:
+          description: OCSP response status (for example, `good`, `revoked`, `unknown`).
+          example: good
+          type: string
+        updates:
+          $ref: "#/components/schemas/SyntheticsTestResultOCSPUpdates"
+      type: object
+    SyntheticsTestResultOCSPUpdates:
+      description: OCSP response update timestamps.
+      properties:
+        next_update:
+          description: Unix timestamp (ms) of the next expected OCSP update.
+          example: 1743074486000
+          format: int64
+          type: integer
+        produced_at:
+          description: Unix timestamp (ms) of when the OCSP response was produced.
+          example: 1742469686000
+          format: int64
+          type: integer
+        this_update:
+          description: Unix timestamp (ms) of this OCSP update.
+          example: 1742469686000
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultParentStep:
+      description: Reference to the parent step of a sub-step.
+      properties:
+        id:
+          description: Identifier of the parent step.
+          example: fkk-j2a-gmw
+          type: string
+      type: object
+    SyntheticsTestResultParentTest:
+      description: Reference to the parent test of a sub-step.
+      properties:
+        id:
+          description: Identifier of the parent test.
+          example: abc-def-123
+          type: string
+      type: object
+    SyntheticsTestResultRedirect:
+      description: A redirect hop encountered while performing the request.
+      properties:
+        location:
+          description: Target location of the redirect.
+          example: https://example.com/new-location
+          type: string
+        status_code:
+          description: HTTP status code of the redirect response.
+          example: 301
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultRelationshipTest:
+      description: Relationship to the Synthetic test.
+      properties:
+        data:
+          $ref: "#/components/schemas/SyntheticsTestResultRelationshipTestData"
+      type: object
+    SyntheticsTestResultRelationshipTestData:
+      description: Data for the test relationship.
+      properties:
+        id:
+          description: The public ID of the test.
+          example: abc-def-123
+          type: string
+        type:
+          description: Type of the related resource.
+          example: test
+          type: string
+      type: object
+    SyntheticsTestResultRelationships:
+      description: Relationships for a Synthetic test result.
+      properties:
+        test:
+          $ref: "#/components/schemas/SyntheticsTestResultRelationshipTest"
+      type: object
+    SyntheticsTestResultRequestInfo:
+      description: Details of the outgoing request made during the test execution.
+      properties:
+        allow_insecure:
+          description: Whether insecure certificates are allowed for this request.
+          example: false
+          type: boolean
+        body:
+          description: Body sent with the request.
+          example: '{"key":"value"}'
+          type: string
+        call_type:
+          description: gRPC call type (for example, `unary`, `healthCheck`, or `reflection`).
+          example: unary
+          type: string
+        destination_service:
+          description: Destination service for a Network Path test.
+          example: my-service
+          type: string
+        dns_server:
+          description: DNS server used to resolve the target host.
+          example: 8.8.8.8
+          type: string
+        dns_server_port:
+          description: Port of the DNS server used for resolution.
+          example: 53
+          format: int64
+          type: integer
+        e2e_queries:
+          description: Number of end-to-end probe queries issued.
+          example: 4
+          format: int64
+          type: integer
+        files:
+          description: Files attached to the request.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultFileRef"
+          type: array
+        headers:
+          additionalProperties: {}
+          description: Headers sent with the request.
+          example:
+            content-type: application/json
+          type: object
+        host:
+          description: Host targeted by the request.
+          example: grpcbin.test.k6.io
+          type: string
+        max_ttl:
+          description: Maximum TTL for network probe packets.
+          example: 64
+          format: int64
+          type: integer
+        message:
+          description: Message sent with the request (for WebSocket/TCP/UDP tests).
+          example: My message
+          type: string
+        method:
+          description: HTTP method used for the request.
+          example: GET
+          type: string
+        no_saving_response_body:
+          description: Whether the response body was not saved.
+          example: true
+          type: boolean
+        port:
+          description: Port targeted by the request. Can be a number or a string variable reference.
+          example: 9000
+        service:
+          description: Service name targeted by the request (for gRPC tests).
+          example: addsvc.Add
+          type: string
+        source_service:
+          description: Source service for a Network Path test.
+          example: synthetics
+          type: string
+        timeout:
+          description: Request timeout in milliseconds.
+          example: 60
+          format: int64
+          type: integer
+        tool_name:
+          description: Name of the MCP tool called (MCP tests only).
+          example: search
+          type: string
+        traceroute_queries:
+          description: Number of traceroute probe queries issued.
+          example: 2
+          format: int64
+          type: integer
+        url:
+          description: URL targeted by the request.
+          example: https://httpbin.org/anything/lol valuehugo
+          type: string
+      type: object
+    SyntheticsTestResultResponse:
+      description: Response object for a Synthetic test result.
+      properties:
+        data:
+          $ref: "#/components/schemas/SyntheticsTestResultData"
+        included:
+          description: Array of included related resources, such as the test definition.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultIncludedItem"
+          type: array
+      type: object
+    SyntheticsTestResultResponseInfo:
+      description: Details of the response received during the test execution.
+      properties:
+        body:
+          description: Body of the response.
+          example: '{"status":"ok"}'
+          type: string
+        body_compressed:
+          description: Compressed representation of the response body.
+          example: eJzLSM3JyQcABiwCFQ==
+          type: string
+        body_hashes:
+          description: Hashes computed over the response body.
+          example: 9e107d9d372bb6826bd81d3542a419d6
+          type: string
+        body_size:
+          description: Size of the response body in bytes.
+          example: 793
+          format: int64
+          type: integer
+        cache_headers:
+          additionalProperties:
+            type: string
+          description: Cache-related response headers.
+          example:
+            server: gunicorn/19.9.0
+          type: object
+        cdn:
+          $ref: "#/components/schemas/SyntheticsTestResultCdnProviderInfo"
+        close:
+          $ref: "#/components/schemas/SyntheticsTestResultWebSocketClose"
+        compressed_message:
+          description: Compressed representation of the response message.
+          example: eJzLSM3JyQcABiwCFQ==
+          type: string
+        headers:
+          additionalProperties: {}
+          description: Response headers.
+          example:
+            content-type: application/json
+          type: object
+        healthcheck:
+          $ref: "#/components/schemas/SyntheticsTestResultHealthCheck"
+        http_version:
+          description: HTTP version of the response.
+          example: "2.0"
+          type: string
+        is_body_truncated:
+          description: Whether the response body was truncated.
+          example: false
+          type: boolean
+        is_message_truncated:
+          description: Whether the response message was truncated.
+          example: false
+          type: boolean
+        message:
+          description: Message received in the response (for WebSocket/TCP/UDP tests).
+          example: '{"f_string":"concat-STATIC_HIDDEN_VALUE"}'
+          type: string
+        metadata:
+          additionalProperties:
+            type: string
+          description: Additional metadata returned with the response.
+          type: object
+        records:
+          description: DNS records returned in the response (DNS tests only).
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultDnsRecord"
+          type: array
+        redirects:
+          description: Redirect hops encountered while performing the request.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultRedirect"
+          type: array
+        status_code:
+          description: HTTP status code of the response.
+          example: 200
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultRouter:
+      description: A router along the traceroute path.
+      properties:
+        ip:
+          description: IP address of the router.
+          example: 34.95.79.70
+          type: string
+        resolved_host:
+          description: Resolved hostname of the router.
+          example: 70.79.95.34.bc.googleusercontent.com
+          type: string
+      type: object
+    SyntheticsTestResultRumContext:
+      description: RUM application context associated with a step or sub-test.
+      properties:
+        application_id:
+          description: RUM application identifier.
+          example: 00000000-0000-0000-0000-000000000000
+          type: string
+        session_id:
+          description: RUM session identifier.
+          example: 11111111-1111-1111-1111-111111111111
+          type: string
+        view_id:
+          description: RUM view identifier.
+          example: 22222222-2222-2222-2222-222222222222
+          type: string
+      type: object
+    SyntheticsTestResultRunType:
+      description: The type of run for a Synthetic test result.
+      enum:
+        - scheduled
+        - fast
+        - ci
+        - triggered
+      example: scheduled
+      type: string
+      x-enum-varnames:
+        - SCHEDULED
+        - FAST
+        - CI
+        - TRIGGERED
+    SyntheticsTestResultStatus:
+      description: Status of a Synthetic test result.
+      enum:
+        - passed
+        - failed
+        - no_data
+      example: passed
+      type: string
+      x-enum-varnames:
+        - PASSED
+        - FAILED
+        - NO_DATA
+    SyntheticsTestResultStep:
+      description: A step result from a browser, mobile, or multistep API test.
+      properties:
+        allow_failure:
+          description: Whether the test continues when this step fails.
+          example: false
+          type: boolean
+        api_test:
+          additionalProperties: {}
+          description: Inner API test definition for browser `runApiTest` steps.
+          type: object
+        assertion_result:
+          $ref: "#/components/schemas/SyntheticsTestResultStepAssertionResult"
+        assertions:
+          description: Assertion results produced by the step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultAssertionResult"
+          type: array
+        blocked_requests_urls:
+          description: URLs of requests blocked during the step.
+          items:
+            description: Blocked request URL.
+            type: string
+          type: array
+        bounds:
+          $ref: "#/components/schemas/SyntheticsTestResultBounds"
+        browser_errors:
+          description: Browser errors captured during the step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultBrowserError"
+          type: array
+        bucket_keys:
+          $ref: "#/components/schemas/SyntheticsTestResultBucketKeys"
+        cdn_resources:
+          description: CDN resources encountered during the step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultCdnResource"
+          type: array
+        click_type:
+          description: Click type performed in a browser step.
+          example: primary
+          type: string
+        compressed_json_descriptor:
+          description: Compressed JSON descriptor for the step (internal format).
+          example: compressedJsonDescriptorValue
+          type: string
+        config:
+          additionalProperties: {}
+          description: Request configuration executed by this step (API test steps).
+          type: object
+        description:
+          description: Human-readable description of the step.
+          example: Navigate to start URL
+          type: string
+        duration:
+          description: Duration of the step in milliseconds.
+          example: 1015.0
+          format: double
+          type: number
+        element_description:
+          description: Description of the element interacted with by the step.
+          example: '<XCUIElementTypeStaticText value="Scroll" name="Scroll" label="Scroll">'
+          type: string
+        element_updates:
+          $ref: "#/components/schemas/SyntheticsTestResultStepElementUpdates"
+        extracted_value:
+          $ref: "#/components/schemas/SyntheticsTestResultVariable"
+        failure:
+          $ref: "#/components/schemas/SyntheticsTestResultFailure"
+        http_results:
+          description: HTTP results produced by an MCP step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultAssertionResult"
+          type: array
+        id:
+          description: Identifier of the step.
+          example: fkk-j2a-gmw
+          type: string
+        is_critical:
+          description: Whether this step is critical for the test outcome.
+          example: true
+          type: boolean
+        javascript_custom_assertion_code:
+          description: Whether the step uses a custom JavaScript assertion.
+          example: false
+          type: boolean
+        locate_element_duration:
+          description: Time taken to locate the element in milliseconds.
+          example: 845.0
+          format: double
+          type: number
+        name:
+          description: Name of the step.
+          example: Extract variable from body
+          type: string
+        request:
+          $ref: "#/components/schemas/SyntheticsTestResultRequestInfo"
+        response:
+          $ref: "#/components/schemas/SyntheticsTestResultResponseInfo"
+        retries:
+          description: Retry results for the step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultStep"
+          type: array
+        retry_count:
+          description: Number of times this step was retried.
+          example: 0
+          format: int64
+          type: integer
+        rum_context:
+          $ref: "#/components/schemas/SyntheticsTestResultRumContext"
+        started_at:
+          description: Unix timestamp (ms) of when the step started.
+          example: 1724445283308
+          format: int64
+          type: integer
+        status:
+          description: Status of the step (for example, `passed`, `failed`).
+          example: passed
+          type: string
+        sub_step:
+          $ref: "#/components/schemas/SyntheticsTestResultSubStep"
+        sub_test:
+          $ref: "#/components/schemas/SyntheticsTestResultSubTest"
+        subtype:
+          description: Subtype of the step.
+          example: http
+          type: string
+        tabs:
+          description: Browser tabs involved in the step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultTab"
+          type: array
+        timings:
+          additionalProperties: {}
+          description: Timing breakdown of the step execution.
+          type: object
+        tunnel:
+          description: Whether the step was executed through a Synthetics tunnel.
+          example: false
+          type: boolean
+        type:
+          description: Type of the step (for example, `click`, `assertElementContent`, `runApiTest`).
+          example: click
+          type: string
+        url:
+          description: URL associated with the step (for navigation steps).
+          example: http://34.95.79.70/prototype
+          type: string
+        value:
+          description: Step value. Its type depends on the step type.
+          example: http://34.95.79.70/prototype
+        variables:
+          $ref: "#/components/schemas/SyntheticsTestResultVariables"
+        vitals_metrics:
+          description: Web vitals metrics captured during the step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultVitalsMetrics"
+          type: array
+        warnings:
+          description: Warnings emitted during the step.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultWarning"
+          type: array
+      type: object
+    SyntheticsTestResultStepAssertionResult:
+      description: Assertion result for a browser or mobile step.
+      properties:
+        actual:
+          description: Actual value observed during the step assertion. Its type depends on the check type.
+          example: "True\ngood\ngood\ngood\ngood\nTrue"
+        check_type:
+          description: Type of the step assertion check.
+          example: contains
+          type: string
+        expected:
+          description: Expected value for the step assertion. Its type depends on the check type.
+          example: True good good good good True
+        has_secure_variables:
+          description: Whether the assertion involves secure variables.
+          example: false
+          type: boolean
+      type: object
+    SyntheticsTestResultStepElementUpdates:
+      description: Element locator updates produced during a step.
+      properties:
+        multi_locator:
+          additionalProperties:
+            type: string
+          description: Updated multi-locator definition.
+          type: object
+        target_outer_html:
+          description: Updated outer HTML of the targeted element.
+          example: <h1>My website - v4</h1>
+          type: string
+        version:
+          description: Version of the element locator definition.
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultStepsInfo:
+      description: Step execution summary for a Synthetic test result.
+      properties:
+        completed:
+          description: Number of completed steps.
+          example: 6
+          format: int64
+          type: integer
+        errors:
+          description: Number of steps with errors.
+          example: 0
+          format: int64
+          type: integer
+        total:
+          description: Total number of steps.
+          example: 6
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultSubStep:
+      description: Information about a sub-step in a nested test execution.
+      properties:
+        level:
+          description: Depth of the sub-step in the execution tree.
+          example: 1
+          format: int64
+          type: integer
+        parent_step:
+          $ref: "#/components/schemas/SyntheticsTestResultParentStep"
+        parent_test:
+          $ref: "#/components/schemas/SyntheticsTestResultParentTest"
+      type: object
+    SyntheticsTestResultSubTest:
+      description: Information about a sub-test played from a parent browser test.
+      properties:
+        id:
+          description: Identifier of the sub-test.
+          example: abc-def-123
+          type: string
+        playing_tab:
+          description: Index of the browser tab playing the sub-test.
+          example: 0
+          format: int64
+          type: integer
+        rum_context:
+          $ref: "#/components/schemas/SyntheticsTestResultRumContext"
+      type: object
+    SyntheticsTestResultSummaryAttributes:
+      description: Attributes of a Synthetic test result summary.
+      properties:
+        device:
+          $ref: "#/components/schemas/SyntheticsTestResultDevice"
+        execution_info:
+          $ref: "#/components/schemas/SyntheticsTestResultExecutionInfo"
+        finished_at:
+          description: Timestamp of when the test finished (in milliseconds).
+          format: int64
+          type: integer
+        location:
+          $ref: "#/components/schemas/SyntheticsTestResultLocation"
+        run_type:
+          $ref: "#/components/schemas/SyntheticsTestResultRunType"
+        started_at:
+          description: Timestamp of when the test started (in milliseconds).
+          format: int64
+          type: integer
+        status:
+          $ref: "#/components/schemas/SyntheticsTestResultStatus"
+        steps_info:
+          $ref: "#/components/schemas/SyntheticsTestResultStepsInfo"
+        test_sub_type:
+          $ref: "#/components/schemas/SyntheticsTestSubType"
+        test_type:
+          $ref: "#/components/schemas/SyntheticsTestType"
+      type: object
+    SyntheticsTestResultSummaryData:
+      description: Wrapper object for a Synthetic test result summary.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SyntheticsTestResultSummaryAttributes"
+        id:
+          description: The result ID.
+          example: "5158904793181869365"
+          type: string
+        relationships:
+          $ref: "#/components/schemas/SyntheticsTestResultRelationships"
+        type:
+          $ref: "#/components/schemas/SyntheticsTestResultSummaryType"
+      type: object
+    SyntheticsTestResultSummaryType:
+      default: "result_summary"
+      description: Type of the Synthetic test result summary resource, `result_summary`.
+      enum:
+        - result_summary
+      example: result_summary
+      type: string
+      x-enum-varnames:
+        - RESULT_SUMMARY
+    SyntheticsTestResultTab:
+      description: Information about a browser tab involved in a step.
+      properties:
+        focused:
+          description: Whether the tab was focused during the step.
+          example: true
+          type: boolean
+        title:
+          description: Title of the tab.
+          example: Team Browser mini-websites
+          type: string
+        url:
+          description: URL loaded in the tab.
+          example: http://34.95.79.70/prototype
+          type: string
+      type: object
+    SyntheticsTestResultTrace:
+      description: Trace identifiers associated with a Synthetic test result.
+      properties:
+        id:
+          description: Datadog APM trace identifier.
+          example: "5513046492231128177"
+          type: string
+        otel_id:
+          description: OpenTelemetry trace identifier.
+          example: d8ba00eb1507bdba8643ba8e7a1c022c
+          type: string
+      type: object
+    SyntheticsTestResultTracerouteHop:
+      description: A network probe result, used for traceroute hops and ping summaries.
+      properties:
+        host:
+          description: Target hostname.
+          example: 34.95.79.70
+          type: string
+        latency:
+          $ref: "#/components/schemas/SyntheticsTestResultNetworkLatency"
+        packet_loss_percentage:
+          description: Percentage of probe packets lost.
+          example: 0.0
+          format: double
+          type: number
+        packet_size:
+          description: Size of each probe packet in bytes.
+          example: 56
+          format: int64
+          type: integer
+        packets_received:
+          description: Number of probe packets received.
+          example: 4
+          format: int64
+          type: integer
+        packets_sent:
+          description: Number of probe packets sent.
+          example: 4
+          format: int64
+          type: integer
+        resolved_ip:
+          description: Resolved IP address for the target.
+          example: 34.95.79.70
+          type: string
+        routers:
+          description: List of intermediate routers for the traceroute.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultRouter"
+          type: array
+      type: object
+    SyntheticsTestResultTurn:
+      description: A turn in a goal-based browser test, grouping steps and reasoning.
+      properties:
+        bucket_keys:
+          $ref: "#/components/schemas/SyntheticsTestResultBucketKeys"
+        name:
+          description: Name of the turn.
+          example: Turn 1
+          type: string
+        reasoning:
+          description: Agent reasoning produced for this turn.
+          example: I need to navigate to the chairs section
+          type: string
+        status:
+          description: Status of the turn (for example, `passed`, `failed`).
+          example: passed
+          type: string
+        steps:
+          description: Steps executed during the turn.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultTurnStep"
+          type: array
+        turn_finished_at:
+          description: Unix timestamp (ms) of when the turn finished.
+          example: 1724521438800
+          format: int64
+          type: integer
+        turn_started_at:
+          description: Unix timestamp (ms) of when the turn started.
+          example: 1724521436800
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestResultTurnStep:
+      description: A step executed during a goal-based browser test turn.
+      properties:
+        bucket_keys:
+          $ref: "#/components/schemas/SyntheticsTestResultBucketKeys"
+        config:
+          additionalProperties: {}
+          description: Browser step configuration for this turn step.
+          example:
+            id: step-1
+            name: Click on div "Chairs"
+            type: click
+          type: object
+      type: object
+    SyntheticsTestResultType:
+      default: "result"
+      description: Type of the Synthetic test result resource, `result`.
+      enum:
+        - result
+      example: result
+      type: string
+      x-enum-varnames:
+        - RESULT
+    SyntheticsTestResultVariable:
+      description: A variable used or extracted during a test.
+      properties:
+        err:
+          description: Error encountered when evaluating the variable.
+          example: LOCAL_VARIABLE_UNKNOWN
+          type: string
+        error_message:
+          description: Human-readable error message for variable evaluation.
+          example: Unknown variable name undefined.
+          type: string
+        example:
+          description: Example value for the variable.
+          example: lol value
+          type: string
+        id:
+          description: Variable identifier.
+          example: c896702c-1e34-4e62-a67b-432e8092d062
+          type: string
+        name:
+          description: Variable name.
+          example: HEADER_VALUE
+          type: string
+        pattern:
+          description: Pattern used to extract the variable.
+          example: lol value
+          type: string
+        secure:
+          description: Whether the variable holds a secure value.
+          example: false
+          type: boolean
+        type:
+          description: Variable type.
+          example: text
+          type: string
+        val:
+          description: Evaluated value of the variable.
+          example: value-to-extract
+          type: string
+        value:
+          description: Current value of the variable.
+          example: lol value
+          type: string
+      type: object
+    SyntheticsTestResultVariables:
+      description: Variables captured during a test step.
+      properties:
+        config:
+          description: Variables defined in the test configuration.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultVariable"
+          type: array
+        extracted:
+          description: Variables extracted during the test execution.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultVariable"
+          type: array
+      type: object
+    SyntheticsTestResultVitalsMetrics:
+      description: Web vitals metrics captured during a browser test step.
+      properties:
+        cls:
+          description: Cumulative Layout Shift score.
+          example: 0.0
+          format: double
+          type: number
+        fcp:
+          description: First Contentful Paint in milliseconds.
+          example: 120.3
+          format: double
+          type: number
+        inp:
+          description: Interaction to Next Paint in milliseconds.
+          example: 85.0
+          format: double
+          type: number
+        lcp:
+          description: Largest Contentful Paint in milliseconds.
+          example: 210.5
+          format: double
+          type: number
+        ttfb:
+          description: Time To First Byte in milliseconds.
+          example: 95.2
+          format: double
+          type: number
+        url:
+          description: URL that produced the metrics.
+          example: http://34.95.79.70/prototype
+          type: string
+      type: object
+    SyntheticsTestResultWarning:
+      description: A warning captured during a browser test step.
+      properties:
+        element_bounds:
+          description: Bounds of elements related to the warning.
+          items:
+            $ref: "#/components/schemas/SyntheticsTestResultBounds"
+          type: array
+        message:
+          description: Warning message.
+          example: Element is not visible in the viewport
+          type: string
+        type:
+          description: Type of the warning.
+          example: visibility
+          type: string
+      type: object
+    SyntheticsTestResultWebSocketClose:
+      description: WebSocket close frame information for WebSocket test responses.
+      properties:
+        reason:
+          description: Reason string received in the close frame.
+          example: Normal closure
+          type: string
+        status_code:
+          description: Status code received in the close frame.
+          example: 1000
+          format: int64
+          type: integer
+      type: object
+    SyntheticsTestSubType:
+      description: Subtype of the Synthetic test that produced this result.
+      enum:
+        - dns
+        - grpc
+        - http
+        - icmp
+        - mcp
+        - multi
+        - ssl
+        - tcp
+        - udp
+        - websocket
+      example: http
+      type: string
+      x-enum-varnames:
+        - DNS
+        - GRPC
+        - HTTP
+        - ICMP
+        - MCP
+        - MULTI
+        - SSL
+        - TCP
+        - UDP
+        - WEBSOCKET
+    SyntheticsTestType:
+      description: Type of the Synthetic test that produced this result.
+      enum:
+        - api
+        - browser
+        - mobile
+        - network
+      example: api
+      type: string
+      x-enum-varnames:
+        - API
+        - BROWSER
+        - MOBILE
+        - NETWORK
     SyntheticsTestVersionActionMetadata:
       description: Object containing metadata about a change action.
       properties:
@@ -126847,6 +128742,209 @@ paths:
         permissions:
           - synthetics_write
           - synthetics_create_edit_trigger
+  /api/v2/synthetics/tests/browser/{public_id}/results:
+    get:
+      description: Get the latest result summaries for a given Synthetic browser test.
+      operationId: ListSyntheticsBrowserTestLatestResults
+      parameters:
+        - description: The public ID of the Synthetic browser test for which to search results.
+          in: path
+          name: public_id
+          required: true
+          schema:
+            type: string
+        - description: Timestamp in milliseconds from which to start querying results.
+          in: query
+          name: from_ts
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: Timestamp in milliseconds up to which to query results.
+          in: query
+          name: to_ts
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: Filter results by status.
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: "#/components/schemas/SyntheticsTestResultStatus"
+        - description: Filter results by run type.
+          in: query
+          name: runType
+          required: false
+          schema:
+            $ref: "#/components/schemas/SyntheticsTestResultRunType"
+        - description: Locations for which to query results.
+          in: query
+          name: probe_dc
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Device IDs for which to query results.
+          in: query
+          name: device_id
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          device:
+                            id: chrome.laptop_large
+                            name: "Chrome - Laptop Large"
+                            type: browser
+                          finished_at: 1679328005200
+                          location:
+                            id: aws:eu-west-1
+                            name: "Ireland (AWS)"
+                          run_type: scheduled
+                          started_at: 1679328000000
+                          status: passed
+                          test_type: browser
+                          test_version: 2
+                        id: "7291038456723891045"
+                        relationships:
+                          test:
+                            data:
+                              id: xyz-abc-789
+                              type: test
+                        type: result_summary
+              schema:
+                $ref: "#/components/schemas/SyntheticsTestLatestResultsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - synthetics_read
+      summary: Get a browser test's latest results
+      tags:
+        - Synthetics
+      x-menu-order: 66
+      x-permission:
+        operator: OR
+        permissions:
+          - synthetics_read
+  /api/v2/synthetics/tests/browser/{public_id}/results/{result_id}:
+    get:
+      description: Get a specific full result from a given Synthetic browser test.
+      operationId: GetSyntheticsBrowserTestResult
+      parameters:
+        - description: The public ID of the Synthetic browser test to which the target result belongs.
+          in: path
+          name: public_id
+          required: true
+          schema:
+            type: string
+        - description: The ID of the result to get.
+          in: path
+          name: result_id
+          required: true
+          schema:
+            type: string
+        - description: The event ID used to look up the result in the event store.
+          in: query
+          name: event_id
+          required: false
+          schema:
+            type: string
+        - description: Timestamp in seconds to look up the result.
+          in: query
+          name: timestamp
+          required: false
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        device:
+                          id: chrome.laptop_large
+                          name: "Chrome - Laptop Large"
+                          type: browser
+                        location:
+                          id: aws:eu-west-1
+                          name: "Ireland (AWS)"
+                        result:
+                          duration: 5200.0
+                          finished_at: 1679328005200
+                          id: "7291038456723891045"
+                          started_at: 1679328000000
+                          status: passed
+                        test_type: browser
+                        test_version: 2
+                      id: "7291038456723891045"
+                      relationships:
+                        test:
+                          data:
+                            id: xyz-abc-789
+                            type: test
+                      type: result
+              schema:
+                $ref: "#/components/schemas/SyntheticsTestResultResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - synthetics_read
+      summary: Get a browser test result
+      tags:
+        - Synthetics
+      x-menu-order: 64
+      x-permission:
+        operator: OR
+        permissions:
+          - synthetics_read
   /api/v2/synthetics/tests/bulk-delete:
     post:
       operationId: DeleteSyntheticsTests
@@ -126914,6 +129012,27 @@ paths:
         "200":
           content:
             application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        location:
+                          id: aws:us-east-1
+                          name: "N. Virginia (AWS)"
+                        result:
+                          duration: 150.5
+                          finished_at: 1679328001000
+                          id: abc12345-1234-1234-1234-abc123456789
+                          resolved_ip: "1.2.3.4"
+                          run_type: fast
+                          started_at: 1679328000000
+                          status: passed
+                        test_sub_type: http
+                        test_type: api
+                        test_version: 1
+                      id: abc12345-1234-1234-1234-abc123456789
+                      type: result
               schema:
                 $ref: "#/components/schemas/SyntheticsFastTestResult"
           description: OK
@@ -127163,6 +129282,78 @@ paths:
         permissions:
           - synthetics_write
           - synthetics_create_edit_trigger
+  /api/v2/synthetics/tests/poll_results:
+    get:
+      description: |-
+        Poll for test results given a list of result IDs. This is typically used after
+        triggering tests with CI/CD to retrieve results once they are available.
+      operationId: PollSyntheticsTestResults
+      parameters:
+        - description: A JSON-encoded array of result IDs to poll for.
+          example: '["id1","id2","id3"]'
+          in: query
+          name: result_ids
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          location:
+                            id: aws:us-east-1
+                            name: "N. Virginia (AWS)"
+                          result:
+                            duration: 150.5
+                            finished_at: 1679328001000
+                            id: "5158904793181869365"
+                            started_at: 1679328000000
+                            status: passed
+                          test_sub_type: http
+                          test_type: api
+                          test_version: 3
+                        id: "5158904793181869365"
+                        relationships:
+                          test:
+                            data:
+                              id: abc-def-123
+                              type: test
+                        type: result
+              schema:
+                $ref: "#/components/schemas/SyntheticsPollTestResultsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - synthetics_read
+      summary: Poll for test results
+      tags:
+        - Synthetics
+      x-menu-order: 67
+      x-permission:
+        operator: OR
+        permissions:
+          - synthetics_read
   /api/v2/synthetics/tests/{public_id}/files/download:
     post:
       description: |-
@@ -127457,6 +129648,203 @@ paths:
       tags:
         - Synthetics
       x-menu-order: 56
+      x-permission:
+        operator: OR
+        permissions:
+          - synthetics_read
+  /api/v2/synthetics/tests/{public_id}/results:
+    get:
+      description: Get the latest result summaries for a given Synthetic test.
+      operationId: ListSyntheticsTestLatestResults
+      parameters:
+        - description: The public ID of the Synthetic test for which to search results.
+          in: path
+          name: public_id
+          required: true
+          schema:
+            type: string
+        - description: Timestamp in milliseconds from which to start querying results.
+          in: query
+          name: from_ts
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: Timestamp in milliseconds up to which to query results.
+          in: query
+          name: to_ts
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: Filter results by status.
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: "#/components/schemas/SyntheticsTestResultStatus"
+        - description: Filter results by run type.
+          in: query
+          name: runType
+          required: false
+          schema:
+            $ref: "#/components/schemas/SyntheticsTestResultRunType"
+        - description: Locations for which to query results.
+          in: query
+          name: probe_dc
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Device IDs for which to query results.
+          in: query
+          name: device_id
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          finished_at: 1679328001000
+                          location:
+                            id: aws:us-east-1
+                            name: "N. Virginia (AWS)"
+                          run_type: scheduled
+                          started_at: 1679328000000
+                          status: passed
+                          test_sub_type: http
+                          test_type: api
+                          test_version: 3
+                        id: "5158904793181869365"
+                        relationships:
+                          test:
+                            data:
+                              id: abc-def-123
+                              type: test
+                        type: result_summary
+              schema:
+                $ref: "#/components/schemas/SyntheticsTestLatestResultsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - synthetics_read
+      summary: Get a test's latest results
+      tags:
+        - Synthetics
+      x-menu-order: 65
+      x-permission:
+        operator: OR
+        permissions:
+          - synthetics_read
+  /api/v2/synthetics/tests/{public_id}/results/{result_id}:
+    get:
+      description: Get a specific full result from a given Synthetic test.
+      operationId: GetSyntheticsTestResult
+      parameters:
+        - description: The public ID of the Synthetic test to which the target result belongs.
+          in: path
+          name: public_id
+          required: true
+          schema:
+            type: string
+        - description: The ID of the result to get.
+          in: path
+          name: result_id
+          required: true
+          schema:
+            type: string
+        - description: The event ID used to look up the result in the event store.
+          in: query
+          name: event_id
+          required: false
+          schema:
+            type: string
+        - description: Timestamp in seconds to look up the result.
+          in: query
+          name: timestamp
+          required: false
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        location:
+                          id: aws:us-east-1
+                          name: "N. Virginia (AWS)"
+                        result:
+                          duration: 150.5
+                          finished_at: 1679328001000
+                          id: "5158904793181869365"
+                          started_at: 1679328000000
+                          status: passed
+                        test_sub_type: http
+                        test_type: api
+                        test_version: 3
+                      id: "5158904793181869365"
+                      relationships:
+                        test:
+                          data:
+                            id: abc-def-123
+                            type: test
+                      type: result
+              schema:
+                $ref: "#/components/schemas/SyntheticsTestResultResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: API error response.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - synthetics_read
+      summary: Get a test result
+      tags:
+        - Synthetics
+      x-menu-order: 63
       x-permission:
         operator: OR
         permissions:
