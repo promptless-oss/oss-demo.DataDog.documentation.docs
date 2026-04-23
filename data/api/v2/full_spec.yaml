@@ -1140,9 +1140,9 @@ components:
       schema:
         type: string
     PersonalAccessTokenID:
-      description: The ID of the personal access token.
+      description: The UUID of the personal access token.
       in: path
-      name: pat_id
+      name: pat_uuid
       required: true
       schema:
         example: "00000000-0000-1234-0000-000000000000"
@@ -29310,6 +29310,11 @@ components:
     FullPersonalAccessTokenAttributes:
       description: Attributes of a full personal access token, including the token key.
       properties:
+        alias:
+          description: The alias (short identifier) of the personal access token.
+          example: "2H9MCNMBM8FQjQ16YucXkX"
+          readOnly: true
+          type: string
         created_at:
           description: Creation date of the personal access token.
           example: "2024-01-01T00:00:00+00:00"
@@ -31104,7 +31109,7 @@ components:
       properties:
         org_site:
           description: The site of the organization.
-          example: "us1"
+          example: "datadoghq.com"
           type: string
         org_uuid:
           description: The UUID of the organization.
@@ -51652,7 +51657,7 @@ components:
           type: string
         owner_org_site:
           description: The site of the organization that owns this org group.
-          example: "us1"
+          example: "datadoghq.com"
           type: string
         owner_org_uuid:
           description: The UUID of the organization that owns this org group.
@@ -51758,7 +51763,7 @@ components:
           type: string
         org_site:
           description: The site of the member organization.
-          example: "us1"
+          example: "datadoghq.com"
           type: string
         org_uuid:
           description: The UUID of the member organization.
@@ -51979,8 +51984,11 @@ components:
           example:
             value: "UTC"
           type: object
-        enforcement_tier:
-          $ref: "#/components/schemas/OrgGroupPolicyEnforcementTier"
+        enforced_at:
+          description: Timestamp when the policy was enforced.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
         modified_at:
           description: Timestamp when the policy was last modified.
           example: "2024-01-15T10:30:00Z"
@@ -51990,12 +51998,9 @@ components:
           description: The name of the policy.
           example: "monitor_timezone"
           type: string
-        policy_type:
-          $ref: "#/components/schemas/OrgGroupPolicyPolicyType"
       required:
         - policy_name
-        - policy_type
-        - enforcement_tier
+        - enforced_at
         - modified_at
       type: object
     OrgGroupPolicyConfigAttributes:
@@ -52066,8 +52071,7 @@ components:
       x-enum-varnames:
         - ORG_GROUP_POLICY_CONFIGS
     OrgGroupPolicyCreateAttributes:
-      description: >-
-        Attributes for creating an org group policy. If `policy_type` or `enforcement_tier` are not provided, they default to `org_config` and `DEFAULT` respectively.
+      description: Attributes for creating an org group policy.
       properties:
         content:
           additionalProperties: {}
@@ -52075,14 +52079,10 @@ components:
           example:
             value: "UTC"
           type: object
-        enforcement_tier:
-          $ref: "#/components/schemas/OrgGroupPolicyEnforcementTier"
         policy_name:
           description: The name of the policy.
           example: "monitor_timezone"
           type: string
-        policy_type:
-          $ref: "#/components/schemas/OrgGroupPolicyPolicyType"
       required:
         - policy_name
         - content
@@ -52136,20 +52136,6 @@ components:
         - type
         - attributes
       type: object
-    OrgGroupPolicyEnforcementTier:
-      default: DEFAULT
-      description: >-
-        The enforcement tier of the policy. `DEFAULT` means the policy is set but member orgs may mutate it. `ENFORCE` means the policy is strictly controlled and mutations are blocked for affected orgs. `DELEGATE` means each member org controls its own value.
-      enum:
-        - DEFAULT
-        - ENFORCE
-        - DELEGATE
-      example: DEFAULT
-      type: string
-      x-enum-varnames:
-        - DEFAULT
-        - ENFORCE
-        - DELEGATE
     OrgGroupPolicyListResponse:
       description: Response containing a list of org group policies.
       properties:
@@ -52182,7 +52168,7 @@ components:
           type: string
         org_site:
           description: The site of the organization that has the override.
-          example: "us1"
+          example: "datadoghq.com"
           type: string
         org_uuid:
           description: The UUID of the organization that has the override.
@@ -52200,7 +52186,7 @@ components:
       properties:
         org_site:
           description: The site of the organization.
-          example: "us1"
+          example: "datadoghq.com"
           type: string
         org_uuid:
           description: The UUID of the organization to grant the override.
@@ -52316,12 +52302,11 @@ components:
       x-enum-varnames:
         - ORG_GROUP_POLICY_OVERRIDES
     OrgGroupPolicyOverrideUpdateAttributes:
-      description: >-
-        Attributes for updating a policy override. The `org_uuid` and `org_site` fields must match the existing override and cannot be changed.
+      description: Attributes for updating a policy override.
       properties:
         org_site:
           description: The site of the organization.
-          example: "us1"
+          example: "datadoghq.com"
           type: string
         org_uuid:
           description: The UUID of the organization.
@@ -52357,16 +52342,6 @@ components:
       required:
         - data
       type: object
-    OrgGroupPolicyPolicyType:
-      default: org_config
-      description: >-
-        The type of the policy. Only `org_config` is supported, indicating a policy backed by an organization configuration setting.
-      enum:
-        - org_config
-      example: org_config
-      type: string
-      x-enum-varnames:
-        - ORG_CONFIG
     OrgGroupPolicyRelationshipToOne:
       description: Relationship to a single org group policy.
       properties:
@@ -52435,8 +52410,6 @@ components:
           example:
             value: "UTC"
           type: object
-        enforcement_tier:
-          $ref: "#/components/schemas/OrgGroupPolicyEnforcementTier"
       type: object
     OrgGroupPolicyUpdateData:
       description: Data for updating an org group policy.
@@ -53801,6 +53774,11 @@ components:
     PersonalAccessTokenAttributes:
       description: Attributes of a personal access token.
       properties:
+        alias:
+          description: The alias (short identifier) of the personal access token.
+          example: "2H9MCNMBM8FQjQ16YucXkX"
+          readOnly: true
+          type: string
         created_at:
           description: Creation date of the personal access token.
           example: "2024-01-01T00:00:00+00:00"
@@ -78346,10 +78324,6 @@ components:
           description: Title of the user.
           nullable: true
           type: string
-        uuid:
-          description: UUID of the user.
-          readOnly: true
-          type: string
         verified:
           description: Whether the user is verified.
           type: boolean
@@ -83506,6 +83480,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      user_ids:
+                        - "00000000-0000-0000-0000-000000000000"
+                    type: anonymize_users_request
             schema:
               $ref: "#/components/schemas/AnonymizeUsersRequest"
         required: true
@@ -109137,7 +109119,7 @@ paths:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-15T10:30:00Z"
                           org_name: "Acme Corp"
-                          org_site: "us1"
+                          org_site: "datadoghq.com"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                         id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                         relationships:
@@ -109196,7 +109178,7 @@ paths:
                   data:
                     attributes:
                       orgs:
-                        - org_site: "us1"
+                        - org_site: "datadoghq.com"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                     relationships:
                       source_org_group:
@@ -109223,7 +109205,7 @@ paths:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-16T14:00:00Z"
                           org_name: "Acme Corp"
-                          org_site: "us1"
+                          org_site: "datadoghq.com"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                         id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                         relationships:
@@ -109289,7 +109271,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
                         org_name: "Acme Corp"
-                        org_site: "us1"
+                        org_site: "datadoghq.com"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                       relationships:
@@ -109371,7 +109353,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-16T14:00:00Z"
                         org_name: "Acme Corp"
-                        org_site: "us1"
+                        org_site: "datadoghq.com"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
                       relationships:
@@ -109440,10 +109422,9 @@ paths:
                       - attributes:
                           content:
                             value: "UTC"
-                          enforcement_tier: "DEFAULT"
+                          enforced_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-15T10:30:00Z"
                           policy_name: "monitor_timezone"
-                          policy_type: "org_config"
                         id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                         relationships:
                           org_group:
@@ -109500,9 +109481,7 @@ paths:
                     attributes:
                       content:
                         value: "UTC"
-                      enforcement_tier: "DEFAULT"
                       policy_name: "monitor_timezone"
-                      policy_type: "org_config"
                     relationships:
                       org_group:
                         data:
@@ -109523,10 +109502,9 @@ paths:
                       attributes:
                         content:
                           value: "UTC"
-                        enforcement_tier: "DEFAULT"
+                        enforced_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
                         policy_name: "monitor_timezone"
-                        policy_type: "org_config"
                       id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                       relationships:
                         org_group:
@@ -109565,7 +109543,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Create an org group policy
       tags: [Org Groups]
-      x-menu-order: 12
+      x-menu-order: 11
       "x-permission":
         operator: OR
         permissions:
@@ -109610,7 +109588,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Delete an org group policy
       tags: [Org Groups]
-      x-menu-order: 14
+      x-menu-order: 13
       "x-permission":
         operator: OR
         permissions:
@@ -109618,74 +109596,8 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
-    get:
-      description: Get a specific organization group policy by its ID.
-      operationId: GetOrgGroupPolicy
-      parameters:
-        - $ref: "#/components/parameters/OrgGroupPolicyId"
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    data:
-                      attributes:
-                        content:
-                          value: "UTC"
-                        enforcement_tier: "DEFAULT"
-                        modified_at: "2024-01-15T10:30:00Z"
-                        policy_name: "monitor_timezone"
-                        policy_type: "org_config"
-                      id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
-                      relationships:
-                        org_group:
-                          data:
-                            id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
-                            type: org_groups
-                      type: org_group_policies
-              schema:
-                $ref: "#/components/schemas/OrgGroupPolicyResponse"
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Not Found
-        "429":
-          $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Get an org group policy
-      tags: [Org Groups]
-      x-menu-order: 11
-      "x-permission":
-        operator: OR
-        permissions:
-          - org_group_read
-      x-unstable: |-
-        **Note**: This endpoint is in Preview and is subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     patch:
-      description: Update an existing organization group policy.
+      description: Update the content of an existing organization group policy.
       operationId: UpdateOrgGroupPolicy
       parameters:
         - $ref: "#/components/parameters/OrgGroupPolicyId"
@@ -109699,7 +109611,6 @@ paths:
                     attributes:
                       content:
                         value: "US/Eastern"
-                      enforcement_tier: "ENFORCE"
                     id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                     type: org_group_policies
             schema:
@@ -109716,10 +109627,9 @@ paths:
                       attributes:
                         content:
                           value: "US/Eastern"
-                        enforcement_tier: "ENFORCE"
+                        enforced_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-16T14:00:00Z"
                         policy_name: "monitor_timezone"
-                        policy_type: "org_config"
                       id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                       relationships:
                         org_group:
@@ -109758,7 +109668,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Update an org group policy
       tags: [Org Groups]
-      x-menu-order: 13
+      x-menu-order: 12
       "x-permission":
         operator: OR
         permissions:
@@ -109805,7 +109715,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: List org group policy configs
       tags: [Org Groups]
-      x-menu-order: 20
+      x-menu-order: 18
       "x-permission":
         operator: OR
         permissions:
@@ -109835,7 +109745,7 @@ paths:
                       - attributes:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-15T10:30:00Z"
-                          org_site: "us1"
+                          org_site: "datadoghq.com"
                           org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                         id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                         relationships:
@@ -109876,7 +109786,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: List org group policy overrides
       tags: [Org Groups]
-      x-menu-order: 15
+      x-menu-order: 14
       "x-permission":
         operator: OR
         permissions:
@@ -109895,7 +109805,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      org_site: "us1"
+                      org_site: "datadoghq.com"
                       org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                     relationships:
                       org_group:
@@ -109921,7 +109831,7 @@ paths:
                       attributes:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
-                        org_site: "us1"
+                        org_site: "datadoghq.com"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                       relationships:
@@ -109965,7 +109875,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Create an org group policy override
       tags: [Org Groups]
-      x-menu-order: 17
+      x-menu-order: 15
       "x-permission":
         operator: OR
         permissions:
@@ -110010,81 +109920,13 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Delete an org group policy override
       tags: [Org Groups]
-      x-menu-order: 19
+      x-menu-order: 17
       "x-permission":
         operator: OR
         permissions:
           - org_group_write
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
-    get:
-      description: Get a specific organization group policy override by its ID.
-      operationId: GetOrgGroupPolicyOverride
-      parameters:
-        - $ref: "#/components/parameters/OrgGroupPolicyOverrideId"
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    data:
-                      attributes:
-                        created_at: "2024-01-15T10:30:00Z"
-                        modified_at: "2024-01-15T10:30:00Z"
-                        org_site: "us1"
-                        org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
-                      id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
-                      relationships:
-                        org_group:
-                          data:
-                            id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
-                            type: org_groups
-                        org_group_policy:
-                          data:
-                            id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
-                            type: org_group_policies
-                      type: org_group_policy_overrides
-              schema:
-                $ref: "#/components/schemas/OrgGroupPolicyOverrideResponse"
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Bad Request
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: Not Found
-        "429":
-          $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Get an org group policy override
-      tags: [Org Groups]
-      x-menu-order: 16
-      "x-permission":
-        operator: OR
-        permissions:
-          - org_group_read
-      x-unstable: |-
-        **Note**: This endpoint is in Preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     patch:
       description: Update an existing organization group policy override.
@@ -110099,7 +109941,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      org_site: "us1"
+                      org_site: "datadoghq.com"
                       org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                     id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                     type: org_group_policy_overrides
@@ -110117,7 +109959,7 @@ paths:
                       attributes:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-16T14:00:00Z"
-                        org_site: "us1"
+                        org_site: "datadoghq.com"
                         org_uuid: "c3d4e5f6-a7b8-9012-cdef-012345678901"
                       id: "9f8e7d6c-5b4a-3210-fedc-ba0987654321"
                       relationships:
@@ -110161,7 +110003,7 @@ paths:
           $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Update an org group policy override
       tags: [Org Groups]
-      x-menu-order: 18
+      x-menu-order: 16
       "x-permission":
         operator: OR
         permissions:
@@ -110190,7 +110032,7 @@ paths:
                           created_at: "2024-01-15T10:30:00Z"
                           modified_at: "2024-01-15T10:30:00Z"
                           name: "My Org Group"
-                          owner_org_site: "us1"
+                          owner_org_site: "datadoghq.com"
                           owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                         id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                         type: org_groups
@@ -110258,7 +110100,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
                         name: "My Org Group"
-                        owner_org_site: "us1"
+                        owner_org_site: "datadoghq.com"
                         owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                       id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                       type: org_groups
@@ -110363,7 +110205,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-15T10:30:00Z"
                         name: "My Org Group"
-                        owner_org_site: "us1"
+                        owner_org_site: "datadoghq.com"
                         owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                       id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                       type: org_groups
@@ -110437,7 +110279,7 @@ paths:
                         created_at: "2024-01-15T10:30:00Z"
                         modified_at: "2024-01-16T14:00:00Z"
                         name: "Updated Org Group Name"
-                        owner_org_site: "us1"
+                        owner_org_site: "datadoghq.com"
                         owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                       id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                       type: org_groups
@@ -110609,7 +110451,7 @@ paths:
         operator: OR
         permissions:
           - user_app_keys
-  /api/v2/personal_access_tokens/{pat_id}:
+  /api/v2/personal_access_tokens/{pat_uuid}:
     delete:
       description: Revoke a specific personal access token.
       operationId: RevokePersonalAccessToken
@@ -123066,7 +122908,7 @@ paths:
         operator: OR
         permissions:
           - service_account_write
-  /api/v2/service_accounts/{service_account_id}/access_tokens/{pat_id}:
+  /api/v2/service_accounts/{service_account_id}/access_tokens/{pat_uuid}:
     delete:
       description: Revoke a specific access token for a service account.
       operationId: RevokeServiceAccountAccessToken
