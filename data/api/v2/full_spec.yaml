@@ -16458,10 +16458,12 @@ components:
       properties:
         completed_date:
           description: Timestamp of when the maintenance was completed.
+          example: "2026-02-18T19:51:13.332360075Z"
           format: date-time
           type: string
         completed_description:
           description: The description shown when the maintenance is completed.
+          example: "We have completed maintenance on the API to improve performance."
           type: string
         components_affected:
           description: The components affected by the maintenance.
@@ -16470,12 +16472,15 @@ components:
           type: array
         in_progress_description:
           description: The description shown while the maintenance is in progress.
+          example: "We are currently performing maintenance on the API to improve performance."
           type: string
         scheduled_description:
           description: The description shown when the maintenance is scheduled.
+          example: "We will be performing maintenance on the API to improve performance."
           type: string
         start_date:
           description: Timestamp of when the maintenance is scheduled to start.
+          example: "2026-02-18T19:21:13.332360075Z"
           format: date-time
           type: string
         title:
@@ -16485,6 +16490,11 @@ components:
       required:
         - components_affected
         - title
+        - completed_date
+        - completed_description
+        - scheduled_description
+        - start_date
+        - in_progress_description
       type: object
     CreateMaintenanceRequestDataAttributesComponentsAffectedItems:
       description: A component affected by a maintenance.
