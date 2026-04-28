@@ -71816,6 +71816,416 @@ components:
             $ref: "#/components/schemas/SyntheticsApiMultistepSubtestData"
           type: array
       type: object
+    SyntheticsDowntimeData:
+      description: A Synthetics downtime object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SyntheticsDowntimeDataAttributesResponse"
+        id:
+          description: The unique identifier of the downtime.
+          example: "00000000-0000-0000-0000-000000000001"
+          type: string
+        type:
+          $ref: "#/components/schemas/SyntheticsDowntimeResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SyntheticsDowntimeDataAttributesRequest:
+      description: Attributes for creating or updating a Synthetics downtime.
+      properties:
+        description:
+          description: An optional description of the downtime.
+          example: Scheduled weekly maintenance window.
+          type: string
+        isEnabled:
+          description: Whether the downtime is enabled.
+          example: true
+          type: boolean
+        name:
+          description: The name of the downtime.
+          example: Weekly maintenance
+          type: string
+        tags:
+          $ref: "#/components/schemas/SyntheticsDowntimeTags"
+        testIds:
+          $ref: "#/components/schemas/SyntheticsDowntimeTestIds"
+        timeSlots:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotRequests"
+      required:
+        - name
+        - isEnabled
+        - timeSlots
+        - testIds
+      type: object
+    SyntheticsDowntimeDataAttributesResponse:
+      description: Attributes of a Synthetics downtime response object.
+      properties:
+        createdAt:
+          description: The timestamp when the downtime was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        createdBy:
+          description: The UUID of the user who created the downtime.
+          example: "00000000-0000-0000-0000-000000000003"
+          type: string
+        createdByName:
+          description: The display name of the user who created the downtime.
+          example: Jane Doe
+          type: string
+        description:
+          description: The description of the downtime.
+          example: Scheduled weekly maintenance window.
+          type: string
+        isEnabled:
+          description: Whether the downtime is enabled.
+          example: true
+          type: boolean
+        name:
+          description: The name of the downtime.
+          example: Weekly maintenance
+          type: string
+        tags:
+          $ref: "#/components/schemas/SyntheticsDowntimeTags"
+        testIds:
+          $ref: "#/components/schemas/SyntheticsDowntimeTestIds"
+        timeSlots:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotResponses"
+        updatedAt:
+          description: The timestamp when the downtime was last updated.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        updatedBy:
+          description: The UUID of the user who last updated the downtime.
+          example: "00000000-0000-0000-0000-000000000003"
+          type: string
+        updatedByName:
+          description: The display name of the user who last updated the downtime.
+          example: Jane Doe
+          type: string
+      required:
+        - name
+        - description
+        - isEnabled
+        - createdBy
+        - createdByName
+        - createdAt
+        - updatedBy
+        - updatedByName
+        - updatedAt
+        - timeSlots
+        - testIds
+        - tags
+      type: object
+    SyntheticsDowntimeDataList:
+      description: List of Synthetics downtime objects.
+      example:
+        - attributes:
+            createdAt: "2024-01-15T10:30:00Z"
+            createdBy: "00000000-0000-0000-0000-000000000003"
+            createdByName: Jane Doe
+            description: Scheduled weekly maintenance window.
+            isEnabled: true
+            name: Weekly maintenance
+            tags: []
+            testIds:
+              - abc-def-123
+            timeSlots:
+              - duration: 3600
+                id: "00000000-0000-0000-0000-000000000002"
+                start:
+                  day: 15
+                  hour: 10
+                  minute: 30
+                  month: 1
+                  year: 2024
+                timezone: Europe/Paris
+            updatedAt: "2024-01-15T10:30:00Z"
+            updatedBy: "00000000-0000-0000-0000-000000000003"
+            updatedByName: Jane Doe
+          id: "00000000-0000-0000-0000-000000000001"
+          type: downtime
+      items:
+        $ref: "#/components/schemas/SyntheticsDowntimeData"
+      type: array
+    SyntheticsDowntimeDataRequest:
+      description: The data object for a Synthetics downtime create or update request.
+      example:
+        attributes:
+          isEnabled: true
+          name: Weekly maintenance
+          testIds:
+            - abc-def-123
+          timeSlots:
+            - duration: 3600
+              start:
+                day: 15
+                hour: 10
+                minute: 30
+                month: 1
+                year: 2024
+              timezone: Europe/Paris
+        type: downtime
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SyntheticsDowntimeDataAttributesRequest"
+        type:
+          $ref: "#/components/schemas/SyntheticsDowntimeResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    SyntheticsDowntimeFrequency:
+      description: The recurrence frequency of a Synthetics downtime time slot.
+      enum:
+        - DAILY
+        - WEEKLY
+        - MONTHLY
+        - YEARLY
+      example: WEEKLY
+      type: string
+      x-enum-varnames:
+        - DAILY
+        - WEEKLY
+        - MONTHLY
+        - YEARLY
+    SyntheticsDowntimeRequest:
+      description: Request body for creating or updating a Synthetics downtime.
+      properties:
+        data:
+          $ref: "#/components/schemas/SyntheticsDowntimeDataRequest"
+      required:
+        - data
+      type: object
+    SyntheticsDowntimeResourceType:
+      description: The resource type for a Synthetics downtime.
+      enum:
+        - downtime
+      example: downtime
+      type: string
+      x-enum-varnames:
+        - DOWNTIME
+    SyntheticsDowntimeResponse:
+      description: Response containing a single Synthetics downtime.
+      properties:
+        data:
+          $ref: "#/components/schemas/SyntheticsDowntimeData"
+      required:
+        - data
+      type: object
+    SyntheticsDowntimeTags:
+      description: List of tags associated with a Synthetics downtime.
+      example:
+        - "team:backend"
+        - "env:prod"
+      items:
+        description: A tag.
+        type: string
+      type: array
+    SyntheticsDowntimeTestIds:
+      description: List of Synthetics test public IDs associated with a downtime.
+      example:
+        - abc-def-123
+        - xyz-uvw-456
+      items:
+        description: A Synthetics test public ID.
+        type: string
+      type: array
+    SyntheticsDowntimeTimeSlotDate:
+      description: A specific date and time used to define the start or end of a Synthetics downtime time slot.
+      properties:
+        day:
+          description: The day component of the date (1-31).
+          example: 15
+          format: int64
+          type: integer
+        hour:
+          description: The hour component of the time (0-23).
+          example: 10
+          format: int64
+          type: integer
+        minute:
+          description: The minute component of the time (0-59).
+          example: 30
+          format: int64
+          type: integer
+        month:
+          description: The month component of the date (1-12).
+          example: 1
+          format: int64
+          type: integer
+        year:
+          description: The year component of the date.
+          example: 2024
+          format: int64
+          type: integer
+      required:
+        - year
+        - month
+        - day
+        - hour
+        - minute
+      type: object
+    SyntheticsDowntimeTimeSlotRecurrenceRequest:
+      description: Recurrence settings for a Synthetics downtime time slot.
+      properties:
+        end:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotDate"
+        frequency:
+          $ref: "#/components/schemas/SyntheticsDowntimeFrequency"
+        interval:
+          description: The interval between recurrences, relative to the frequency.
+          example: 1
+          format: int64
+          type: integer
+        weekdays:
+          $ref: "#/components/schemas/SyntheticsDowntimeWeekdays"
+      required:
+        - frequency
+      type: object
+    SyntheticsDowntimeTimeSlotRecurrenceResponse:
+      description: Recurrence settings returned in a Synthetics downtime time slot response.
+      properties:
+        frequency:
+          $ref: "#/components/schemas/SyntheticsDowntimeFrequency"
+        interval:
+          description: The interval between recurrences, relative to the frequency.
+          example: 1
+          format: int64
+          type: integer
+        until:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotDate"
+        weekdays:
+          $ref: "#/components/schemas/SyntheticsDowntimeWeekdays"
+      required:
+        - frequency
+        - interval
+        - weekdays
+      type: object
+    SyntheticsDowntimeTimeSlotRequest:
+      description: A time slot for a Synthetics downtime create or update request.
+      properties:
+        duration:
+          description: The duration of the time slot in seconds, between 60 and 604800.
+          example: 3600
+          format: int64
+          type: integer
+        name:
+          description: An optional label for the time slot.
+          example: Weekly maintenance window
+          type: string
+        recurrence:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotRecurrenceRequest"
+        start:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotDate"
+        timezone:
+          description: The IANA timezone name for the time slot.
+          example: Europe/Paris
+          type: string
+      required:
+        - start
+        - timezone
+        - duration
+      type: object
+    SyntheticsDowntimeTimeSlotRequests:
+      description: List of time slots for a Synthetics downtime create or update request.
+      example:
+        - duration: 3600
+          start:
+            day: 15
+            hour: 10
+            minute: 30
+            month: 1
+            year: 2024
+          timezone: Europe/Paris
+      items:
+        $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotRequest"
+      type: array
+    SyntheticsDowntimeTimeSlotResponse:
+      description: A time slot returned in a Synthetics downtime response.
+      properties:
+        duration:
+          description: The duration of the time slot in seconds.
+          example: 3600
+          format: int64
+          type: integer
+        id:
+          description: The unique identifier of the time slot.
+          example: "00000000-0000-0000-0000-000000000002"
+          type: string
+        name:
+          description: The label for the time slot.
+          example: Weekly maintenance window
+          type: string
+        recurrence:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotRecurrenceResponse"
+        start:
+          $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotDate"
+        timezone:
+          description: The IANA timezone name for the time slot.
+          example: Europe/Paris
+          type: string
+      required:
+        - id
+        - start
+        - timezone
+        - duration
+      type: object
+    SyntheticsDowntimeTimeSlotResponses:
+      description: List of time slots in a Synthetics downtime response.
+      example:
+        - duration: 3600
+          id: "00000000-0000-0000-0000-000000000002"
+          start:
+            day: 15
+            hour: 10
+            minute: 30
+            month: 1
+            year: 2024
+          timezone: Europe/Paris
+      items:
+        $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotResponse"
+      type: array
+    SyntheticsDowntimeWeekday:
+      description: A day of the week for a Synthetics downtime recurrence.
+      enum:
+        - MO
+        - TU
+        - WE
+        - TH
+        - FR
+        - SA
+        - SU
+      example: MO
+      type: string
+      x-enum-varnames:
+        - MONDAY
+        - TUESDAY
+        - WEDNESDAY
+        - THURSDAY
+        - FRIDAY
+        - SATURDAY
+        - SUNDAY
+    SyntheticsDowntimeWeekdays:
+      description: Days of the week for a Synthetics downtime recurrence schedule.
+      example:
+        - MO
+        - WE
+        - FR
+      items:
+        $ref: "#/components/schemas/SyntheticsDowntimeWeekday"
+      type: array
+    SyntheticsDowntimesResponse:
+      description: Response containing a list of Synthetics downtimes.
+      properties:
+        data:
+          $ref: "#/components/schemas/SyntheticsDowntimeDataList"
+      required:
+        - data
+      type: object
     SyntheticsFastTestResult:
       description: |-
         Fast test result response. Returns `null` if the result is not yet available
@@ -128771,6 +129181,552 @@ paths:
         operator: OR
         permissions:
           - synthetics_read
+  /api/v2/synthetics/downtimes:
+    get:
+      description: Get a list of all Synthetics downtimes for your organization.
+      operationId: ListSyntheticsDowntimes
+      parameters:
+        - description: Comma-separated list of Synthetics test public IDs to filter downtimes by.
+          in: query
+          name: filter[test_ids]
+          required: false
+          schema:
+            example: abc-def-123,xyz-uvw-456
+            type: string
+        - description: If set to `true`, return only downtimes that are currently active.
+          in: query
+          name: filter[active]
+          required: false
+          schema:
+            example: "true"
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          createdAt: "2024-01-15T10:30:00Z"
+                          createdBy: "00000000-0000-0000-0000-000000000003"
+                          createdByName: Jane Doe
+                          description: Scheduled weekly maintenance window.
+                          isEnabled: true
+                          name: Weekly maintenance
+                          tags: []
+                          testIds:
+                            - abc-def-123
+                          timeSlots:
+                            - duration: 3600
+                              id: "00000000-0000-0000-0000-000000000002"
+                              start:
+                                day: 15
+                                hour: 10
+                                minute: 30
+                                month: 1
+                                year: 2024
+                              timezone: Europe/Paris
+                          updatedAt: "2024-01-15T10:30:00Z"
+                          updatedBy: "00000000-0000-0000-0000-000000000003"
+                          updatedByName: Jane Doe
+                        id: "00000000-0000-0000-0000-000000000001"
+                        type: downtime
+              schema:
+                $ref: "#/components/schemas/SyntheticsDowntimesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List Synthetics downtimes
+      tags:
+        - Synthetics
+      x-menu-order: 68
+      x-permission:
+        operator: AND
+        permissions:
+          - synthetics_read
+    post:
+      description: Create a new Synthetics downtime.
+      operationId: CreateSyntheticsDowntime
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      isEnabled: true
+                      name: Weekly maintenance
+                      testIds:
+                        - abc-def-123
+                      timeSlots:
+                        - duration: 3600
+                          start:
+                            day: 15
+                            hour: 10
+                            minute: 30
+                            month: 1
+                            year: 2024
+                          timezone: Europe/Paris
+                    type: downtime
+            schema:
+              $ref: "#/components/schemas/SyntheticsDowntimeRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        createdAt: "2024-01-15T10:30:00Z"
+                        createdBy: "00000000-0000-0000-0000-000000000003"
+                        createdByName: Jane Doe
+                        description: Scheduled weekly maintenance window.
+                        isEnabled: true
+                        name: Weekly maintenance
+                        tags: []
+                        testIds:
+                          - abc-def-123
+                        timeSlots:
+                          - duration: 3600
+                            id: "00000000-0000-0000-0000-000000000002"
+                            start:
+                              day: 15
+                              hour: 10
+                              minute: 30
+                              month: 1
+                              year: 2024
+                            timezone: Europe/Paris
+                        updatedAt: "2024-01-15T10:30:00Z"
+                        updatedBy: "00000000-0000-0000-0000-000000000003"
+                        updatedByName: Jane Doe
+                      id: "00000000-0000-0000-0000-000000000001"
+                      type: downtime
+              schema:
+                $ref: "#/components/schemas/SyntheticsDowntimeResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Create a Synthetics downtime
+      tags:
+        - Synthetics
+      x-menu-order: 69
+      x-permission:
+        operator: AND
+        permissions:
+          - synthetics_write
+  /api/v2/synthetics/downtimes/{downtime_id}:
+    delete:
+      description: Delete a Synthetics downtime by its ID.
+      operationId: DeleteSyntheticsDowntime
+      parameters:
+        - description: The ID of the downtime to delete.
+          in: path
+          name: downtime_id
+          required: true
+          schema:
+            example: "00000000-0000-0000-0000-000000000001"
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Delete a Synthetics downtime
+      tags:
+        - Synthetics
+      x-menu-order: 72
+      x-permission:
+        operator: AND
+        permissions:
+          - synthetics_write
+    get:
+      description: Get a Synthetics downtime by its ID.
+      operationId: GetSyntheticsDowntime
+      parameters:
+        - description: The ID of the downtime to retrieve.
+          in: path
+          name: downtime_id
+          required: true
+          schema:
+            example: "00000000-0000-0000-0000-000000000001"
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        createdAt: "2024-01-15T10:30:00Z"
+                        createdBy: "00000000-0000-0000-0000-000000000003"
+                        createdByName: Jane Doe
+                        description: Scheduled weekly maintenance window.
+                        isEnabled: true
+                        name: Weekly maintenance
+                        tags: []
+                        testIds:
+                          - abc-def-123
+                        timeSlots:
+                          - duration: 3600
+                            id: "00000000-0000-0000-0000-000000000002"
+                            start:
+                              day: 15
+                              hour: 10
+                              minute: 30
+                              month: 1
+                              year: 2024
+                            timezone: Europe/Paris
+                        updatedAt: "2024-01-15T10:30:00Z"
+                        updatedBy: "00000000-0000-0000-0000-000000000003"
+                        updatedByName: Jane Doe
+                      id: "00000000-0000-0000-0000-000000000001"
+                      type: downtime
+              schema:
+                $ref: "#/components/schemas/SyntheticsDowntimeResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get a Synthetics downtime
+      tags:
+        - Synthetics
+      x-menu-order: 70
+      x-permission:
+        operator: AND
+        permissions:
+          - synthetics_read
+    put:
+      description: Update a Synthetics downtime by its ID.
+      operationId: UpdateSyntheticsDowntime
+      parameters:
+        - description: The ID of the downtime to update.
+          in: path
+          name: downtime_id
+          required: true
+          schema:
+            example: "00000000-0000-0000-0000-000000000001"
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      isEnabled: true
+                      name: Weekly maintenance
+                      testIds:
+                        - abc-def-123
+                      timeSlots:
+                        - duration: 3600
+                          start:
+                            day: 15
+                            hour: 10
+                            minute: 30
+                            month: 1
+                            year: 2024
+                          timezone: Europe/Paris
+                    type: downtime
+            schema:
+              $ref: "#/components/schemas/SyntheticsDowntimeRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        createdAt: "2024-01-15T10:30:00Z"
+                        createdBy: "00000000-0000-0000-0000-000000000003"
+                        createdByName: Jane Doe
+                        description: Scheduled weekly maintenance window.
+                        isEnabled: true
+                        name: Weekly maintenance
+                        tags: []
+                        testIds:
+                          - abc-def-123
+                        timeSlots:
+                          - duration: 3600
+                            id: "00000000-0000-0000-0000-000000000002"
+                            start:
+                              day: 15
+                              hour: 10
+                              minute: 30
+                              month: 1
+                              year: 2024
+                            timezone: Europe/Paris
+                        updatedAt: "2024-01-15T10:30:00Z"
+                        updatedBy: "00000000-0000-0000-0000-000000000003"
+                        updatedByName: Jane Doe
+                      id: "00000000-0000-0000-0000-000000000001"
+                      type: downtime
+              schema:
+                $ref: "#/components/schemas/SyntheticsDowntimeResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update a Synthetics downtime
+      tags:
+        - Synthetics
+      x-menu-order: 71
+      x-permission:
+        operator: AND
+        permissions:
+          - synthetics_write
+  /api/v2/synthetics/downtimes/{downtime_id}/tests/{test_id}:
+    delete:
+      description: Disassociate a Synthetics test from a downtime.
+      operationId: RemoveTestFromSyntheticsDowntime
+      parameters:
+        - description: The ID of the downtime.
+          in: path
+          name: downtime_id
+          required: true
+          schema:
+            example: "00000000-0000-0000-0000-000000000001"
+            type: string
+        - description: The public ID of the Synthetics test to disassociate from the downtime.
+          in: path
+          name: test_id
+          required: true
+          schema:
+            example: abc-def-123
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        createdAt: "2024-01-15T10:30:00Z"
+                        createdBy: "00000000-0000-0000-0000-000000000003"
+                        createdByName: Jane Doe
+                        description: Scheduled weekly maintenance window.
+                        isEnabled: true
+                        name: Weekly maintenance
+                        tags: []
+                        testIds:
+                          - abc-def-123
+                        timeSlots:
+                          - duration: 3600
+                            id: "00000000-0000-0000-0000-000000000002"
+                            start:
+                              day: 15
+                              hour: 10
+                              minute: 30
+                              month: 1
+                              year: 2024
+                            timezone: Europe/Paris
+                        updatedAt: "2024-01-15T10:30:00Z"
+                        updatedBy: "00000000-0000-0000-0000-000000000003"
+                        updatedByName: Jane Doe
+                      id: "00000000-0000-0000-0000-000000000001"
+                      type: downtime
+              schema:
+                $ref: "#/components/schemas/SyntheticsDowntimeResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Remove a test from a Synthetics downtime
+      tags:
+        - Synthetics
+      x-menu-order: 74
+      x-permission:
+        operator: AND
+        permissions:
+          - synthetics_write
+    put:
+      description: Associate a Synthetics test with a downtime.
+      operationId: AddTestToSyntheticsDowntime
+      parameters:
+        - description: The ID of the downtime.
+          in: path
+          name: downtime_id
+          required: true
+          schema:
+            example: "00000000-0000-0000-0000-000000000001"
+            type: string
+        - description: The public ID of the Synthetics test to associate with the downtime.
+          in: path
+          name: test_id
+          required: true
+          schema:
+            example: abc-def-123
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        createdAt: "2024-01-15T10:30:00Z"
+                        createdBy: "00000000-0000-0000-0000-000000000003"
+                        createdByName: Jane Doe
+                        description: Scheduled weekly maintenance window.
+                        isEnabled: true
+                        name: Weekly maintenance
+                        tags: []
+                        testIds:
+                          - abc-def-123
+                        timeSlots:
+                          - duration: 3600
+                            id: "00000000-0000-0000-0000-000000000002"
+                            start:
+                              day: 15
+                              hour: 10
+                              minute: 30
+                              month: 1
+                              year: 2024
+                            timezone: Europe/Paris
+                        updatedAt: "2024-01-15T10:30:00Z"
+                        updatedBy: "00000000-0000-0000-0000-000000000003"
+                        updatedByName: Jane Doe
+                      id: "00000000-0000-0000-0000-000000000001"
+                      type: downtime
+              schema:
+                $ref: "#/components/schemas/SyntheticsDowntimeResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Add a test to a Synthetics downtime
+      tags:
+        - Synthetics
+      x-menu-order: 73
+      x-permission:
+        operator: AND
+        permissions:
+          - synthetics_write
   /api/v2/synthetics/settings/on_demand_concurrency_cap:
     get:
       description: Get the on-demand concurrency cap.
