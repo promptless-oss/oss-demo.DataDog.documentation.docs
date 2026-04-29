@@ -46773,6 +46773,7 @@ components:
         - $ref: "#/components/schemas/ObservabilityPipelineSplunkHecDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineSumoLogicDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineSyslogNgDestination"
+        - $ref: "#/components/schemas/ObservabilityPipelineDatabricksZerobusDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineDatadogMetricsDestination"
     ObservabilityPipelineConfigPipelineType:
       default: logs
@@ -47057,6 +47058,74 @@ components:
         - name
         - config
       type: object
+    ObservabilityPipelineDatabricksZerobusDestination:
+      description: |-
+        The `databricks_zerobus` destination sends logs to Databricks using the Zerobus ingestion API, streaming data directly into your Databricks Lakehouse.
+
+        **Supported pipeline types:** Logs, rehydration
+      properties:
+        auth:
+          $ref: "#/components/schemas/ObservabilityPipelineDatabricksZerobusDestinationAuth"
+        buffer:
+          $ref: "#/components/schemas/ObservabilityPipelineBufferOptions"
+        id:
+          description: The unique identifier for this component.
+          example: databricks-zerobus-destination
+          type: string
+        ingestion_endpoint:
+          description: Your Databricks Zerobus ingestion endpoint. This is the endpoint used to stream data directly into your Databricks Lakehouse.
+          example: https://my-workspace-id.zerobus.us-east-1.cloud.databricks.com
+          type: string
+        inputs:
+          description: A list of component IDs whose output is used as the `input` for this component.
+          example: ["filter-processor"]
+          items:
+            description: The ID of a component whose output is used as input for this destination.
+            type: string
+          type: array
+        table_name:
+          description: The fully qualified name of your target Databricks table. Make sure this table already exists in your Databricks workspace before deploying.
+          example: catalog.schema.table
+          type: string
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineDatabricksZerobusDestinationType"
+        unity_catalog_endpoint:
+          description: Your Databricks workspace URL. This is used to communicate with the Unity Catalog API.
+          example: https://my-workspace.cloud.databricks.com
+          type: string
+      required:
+        - id
+        - type
+        - inputs
+        - ingestion_endpoint
+        - table_name
+        - unity_catalog_endpoint
+        - auth
+      type: object
+      x-pipeline-types: [logs, rehydration]
+    ObservabilityPipelineDatabricksZerobusDestinationAuth:
+      description: OAuth credentials for authenticating with the Databricks Zerobus ingestion API.
+      properties:
+        client_id:
+          description: Your service principal application ID (UUID).
+          example: 9a8b7c6d-1234-5678-abcd-ef0123456789
+          type: string
+        client_secret_key:
+          description: Name of the environment variable or secret that holds the OAuth client secret used to authenticate with the Databricks ingestion endpoint.
+          example: DD_OP_DESTINATION_DATABRICKS_ZEROBUS_OAUTH_CLIENT_SECRET
+          type: string
+      required:
+        - client_id
+      type: object
+    ObservabilityPipelineDatabricksZerobusDestinationType:
+      default: databricks_zerobus
+      description: The destination type. The value must be `databricks_zerobus`.
+      enum:
+        - databricks_zerobus
+      example: databricks_zerobus
+      type: string
+      x-enum-varnames:
+        - DATABRICKS_ZEROBUS
     ObservabilityPipelineDatadogAgentSource:
       description: |-
         The `datadog_agent` source collects logs/metrics from the Datadog Agent.
