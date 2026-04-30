@@ -91211,9 +91211,6 @@ paths:
         operator: OR
         permissions:
           - test_optimization_settings_write
-      x-unstable: |-
-        **Note**: This endpoint is in preview and may be subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     post:
       description: |-
         Retrieve Flaky Tests Management repository-level policies for the given repository.
@@ -91259,9 +91256,6 @@ paths:
         operator: OR
         permissions:
           - test_optimization_read
-      x-unstable: |-
-        **Note**: This endpoint is in preview and may be subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/ci/test-optimization/settings/service:
     delete:
       description: |-
@@ -91306,9 +91300,6 @@ paths:
         operator: OR
         permissions:
           - test_optimization_settings_write
-      x-unstable: |-
-        **Note**: This endpoint is in preview and may be subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     patch:
       description: |-
         Partially update Test Optimization settings for a specific service identified by repository, service name, and environment.
@@ -91363,9 +91354,6 @@ paths:
         operator: OR
         permissions:
           - test_optimization_settings_write
-      x-unstable: |-
-        **Note**: This endpoint is in preview and may be subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     post:
       description: |-
         Retrieve Test Optimization settings for a specific service identified by repository, service name, and environment.
@@ -91413,9 +91401,6 @@ paths:
         operator: OR
         permissions:
           - test_optimization_read
-      x-unstable: |-
-        **Note**: This endpoint is in preview and may be subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/ci/tests/analytics/aggregate:
     post:
       description: |-
@@ -134345,9 +134330,6 @@ paths:
         operator: OR
         permissions:
           - test_optimization_write
-      x-unstable: |-
-        **Note**: This endpoint is in preview and may be subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     post:
       description: |-
         List endpoint returning flaky tests from Flaky Test Management. Results are paginated.
@@ -134415,9 +134397,6 @@ paths:
         operator: OR
         permissions:
           - test_optimization_read
-      x-unstable: |-
-        **Note**: This endpoint is in preview and may be subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/usage/application_security:
     get:
       deprecated: true
