@@ -46199,6 +46199,90 @@ components:
         - id
         - type
       type: object
+    OCIConfig:
+      description: OCI config.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/OCIConfigAttributes"
+        id:
+          description: The ID of the OCI config.
+          example: "1"
+          type: string
+        type:
+          $ref: "#/components/schemas/OCIConfigType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    OCIConfigAttributes:
+      description: Attributes for an OCI config.
+      properties:
+        account_id:
+          description: The OCID of the OCI tenancy.
+          example: "ocid1.tenancy.oc1..example"
+          type: string
+        created_at:
+          description: The timestamp when the OCI config was created.
+          example: "2026-01-01T12:00:00Z"
+          type: string
+        error_messages:
+          description: The error messages for the OCI config.
+          items:
+            description: An error message string.
+            type: string
+          nullable: true
+          type: array
+        status:
+          description: The status of the OCI config.
+          example: "active"
+          type: string
+        status_updated_at:
+          description: The timestamp when the OCI config status was last updated.
+          example: "2026-01-01T12:00:00Z"
+          type: string
+        updated_at:
+          description: The timestamp when the OCI config was last updated.
+          example: "2026-01-01T12:00:00Z"
+          type: string
+      required:
+        - account_id
+        - created_at
+        - status
+        - status_updated_at
+        - updated_at
+      type: object
+    OCIConfigType:
+      default: oci_config
+      description: Type of OCI config.
+      enum:
+        - oci_config
+      example: oci_config
+      type: string
+      x-enum-varnames:
+        - OCI_CONFIG
+    OCIConfigsResponse:
+      description: List of OCI configs.
+      example:
+        data:
+          - attributes:
+              account_id: "ocid1.tenancy.oc1..example"
+              created_at: "2026-01-01T12:00:00Z"
+              error_messages: []
+              status: active
+              status_updated_at: "2026-01-01T12:00:00Z"
+              updated_at: "2026-01-01T12:00:00Z"
+            id: "1"
+            type: oci_config
+      properties:
+        data:
+          description: An OCI config.
+          items:
+            $ref: "#/components/schemas/OCIConfig"
+          type: array
+      required:
+        - data
+      type: object
     ObservabilityPipeline:
       description: Top-level schema representing a pipeline.
       properties:
@@ -93907,6 +93991,38 @@ paths:
         operator: OR
         permissions:
           - cloud_cost_management_write
+  /api/v2/cost/oci_config:
+    get:
+      description: List the OCI configs.
+      operationId: ListCostOCIConfigs
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OCIConfigsResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management OCI configs
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 39
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
   /api/v2/cost_by_tag/active_billing_dimensions:
     get:
       description: |-
