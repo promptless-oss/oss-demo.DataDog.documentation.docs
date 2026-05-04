@@ -17223,7 +17223,6 @@ components:
                 type: component
             domain_prefix: status-page-us1
             email_header_image: data:image/png;base64,pQSLAw0KGgoAAAANSUhEUgAAAQ4AASJKFF
-            enabled: true
             favicon: data:image/png;base64,kWMRNw0KGgoAAAANSUhEUgAAAEAAAABACA
             name: Status Page US1
             subscriptions_enabled: true
@@ -17282,10 +17281,6 @@ components:
           description: Base64-encoded image data included in email notifications sent to status page subscribers.
           example: data:image/png;base64,pQSLAw0KGgoAAAANSUhEUgAAAQ4AASJKFF
           type: string
-        enabled:
-          description: Whether the status page is enabled.
-          example: true
-          type: boolean
         favicon:
           description: Base64-encoded image data displayed in the browser tab.
           example: data:image/png;base64,kWMRNw0KGgoAAAANSUhEUgAAAEAAAABACA
@@ -17306,7 +17301,6 @@ components:
           example: bars_and_uptime_percentage
       required:
         - domain_prefix
-        - enabled
         - name
         - type
         - visualization_type
@@ -129126,7 +129120,7 @@ paths:
         permissions:
           - status_pages_settings_read
     post:
-      description: "Creates a new status page. **Note**: Publishing a status page on creation via the `enabled` property will be deprecated. Use the dedicated [publish](#publish-status-page) status page endpoint after creation instead."
+      description: "Creates a new status page in an unpublished state. Use the dedicated [publish](#publish-status-page) status page endpoint to publish the page after creation."
       operationId: CreateStatusPage
       parameters:
         - description: "Comma-separated list of resources to include. Supported values: created_by_user, last_modified_by_user."
@@ -129162,7 +129156,6 @@ paths:
                           type: component
                       domain_prefix: status-page-us1
                       email_header_image: data:image/png;base64,pQSLAw0KGgoAAAANSUhEUgAAAQ4AASJKFF
-                      enabled: true
                       favicon: data:image/png;base64,kWMRNw0KGgoAAAANSUhEUgAAAEAAAABACA
                       name: Status Page US1
                       subscriptions_enabled: true
