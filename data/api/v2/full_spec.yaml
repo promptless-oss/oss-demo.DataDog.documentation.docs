@@ -52506,6 +52506,8 @@ components:
           items:
             $ref: "#/components/schemas/OrgGroupMembershipData"
           type: array
+        links:
+          $ref: "#/components/schemas/OrgGroupPaginationLinks"
         meta:
           $ref: "#/components/schemas/OrgGroupPaginationMeta"
       required:
@@ -52623,6 +52625,8 @@ components:
           items:
             $ref: "#/components/schemas/OrgGroupMembershipData"
           type: array
+        links:
+          $ref: "#/components/schemas/OrgGroupPaginationLinks"
         meta:
           $ref: "#/components/schemas/OrgGroupPaginationMeta"
       required:
@@ -52723,24 +52727,71 @@ components:
       required:
         - data
       type: object
+    OrgGroupPaginationLinks:
+      description: Pagination links for navigating between pages of an org group list response.
+      properties:
+        first:
+          description: Link to the first page.
+          type: string
+        last:
+          description: Link to the last page.
+          type: string
+        next:
+          description: Link to the next page.
+          nullable: true
+          type: string
+        prev:
+          description: Link to the previous page.
+          nullable: true
+          type: string
+        self:
+          description: Link to the current page.
+          type: string
+      type: object
     OrgGroupPaginationMeta:
-      description: Pagination metadata.
+      description: Pagination metadata for org group list responses.
       properties:
         page:
           $ref: "#/components/schemas/OrgGroupPaginationMetaPage"
-      required:
-        - page
       type: object
     OrgGroupPaginationMetaPage:
-      description: Page-based pagination details.
+      description: Page-based pagination details for org group list responses.
       properties:
-        total_count:
-          description: The total number of items.
-          example: 42
+        first_number:
+          description: First page number.
           format: int64
           type: integer
-      required:
-        - total_count
+        last_number:
+          description: Last page number.
+          format: int64
+          nullable: true
+          type: integer
+        next_number:
+          description: Next page number.
+          format: int64
+          nullable: true
+          type: integer
+        number:
+          description: Page number.
+          format: int64
+          type: integer
+        prev_number:
+          description: Previous page number.
+          format: int64
+          nullable: true
+          type: integer
+        size:
+          description: Page size.
+          format: int64
+          type: integer
+        total:
+          description: Total number of results.
+          format: int64
+          type: integer
+        type:
+          description: Pagination type.
+          example: "number_size"
+          type: string
       type: object
     OrgGroupPolicyAttributes:
       description: Attributes of an org group policy.
@@ -52930,6 +52981,8 @@ components:
           items:
             $ref: "#/components/schemas/OrgGroupPolicyData"
           type: array
+        links:
+          $ref: "#/components/schemas/OrgGroupPaginationLinks"
         meta:
           $ref: "#/components/schemas/OrgGroupPaginationMeta"
       required:
@@ -53043,6 +53096,8 @@ components:
           items:
             $ref: "#/components/schemas/OrgGroupPolicyOverrideData"
           type: array
+        links:
+          $ref: "#/components/schemas/OrgGroupPaginationLinks"
         meta:
           $ref: "#/components/schemas/OrgGroupPaginationMeta"
       required:
@@ -112663,9 +112718,22 @@ paths:
                               id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                               type: org_groups
                         type: org_group_memberships
+                    links:
+                      first: "https://api.datadoghq.com/api/v2/org_group_memberships?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      last: "https://api.datadoghq.com/api/v2/org_group_memberships?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      next:
+                      prev:
+                      self: "https://api.datadoghq.com/api/v2/org_group_memberships?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
                     meta:
                       page:
-                        total_count: 1
+                        first_number: 0
+                        last_number: 0
+                        next_number:
+                        number: 0
+                        prev_number:
+                        size: 50
+                        total: 1
+                        type: number_size
               schema:
                 $ref: "#/components/schemas/OrgGroupMembershipListResponse"
           description: OK
@@ -112968,9 +113036,22 @@ paths:
                               id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                               type: org_groups
                         type: org_group_policies
+                    links:
+                      first: "https://api.datadoghq.com/api/v2/org_group_policies?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      last: "https://api.datadoghq.com/api/v2/org_group_policies?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      next:
+                      prev:
+                      self: "https://api.datadoghq.com/api/v2/org_group_policies?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
                     meta:
                       page:
-                        total_count: 1
+                        first_number: 0
+                        last_number: 0
+                        next_number:
+                        number: 0
+                        prev_number:
+                        size: 50
+                        total: 1
+                        type: number_size
               schema:
                 $ref: "#/components/schemas/OrgGroupPolicyListResponse"
           description: OK
@@ -113365,9 +113446,22 @@ paths:
                               id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                               type: org_group_policies
                         type: org_group_policy_overrides
+                    links:
+                      first: "https://api.datadoghq.com/api/v2/org_group_policy_overrides?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      last: "https://api.datadoghq.com/api/v2/org_group_policy_overrides?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      next:
+                      prev:
+                      self: "https://api.datadoghq.com/api/v2/org_group_policy_overrides?filter%5Borg_group_id%5D=a1b2c3d4-e5f6-7890-abcd-ef0123456789&page%5Bnumber%5D=0&page%5Bsize%5D=50"
                     meta:
                       page:
-                        total_count: 1
+                        first_number: 0
+                        last_number: 0
+                        next_number:
+                        number: 0
+                        prev_number:
+                        size: 50
+                        total: 1
+                        type: number_size
               schema:
                 $ref: "#/components/schemas/OrgGroupPolicyOverrideListResponse"
           description: OK
@@ -113711,9 +113805,22 @@ paths:
                           owner_org_uuid: "b2c3d4e5-f6a7-8901-bcde-f01234567890"
                         id: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
                         type: org_groups
+                    links:
+                      first: "https://api.datadoghq.com/api/v2/org_groups?page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      last: "https://api.datadoghq.com/api/v2/org_groups?page%5Bnumber%5D=0&page%5Bsize%5D=50"
+                      next:
+                      prev:
+                      self: "https://api.datadoghq.com/api/v2/org_groups?page%5Bnumber%5D=0&page%5Bsize%5D=50"
                     meta:
                       page:
-                        total_count: 1
+                        first_number: 0
+                        last_number: 0
+                        next_number:
+                        number: 0
+                        prev_number:
+                        size: 50
+                        total: 1
+                        type: number_size
               schema:
                 $ref: "#/components/schemas/OrgGroupListResponse"
           description: OK
