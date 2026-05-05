@@ -97210,6 +97210,15 @@ paths:
                 - datadoghq.eu
                 - ddog-gov.com
                 - us2.ddog-gov.com
+              x-enum-varnames:
+                - US1
+                - US3
+                - US5
+                - AP1
+                - AP2
+                - EU1
+                - GOV
+                - US2_GOV
             subdomain:
               default: event-management-intake
               description: The subdomain where the API is deployed.
@@ -106849,6 +106858,15 @@ paths:
                 - datadoghq.eu
                 - ddog-gov.com
                 - us2.ddog-gov.com
+              x-enum-varnames:
+                - US1
+                - US3
+                - US5
+                - AP1
+                - AP2
+                - EU1
+                - GOV
+                - US2_GOV
             subdomain:
               default: http-intake.logs
               description: The subdomain where the API is deployed.
@@ -111241,6 +111259,13 @@ paths:
                 - coral.oncall.datadoghq.com
                 - teal.oncall.datadoghq.com
                 - beige.oncall.datadoghq.eu
+              x-enum-varnames:
+                - LAVA
+                - SAFFRON
+                - NAVY
+                - CORAL
+                - TEAL
+                - BEIGE
         - url: "{protocol}://{name}"
           variables:
             name:
@@ -111297,6 +111322,13 @@ paths:
                 - coral.oncall.datadoghq.com
                 - teal.oncall.datadoghq.com
                 - beige.oncall.datadoghq.eu
+              x-enum-varnames:
+                - LAVA
+                - SAFFRON
+                - NAVY
+                - CORAL
+                - TEAL
+                - BEIGE
         - url: "{protocol}://{name}"
           variables:
             name:
@@ -111353,6 +111385,13 @@ paths:
                 - coral.oncall.datadoghq.com
                 - teal.oncall.datadoghq.com
                 - beige.oncall.datadoghq.eu
+              x-enum-varnames:
+                - LAVA
+                - SAFFRON
+                - NAVY
+                - CORAL
+                - TEAL
+                - BEIGE
         - url: "{protocol}://{name}"
           variables:
             name:
@@ -111409,6 +111448,13 @@ paths:
                 - coral.oncall.datadoghq.com
                 - teal.oncall.datadoghq.com
                 - beige.oncall.datadoghq.eu
+              x-enum-varnames:
+                - LAVA
+                - SAFFRON
+                - NAVY
+                - CORAL
+                - TEAL
+                - BEIGE
         - url: "{protocol}://{name}"
           variables:
             name:
@@ -115220,6 +115266,13 @@ paths:
                 - browser-intake-ap1-datadoghq.com
                 - browser-intake-ap2-datadoghq.com
                 - browser-intake-datadoghq.eu
+              x-enum-varnames:
+                - US1
+                - US3
+                - US5
+                - AP1
+                - AP2
+                - EU1
         - url: "{protocol}://{name}"
           variables:
             name:
