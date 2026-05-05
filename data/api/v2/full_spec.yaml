@@ -64402,6 +64402,63 @@ components:
         - TWO_DAYS
         - ONE_WEEK
         - TWO_WEEKS
+    SecurityMonitoringRuleBulkDeleteAttributes:
+      description: Attributes for bulk deleting security monitoring rules.
+      properties:
+        ruleIds:
+          description: List of rule IDs to delete.
+          example:
+            - abc-000-u7q
+            - abc-000-7dd
+          items:
+            description: A rule ID to delete.
+            type: string
+          minItems: 1
+          type: array
+      required:
+        - ruleIds
+      type: object
+    SecurityMonitoringRuleBulkDeleteData:
+      description: Data for bulk deleting security monitoring rules.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringRuleBulkDeleteAttributes"
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringRuleBulkDeleteRequestDataType"
+      required:
+        - attributes
+        - type
+      type: object
+    SecurityMonitoringRuleBulkDeletePayload:
+      description: Payload for bulk deleting security monitoring rules.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringRuleBulkDeleteData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringRuleBulkDeleteRequestDataType:
+      description: The resource type for a bulk delete request.
+      enum:
+        - bulk_delete_rules
+      example: bulk_delete_rules
+      type: string
+      x-enum-varnames:
+        - BULK_DELETE_RULES
+    SecurityMonitoringRuleBulkDeleteResponse:
+      description: Response for bulk deleting security monitoring rules.
+      properties:
+        deletedRules:
+          description: List of successfully deleted rule IDs.
+          items:
+            type: string
+          type: array
+        failedRules:
+          description: List of rule IDs that could not be deleted.
+          items:
+            type: string
+          type: array
+      type: object
     SecurityMonitoringRuleBulkExportAttributes:
       description: Attributes for bulk exporting security monitoring rules.
       properties:
@@ -124662,6 +124719,54 @@ paths:
       tags: ["Security Monitoring"]
       x-codegen-request-body-name: body
       x-menu-order: 52
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_write
+  /api/v2/security_monitoring/rules/bulk_delete:
+    delete:
+      description: |-
+        Delete multiple security monitoring rules in a single request. Default rules cannot be deleted.
+      operationId: BulkDeleteSecurityMonitoringRules
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      ruleIds:
+                        - abc-000-u7q
+                        - abc-000-7dd
+                    type: bulk_delete_rules
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringRuleBulkDeletePayload"
+        required: true
+      responses:
+        "200":
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringRuleBulkDeleteResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_write
+      summary: Bulk delete security monitoring rules
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 97
       "x-permission":
         operator: OR
         permissions:
