@@ -136445,16 +136445,45 @@ paths:
           application/json:
             examples:
               default:
+                summary: CCM cost summary widget
                 value:
                   data:
                     attributes:
                       definition:
-                        title: My Widget
-                        type: bar_chart
+                        graph_options:
+                          - type: query_value
+                            view: total
+                          - type: query_value
+                            view: change
+                          - display_type: bars
+                            type: timeseries
+                          - type: cloud_cost_table
+                            view: summary
+                        requests:
+                          - formulas:
+                              - formula: query1
+                            queries:
+                              - data_source: cloud_cost
+                                name: query1
+                                query: sum:aws.cost.amortized{*} by {aws_product}.rollup(sum, daily)
+                            response_format: timeseries
+                        time:
+                          type: live
+                          unit: day
+                          value: 30
+                        title: AWS spend by service (last 30 days)
+                        type: cloud_cost_summary
+                      tags: ["finops", "aws"]
                     type: widgets
             schema:
               $ref: "#/components/schemas/CreateOrUpdateWidgetRequest"
-        description: Widget request body.
+        description: |-
+          Widget request body. The `definition` object's required fields vary
+          by `widget.definition.type`: every type requires `requests`, and
+          some types require additional fields (e.g. `cloud_cost_summary`
+          requires `graph_options`, `geomap` requires `style` and `view`).
+          The example below shows a complete `cloud_cost_summary` payload
+          for the `ccm_reports` experience type.
         required: true
       responses:
         "200":
@@ -136627,16 +136656,42 @@ paths:
           application/json:
             examples:
               default:
+                summary: CCM cost summary widget
                 value:
                   data:
                     attributes:
                       definition:
-                        title: My Widget
-                        type: bar_chart
+                        graph_options:
+                          - type: query_value
+                            view: total
+                          - type: query_value
+                            view: change
+                          - display_type: bars
+                            type: timeseries
+                          - type: cloud_cost_table
+                            view: summary
+                        requests:
+                          - formulas:
+                              - formula: query1
+                            queries:
+                              - data_source: cloud_cost
+                                name: query1
+                                query: sum:aws.cost.amortized{*} by {aws_product}.rollup(sum, daily)
+                            response_format: timeseries
+                        time:
+                          type: live
+                          unit: day
+                          value: 30
+                        title: AWS spend by service (last 30 days)
+                        type: cloud_cost_summary
+                      tags: ["finops", "aws"]
                     type: widgets
             schema:
               $ref: "#/components/schemas/CreateOrUpdateWidgetRequest"
-        description: Widget request body.
+        description: |-
+          Widget request body. The `definition` object's required fields vary
+          by `widget.definition.type`; see `CreateWidget` above for a complete
+          worked payload. Update is a full replacement of the widget definition.
         required: true
       responses:
         "200":
