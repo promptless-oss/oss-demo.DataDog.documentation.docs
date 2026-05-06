@@ -59917,6 +59917,7 @@ components:
       oneOf:
         - $ref: "#/components/schemas/SendSlackMessageAction"
         - $ref: "#/components/schemas/SendTeamsMessageAction"
+        - $ref: "#/components/schemas/TriggerWorkflowAutomationAction"
     RoutingRuleAttributes:
       description: Defines the configurable attributes of a routing rule, such as actions, query, time restriction, and urgency.
       properties:
@@ -79713,6 +79714,28 @@ components:
       type: string
       x-enum-varnames:
         - MONITOR_ALERT_TRIGGER
+    TriggerWorkflowAutomationAction:
+      description: "Triggers a Workflow Automation."
+      properties:
+        handle:
+          description: "The handle of the Workflow Automation to trigger."
+          example: my-workflow-handle
+          type: string
+        type:
+          $ref: "#/components/schemas/TriggerWorkflowAutomationActionType"
+      required:
+        - type
+        - handle
+      type: object
+    TriggerWorkflowAutomationActionType:
+      default: workflow
+      description: "Indicates that the action triggers a Workflow Automation."
+      enum:
+        - workflow
+      example: workflow
+      type: string
+      x-enum-varnames:
+        - TRIGGER_WORKFLOW_AUTOMATION
     UCConfigPair:
       description: The definition of `UCConfigPair` object.
       example:
