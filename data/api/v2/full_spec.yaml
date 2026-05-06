@@ -41866,6 +41866,8 @@ components:
     LogsArchiveAttributes:
       description: The attributes associated with the archive.
       properties:
+        compression_method:
+          $ref: "#/components/schemas/LogsArchiveAttributesCompressionMethod"
         destination:
           $ref: "#/components/schemas/LogsArchiveDestination"
         include_tags:
@@ -41903,6 +41905,17 @@ components:
         - query
         - destination
       type: object
+    LogsArchiveAttributesCompressionMethod:
+      default: GZIP
+      description: The type of compression for the archive.
+      enum:
+        - GZIP
+        - ZSTD
+      example: GZIP
+      type: string
+      x-enum-varnames:
+        - GZIP
+        - ZSTD
     LogsArchiveCreateRequest:
       description: The logs archive.
       properties:
@@ -41912,6 +41925,8 @@ components:
     LogsArchiveCreateRequestAttributes:
       description: The attributes associated with the archive.
       properties:
+        compression_method:
+          $ref: "#/components/schemas/LogsArchiveAttributesCompressionMethod"
         destination:
           $ref: "#/components/schemas/LogsArchiveCreateRequestDestination"
         include_tags:
@@ -112242,6 +112257,7 @@ paths:
                 value:
                   data:
                     attributes:
+                      compression_method: GZIP
                       destination:
                         container: container-name
                         storage_account: account-name
@@ -112418,6 +112434,7 @@ paths:
                 value:
                   data:
                     attributes:
+                      compression_method: GZIP
                       destination:
                         container: container-name
                         storage_account: account-name
