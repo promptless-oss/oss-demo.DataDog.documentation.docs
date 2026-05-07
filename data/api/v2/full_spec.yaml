@@ -79557,6 +79557,321 @@ components:
       type: string
       x-enum-varnames:
         - SECRET
+    TransportWebhookLog:
+      description: A single email transport webhook log event.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/TransportWebhookLogAttributes"
+        date:
+          description: The ISO 8601 timestamp of the event.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        log_id:
+          description: The unique log event identifier.
+          example: "AQAAAZPHnBT0TwJAdgAAAABBWlBIblVlNEFBQ0dFMmVkYTFDSnRR"
+          type: string
+        source:
+          description: The email transport provider.
+          example: "sendgrid"
+          type: string
+        status:
+          description: The log status level.
+          example: "info"
+          type: string
+        tags:
+          description: A list of tags associated with the event.
+          example: ["env:production"]
+          items:
+            description: A tag in key:value or key-only form (for example, env:production).
+            type: string
+          type: array
+      required:
+        - date
+        - log_id
+        - source
+        - status
+        - tags
+        - attributes
+      type: object
+    TransportWebhookLogAttributes:
+      description: Top-level attributes for the webhook log event, including delivery status, recipient details, and provider metadata.
+      properties:
+        category:
+          description: The event categories.
+          example: ["transactional"]
+          items:
+            description: An event category assigned by the transport provider.
+            type: string
+          type: array
+        email:
+          $ref: "#/components/schemas/TransportWebhookLogEmail"
+        email_id:
+          description: The unique email identifier.
+          example: "abc123-def456"
+          type: string
+        email_type_display_name:
+          description: The human-readable email type name.
+          example: "Monitor Alert"
+          type: string
+        message:
+          $ref: "#/components/schemas/TransportWebhookLogMessage"
+        network:
+          $ref: "#/components/schemas/TransportWebhookLogNetwork"
+        org:
+          description: The numeric organization identifier.
+          example: 1234
+          format: int64
+          type: integer
+        org_metadata:
+          $ref: "#/components/schemas/TransportWebhookLogOrgMetadata"
+        org_uuid:
+          description: The organization UUID.
+          example: "8dee7c38-00cb-11ea-a77b-8b5a08d3b091"
+          type: string
+        queue_time:
+          description: The timestamp when the email was queued.
+          example: "2024-01-15T10:29:00Z"
+          type: string
+        sg_machine_open:
+          description: Indicates whether the open event was triggered by automated machine activity rather than a human recipient (SendGrid-specific).
+          type: boolean
+        subject:
+          description: The email subject line.
+          example: "[Monitor Alert] CPU usage is high"
+          type: string
+        useragent:
+          description: The user agent string for open events.
+          example: "Mozilla/5.0"
+          type: string
+      type: object
+    TransportWebhookLogBatchRequest:
+      description: A batch of email transport webhook log events.
+      items:
+        $ref: "#/components/schemas/TransportWebhookLog"
+      type: array
+    TransportWebhookLogEmail:
+      description: The email address details.
+      properties:
+        address:
+          description: The recipient email address.
+          example: "user@example.com"
+          type: string
+        domain:
+          description: The recipient domain.
+          example: "example.com"
+          type: string
+        subject:
+          description: The email subject line.
+          example: "[Monitor Alert] CPU usage is high"
+          type: string
+        type:
+          description: Email categorization tags applied by the transport provider (for example, "transactional", "marketing").
+          example: ["transactional"]
+          items:
+            description: An email type classification (for example, "transactional", "user").
+            type: string
+          type: array
+      type: object
+    TransportWebhookLogIpAttribute:
+      description: An IP attribute with its sources.
+      properties:
+        ip:
+          description: The IP address.
+          example: "192.168.1.1"
+          type: string
+        source:
+          description: The transport providers or systems that reported this IP address.
+          example: ["sendgrid"]
+          items:
+            description: A transport provider or system that reported this IP address.
+            type: string
+          type: array
+      type: object
+    TransportWebhookLogMessage:
+      description: The message delivery event details.
+      properties:
+        auth:
+          $ref: "#/components/schemas/TransportWebhookLogMessageAuth"
+        custom_args:
+          $ref: "#/components/schemas/TransportWebhookLogMessageCustomArgs"
+        id:
+          $ref: "#/components/schemas/TransportWebhookLogMessageId"
+        name:
+          description: The delivery event type emitted by the transport provider (for example, "delivered", "dropped", "bounced").
+          example: "delivered"
+          type: string
+        response:
+          $ref: "#/components/schemas/TransportWebhookLogMessageResponse"
+        sender_ip:
+          description: The IP address of the sending server.
+          example: "192.168.1.1"
+          type: string
+        timestamp:
+          $ref: "#/components/schemas/TransportWebhookLogMessageTimestamp"
+      type: object
+    TransportWebhookLogMessageAuth:
+      description: The message authentication details.
+      properties:
+        delivered_with_tls:
+          description: The TLS version or negotiation information.
+          example: "TLSv1.2"
+          type: string
+      type: object
+    TransportWebhookLogMessageCustomArgs:
+      description: Custom arguments passed through the email transport provider for tracking.
+      properties:
+        email_id:
+          description: The unique email identifier.
+          example: "abc123-def456"
+          type: string
+        email_type_display_name:
+          description: The human-readable email type name.
+          example: "Monitor Alert"
+          type: string
+        org_uuid:
+          description: The organization UUID.
+          example: "8dee7c38-00cb-11ea-a77b-8b5a08d3b091"
+          type: string
+        queue_time:
+          description: The timestamp when the email was queued.
+          example: "2024-01-15T10:29:00Z"
+          type: string
+        subject:
+          description: The email subject line.
+          example: "[Monitor Alert] CPU usage is high"
+          type: string
+      type: object
+    TransportWebhookLogMessageId:
+      description: The message identifiers.
+      properties:
+        message_id:
+          description: The RFC 5322 Message-ID.
+          example: "<message-id@example.com>"
+          type: string
+        smtp_id:
+          description: The SMTP transaction identifier.
+          example: "<abc123@mail.example.com>"
+          type: string
+        transport_event_id:
+          description: The transport provider event identifier.
+          example: "evt_abc123"
+          type: string
+      type: object
+    TransportWebhookLogMessageResponse:
+      description: The SMTP response information.
+      properties:
+        enhanced_smtp_code:
+          description: The enhanced SMTP status code.
+          example: "2.0.0"
+          type: string
+        reason:
+          description: The SMTP response message.
+          example: "250 2.0.0 OK"
+          type: string
+        smtp_code:
+          description: The SMTP status code.
+          example: "250"
+          type: string
+      type: object
+    TransportWebhookLogMessageTimestamp:
+      description: The message delivery timing information.
+      properties:
+        event_timestamp:
+          description: The Unix timestamp of the event.
+          example: 1705312200.0
+          format: double
+          type: number
+        lifetime:
+          description: The total delivery time in seconds.
+          example: 3.2
+          format: double
+          type: number
+        queue_time:
+          description: Number of seconds the message spent in the delivery queue.
+          example: 1.5
+          format: double
+          type: number
+        scheduled_time:
+          description: The scheduled delivery time as a Unix timestamp.
+          example: 1705312190.0
+          format: double
+          type: number
+      type: object
+    TransportWebhookLogNetwork:
+      description: The network information for the event.
+      properties:
+        ip:
+          $ref: "#/components/schemas/TransportWebhookLogNetworkIp"
+      type: object
+    TransportWebhookLogNetworkIp:
+      description: The IP address information.
+      properties:
+        attributes:
+          description: Per-IP attribute records, each pairing an IP address with the providers that observed it.
+          items:
+            $ref: "#/components/schemas/TransportWebhookLogIpAttribute"
+          type: array
+        list:
+          description: The list of IP addresses.
+          example: ["192.168.1.1"]
+          items:
+            description: An IP address observed during message delivery.
+            type: string
+          type: array
+      type: object
+    TransportWebhookLogOrgMetadata:
+      description: Metadata about the organization that sent the email.
+      properties:
+        billing_country:
+          description: Country code or name used for billing purposes.
+          type: string
+        billing_plan:
+          description: The Datadog billing plan for the organization (for example, "pro", "enterprise").
+          type: string
+        customer_tier:
+          description: Support or account tier assigned to the organization (for example, "tier-1").
+          type: string
+        domain:
+          description: Primary email domain associated with the organization (for example, "example.com").
+          type: string
+        industry:
+          description: Industry classification of the organization (for example, "technology", "finance").
+          type: string
+        is_bugbounty:
+          description: Whether the organization is enrolled in the Datadog bug bounty program.
+          type: string
+        is_msp:
+          description: Whether the organization operates as a Managed Service Provider managing child orgs.
+          type: string
+        name:
+          description: Display name of the organization as configured in Datadog account settings.
+          type: string
+        org_uuid:
+          description: Globally unique identifier for the Datadog organization (UUID v1 format).
+          type: string
+        parent_org_id:
+          description: Identifier of the immediate parent organization, if this is a child org.
+          type: string
+        premium_support:
+          description: Whether the organization has a premium support plan with Datadog.
+          type: string
+        root_org_id:
+          description: Identifier of the top-level parent organization in a multi-org account hierarchy.
+          type: string
+        root_org_name:
+          description: Display name of the top-level parent organization in a multi-org account hierarchy.
+          type: string
+        shipping_country:
+          description: Country code or name used for shipping or regional assignment.
+          type: string
+        website:
+          description: Website URL provided during organization registration.
+          type: string
+        when_created:
+          description: ISO 8601 timestamp of when the Datadog organization was created.
+          type: string
+      type: object
     Trigger:
       description: "One of the triggers that can start the execution of a workflow."
       oneOf:
@@ -99936,6 +100251,71 @@ paths:
         operator: OR
         permissions:
           - monitors_downtime
+  /api/v2/email/transport/webhook_intake:
+    post:
+      description: |-
+        Receives a batch of email transport webhook log events and emits an audit trail entry
+        for each event with a final delivery status (delivered, dropped, or bounced).
+        Only authorized organizations can submit events.
+      operationId: CreateEmailTransportWebhookIntake
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  - attributes:
+                      email:
+                        address: "user@example.com"
+                        domain: "example.com"
+                      email_id: "abc123-def456"
+                      email_type_display_name: "Monitor Alert"
+                      message:
+                        id:
+                          message_id: "<message-id@example.com>"
+                          smtp_id: "<abc123@mail.example.com>"
+                        name: "delivered"
+                        response:
+                          reason: "250 2.0.0 OK"
+                          smtp_code: "250"
+                        timestamp:
+                          event_timestamp: 1705312200.0
+                      org: 1234
+                      org_uuid: "8dee7c38-00cb-11ea-a77b-8b5a08d3b091"
+                      subject: "[Monitor Alert] CPU usage is high"
+                    date: "2024-01-15T10:30:00Z"
+                    log_id: "AQAAAZPHnBT0TwJAdgAAAABBWlBIblVlNEFBQ0dFMmVkYTFDSnRR"
+                    source: "sendgrid"
+                    status: "info"
+                    tags:
+                      - "env:production"
+            schema:
+              $ref: "#/components/schemas/TransportWebhookLogBatchRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Ingest email transport webhook events
+      tags:
+        - Email Transport
+      x-menu-order: 1
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/error-tracking/issues/search:
     post:
       description: Search issues endpoint allows you to programmatically search for issues within your organization. This endpoint returns a list of issues that match a given search query, following the event search syntax. The search results are limited to a maximum of 100 issues per request.
@@ -147463,6 +147843,8 @@ tags:
       scopes from alerting. Downtime settings, which can be scheduled with start and
       end times, prevent all alerting related to specified Datadog tags.
     name: Downtimes
+  - description: Endpoints for receiving email transport webhook events for audit trail processing.
+    name: Email Transport
   - description: Retrieves security risk scores for entities in your organization.
     name: Entity Risk Scores
   - description: View and manage issues within Error Tracking. See the [Error Tracking page](https://docs.datadoghq.com/error_tracking/) for more information.
