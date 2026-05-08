@@ -4217,6 +4217,8 @@ components:
       description: >-
         A query for APM dependency statistics between services, such as call latency and error rates.
       properties:
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/ApmDependencyStatsDataSource"
         env:
@@ -4275,6 +4277,8 @@ components:
       description: >-
         A query for APM trace metrics such as hits, errors, and latency percentiles, aggregated across services.
       properties:
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/ApmMetricsDataSource"
         group_by:
@@ -4425,6 +4429,8 @@ components:
       description: >-
         A query for APM resource statistics such as latency, error rate, and hit count, grouped by resource name.
       properties:
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/ApmResourceStatsDataSource"
         env:
@@ -15236,6 +15242,8 @@ components:
       properties:
         aggregator:
           $ref: "#/components/schemas/MetricsAggregator"
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/ContainerDataSource"
         is_normalized_cpu:
@@ -15273,6 +15281,8 @@ components:
     ContainerTimeseriesQuery:
       description: A query for container-level metrics such as CPU and memory usage.
       properties:
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/ContainerDataSource"
         is_normalized_cpu:
@@ -18034,6 +18044,14 @@ components:
           nullable: true
           type: string
       type: object
+    CrossOrgUuids:
+      description: >-
+        Organization UUIDs to query when using [cross-organization visibility](/account_management/org_settings/cross_org_visibility/). Limited to one organization UUID.
+      items:
+        description: An organization UUID.
+        type: string
+      maxItems: 1
+      type: array
     CsmAgentData:
       description: Single Agent Data.
       properties:
@@ -25973,6 +25991,8 @@ components:
       properties:
         compute:
           $ref: "#/components/schemas/EventsCompute"
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/EventsDataSource"
         group_by:
@@ -26026,6 +26046,8 @@ components:
       properties:
         compute:
           $ref: "#/components/schemas/EventsCompute"
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/EventsDataSource"
         group_by:
@@ -44392,6 +44414,8 @@ components:
       properties:
         aggregator:
           $ref: "#/components/schemas/MetricsAggregator"
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/MetricsDataSource"
         name:
@@ -44409,6 +44433,8 @@ components:
     MetricsTimeseriesQuery:
       description: A query against Datadog custom metrics or Cloud Cost data sources.
       properties:
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/MetricsDataSource"
         name:
@@ -55523,6 +55549,8 @@ components:
       properties:
         aggregator:
           $ref: "#/components/schemas/MetricsAggregator"
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/ProcessDataSource"
         is_normalized_cpu:
@@ -55646,6 +55674,8 @@ components:
     ProcessTimeseriesQuery:
       description: A query for host-level process metrics such as CPU and memory usage.
       properties:
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/ProcessDataSource"
         is_normalized_cpu:
@@ -70053,6 +70083,8 @@ components:
           description: Additional filters applied to the SLO query.
           example: "host:host_a,env:prod"
           type: string
+        cross_org_uuids:
+          $ref: "#/components/schemas/CrossOrgUuids"
         data_source:
           $ref: "#/components/schemas/SloDataSource"
         group_mode:
