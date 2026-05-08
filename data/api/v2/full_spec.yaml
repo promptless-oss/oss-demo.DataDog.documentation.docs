@@ -37241,6 +37241,15 @@ components:
           description: Search query following the event search syntax.
           example: "service:orders-* AND @language:go"
           type: string
+        states:
+          description: Filter issues by state. Multiple values are combined with OR logic.
+          example:
+            - "OPEN"
+            - "ACKNOWLEDGED"
+          items:
+            $ref: "#/components/schemas/IssueState"
+          maxItems: 20
+          type: array
         team_ids:
           description: Filter issues by team IDs. Multiple values are combined with OR logic.
           example:
