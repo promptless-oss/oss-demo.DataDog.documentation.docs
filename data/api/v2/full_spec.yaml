@@ -6339,6 +6339,62 @@ components:
       type: string
       x-enum-varnames:
         - ARBITRARY_RULE
+    ArbitraryRuleStatusResponseArray:
+      description: Processing statuses for all custom allocation rules in the specified organization.
+      example:
+        data:
+          - attributes:
+              processing_status: processing
+            id: "123"
+            type: arbitrary_rule_status
+          - attributes:
+              processing_status: done
+            id: "456"
+            type: arbitrary_rule_status
+      properties:
+        data:
+          description: Processing status for a custom allocation rule.
+          items:
+            $ref: "#/components/schemas/ArbitraryRuleStatusResponseData"
+          type: array
+      required:
+        - data
+      type: object
+    ArbitraryRuleStatusResponseData:
+      description: Processing status for a custom allocation rule.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ArbitraryRuleStatusResponseDataAttributes"
+        id:
+          description: The unique identifier of the custom allocation rule.
+          example: "123"
+          type: string
+        type:
+          $ref: "#/components/schemas/ArbitraryRuleStatusResponseDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    ArbitraryRuleStatusResponseDataAttributes:
+      description: Processing status for a custom allocation rule.
+      properties:
+        processing_status:
+          description: The processing status of the custom allocation rule.
+          example: processing
+          type: string
+      required:
+        - processing_status
+      type: object
+    ArbitraryRuleStatusResponseDataType:
+      default: arbitrary_rule_status
+      description: Custom allocation rule status resource type.
+      enum:
+        - arbitrary_rule_status
+      example: arbitrary_rule_status
+      type: string
+      x-enum-varnames:
+        - ARBITRARY_RULE_STATUS
     Argument:
       description: A named argument for a custom static analysis rule.
       properties:
@@ -60649,6 +60705,62 @@ components:
       type: string
       x-enum-varnames:
         - RULESET
+    RulesetStatusRespArray:
+      description: Processing statuses for all tag pipeline rulesets in the specified organization.
+      example:
+        data:
+          - attributes:
+              processing_status: processing
+            id: 55ef2385-9ae1-4410-90c4-5ac1b60fec10
+            type: ruleset_status
+          - attributes:
+              processing_status: done
+            id: a7b8c9d0-1234-5678-9abc-def012345678
+            type: ruleset_status
+      properties:
+        data:
+          description: Processing status for a tag pipeline ruleset.
+          items:
+            $ref: "#/components/schemas/RulesetStatusRespData"
+          type: array
+      required:
+        - data
+      type: object
+    RulesetStatusRespData:
+      description: Processing status for a tag pipeline ruleset.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/RulesetStatusRespDataAttributes"
+        id:
+          description: The unique identifier of the ruleset.
+          example: 55ef2385-9ae1-4410-90c4-5ac1b60fec10
+          type: string
+        type:
+          $ref: "#/components/schemas/RulesetStatusRespDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    RulesetStatusRespDataAttributes:
+      description: Processing status for a tag pipeline ruleset.
+      properties:
+        processing_status:
+          description: The processing status of the ruleset.
+          example: processing
+          type: string
+      required:
+        - processing_status
+      type: object
+    RulesetStatusRespDataType:
+      default: ruleset_status
+      description: Ruleset status resource type.
+      enum:
+        - ruleset_status
+      example: ruleset_status
+      type: string
+      x-enum-varnames:
+        - RULESET_STATUS
     RumCrossProductSampling:
       description: The configuration for cross-product retention filters.
       properties:
@@ -95275,6 +95387,40 @@ paths:
       tags:
         - Cloud Cost Management
       x-menu-order: 28
+  /api/v2/cost/arbitrary_rule/status:
+    get:
+      description: List the processing status of all custom allocation rules. Returns only the ID and processing status for each rule.
+      operationId: ListCustomAllocationRulesStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          processing_status: processing
+                        id: "123"
+                        type: arbitrary_rule_status
+                      - attributes:
+                          processing_status: done
+                        id: "456"
+                        type: arbitrary_rule_status
+              schema:
+                $ref: "#/components/schemas/ArbitraryRuleStatusResponseArray"
+          description: OK
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List custom allocation rule statuses
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 40
   /api/v2/cost/arbitrary_rule/{rule_id}:
     delete:
       description: Delete a custom allocation rule - Delete an existing custom allocation rule by its ID
@@ -142644,6 +142790,40 @@ paths:
       tags:
         - Cloud Cost Management
       x-menu-order: 21
+  /api/v2/tags/enrichment/status:
+    get:
+      description: List the processing status of all tag pipeline rulesets. Returns only the ID and processing status for each ruleset.
+      operationId: ListTagPipelinesRulesetsStatus
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          processing_status: processing
+                        id: 55ef2385-9ae1-4410-90c4-5ac1b60fec10
+                        type: ruleset_status
+                      - attributes:
+                          processing_status: done
+                        id: a7b8c9d0-1234-5678-9abc-def012345678
+                        type: ruleset_status
+              schema:
+                $ref: "#/components/schemas/RulesetStatusRespArray"
+          description: OK
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List tag pipeline ruleset statuses
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 41
   /api/v2/tags/enrichment/validate-query:
     post:
       description: Validate a tag pipeline query - Validate the syntax and structure of a tag pipeline query
