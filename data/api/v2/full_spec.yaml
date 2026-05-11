@@ -26858,6 +26858,10 @@ components:
           description: Indicates whether this feature flag requires approval for changes.
           example: false
           type: boolean
+        staleness_status:
+          description: Indicates the whether a feature flag is stale or not.
+          example: "ACTIVE"
+          type: string
         tags:
           description: Tags associated with the feature flag.
           example: []
@@ -26941,23 +26945,170 @@ components:
           description: Indicates whether feature flag changes require approval in this environment.
           example: false
           type: boolean
-        rollout_percentage:
-          description: Rollout percentage for this environment.
-          example: 0
-          format: int64
-          maximum: 100
-          minimum: 0
-          type: integer
-        rules:
-          description: Environment targeting rules for this feature flag.
-          items:
-            $ref: "#/components/schemas/FeatureFlagTargetingRule"
-          type: array
         status:
           $ref: "#/components/schemas/FeatureFlagStatus"
       required:
         - environment_id
         - status
+      type: object
+    FeatureFlagEnvironmentListItem:
+      description: Environment-specific settings for a feature flag in list responses.
+      properties:
+        default_allocation_key:
+          description: The allocation key used for the default variant.
+          example: "allocation-default-123abc"
+          type: string
+        default_variant_id:
+          description: The ID of the default variant for this environment.
+          example: "550e8400-e29b-41d4-a716-446655440002"
+          nullable: true
+          type: string
+        environment_id:
+          description: The ID of the environment.
+          example: "550e8400-e29b-41d4-a716-446655440001"
+          format: uuid
+          type: string
+        environment_name:
+          description: The name of the environment.
+          example: "env-search-term"
+          type: string
+        environment_queries:
+          description: Queries that target this environment.
+          example:
+            - "test-feature-flag"
+            - "env-search-term"
+          items:
+            description: A query string targeting the environment.
+            type: string
+          type: array
+        is_production:
+          description: Indicates whether the environment is production.
+          example: false
+          type: boolean
+        override_allocation_key:
+          description: The allocation key used for the override variant.
+          example: "allocation-override-123abc"
+          type: string
+        override_variant_id:
+          description: The ID of the override variant for this environment.
+          example: "550e8400-e29b-41d4-a716-446655440003"
+          nullable: true
+          type: string
+        pending_suggestion_id:
+          description: Pending suggestion identifier, if approval is required.
+          example: "550e8400-e29b-41d4-a716-446655440099"
+          nullable: true
+          type: string
+        require_feature_flag_approval:
+          description: Indicates whether feature flag changes require approval in this environment.
+          example: false
+          type: boolean
+        status:
+          $ref: "#/components/schemas/FeatureFlagStatus"
+      required:
+        - environment_id
+        - status
+      type: object
+    FeatureFlagListItem:
+      description: A feature flag resource for list responses.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/FeatureFlagListItemAttributes"
+        id:
+          description: The unique identifier of the feature flag.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          format: uuid
+          type: string
+        type:
+          $ref: "#/components/schemas/CreateFeatureFlagDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    FeatureFlagListItemAttributes:
+      description: Attributes of a feature flag in list responses.
+      properties:
+        archived_at:
+          description: The timestamp when the feature flag was archived.
+          example: "2023-01-01T00:00:00Z"
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          description: The timestamp when the feature flag was created.
+          example: "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        created_by:
+          description: The ID of the user who created the feature flag.
+          example: "550e8400-e29b-41d4-a716-446655440010"
+          format: uuid
+          type: string
+        description:
+          description: The description of the feature flag.
+          example: "This is an example feature flag for demonstration"
+          type: string
+        distribution_channel:
+          description: Distribution channel for the feature flag.
+          example: "ALL"
+          type: string
+        feature_flag_environments:
+          description: Environment-specific settings for the feature flag.
+          items:
+            $ref: "#/components/schemas/FeatureFlagEnvironmentListItem"
+          type: array
+        json_schema:
+          description: JSON schema for validation when value_type is JSON.
+          example: '{"type": "object", "properties": {"enabled": {"type": "boolean"}}}'
+          nullable: true
+          type: string
+        key:
+          description: The unique key of the feature flag.
+          example: "feature-flag-abc123"
+          type: string
+        last_updated_by:
+          description: The ID of the user who last updated the feature flag.
+          example: "550e8400-e29b-41d4-a716-446655440010"
+          format: uuid
+          type: string
+        name:
+          description: The name of the feature flag.
+          example: "Feature Flag ABC123"
+          type: string
+        require_approval:
+          description: Indicates whether this feature flag requires approval for changes.
+          example: false
+          type: boolean
+        staleness_status:
+          description: Indicates the staleness status of the feature flag.
+          example: "ACTIVE"
+          type: string
+        tags:
+          description: Tags associated with the feature flag.
+          example: []
+          items:
+            description: A tag associated with the feature flag.
+            type: string
+          type: array
+        updated_at:
+          description: The timestamp when the feature flag was last updated.
+          example: "2023-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        value_type:
+          $ref: "#/components/schemas/ValueType"
+        variants:
+          description: The variants of the feature flag.
+          items:
+            $ref: "#/components/schemas/Variant"
+          type: array
+      required:
+        - key
+        - name
+        - description
+        - value_type
+        - variants
       type: object
     FeatureFlagResponse:
       description: Response containing a feature flag.
@@ -26977,10 +27128,6 @@ components:
       x-enum-varnames:
         - ENABLED
         - DISABLED
-    FeatureFlagTargetingRule:
-      additionalProperties: {}
-      description: A targeting rule for a feature flag.
-      type: object
     FeatureFlagsPaginationMeta:
       description: Pagination metadata for feature flags.
       properties:
@@ -41064,7 +41211,7 @@ components:
         data:
           description: List of feature flags.
           items:
-            $ref: "#/components/schemas/FeatureFlag"
+            $ref: "#/components/schemas/FeatureFlagListItem"
           type: array
         meta:
           $ref: "#/components/schemas/FeatureFlagsPaginationMeta"
