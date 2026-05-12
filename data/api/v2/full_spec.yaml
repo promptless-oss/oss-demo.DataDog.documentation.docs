@@ -16037,6 +16037,161 @@ components:
           example: Postmortem-IR-123
           type: string
       type: object
+    CreateBackfilledDegradationRequest:
+      description: Request object for creating a backfilled degradation.
+      example:
+        data:
+          attributes:
+            title: Past API Outage
+            updates:
+              - components_affected:
+                  - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                    status: degraded
+                description: We detected elevated error rates in the API.
+                started_at: "2026-04-27T13:37:31.038001628Z"
+                status: investigating
+              - components_affected:
+                  - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                    status: degraded
+                description: Root cause identified as a misconfigured deployment.
+                started_at: "2026-04-27T14:07:31.038001628Z"
+                status: identified
+              - components_affected:
+                  - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                    status: operational
+                description: The issue has been resolved and API is operating normally.
+                started_at: "2026-04-27T14:37:31.038001628Z"
+                status: resolved
+          type: degradations
+      properties:
+        data:
+          $ref: "#/components/schemas/CreateBackfilledDegradationRequestData"
+      type: object
+    CreateBackfilledDegradationRequestData:
+      description: The data object for creating a backfilled degradation.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CreateBackfilledDegradationRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/PatchDegradationRequestDataType"
+      required:
+        - type
+      type: object
+    CreateBackfilledDegradationRequestDataAttributes:
+      description: The supported attributes for creating a backfilled degradation.
+      properties:
+        title:
+          description: The title of the backfilled degradation.
+          example: ""
+          type: string
+        updates:
+          description: The list of status updates describing the timeline of the degradation.
+          items:
+            $ref: "#/components/schemas/CreateBackfilledDegradationRequestDataAttributesUpdatesItems"
+          type: array
+      required:
+        - title
+        - updates
+      type: object
+    CreateBackfilledDegradationRequestDataAttributesUpdatesItems:
+      description: A backfilled degradation update entry.
+      properties:
+        components_affected:
+          description: The components affected.
+          items:
+            $ref: "#/components/schemas/CreateDegradationRequestDataAttributesComponentsAffectedItems"
+          type: array
+        description:
+          description: A description of the update.
+          type: string
+        started_at:
+          description: Timestamp of when the update occurred.
+          example: ""
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/CreateDegradationRequestDataAttributesStatus"
+      required:
+        - started_at
+        - status
+      type: object
+    CreateBackfilledMaintenanceRequest:
+      description: Request object for creating a backfilled maintenance.
+      example:
+        data:
+          attributes:
+            title: Past Database Maintenance
+            updates:
+              - components_affected:
+                  - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                    status: maintenance
+                description: Database maintenance is in progress.
+                started_at: "2026-04-27T13:37:31.038003786Z"
+                status: in_progress
+              - components_affected:
+                  - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                    status: operational
+                description: Database maintenance has been completed successfully.
+                started_at: "2026-04-27T14:37:31.038003786Z"
+                status: completed
+          type: maintenances
+      properties:
+        data:
+          $ref: "#/components/schemas/CreateBackfilledMaintenanceRequestData"
+      type: object
+    CreateBackfilledMaintenanceRequestData:
+      description: The data object for creating a backfilled maintenance.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CreateBackfilledMaintenanceRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/PatchMaintenanceRequestDataType"
+      required:
+        - type
+      type: object
+    CreateBackfilledMaintenanceRequestDataAttributes:
+      description: The supported attributes for creating a backfilled maintenance.
+      properties:
+        title:
+          description: The title of the backfilled maintenance.
+          example: ""
+          type: string
+        updates:
+          description: "The list of updates. Exactly two updates are required: the start (`in_progress`) and the end (`completed`)."
+          items:
+            $ref: "#/components/schemas/CreateBackfilledMaintenanceRequestDataAttributesUpdatesItems"
+          maxItems: 2
+          minItems: 2
+          type: array
+      required:
+        - title
+        - updates
+      type: object
+    CreateBackfilledMaintenanceRequestDataAttributesUpdatesItems:
+      description: A backfilled maintenance update entry.
+      properties:
+        components_affected:
+          description: The components affected.
+          items:
+            $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesComponentsAffectedItems"
+          type: array
+        description:
+          description: A description of the update.
+          example: ""
+          type: string
+        started_at:
+          description: Timestamp of when the update occurred.
+          example: ""
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItemsStatus"
+      required:
+        - components_affected
+        - description
+        - started_at
+        - status
+      type: object
     CreateCampaignRequest:
       description: Request to create a new campaign.
       properties:
@@ -16452,6 +16607,10 @@ components:
           description: The title of the degradation.
           example: Elevated API Latency
           type: string
+        updates:
+          items:
+            $ref: "#/components/schemas/CreateDegradationRequestDataAttributesUpdatesItems"
+          type: array
       required:
         - components_affected
         - status
@@ -16489,6 +16648,48 @@ components:
         - IDENTIFIED
         - MONITORING
         - RESOLVED
+    CreateDegradationRequestDataAttributesUpdatesItems:
+      description: A degradation update entry.
+      properties:
+        components_affected:
+          description: The components affected.
+          items:
+            $ref: "#/components/schemas/CreateDegradationRequestDataAttributesUpdatesItemsComponentsAffectedItems"
+          type: array
+        description:
+          description: A description of the update.
+          example: ""
+          type: string
+        started_at:
+          description: Timestamp of when the update occurred.
+          example: ""
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/CreateDegradationRequestDataAttributesStatus"
+      required:
+        - components_affected
+        - description
+        - started_at
+        - status
+      type: object
+    CreateDegradationRequestDataAttributesUpdatesItemsComponentsAffectedItems:
+      description: A component affected by a degradation update.
+      properties:
+        id:
+          description: The ID of the component. Must be a component of type `component`.
+          example: ""
+          type: string
+        name:
+          description: The name of the component.
+          readOnly: true
+          type: string
+        status:
+          $ref: "#/components/schemas/StatusPagesComponentDataAttributesStatus"
+      required:
+        - id
+        - status
+      type: object
     CreateDeploymentGateParams:
       description: Parameters for creating a deployment gate.
       properties:
@@ -16857,6 +17058,10 @@ components:
           description: The title of the maintenance.
           example: "API Maintenance"
           type: string
+        updates:
+          items:
+            $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItems"
+          type: array
       required:
         - components_affected
         - title
@@ -16884,6 +17089,58 @@ components:
         - id
         - status
       type: object
+    CreateMaintenanceRequestDataAttributesUpdatesItems:
+      description: A maintenance update entry.
+      properties:
+        components_affected:
+          description: The components affected.
+          items:
+            $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItemsComponentsAffectedItems"
+          type: array
+        description:
+          description: A description of the update.
+          example: ""
+          type: string
+        started_at:
+          description: Timestamp of when the update occurred.
+          example: ""
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItemsStatus"
+      required:
+        - components_affected
+        - description
+        - started_at
+        - status
+      type: object
+    CreateMaintenanceRequestDataAttributesUpdatesItemsComponentsAffectedItems:
+      description: A component affected by a maintenance update.
+      properties:
+        id:
+          description: The ID of the component. Must be a component of type `component`.
+          example: ""
+          type: string
+        name:
+          description: The name of the component.
+          readOnly: true
+          type: string
+        status:
+          $ref: "#/components/schemas/PatchMaintenanceRequestDataAttributesComponentsAffectedItemsStatus"
+      required:
+        - id
+        - status
+      type: object
+    CreateMaintenanceRequestDataAttributesUpdatesItemsStatus:
+      description: The status of a maintenance update.
+      enum:
+        - in_progress
+        - completed
+      example: in_progress
+      type: string
+      x-enum-varnames:
+        - IN_PROGRESS
+        - COMPLETED
     CreateNotificationChannelAttributes:
       description: Attributes for creating an on-call notification channel.
       properties:
@@ -139956,6 +140213,86 @@ paths:
         operator: AND
         permissions:
           - status_pages_incident_write
+  /api/v2/statuspages/{page_id}/degradations/backfill:
+    post:
+      description: Creates a backfilled degradation with predefined updates.
+      operationId: CreateBackfilledDegradation
+      parameters:
+        - description: "Comma-separated list of resources to include. Supported values: created_by_user, last_modified_by_user, status_page."
+          in: query
+          name: include
+          schema:
+            type: string
+        - description: The ID of the status page.
+          in: path
+          name: page_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      title: Past API Outage
+                      updates:
+                        - components_affected:
+                            - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                              status: degraded
+                          description: We detected elevated error rates in the API.
+                          started_at: "2026-04-27T13:37:31Z"
+                          status: investigating
+                        - components_affected:
+                            - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                              status: operational
+                          description: The issue has been resolved.
+                          started_at: "2026-04-27T14:37:31Z"
+                          status: resolved
+                    type: degradations
+            schema:
+              $ref: "#/components/schemas/CreateBackfilledDegradationRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        components_affected:
+                          - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                            status: operational
+                        created_at: "2026-04-27T13:37:31+00:00"
+                        description: The issue has been resolved.
+                        modified_at: "2026-04-27T14:37:31+00:00"
+                        status: resolved
+                        title: Past API Outage
+                        updates: []
+                      id: 00000000-0000-0000-0000-000000000010
+                      type: degradations
+              schema:
+                $ref: "#/components/schemas/Degradation"
+          description: Created
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ: []
+      summary: Create backfilled degradation
+      tags:
+        - Status Pages
+      x-menu-order: 23
+      x-permission:
+        operator: AND
+        permissions:
+          - status_pages_incident_write
   /api/v2/statuspages/{page_id}/degradations/{degradation_id}:
     delete:
       description: Deletes a degradation by its ID.
@@ -140219,6 +140556,85 @@ paths:
       tags:
         - Status Pages
       x-menu-order: 18
+      x-permission:
+        operator: AND
+        permissions:
+          - status_pages_incident_write
+  /api/v2/statuspages/{page_id}/maintenances/backfill:
+    post:
+      description: Creates a backfilled maintenance with predefined updates.
+      operationId: CreateBackfilledMaintenance
+      parameters:
+        - description: "Comma-separated list of resources to include. Supported values: created_by_user, last_modified_by_user, status_page."
+          in: query
+          name: include
+          schema:
+            type: string
+        - description: The ID of the status page.
+          in: path
+          name: page_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      title: Past Database Maintenance
+                      updates:
+                        - components_affected:
+                            - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                              status: maintenance
+                          description: Database maintenance is in progress.
+                          started_at: "2026-04-27T13:37:31Z"
+                          status: in_progress
+                        - components_affected:
+                            - id: 1234abcd-12ab-34cd-56ef-123456abcdef
+                              status: operational
+                          description: Database maintenance has been completed.
+                          started_at: "2026-04-27T14:37:31Z"
+                          status: completed
+                    type: maintenances
+            schema:
+              $ref: "#/components/schemas/CreateBackfilledMaintenanceRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        completed_date: "2026-04-27T14:37:31+00:00"
+                        completed_description: ""
+                        components_affected: []
+                        in_progress_description: ""
+                        scheduled_description: ""
+                        start_date: "2026-04-27T13:37:31+00:00"
+                        status: completed
+                        title: Past Database Maintenance
+                      id: 00000000-0000-0000-0000-000000000015
+                      type: maintenances
+              schema:
+                $ref: "#/components/schemas/Maintenance"
+          description: Created
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ: []
+      summary: Create backfilled maintenance
+      tags:
+        - Status Pages
+      x-menu-order: 22
       x-permission:
         operator: AND
         permissions:
