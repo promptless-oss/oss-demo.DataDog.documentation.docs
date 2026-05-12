@@ -82984,6 +82984,77 @@ components:
       description: The title of the event.
       example: "The event title"
       type: string
+    ValidateAPIKeyResponse:
+      description: Response object for the API and application key validation status check.
+      properties:
+        status:
+          $ref: "#/components/schemas/ValidateAPIKeyStatus"
+      required:
+        - status
+      type: object
+    ValidateAPIKeyStatus:
+      description: Status of the validation. Always `ok` when both the API key and the application key are valid.
+      enum:
+        - ok
+      example: ok
+      type: string
+      x-enum-varnames:
+        - OK
+    ValidateV2Attributes:
+      description: Attributes of the API key validation response.
+      properties:
+        api_key_id:
+          description: The UUID of the API key.
+          example: "a1b2c3d4-e5f6-47a8-b9c0-d1e2f3a4b5c6"
+          type: string
+        api_key_scopes:
+          description: List of scope names associated with the API key.
+          example:
+            - "remote_config_read"
+          items:
+            type: string
+          type: array
+        valid:
+          description: Whether the API key is valid.
+          example: true
+          type: boolean
+      required:
+        - valid
+        - api_key_scopes
+        - api_key_id
+      type: object
+    ValidateV2Data:
+      description: Data object containing the API key validation result.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ValidateV2Attributes"
+        id:
+          description: The UUID of the organization associated with the API key.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+          type: string
+        type:
+          $ref: "#/components/schemas/ValidateV2Type"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    ValidateV2Response:
+      description: Response for the API key validation endpoint.
+      properties:
+        data:
+          $ref: "#/components/schemas/ValidateV2Data"
+      required:
+        - data
+      type: object
+    ValidateV2Type:
+      description: Resource type for the API key validation response.
+      enum:
+        - validate_v2
+      example: validate_v2
+      type: string
+      x-enum-varnames:
+        - ValidateV2
     ValidationError:
       description: Represents a single validation error, including a human-readable title and metadata.
       properties:
@@ -147300,6 +147371,91 @@ paths:
         operator: OR
         permissions:
           - teams_read
+  /api/v2/validate:
+    get:
+      description: Check if the API key is valid. Returns the organization UUID, API key ID, and associated scopes.
+      operationId: Validate
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        api_key_id: "a1b2c3d4-e5f6-47a8-b9c0-d1e2f3a4b5c6"
+                        api_key_scopes:
+                          - "remote_config_read"
+                        valid: true
+                      id: "550e8400-e29b-41d4-a716-446655440000"
+                      type: "validate_v2"
+              schema:
+                $ref: "#/components/schemas/ValidateV2Response"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+      summary: Validate API key
+      tags:
+        - Key Management
+      x-menu-order: 20
+      "x-permission":
+        operator: OPEN
+        permissions: []
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/validate_keys:
+    get:
+      description: |-
+        Check that the API key and application key used for the request are both valid.
+        Returns `{"status": "ok"}` on success, `401` or `403` otherwise. Useful as a
+        lightweight authentication probe before issuing other API calls that require
+        full credentials.
+      operationId: ValidateAPIKey
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    status: ok
+              schema:
+                $ref: "#/components/schemas/ValidateAPIKeyResponse"
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Validate API and application keys
+      tags:
+        - Key Management
+      x-menu-order: 21
+      "x-permission":
+        operator: OPEN
+        permissions: []
   /api/v2/widgets/{experience_type}:
     get:
       description: |-
