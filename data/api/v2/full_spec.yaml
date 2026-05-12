@@ -15578,6 +15578,98 @@ components:
       type: string
       x-enum-varnames:
         - COST_BY_ORG
+    CostTagDescription:
+      description: A Cloud Cost Management tag key description, either cross-cloud or scoped to a single cloud provider.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostTagDescriptionAttributes"
+        id:
+          description: Stable identifier of the tag description. Equals the tag key when the description is the cross-cloud default; encodes both the cloud and the tag key when the description is cloud-specific.
+          example: account_id
+          type: string
+        type:
+          $ref: "#/components/schemas/CostTagDescriptionType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    CostTagDescriptionAttributes:
+      description: Human-readable description and metadata attached to a Cloud Cost Management tag key, optionally scoped to a single cloud provider.
+      properties:
+        cloud:
+          description: Cloud provider this description applies to (for example, `aws`). Empty when the description is the cross-cloud default for the tag key.
+          example: aws
+          type: string
+        created_at:
+          description: Timestamp when the description was created, in RFC 3339 format.
+          example: "2026-01-01T12:00:00Z"
+          type: string
+        description:
+          description: The human-readable description for the tag key.
+          example: AWS account that owns this cost.
+          type: string
+        source:
+          $ref: "#/components/schemas/CostTagDescriptionSource"
+        tag_key:
+          description: The tag key this description applies to.
+          example: account_id
+          type: string
+        updated_at:
+          description: Timestamp when the description was last updated, in RFC 3339 format.
+          example: "2026-01-01T12:00:00Z"
+          type: string
+      required:
+        - cloud
+        - created_at
+        - description
+        - source
+        - tag_key
+        - updated_at
+      type: object
+    CostTagDescriptionSource:
+      description: Origin of the description. `human` indicates the description was written by a user, `ai_generated` was produced by AI, and `datadog` is a default supplied by Datadog.
+      enum:
+        - human
+        - ai_generated
+        - datadog
+      example: human
+      type: string
+      x-enum-varnames:
+        - HUMAN
+        - AI_GENERATED
+        - DATADOG
+    CostTagDescriptionType:
+      default: cost_tag_description
+      description: Type of the Cloud Cost Management tag description resource.
+      enum:
+        - cost_tag_description
+      example: cost_tag_description
+      type: string
+      x-enum-varnames:
+        - COST_TAG_DESCRIPTION
+    CostTagDescriptionsResponse:
+      description: List of Cloud Cost Management tag key descriptions for the organization, optionally filtered to a single cloud provider.
+      example:
+        data:
+          - attributes:
+              cloud: aws
+              created_at: "2026-01-01T12:00:00Z"
+              description: AWS account that owns this cost.
+              source: human
+              tag_key: account_id
+              updated_at: "2026-01-01T12:00:00Z"
+            id: account_id
+            type: cost_tag_description
+      properties:
+        data:
+          description: List of tag key descriptions.
+          items:
+            $ref: "#/components/schemas/CostTagDescription"
+          type: array
+      required:
+        - data
+      type: object
     CoverageSummaryAttributes:
       description: Attributes object for code coverage summary response.
       properties:
@@ -97078,6 +97170,58 @@ paths:
       tags:
         - Cloud Cost Management
       x-menu-order: 39
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+  /api/v2/cost/tag_descriptions:
+    get:
+      description: List Cloud Cost Management tag key descriptions for the organization. Use `filter[cloud]` to scope the result to a single cloud provider; when omitted, both cross-cloud defaults and cloud-specific descriptions are returned.
+      operationId: ListCostTagDescriptions
+      parameters:
+        - description: Filter descriptions to a specific cloud provider (for example, `aws`). Omit to return descriptions across all clouds.
+          in: query
+          name: filter[cloud]
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          cloud: aws
+                          created_at: "2026-01-01T12:00:00Z"
+                          description: AWS account that owns this cost.
+                          source: human
+                          tag_key: account_id
+                          updated_at: "2026-01-01T12:00:00Z"
+                        id: account_id
+                        type: cost_tag_description
+              schema:
+                $ref: "#/components/schemas/CostTagDescriptionsResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management tag descriptions
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 42
       "x-permission":
         operator: OR
         permissions:
