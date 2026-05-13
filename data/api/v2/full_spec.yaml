@@ -93,6 +93,13 @@ components:
       required: true
       schema:
         type: string
+    AnomalyID:
+      description: The UUID of the cost anomaly.
+      in: path
+      name: anomaly_id
+      required: true
+      schema:
+        type: string
     ApplicationKeyFilterCreatedAtEndParameter:
       description: Only include application keys created on or before the specified date.
       in: query
@@ -15468,6 +15475,204 @@ components:
       type: string
       x-enum-varnames:
         - CUMULATIVE
+    CostAnomaliesResponse:
+      description: Response object containing a list of detected Cloud Cost Management anomalies and aggregated totals.
+      properties:
+        data:
+          $ref: "#/components/schemas/CostAnomaliesResponseData"
+      type: object
+    CostAnomaliesResponseData:
+      description: Resource wrapper for the list of cost anomalies and aggregated totals.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostAnomaliesResponseDataAttributes"
+        id:
+          description: Static identifier of the cost anomalies collection resource.
+          example: anomalies
+          type: string
+        type:
+          $ref: "#/components/schemas/CostAnomaliesResponseDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    CostAnomaliesResponseDataAttributes:
+      description: Cost anomaly results and aggregated totals for the queried window.
+      properties:
+        anomalies:
+          description: The list of cost anomalies that match the request.
+          items:
+            $ref: "#/components/schemas/CostAnomaly"
+          type: array
+        avg_daily_anomalous_cost:
+          description: Average daily anomalous cost change across the queried window.
+          example: 625.375
+          format: double
+          type: number
+        total_actual_cost:
+          description: Total actual cost spent across the queried window for the matching providers.
+          example: 3001.24
+          format: double
+          type: number
+        total_anomalous_cost:
+          description: Sum of the anomalous cost change across all returned anomalies.
+          example: 1250.75
+          format: double
+          type: number
+        total_count:
+          description: Total number of anomalies that match the request.
+          example: 1
+          format: int64
+          type: integer
+      required:
+        - anomalies
+        - total_count
+        - total_anomalous_cost
+        - total_actual_cost
+        - avg_daily_anomalous_cost
+      type: object
+    CostAnomaliesResponseDataType:
+      default: anomalies
+      description: Type of the cost anomalies collection resource. Must be `anomalies`.
+      enum:
+        - anomalies
+      example: anomalies
+      type: string
+      x-enum-varnames:
+        - ANOMALIES
+    CostAnomaly:
+      description: A single detected Cloud Cost Management anomaly.
+      properties:
+        actual_cost:
+          description: Actual cost incurred during the anomaly window.
+          example: 3001.24
+          format: double
+          type: number
+        anomalous_cost_change:
+          description: Anomalous cost change relative to the expected baseline.
+          example: 1250.75
+          format: double
+          type: number
+        anomaly_end:
+          description: Anomaly end timestamp in Unix milliseconds.
+          example: 1730429150000
+          format: int64
+          type: integer
+        anomaly_start:
+          description: Anomaly start timestamp in Unix milliseconds.
+          example: 1730259950000
+          format: int64
+          type: integer
+        correlated_tags:
+          $ref: "#/components/schemas/CostAnomalyCorrelatedTags"
+        dimensions:
+          $ref: "#/components/schemas/CostAnomalyDimensions"
+        dismissal:
+          $ref: "#/components/schemas/CostAnomalyDismissal"
+        max_cost:
+          description: Maximum cost observed during the anomaly window.
+          example: 5000.5
+          format: double
+          type: number
+        provider:
+          description: Cloud or SaaS provider associated with the anomaly (for example `aws`, `gcp`, `azure`).
+          example: aws
+          type: string
+        query:
+          description: The metrics query that detected the anomaly.
+          example: sum:aws.cost.net.amortized{aws_cost_type IN (Usage,DiscountedUsage,SavingsPlanCoveredUsage) AND aws_product NOT IN (supportenterprise) AND service:"ec2"}.rollup(sum, daily)
+          type: string
+        uuid:
+          description: The unique identifier of the anomaly.
+          example: b0a6aaa9-3c4c-48cb-9447-a0d1338b3e09
+          type: string
+      required:
+        - uuid
+        - anomaly_start
+        - anomaly_end
+        - query
+        - dimensions
+        - correlated_tags
+        - anomalous_cost_change
+        - actual_cost
+        - max_cost
+        - provider
+      type: object
+    CostAnomalyCorrelatedTags:
+      additionalProperties:
+        description: The list of correlated values for the tag key.
+        items:
+          type: string
+        type: array
+      description: Map of correlated tag keys to the list of correlated tag values.
+      example:
+        region:
+          - us-east-1
+          - us-west-2
+      nullable: true
+      type: object
+    CostAnomalyDimensions:
+      additionalProperties:
+        description: The dimension value.
+        type: string
+      description: Map of cost dimension keys to their values for the anomaly grouping.
+      example:
+        service: ec2
+      type: object
+    CostAnomalyDismissal:
+      description: Resolution metadata for an anomaly that has been dismissed.
+      properties:
+        cause:
+          description: Reason the anomaly was dismissed.
+          example: false_positive
+          type: string
+        dismissal_id:
+          description: Unique identifier of the dismissal record.
+          example: 12345678-1234-1234-1234-123456789abc
+          type: string
+        message:
+          description: Optional message explaining the dismissal.
+          example: This was expected due to planned infrastructure changes.
+          type: string
+        updated_at:
+          description: Timestamp of the last dismissal update in Unix milliseconds.
+          example: 1730344150000
+          format: int64
+          type: integer
+        updated_by:
+          description: Identifier of the user that last updated the dismissal.
+          example: user@example.com
+          type: string
+      required:
+        - dismissal_id
+        - cause
+        - message
+        - updated_at
+        - updated_by
+      type: object
+    CostAnomalyResponse:
+      description: Response object containing a single Cloud Cost Management anomaly.
+      properties:
+        data:
+          $ref: "#/components/schemas/CostAnomalyResponseData"
+      type: object
+    CostAnomalyResponseData:
+      description: Resource wrapper for a single cost anomaly.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostAnomaly"
+        id:
+          description: The unique identifier of the anomaly.
+          example: b0a6aaa9-3c4c-48cb-9447-a0d1338b3e09
+          type: string
+        type:
+          $ref: "#/components/schemas/CostAnomaliesResponseDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     CostAttributionAggregates:
       description: An array of available aggregates.
       items:
@@ -96276,6 +96481,206 @@ paths:
       "x-permission":
         operator: OPEN
         permissions: []
+  /api/v2/cost/anomalies:
+    get:
+      description: List detected Cloud Cost Management anomalies for the organization.
+      operationId: ListCostAnomalies
+      parameters:
+        - description: Start time as Unix milliseconds. Defaults to the start of the latest stable seven-day window.
+          in: query
+          name: start
+          required: false
+          schema:
+            example: 1730259950000
+            format: int64
+            type: integer
+        - description: End time as Unix milliseconds. Defaults to the end of the latest stable seven-day window.
+          in: query
+          name: end
+          required: false
+          schema:
+            example: 1730429150000
+            format: int64
+            type: integer
+        - description: 'Optional JSON object mapping cost tag keys to allowed values, for example `{"team":["payments"],"env":["prod"]}`. Filters match anomaly dimensions or correlated tags.'
+          in: query
+          name: filter
+          required: false
+          schema:
+            example: '{"team":["payments"]}'
+            type: string
+        - description: Minimum absolute anomalous cost change to include. Numeric value; defaults to `1`.
+          in: query
+          name: min_anomalous_threshold
+          required: false
+          schema:
+            example: "1.0"
+            type: string
+        - description: Minimum absolute actual cost to include. Numeric value; defaults to `0`.
+          in: query
+          name: min_cost_threshold
+          required: false
+          schema:
+            example: "0.0"
+            type: string
+        - description: Filter by resolution state. Use `none` for unresolved anomalies, `all` or `*` for resolved anomalies, or a comma-separated list of causes.
+          in: query
+          name: dismissal_cause
+          required: false
+          schema:
+            example: none
+            type: string
+        - description: Sort field. One of `start_date`, `end_date`, `duration`, `max_cost`, `anomalous_cost`, or `dismissal_date`. Defaults to `anomalous_cost`.
+          in: query
+          name: order_by
+          required: false
+          schema:
+            example: anomalous_cost
+            type: string
+        - description: Sort direction. One of `asc` or `desc`. Defaults to `desc`.
+          in: query
+          name: order
+          required: false
+          schema:
+            example: desc
+            type: string
+        - description: Maximum number of anomalies to return. Defaults to `200`.
+          in: query
+          name: limit
+          required: false
+          schema:
+            example: 200
+            type: integer
+        - description: Pagination offset. Defaults to `0`.
+          in: query
+          name: offset
+          required: false
+          schema:
+            example: 0
+            type: integer
+        - description: Optional repeated cloud or SaaS provider filters, such as `aws`, `gcp`, `azure`, `Oracle`, `datadog`, `OpenAI`, or `Anthropic`.
+          explode: true
+          in: query
+          name: provider_ids
+          required: false
+          schema:
+            items:
+              example: aws
+              type: string
+            type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        anomalies:
+                          - actual_cost: 3001.24
+                            anomalous_cost_change: 1250.75
+                            anomaly_end: 1730429150000
+                            anomaly_start: 1730259950000
+                            correlated_tags:
+                              region:
+                                - us-east-1
+                                - us-west-2
+                            dimensions:
+                              service: ec2
+                            max_cost: 5000.5
+                            provider: aws
+                            query: 'sum:aws.cost.net.amortized{aws_cost_type IN (Usage,DiscountedUsage,SavingsPlanCoveredUsage) AND aws_product NOT IN (supportenterprise) AND service:"ec2"}.rollup(sum, daily)'
+                            uuid: b0a6aaa9-3c4c-48cb-9447-a0d1338b3e09
+                        avg_daily_anomalous_cost: 625.375
+                        total_actual_cost: 3001.24
+                        total_anomalous_cost: 1250.75
+                        total_count: 1
+                      id: anomalies
+                      type: anomalies
+              schema:
+                $ref: "#/components/schemas/CostAnomaliesResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List cost anomalies
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 43
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/anomalies/{anomaly_id}:
+    get:
+      description: Get a detected Cloud Cost Management anomaly by UUID.
+      operationId: GetCostAnomaly
+      parameters:
+        - $ref: "#/components/parameters/AnomalyID"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        actual_cost: 3001.24
+                        anomalous_cost_change: 1250.75
+                        anomaly_end: 1730429150000
+                        anomaly_start: 1730259950000
+                        correlated_tags:
+                          region:
+                            - us-east-1
+                            - us-west-2
+                        dimensions:
+                          service: ec2
+                        max_cost: 5000.5
+                        provider: aws
+                        query: 'sum:aws.cost.net.amortized{aws_cost_type IN (Usage,DiscountedUsage,SavingsPlanCoveredUsage) AND aws_product NOT IN (supportenterprise) AND service:"ec2"}.rollup(sum, daily)'
+                        uuid: b0a6aaa9-3c4c-48cb-9447-a0d1338b3e09
+                      id: b0a6aaa9-3c4c-48cb-9447-a0d1338b3e09
+                      type: anomalies
+              schema:
+                $ref: "#/components/schemas/CostAnomalyResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get cost anomaly
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 44
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cost/arbitrary_rule:
     get:
       description: List all custom allocation rules - Retrieve a list of all custom allocation rules for the organization
