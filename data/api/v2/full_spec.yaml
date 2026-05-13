@@ -1454,6 +1454,13 @@ components:
       required: true
       schema:
         type: string
+    TagKey:
+      description: The Cloud Cost Management tag key. Tag keys can contain forward slashes (for example, `kubernetes/instance`).
+      in: path
+      name: tag_key
+      required: true
+      schema:
+        type: string
     ToTimestamp:
       description: The ending timestamp for the SLO status query in epoch seconds.
       in: query
@@ -15783,6 +15790,41 @@ components:
       type: string
       x-enum-varnames:
         - COST_BY_ORG
+    CostTag:
+      description: A Cloud Cost Management tag.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostTagAttributes"
+        id:
+          description: The tag identifier, equal to its `key:value` representation.
+          example: providername:aws
+          type: string
+        type:
+          $ref: "#/components/schemas/CostTagType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    CostTagAttributes:
+      description: Attributes of a Cloud Cost Management tag.
+      properties:
+        sources:
+          description: List of sources that define this tag.
+          example:
+            - focus
+          items:
+            description: A tag source.
+            type: string
+          type: array
+        value:
+          description: The tag value in `key:value` format.
+          example: providername:aws
+          type: string
+      required:
+        - sources
+        - value
+      type: object
     CostTagDescription:
       description: A Cloud Cost Management tag key description, either cross-cloud or scoped to a single cloud provider.
       properties:
@@ -15871,6 +15913,153 @@ components:
           description: List of tag key descriptions.
           items:
             $ref: "#/components/schemas/CostTagDescription"
+          type: array
+      required:
+        - data
+      type: object
+    CostTagKey:
+      description: A Cloud Cost Management tag key.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostTagKeyAttributes"
+        id:
+          description: The tag key identifier.
+          example: providername
+          type: string
+        type:
+          $ref: "#/components/schemas/CostTagKeyType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    CostTagKeyAttributes:
+      description: Attributes of a Cloud Cost Management tag key.
+      properties:
+        details:
+          $ref: "#/components/schemas/CostTagKeyDetails"
+        sources:
+          description: List of sources that define this tag key.
+          example:
+            - focus
+          items:
+            description: A tag key source.
+            type: string
+          type: array
+        value:
+          description: The tag key name.
+          example: providername
+          type: string
+      required:
+        - sources
+        - value
+      type: object
+    CostTagKeyDetails:
+      description: Additional details for a Cloud Cost Management tag key, including its description and example tag values.
+      properties:
+        description:
+          description: Description of the tag key.
+          example: The cloud provider name reported for the cost line item.
+          type: string
+        tag_values:
+          description: Example tag values observed for this tag key.
+          example:
+            - aws
+            - gcp
+            - azure
+          items:
+            description: A tag value observed for this tag key.
+            type: string
+          type: array
+      required:
+        - description
+        - tag_values
+      type: object
+    CostTagKeyResponse:
+      description: A single Cloud Cost Management tag key.
+      example:
+        data:
+          attributes:
+            details:
+              description: The cloud provider name reported for the cost line item.
+              tag_values:
+                - aws
+                - gcp
+                - azure
+            sources:
+              - focus
+            value: providername
+          id: providername
+          type: cost_tag_key
+      properties:
+        data:
+          $ref: "#/components/schemas/CostTagKey"
+      required:
+        - data
+      type: object
+    CostTagKeyType:
+      default: cost_tag_key
+      description: Type of the Cloud Cost Management tag key resource.
+      enum:
+        - cost_tag_key
+      example: cost_tag_key
+      type: string
+      x-enum-varnames:
+        - COST_TAG_KEY
+    CostTagKeysResponse:
+      description: A list of Cloud Cost Management tag keys.
+      example:
+        data:
+          - attributes:
+              sources:
+                - focus
+              value: providername
+            id: providername
+            type: cost_tag_key
+          - attributes:
+              sources: []
+              value: service
+            id: service
+            type: cost_tag_key
+      properties:
+        data:
+          description: The list of Cloud Cost Management tag keys.
+          items:
+            $ref: "#/components/schemas/CostTagKey"
+          type: array
+      required:
+        - data
+      type: object
+    CostTagType:
+      default: cost_tag
+      description: Type of the Cloud Cost Management tag resource.
+      enum:
+        - cost_tag
+      example: cost_tag
+      type: string
+      x-enum-varnames:
+        - COST_TAG
+    CostTagsResponse:
+      description: A list of Cloud Cost Management tags.
+      example:
+        data:
+          - attributes:
+              sources:
+                - focus
+              value: providername:aws
+            id: providername:aws
+            type: cost_tag
+          - attributes:
+              sources:
+                - focus
+              value: providername:gcp
+            id: providername:gcp
+            type: cost_tag
+      properties:
+        data:
+          description: The list of Cloud Cost Management tags.
+          items:
+            $ref: "#/components/schemas/CostTag"
           type: array
       required:
         - data
@@ -98630,6 +98819,238 @@ paths:
       tags:
         - Cloud Cost Management
       x-menu-order: 42
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+  /api/v2/cost/tag_keys:
+    get:
+      description: List Cloud Cost Management tag keys.
+      operationId: ListCostTagKeys
+      parameters:
+        - description: The Cloud Cost Management metric to scope the tag keys to. When omitted, returns tag keys across all metrics.
+          in: query
+          name: filter[metric]
+          schema:
+            type: string
+        - description: |-
+            Filter to return only tag keys that appear with the given `key:value` tag values. For example, `filter[tags]=providername:aws` returns tag keys found on the same cost data, such as `is_aws_ec2_compute` and `aws_instance_type`.
+          in: query
+          name: filter[tags]
+          schema:
+            items:
+              type: string
+            type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          sources:
+                            - focus
+                          value: providername
+                        id: providername
+                        type: cost_tag_key
+                      - attributes:
+                          sources: []
+                          value: service
+                        id: service
+                        type: cost_tag_key
+              schema:
+                $ref: "#/components/schemas/CostTagKeysResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management tag keys
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 46
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+  /api/v2/cost/tag_keys/{tag_key}:
+    get:
+      description: Get details for a specific Cloud Cost Management tag key, including example tag values and description.
+      operationId: GetCostTagKey
+      parameters:
+        - $ref: "#/components/parameters/TagKey"
+        - description: The Cloud Cost Management metric to scope the tag key details to. When omitted, returns details across all metrics.
+          in: query
+          name: filter[metric]
+          schema:
+            type: string
+        - description: |-
+            Controls the size of the internal tag value search scope. This does **not** restrict the number of example tag values returned in the response. Defaults to 50, maximum 10000.
+          in: query
+          name: page[size]
+          schema:
+            default: 50
+            format: int32
+            maximum: 10000
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        details:
+                          description: The cloud provider name reported for the cost line item.
+                          tag_values:
+                            - aws
+                            - gcp
+                            - azure
+                        sources:
+                          - focus
+                        value: providername
+                      id: providername
+                      type: cost_tag_key
+              schema:
+                $ref: "#/components/schemas/CostTagKeyResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get a Cloud Cost Management tag key
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 47
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+  /api/v2/cost/tags:
+    get:
+      description: List Cloud Cost Management tags for a given metric.
+      operationId: ListCostTags
+      parameters:
+        - description: The Cloud Cost Management metric to scope the tags to. When omitted, returns tags across all metrics.
+          in: query
+          name: filter[metric]
+          schema:
+            type: string
+        - description: A substring used to filter the returned tags by name.
+          in: query
+          name: filter[match]
+          schema:
+            type: string
+        - description: |-
+            Filter to return only tags that appear with the given `key:value` tag values. For example, `filter[tags]=providername:aws` returns tags found on the same cost data, such as `aws_instance_type:t3.micro` and `aws_instance_type:m5.large`.
+          in: query
+          name: filter[tags]
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Restrict the returned tags to those whose key matches one of the given tag keys.
+          in: query
+          name: filter[tag_keys]
+          schema:
+            items:
+              type: string
+            type: array
+        - description: |-
+            Controls the size of the internal tag search scope. This does **not** restrict the number of tags returned in the response. Defaults to 50, maximum 10000.
+          in: query
+          name: page[size]
+          schema:
+            default: 50
+            format: int32
+            maximum: 10000
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          sources:
+                            - focus
+                          value: providername:aws
+                        id: providername:aws
+                        type: cost_tag
+                      - attributes:
+                          sources:
+                            - focus
+                          value: providername:gcp
+                        id: providername:gcp
+                        type: cost_tag
+              schema:
+                $ref: "#/components/schemas/CostTagsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management tags
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 45
       "x-permission":
         operator: OR
         permissions:
