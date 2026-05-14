@@ -1300,6 +1300,67 @@ components:
       required: true
       schema:
         type: string
+    RuleBasedViewFramework:
+      description: Compliance framework handle to filter rules and findings by.
+      in: query
+      name: framework
+      required: false
+      schema:
+        default: ""
+        example: hipaa
+        type: string
+    RuleBasedViewIncludeRulesWithoutFindings:
+      description: When `true`, includes rules in the response that have no associated findings.
+      in: query
+      name: include_rules_without_findings
+      required: false
+      schema:
+        default: false
+        example: false
+        type: boolean
+    RuleBasedViewIsCustom:
+      description: Set to `true` when the requested `framework` is a custom framework.
+      in: query
+      name: is_custom
+      required: false
+      schema:
+        example: false
+        type: boolean
+    RuleBasedViewQuery:
+      description: Additional event-platform filters applied to the underlying findings query. For example, `scored:true project_id:datadog-prod-us5`.
+      in: query
+      name: query
+      required: false
+      schema:
+        default: ""
+        example: scored:true
+        type: string
+    RuleBasedViewQueryFindingsWithoutFrameworkVersion:
+      description: When `true`, returns findings without a `framework_version` tag. Used for findings from custom frameworks or those created before framework versioning was introduced.
+      in: query
+      name: query_findings_without_framework_version
+      required: false
+      schema:
+        default: false
+        example: false
+        type: boolean
+    RuleBasedViewTo:
+      description: Timestamp of the query end, in milliseconds since the Unix epoch.
+      in: query
+      name: to
+      required: true
+      schema:
+        example: 1739982278000
+        format: int64
+        type: integer
+    RuleBasedViewVersion:
+      description: Version of the compliance framework to filter rules and findings by.
+      in: query
+      name: version
+      required: false
+      schema:
+        example: "1"
+        type: string
     RuleId:
       description: The ID of the rule.
       in: path
@@ -61494,6 +61555,194 @@ components:
           example: Deployments automated via Deployment Trains
           type: string
       type: object
+    RuleBasedViewAttributes:
+      description: Attributes of the rule-based view.
+      properties:
+        count:
+          description: Total number of rules in the view.
+          example: 1
+          format: int64
+          type: integer
+        rules:
+          $ref: "#/components/schemas/RuleBasedViewRules"
+      required:
+        - count
+        - rules
+      type: object
+    RuleBasedViewComplianceFramework:
+      description: Compliance framework mapping for a rule.
+      properties:
+        control:
+          description: Identifier of the control inside the requirement.
+          example: 164.308-a-4-i
+          type: string
+        framework:
+          description: Handle of the compliance framework.
+          example: hipaa
+          type: string
+        is_default:
+          description: Whether the framework is a Datadog default framework. `true` indicates a Datadog framework and `false` indicates a custom framework.
+          example: true
+          type: boolean
+        message:
+          description: Optional message describing the framework mapping for the rule.
+          example: ""
+          type: string
+        requirement:
+          description: Name of the requirement that contains the control.
+          example: Information-Access-Management
+          type: string
+        version:
+          description: Version of the compliance framework.
+          example: "1"
+          type: string
+      type: object
+    RuleBasedViewComplianceFrameworks:
+      description: List of compliance framework mappings associated with the rule.
+      items:
+        $ref: "#/components/schemas/RuleBasedViewComplianceFramework"
+      type: array
+    RuleBasedViewData:
+      description: Data envelope for the rule-based view response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/RuleBasedViewAttributes"
+        id:
+          description: Unique identifier of the rule-based view document.
+          example: JSONAPI_USELESS_ID
+          type: string
+        type:
+          $ref: "#/components/schemas/RuleBasedViewType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    RuleBasedViewResourceAttributes:
+      description: List of resource attribute names exposed by the rule.
+      example:
+        - instance_id
+      items:
+        description: Name of a resource attribute exposed by the rule.
+        example: instance_id
+        type: string
+      type: array
+    RuleBasedViewResponse:
+      description: Response containing an aggregated view of compliance rules with their finding statistics.
+      properties:
+        data:
+          $ref: "#/components/schemas/RuleBasedViewData"
+      required:
+        - data
+      type: object
+    RuleBasedViewRule:
+      description: A compliance rule along with its evaluation statistics and framework mappings.
+      properties:
+        compliance_frameworks:
+          $ref: "#/components/schemas/RuleBasedViewComplianceFrameworks"
+        enabled:
+          description: Whether the rule is enabled.
+          example: true
+          type: boolean
+        id:
+          description: Unique identifier of the rule.
+          example: qjx-udx-xo8
+          type: string
+        name:
+          description: Human-readable name of the rule.
+          example: IAM roles should not allow untrusted GitHub Actions to assume them
+          type: string
+        resourceAttributes:
+          $ref: "#/components/schemas/RuleBasedViewResourceAttributes"
+        resourceCategory:
+          description: Resource category targeted by the rule.
+          example: identity
+          type: string
+        resourceType:
+          description: Resource type targeted by the rule.
+          example: aws_iam_role
+          type: string
+        stats:
+          $ref: "#/components/schemas/RuleBasedViewRuleStats"
+        status:
+          description: Severity associated with the rule (for example, `info`, `low`, `medium`, `high`, or `critical`).
+          example: critical
+          type: string
+        tags:
+          $ref: "#/components/schemas/RuleBasedViewRuleTags"
+        type:
+          $ref: "#/components/schemas/RuleBasedViewRuleCategory"
+      required:
+        - compliance_frameworks
+        - enabled
+        - id
+        - name
+        - resourceAttributes
+        - resourceCategory
+        - resourceType
+        - stats
+        - status
+        - tags
+        - type
+      type: object
+    RuleBasedViewRuleCategory:
+      description: The category of the security rule.
+      enum:
+        - cloud_configuration
+        - infrastructure_configuration
+        - api_security
+      example: cloud_configuration
+      type: string
+      x-enum-varnames:
+        - CLOUD_CONFIGURATION
+        - INFRASTRUCTURE_CONFIGURATION
+        - API_SECURITY
+    RuleBasedViewRuleStats:
+      description: Counts of findings for the rule, grouped by their evaluation status.
+      properties:
+        fail:
+          description: Number of findings that failed evaluation.
+          example: 0
+          format: int64
+          type: integer
+        muted:
+          description: Number of findings that have been muted.
+          example: 0
+          format: int64
+          type: integer
+        pass:
+          description: Number of findings that passed evaluation.
+          example: 3
+          format: int64
+          type: integer
+      required:
+        - fail
+        - pass
+        - muted
+      type: object
+    RuleBasedViewRuleTags:
+      description: List of tags attached to the rule.
+      example:
+        - security:compliance
+      items:
+        description: A tag attached to the rule.
+        example: security:compliance
+        type: string
+      type: array
+    RuleBasedViewRules:
+      description: List of rules in the rule-based view.
+      items:
+        $ref: "#/components/schemas/RuleBasedViewRule"
+      type: array
+    RuleBasedViewType:
+      default: rule_based_view
+      description: The type of the resource. The value should always be `rule_based_view`.
+      enum:
+        - rule_based_view
+      example: rule_based_view
+      type: string
+      x-enum-varnames:
+        - RULE_BASED_VIEW
     RuleId:
       description: The unique ID for a scorecard rule.
       example: q8MQxk8TCqrHnWkx
@@ -96177,6 +96426,90 @@ paths:
           - code_coverage_read
       x-unstable: |-
         **Note**: This endpoint is in preview and may be subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/compliance_findings/rule_based_view:
+    get:
+      description: |-
+        Get an aggregated view of compliance rules with their pass, fail, and muted finding counts.
+        Supports filtering by compliance framework, framework version, and additional query filters.
+      operationId: GetRuleBasedView
+      parameters:
+        - $ref: "#/components/parameters/RuleBasedViewTo"
+        - $ref: "#/components/parameters/RuleBasedViewFramework"
+        - $ref: "#/components/parameters/RuleBasedViewVersion"
+        - $ref: "#/components/parameters/RuleBasedViewQueryFindingsWithoutFrameworkVersion"
+        - $ref: "#/components/parameters/RuleBasedViewIncludeRulesWithoutFindings"
+        - $ref: "#/components/parameters/RuleBasedViewIsCustom"
+        - $ref: "#/components/parameters/RuleBasedViewQuery"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        count: 1
+                        rules:
+                          - compliance_frameworks:
+                              - control: 164.308-a-4-i
+                                framework: hipaa
+                                is_default: true
+                                message: ""
+                                requirement: Information-Access-Management
+                                version: "1"
+                            enabled: true
+                            id: qjx-udx-xo8
+                            name: IAM roles should not allow untrusted GitHub Actions to assume them
+                            resourceAttributes: []
+                            resourceCategory: identity
+                            resourceType: aws_iam_role
+                            stats:
+                              fail: 0
+                              muted: 0
+                              pass: 3
+                            status: critical
+                            tags:
+                              - security:compliance
+                              - cloud_provider:aws
+                              - framework:hipaa
+                            type: cloud_configuration
+                      id: JSONAPI_USELESS_ID
+                      type: rule_based_view
+              schema:
+                $ref: "#/components/schemas/RuleBasedViewResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Service Unavailable
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_findings_read
+      summary: Get the rule-based view of compliance findings
+      tags: ["Compliance"]
+      x-menu-order: 1
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_findings_read
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/container_images:
     get:
@@ -149906,6 +150239,12 @@ tags:
   - description: |-
       Retrieve and analyze code coverage data from Code Coverage. See the [Code Coverage page](https://docs.datadoghq.com/code_coverage/) for more information.
     name: Code Coverage
+  - description: |-
+      Datadog Cloud Security Misconfigurations provides aggregated views of
+      compliance rules and findings across your cloud resources, helping you assess
+      posture against industry frameworks (such as HIPAA, SOC 2, ISO 27001) and custom
+      frameworks. Learn more at https://docs.datadoghq.com/security/cloud_security_management/misconfigurations/#maintain-compliance-with-industry-frameworks-and-benchmarks.
+    name: "Compliance"
   - description: |-
       Manage your Datadog Confluent Cloud integration accounts and account resources directly through the Datadog API. See the [Confluent Cloud page](https://docs.datadoghq.com/integrations/confluent_cloud/) for more information.
     name: Confluent Cloud
