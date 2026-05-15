@@ -312,6 +312,54 @@ components:
       required: false
       schema:
         type: string
+    CommitmentsCommitmentType:
+      description: Type of commitment to query. ri for Reserved Instances, sp for Savings Plans. Defaults to ri.
+      in: query
+      name: commitmentType
+      required: false
+      schema:
+        $ref: "#/components/schemas/CommitmentsCommitmentType"
+    CommitmentsEnd:
+      description: End of the query time range in Unix milliseconds.
+      example: 1696118400000
+      in: query
+      name: end
+      required: true
+      schema:
+        format: int64
+        type: integer
+    CommitmentsFilterBy:
+      description: Optional filter expression to narrow down results.
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        type: string
+    CommitmentsProduct:
+      description: Cloud product identifier (for example, ec2, rds, virtualmachines).
+      example: ec2
+      in: query
+      name: product
+      required: true
+      schema:
+        type: string
+    CommitmentsProvider:
+      description: Cloud provider for commitment programs (aws or azure).
+      example: aws
+      in: query
+      name: provider
+      required: true
+      schema:
+        $ref: "#/components/schemas/CommitmentsProvider"
+    CommitmentsStart:
+      description: Start of the query time range in Unix milliseconds.
+      example: 1693526400000
+      in: query
+      name: start
+      required: true
+      schema:
+        format: int64
+        type: integer
     ConfluentAccountID:
       description: Confluent Account ID.
       in: path
@@ -13994,6 +14042,623 @@ components:
       type: string
       x-enum-varnames:
         - CI_APP_COVERAGE_COMMIT_SUMMARY_REQUEST
+    CommitmentsAwsEC2RICommitment:
+      description: AWS EC2 Reserved Instance commitment details.
+      properties:
+        availability_zone:
+          description: The availability zone of the reservation.
+          example: us-east-1a
+          type: string
+        commitment_id:
+          description: The unique identifier of the Reserved Instance.
+          example: ri-0123456789abcdef0
+          type: string
+        expiration_date:
+          description: The expiration date of the commitment.
+          example: "2025-12-31T00:00:00Z"
+          type: string
+        instance_type:
+          description: The EC2 instance type.
+          example: m5.xlarge
+          type: string
+        number_of_nfus:
+          description: The number of Normalized Capacity Units.
+          example: 8
+          format: double
+          type: number
+        number_of_reservations:
+          description: The number of reserved instances.
+          example: 2
+          format: double
+          type: number
+        offering_class:
+          description: The offering class of the Reserved Instance.
+          example: standard
+          type: string
+        operating_system:
+          description: The operating system of the Reserved Instance.
+          example: Linux
+          type: string
+        purchase_option:
+          description: The payment option for the Reserved Instance.
+          example: All Upfront
+          type: string
+        region:
+          description: The AWS region of the Reserved Instance.
+          example: us-east-1
+          type: string
+        start_date:
+          description: The start date of the commitment.
+          example: "2023-01-01T00:00:00Z"
+          type: string
+        term_length:
+          description: The term length in years.
+          example: 1
+          format: double
+          type: number
+        utilization:
+          description: The utilization percentage of the commitment.
+          example: 0.85
+          format: double
+          type: number
+      required:
+        - commitment_id
+        - instance_type
+        - offering_class
+        - operating_system
+        - purchase_option
+        - region
+      type: object
+    CommitmentsAwsElasticacheRICommitment:
+      description: AWS ElastiCache Reserved Instance commitment details.
+      properties:
+        cache_engine:
+          description: The cache engine type of the Reserved Instance.
+          example: Redis
+          type: string
+        commitment_id:
+          description: The unique identifier of the Reserved Instance.
+          example: ri-0123456789abcdef0
+          type: string
+        expiration_date:
+          description: The expiration date of the commitment.
+          example: "2025-12-31T00:00:00Z"
+          type: string
+        instance_type:
+          description: The ElastiCache instance type.
+          example: cache.m5.xlarge
+          type: string
+        number_of_nfus:
+          description: The number of Normalized Capacity Units.
+          example: 8
+          format: double
+          type: number
+        number_of_reservations:
+          description: The number of reserved instances.
+          example: 2
+          format: double
+          type: number
+        purchase_option:
+          description: The payment option for the Reserved Instance.
+          example: All Upfront
+          type: string
+        region:
+          description: The AWS region of the Reserved Instance.
+          example: us-east-1
+          type: string
+        start_date:
+          description: The start date of the commitment.
+          example: "2023-01-01T00:00:00Z"
+          type: string
+        term_length:
+          description: The term length in years.
+          example: 1
+          format: double
+          type: number
+        utilization:
+          description: The utilization percentage of the commitment.
+          example: 0.85
+          format: double
+          type: number
+      required:
+        - cache_engine
+        - commitment_id
+        - instance_type
+        - purchase_option
+        - region
+      type: object
+    CommitmentsAwsRDSRICommitment:
+      description: AWS RDS Reserved Instance commitment details.
+      properties:
+        commitment_id:
+          description: The unique identifier of the Reserved Instance.
+          example: ri-0123456789abcdef0
+          type: string
+        database_engine:
+          description: The database engine of the Reserved Instance.
+          example: MySQL
+          type: string
+        expiration_date:
+          description: The expiration date of the commitment.
+          example: "2025-12-31T00:00:00Z"
+          type: string
+        instance_type:
+          description: The RDS instance type.
+          example: db.m5.xlarge
+          type: string
+        is_multi_az:
+          description: Whether the Reserved Instance is Multi-AZ.
+          example: false
+          type: boolean
+        number_of_nfus:
+          description: The number of Normalized Capacity Units.
+          example: 8
+          format: double
+          type: number
+        number_of_reservations:
+          description: The number of reserved instances.
+          example: 2
+          format: double
+          type: number
+        purchase_option:
+          description: The payment option for the Reserved Instance.
+          example: All Upfront
+          type: string
+        region:
+          description: The AWS region of the Reserved Instance.
+          example: us-east-1
+          type: string
+        start_date:
+          description: The start date of the commitment.
+          example: "2023-01-01T00:00:00Z"
+          type: string
+        term_length:
+          description: The term length in years.
+          example: 1
+          format: double
+          type: number
+        utilization:
+          description: The utilization percentage of the commitment.
+          example: 0.85
+          format: double
+          type: number
+      required:
+        - commitment_id
+        - database_engine
+        - instance_type
+        - purchase_option
+        - region
+      type: object
+    CommitmentsAwsSPCommitment:
+      description: AWS Savings Plan commitment details.
+      properties:
+        commitment_id:
+          description: The unique identifier of the Savings Plan.
+          example: arn:aws:savingsplans::123456789:savingsplan/abc123
+          type: string
+        committed_spend_per_hour:
+          description: The hourly committed spend for the Savings Plan.
+          example: 1.5
+          format: double
+          type: number
+        expiration_date:
+          description: The expiration date of the commitment.
+          example: "2025-12-31T00:00:00Z"
+          type: string
+        purchase_option:
+          description: The payment option for the Savings Plan.
+          example: All Upfront
+          type: string
+        savings_plan_type:
+          description: The Savings Plan type.
+          example: ComputeSavingsPlans
+          type: string
+        start_date:
+          description: The start date of the commitment.
+          example: "2023-01-01T00:00:00Z"
+          type: string
+        term_length:
+          description: The term length in years.
+          example: 1
+          format: double
+          type: number
+        utilization:
+          description: The utilization percentage of the commitment.
+          example: 0.85
+          format: double
+          type: number
+      required:
+        - commitment_id
+        - purchase_option
+        - savings_plan_type
+      type: object
+    CommitmentsAzureComputeSPCommitment:
+      description: Azure Compute Savings Plan commitment details.
+      properties:
+        benefit_name:
+          description: The display name of the Azure Savings Plan.
+          example: my-compute-savings-plan
+          type: string
+        commitment_id:
+          description: The unique identifier of the Savings Plan.
+          example: /subscriptions/abc123/providers/Microsoft.BillingBenefits/savingsPlanOrders/xyz789
+          type: string
+        committed_spend_per_hour:
+          description: The hourly committed spend for the Savings Plan.
+          example: 2.5
+          format: double
+          type: number
+        expiration_date:
+          description: The expiration date of the commitment.
+          example: "2025-12-31T00:00:00Z"
+          type: string
+        start_date:
+          description: The start date of the commitment.
+          example: "2023-01-01T00:00:00Z"
+          type: string
+        term_length:
+          description: The term length in years.
+          example: 1
+          format: double
+          type: number
+        utilization:
+          description: The utilization percentage of the commitment.
+          example: 0.85
+          format: double
+          type: number
+      required:
+        - benefit_name
+        - commitment_id
+      type: object
+    CommitmentsAzureVMRICommitment:
+      description: Azure Virtual Machine Reserved Instance commitment details.
+      properties:
+        benefit_name:
+          description: The display name of the Azure reservation.
+          example: my-vm-reservation
+          type: string
+        commitment_id:
+          description: The unique identifier of the Reserved Instance.
+          example: /subscriptions/abc123/providers/Microsoft.Capacity/reservationOrders/xyz789
+          type: string
+        expiration_date:
+          description: The expiration date of the commitment.
+          example: "2025-12-31T00:00:00Z"
+          type: string
+        instance_type:
+          description: The Azure VM instance type.
+          example: Standard_D4s_v3
+          type: string
+        meter_sub_category:
+          description: The Azure meter sub-category for the reservation.
+          example: D4s v3
+          type: string
+        region:
+          description: The Azure region of the Reserved Instance.
+          example: eastus
+          type: string
+        start_date:
+          description: The start date of the commitment.
+          example: "2023-01-01T00:00:00Z"
+          type: string
+        status:
+          $ref: "#/components/schemas/CommitmentsAzureVMRIStatus"
+        term_length:
+          description: The term length in years.
+          example: 1
+          format: double
+          type: number
+        utilization:
+          description: The utilization percentage of the commitment.
+          example: 0.85
+          format: double
+          type: number
+      required:
+        - benefit_name
+        - commitment_id
+        - instance_type
+        - meter_sub_category
+        - region
+        - status
+      type: object
+    CommitmentsAzureVMRIStatus:
+      description: Status of an Azure VM Reserved Instance.
+      enum:
+        - running
+        - expired
+        - cancelled
+      example: running
+      type: string
+      x-enum-varnames:
+        - RUNNING
+        - EXPIRED
+        - CANCELLED
+    CommitmentsCommitmentType:
+      description: Type of commitment. ri for Reserved Instances, sp for Savings Plans.
+      enum:
+        - ri
+        - sp
+      example: ri
+      type: string
+      x-enum-varnames:
+        - RESERVED_INSTANCES
+        - SAVINGS_PLANS
+    CommitmentsCoverageScalarResponse:
+      description: Response containing scalar coverage metrics for cloud commitment programs.
+      properties:
+        columns:
+          $ref: "#/components/schemas/CommitmentsScalarColumns"
+      required:
+        - columns
+      type: object
+    CommitmentsCoverageTimeseriesResponse:
+      description: Response containing timeseries coverage metrics for cloud commitment programs.
+      properties:
+        cost:
+          $ref: "#/components/schemas/CommitmentsTimeseriesMetric"
+        hours:
+          $ref: "#/components/schemas/CommitmentsTimeseriesMetric"
+      required:
+        - cost
+        - hours
+      type: object
+    CommitmentsListItem:
+      description: A commitment item, which varies based on the provider, product, and commitment type.
+      oneOf:
+        - $ref: "#/components/schemas/CommitmentsAwsEC2RICommitment"
+        - $ref: "#/components/schemas/CommitmentsAwsRDSRICommitment"
+        - $ref: "#/components/schemas/CommitmentsAwsElasticacheRICommitment"
+        - $ref: "#/components/schemas/CommitmentsAwsSPCommitment"
+        - $ref: "#/components/schemas/CommitmentsAzureVMRICommitment"
+        - $ref: "#/components/schemas/CommitmentsAzureComputeSPCommitment"
+    CommitmentsListItems:
+      description: Array of commitment items.
+      example:
+        - commitment_id: ri-0123456789abcdef0
+          instance_type: m5.xlarge
+          offering_class: standard
+          operating_system: Linux
+          purchase_option: All Upfront
+          region: us-east-1
+      items:
+        $ref: "#/components/schemas/CommitmentsListItem"
+      type: array
+    CommitmentsListMeta:
+      description: Metadata for a commitments list response.
+      properties:
+        committed_spend_unit:
+          $ref: "#/components/schemas/CommitmentsUnit"
+      type: object
+    CommitmentsListResponse:
+      description: Response containing a list of cloud commitment details.
+      properties:
+        commitments:
+          $ref: "#/components/schemas/CommitmentsListItems"
+        meta:
+          $ref: "#/components/schemas/CommitmentsListMeta"
+      required:
+        - commitments
+      type: object
+    CommitmentsOnDemandHotspotsScalarMeta:
+      description: Metadata for the on-demand hot-spots scalar response.
+      properties:
+        on_demand_filters:
+          description: Active on-demand filters applied to the response.
+          example: "region:us-east-1"
+          type: string
+      required:
+        - on_demand_filters
+      type: object
+    CommitmentsOnDemandHotspotsScalarResponse:
+      description: Response containing scalar on-demand hot-spots data for cloud commitment programs.
+      properties:
+        columns:
+          $ref: "#/components/schemas/CommitmentsScalarColumns"
+        meta:
+          $ref: "#/components/schemas/CommitmentsOnDemandHotspotsScalarMeta"
+        total:
+          $ref: "#/components/schemas/CommitmentsScalarColumns"
+      required:
+        - columns
+        - total
+      type: object
+    CommitmentsProvider:
+      description: Cloud provider for commitment programs.
+      enum:
+        - aws
+        - azure
+      example: aws
+      type: string
+      x-enum-varnames:
+        - AWS
+        - AZURE
+    CommitmentsSavingsScalarResponse:
+      description: Response containing scalar savings metrics for cloud commitment programs.
+      properties:
+        columns:
+          $ref: "#/components/schemas/CommitmentsScalarColumns"
+      required:
+        - columns
+      type: object
+    CommitmentsSavingsTimeseriesResponse:
+      description: Response containing timeseries savings metrics for cloud commitment programs.
+      properties:
+        actual_cost:
+          $ref: "#/components/schemas/CommitmentsTimeseriesMetric"
+        effective_savings_rate:
+          $ref: "#/components/schemas/CommitmentsTimeseriesMetric"
+        on_demand_equivalent_cost:
+          $ref: "#/components/schemas/CommitmentsTimeseriesMetric"
+        realized_savings:
+          $ref: "#/components/schemas/CommitmentsTimeseriesMetric"
+      required:
+        - actual_cost
+        - effective_savings_rate
+        - on_demand_equivalent_cost
+        - realized_savings
+      type: object
+    CommitmentsScalarColumn:
+      description: A column in a scalar response. When type is "group", values contains arrays of strings. When type is "number", values contains numeric values.
+      properties:
+        meta:
+          $ref: "#/components/schemas/CommitmentsScalarColumnMeta"
+        name:
+          description: The column name.
+          example: utilization
+          type: string
+        type:
+          $ref: "#/components/schemas/CommitmentsScalarColumnType"
+        values:
+          $ref: "#/components/schemas/CommitmentsScalarColumnValueItems"
+      required:
+        - name
+        - type
+        - values
+      type: object
+    CommitmentsScalarColumnMeta:
+      description: Metadata for a scalar column, including unit information.
+      properties:
+        unit:
+          $ref: "#/components/schemas/CommitmentsUnit"
+      required:
+        - unit
+      type: object
+    CommitmentsScalarColumnType:
+      description: The column type. "group" for dimension columns, "number" for metric columns.
+      enum:
+        - group
+        - number
+      example: group
+      type: string
+      x-enum-varnames:
+        - GROUP
+        - NUMBER
+    CommitmentsScalarColumnValueItems:
+      description: Values for a scalar column. Arrays of strings for group columns, numbers for value columns.
+      example:
+        - 0.85
+        - 0.72
+      items: {}
+      type: array
+    CommitmentsScalarColumns:
+      description: Array of scalar columns in the response.
+      items:
+        $ref: "#/components/schemas/CommitmentsScalarColumn"
+      type: array
+    CommitmentsTimeseriesMetric:
+      description: A timeseries metric containing timestamps, series values, and optional unit metadata.
+      properties:
+        series:
+          $ref: "#/components/schemas/CommitmentsTimeseriesSeries"
+        times:
+          $ref: "#/components/schemas/CommitmentsTimestamps"
+        unit:
+          $ref: "#/components/schemas/CommitmentsUnit"
+      required:
+        - series
+        - times
+      type: object
+    CommitmentsTimeseriesSeries:
+      additionalProperties:
+        $ref: "#/components/schemas/CommitmentsTimeseriesValues"
+      description: Timeseries data as a map of series names to their corresponding value arrays.
+      type: object
+    CommitmentsTimeseriesValues:
+      description: A series of numeric values for a timeseries metric.
+      items:
+        format: double
+        type: number
+      type: array
+    CommitmentsTimestamps:
+      description: Unix timestamps in seconds for the timeseries data points.
+      example:
+        - 1693526400
+        - 1693612800
+      items:
+        format: int64
+        type: integer
+      type: array
+    CommitmentsUnit:
+      description: Unit metadata for a numeric metric.
+      properties:
+        family:
+          description: The unit family (for example, percentage or money).
+          example: percentage
+          type: string
+        id:
+          description: The unit identifier.
+          example: 17
+          format: int64
+          type: integer
+        name:
+          description: The unit name (for example, percent or dollar).
+          example: percent
+          type: string
+        plural:
+          description: The plural form of the unit name.
+          example: percent
+          type: string
+        scale_factor:
+          description: The scale factor for the unit.
+          example: 1
+          format: double
+          type: number
+        short_name:
+          description: The abbreviated unit name (for example, % or $).
+          example: "%"
+          type: string
+      required:
+        - family
+        - id
+        - name
+        - plural
+        - scale_factor
+        - short_name
+      type: object
+    CommitmentsUtilizationScalarProductBreakdown:
+      description: Array of per-product utilization breakdown entries.
+      items:
+        $ref: "#/components/schemas/CommitmentsUtilizationScalarProductBreakdownEntry"
+      type: array
+    CommitmentsUtilizationScalarProductBreakdownEntry:
+      description: Per-product utilization data in a scalar utilization response.
+      properties:
+        product:
+          description: The cloud product name.
+          example: ec2
+          type: string
+        utilization:
+          description: The utilization percentage for the product.
+          example: 0.85
+          format: double
+          type: number
+      required:
+        - product
+        - utilization
+      type: object
+    CommitmentsUtilizationScalarResponse:
+      description: Response containing scalar utilization metrics for cloud commitment programs.
+      properties:
+        columns:
+          $ref: "#/components/schemas/CommitmentsScalarColumns"
+        product_breakdown:
+          $ref: "#/components/schemas/CommitmentsUtilizationScalarProductBreakdown"
+      required:
+        - columns
+      type: object
+    CommitmentsUtilizationTimeseriesResponse:
+      description: Response containing timeseries utilization metrics for cloud commitment programs.
+      properties:
+        series:
+          $ref: "#/components/schemas/CommitmentsTimeseriesSeries"
+        times:
+          $ref: "#/components/schemas/CommitmentsTimestamps"
+        unit:
+          $ref: "#/components/schemas/CommitmentsUnit"
+      required:
+        - series
+        - times
+      type: object
     CompletionCondition:
       description: The definition of `CompletionCondition` object.
       properties:
@@ -98198,6 +98863,553 @@ paths:
       tags:
         - Cloud Cost Management
       x-menu-order: 33
+  /api/v2/cost/commitments/commitment-list:
+    get:
+      description: Get a list of individual cloud commitments (Reserved Instances or Savings Plans) with their utilization details. The response schema varies based on the provider, product, and commitment type.
+      operationId: GetCommitmentsCommitmentList
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+        - $ref: "#/components/parameters/CommitmentsCommitmentType"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    commitments:
+                      - commitment_id: ri-0123456789abcdef0
+                        expiration_date: "2025-12-31T00:00:00Z"
+                        instance_type: m5.xlarge
+                        offering_class: standard
+                        operating_system: Linux
+                        purchase_option: All Upfront
+                        region: us-east-1
+                        start_date: "2023-01-01T00:00:00Z"
+                        term_length: 1
+                        utilization: 0.85
+              schema:
+                $ref: "#/components/schemas/CommitmentsListResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments list
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 55
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/commitments/coverage/scalar:
+    get:
+      description: Get scalar coverage metrics for cloud commitment programs, including hours and cost coverage percentages.
+      operationId: GetCommitmentsCoverageScalar
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    columns:
+                      - name: service
+                        type: group
+                        values:
+                          -   - ec2
+                      - meta:
+                          unit:
+                            family: percentage
+                            id: 17
+                            name: percent
+                            plural: percent
+                            scale_factor: 1
+                            short_name: "%"
+                        name: hours_coverage
+                        type: number
+                        values:
+                          - 0.78
+              schema:
+                $ref: "#/components/schemas/CommitmentsCoverageScalarResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments coverage (scalar)
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 49
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/commitments/coverage/timeseries:
+    get:
+      description: Get timeseries coverage metrics for cloud commitment programs, broken down by coverage type (Reserved Instances, Savings Plans, On-Demand, and Spot) for both hours and cost.
+      operationId: GetCommitmentsCoverageTimeseries
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    cost:
+                      series:
+                        on_demand_only:
+                          - 1000.0
+                          - 900.0
+                        ri:
+                          - 3600.0
+                          - 3700.0
+                        sp:
+                          - 400.0
+                          - 400.0
+                        spot_only:
+                          - 50.0
+                          - 50.0
+                      times:
+                        - 1693526400
+                        - 1693612800
+                    hours:
+                      series:
+                        on_demand_only:
+                          - 500.0
+                          - 450.0
+                        ri:
+                          - 1800.0
+                          - 1850.0
+                        sp:
+                          - 200.0
+                          - 200.0
+                        spot_only:
+                          - 100.0
+                          - 100.0
+                      times:
+                        - 1693526400
+                        - 1693612800
+              schema:
+                $ref: "#/components/schemas/CommitmentsCoverageTimeseriesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments coverage (timeseries)
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 54
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/commitments/on-demand-hot-spots/scalar:
+    get:
+      description: Get scalar on-demand hot-spots data for cloud commitment programs, showing per-dimension breakdowns of on-demand spending with coverage metrics and potential savings.
+      operationId: GetCommitmentsOnDemandHotspotsScalar
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    columns:
+                      - name: service
+                        type: group
+                        values:
+                          -   - ec2
+                      - meta:
+                          unit:
+                            family: money
+                            id: 1
+                            name: dollar
+                            plural: dollars
+                            scale_factor: 1
+                            short_name: "$"
+                        name: on_demand_cost
+                        type: number
+                        values:
+                          - 1500.0
+                    total:
+                      - meta:
+                          unit:
+                            family: money
+                            id: 1
+                            name: dollar
+                            plural: dollars
+                            scale_factor: 1
+                            short_name: "$"
+                        name: on_demand_cost
+                        type: number
+                        values:
+                          - 1500.0
+              schema:
+                $ref: "#/components/schemas/CommitmentsOnDemandHotspotsScalarResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments on-demand hot spots (scalar)
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 50
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/commitments/savings/scalar:
+    get:
+      description: Get scalar savings metrics for cloud commitment programs, including realized savings and effective savings rate.
+      operationId: GetCommitmentsSavingsScalar
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    columns:
+                      - meta:
+                          unit:
+                            family: money
+                            id: 1
+                            name: dollar
+                            plural: dollars
+                            scale_factor: 1
+                            short_name: "$"
+                        name: realized_savings
+                        type: number
+                        values:
+                          - 2500.0
+                      - meta:
+                          unit:
+                            family: percentage
+                            id: 17
+                            name: percent
+                            plural: percent
+                            scale_factor: 1
+                            short_name: "%"
+                        name: effective_savings_rate
+                        type: number
+                        values:
+                          - 0.33
+              schema:
+                $ref: "#/components/schemas/CommitmentsSavingsScalarResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments savings (scalar)
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 51
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/commitments/savings/timeseries:
+    get:
+      description: Get timeseries savings metrics for cloud commitment programs, including actual cost, on-demand equivalent cost, realized savings, and effective savings rate over time.
+      operationId: GetCommitmentsSavingsTimeseries
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    actual_cost:
+                      series:
+                        total:
+                          - 5000.0
+                          - 5200.0
+                      times:
+                        - 1693526400
+                        - 1693612800
+                      unit:
+                        family: money
+                        id: 1
+                        name: dollar
+                        plural: dollars
+                        scale_factor: 1
+                        short_name: "$"
+                    effective_savings_rate:
+                      series:
+                        total:
+                          - 0.33
+                          - 0.33
+                      times:
+                        - 1693526400
+                        - 1693612800
+                    on_demand_equivalent_cost:
+                      series:
+                        total:
+                          - 7500.0
+                          - 7800.0
+                      times:
+                        - 1693526400
+                        - 1693612800
+                    realized_savings:
+                      series:
+                        total:
+                          - 2500.0
+                          - 2600.0
+                      times:
+                        - 1693526400
+                        - 1693612800
+              schema:
+                $ref: "#/components/schemas/CommitmentsSavingsTimeseriesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments savings (timeseries)
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 52
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/commitments/utilization/scalar:
+    get:
+      description: Get scalar utilization metrics for cloud commitment programs, including utilization percentage and unused cost.
+      operationId: GetCommitmentsUtilizationScalar
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+        - $ref: "#/components/parameters/CommitmentsCommitmentType"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    columns:
+                      - name: service
+                        type: group
+                        values:
+                          -   - ec2
+                          -   - rds
+                      - meta:
+                          unit:
+                            family: percentage
+                            id: 17
+                            name: percent
+                            plural: percent
+                            scale_factor: 1
+                            short_name: "%"
+                        name: utilization
+                        type: number
+                        values:
+                          - 0.85
+                          - 0.72
+              schema:
+                $ref: "#/components/schemas/CommitmentsUtilizationScalarResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments utilization (scalar)
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 48
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/commitments/utilization/timeseries:
+    get:
+      description: Get timeseries utilization metrics for cloud commitment programs, including used and unused cost series over time.
+      operationId: GetCommitmentsUtilizationTimeseries
+      parameters:
+        - $ref: "#/components/parameters/CommitmentsProvider"
+        - $ref: "#/components/parameters/CommitmentsProduct"
+        - $ref: "#/components/parameters/CommitmentsStart"
+        - $ref: "#/components/parameters/CommitmentsEnd"
+        - $ref: "#/components/parameters/CommitmentsFilterBy"
+        - $ref: "#/components/parameters/CommitmentsCommitmentType"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    series:
+                      unused:
+                        - 750.0
+                        - 600.0
+                      used:
+                        - 4250.0
+                        - 4400.0
+                    times:
+                      - 1693526400
+                      - 1693612800
+                    unit:
+                      family: money
+                      id: 1
+                      name: dollar
+                      plural: dollars
+                      scale_factor: 1
+                      short_name: "$"
+              schema:
+                $ref: "#/components/schemas/CommitmentsUtilizationTimeseriesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get commitments utilization (timeseries)
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 53
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cost/custom_costs:
     get:
       description: List the Custom Costs files.
