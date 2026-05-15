@@ -14658,7 +14658,8 @@ components:
       example:
         - 0.85
         - 0.72
-      items: {}
+      items:
+        description: A scalar column value, either a group key (string) or a numeric metric.
       type: array
     CommitmentsScalarColumns:
       description: Array of scalar columns in the response.
@@ -14686,6 +14687,7 @@ components:
     CommitmentsTimeseriesValues:
       description: A series of numeric values for a timeseries metric.
       items:
+        description: A single numeric value in the timeseries.
         format: double
         type: number
       type: array
@@ -14695,6 +14697,7 @@ components:
         - 1693526400
         - 1693612800
       items:
+        description: A Unix timestamp in seconds.
         format: int64
         type: integer
       type: array
@@ -16456,6 +16459,7 @@ components:
       additionalProperties:
         description: The list of correlated values for the tag key.
         items:
+          description: A correlated tag value.
           type: string
         type: array
       description: Map of correlated tag keys to the list of correlated tag values.
@@ -16636,6 +16640,121 @@ components:
       type: string
       x-enum-varnames:
         - COST_BY_ORG
+    CostCurrency:
+      description: A Cloud Cost Management billing currency entry.
+      properties:
+        id:
+          description: The currency code (for example, `USD`).
+          example: USD
+          type: string
+        type:
+          $ref: "#/components/schemas/CostCurrencyType"
+      required:
+        - id
+        - type
+      type: object
+    CostCurrencyResponse:
+      description: The dominant Cloud Cost Management billing currency for the requested period. The `data` array contains at most one entry, and is empty when no currency data is available.
+      example:
+        data:
+          - id: USD
+            type: cost_currency
+      properties:
+        data:
+          description: The dominant billing currency. Empty when no data is available, or a single entry otherwise.
+          items:
+            $ref: "#/components/schemas/CostCurrency"
+          type: array
+      required:
+        - data
+      type: object
+    CostCurrencyType:
+      default: cost_currency
+      description: Type of the Cloud Cost Management billing currency resource.
+      enum:
+        - cost_currency
+      example: cost_currency
+      type: string
+      x-enum-varnames:
+        - COST_CURRENCY
+    CostMetric:
+      description: A Cloud Cost Management metric that has data for the requested period.
+      properties:
+        id:
+          description: The metric name, for example `aws.cost.net.amortized`.
+          example: aws.cost.net.amortized
+          type: string
+        type:
+          $ref: "#/components/schemas/CostMetricType"
+      required:
+        - id
+        - type
+      type: object
+    CostMetricType:
+      default: cost_metric
+      description: Type of the Cloud Cost Management available metric resource.
+      enum:
+        - cost_metric
+      example: cost_metric
+      type: string
+      x-enum-varnames:
+        - COST_METRIC
+    CostMetricsResponse:
+      description: List of available Cloud Cost Management metrics for the requested period.
+      example:
+        data:
+          - id: aws.cost.net.amortized
+            type: cost_metric
+          - id: gcp.cost.amortized
+            type: cost_metric
+      properties:
+        data:
+          description: List of available metrics.
+          items:
+            $ref: "#/components/schemas/CostMetric"
+          type: array
+      required:
+        - data
+      type: object
+    CostOrchestrator:
+      description: A container orchestrator detected in Cloud Cost Management data.
+      properties:
+        id:
+          description: The orchestrator name, for example `kubernetes` or `ecs`.
+          example: kubernetes
+          type: string
+        type:
+          $ref: "#/components/schemas/CostOrchestratorType"
+      required:
+        - id
+        - type
+      type: object
+    CostOrchestratorType:
+      default: cost_orchestrator
+      description: Type of the Cloud Cost Management orchestrator resource.
+      enum:
+        - cost_orchestrator
+      example: cost_orchestrator
+      type: string
+      x-enum-varnames:
+        - COST_ORCHESTRATOR
+    CostOrchestratorsResponse:
+      description: List of container orchestrators detected in Cloud Cost Management data for the requested period.
+      example:
+        data:
+          - id: ecs
+            type: cost_orchestrator
+          - id: kubernetes
+            type: cost_orchestrator
+      properties:
+        data:
+          description: List of detected container orchestrators.
+          items:
+            $ref: "#/components/schemas/CostOrchestrator"
+          type: array
+      required:
+        - data
+      type: object
     CostTag:
       description: A Cloud Cost Management tag.
       properties:
@@ -16821,6 +16940,121 @@ components:
         - description
         - tag_values
       type: object
+    CostTagKeyMetadata:
+      description: A Cloud Cost Management tag key metadata entry, aggregating coverage and example values for a single tag key, metric, and period.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostTagKeyMetadataAttributes"
+        id:
+          description: A composite identifier of the form `tag_key:metric` for monthly roll-ups, or `tag_key:metric:YYYY-MM-DD` when `filter[daily]=true`.
+          example: env:aws.cost.net.amortized
+          type: string
+        type:
+          $ref: "#/components/schemas/CostTagKeyMetadataType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    CostTagKeyMetadataAttributes:
+      description: Attributes of a Cloud Cost Management tag key metadata entry.
+      properties:
+        cardinality_by_account:
+          $ref: "#/components/schemas/CostTagKeyMetadataCardinalityByAccount"
+        cost_covered:
+          description: Total cost (in the report currency) of cost line items that carry this tag key for the requested period.
+          example: 1234.56
+          format: double
+          type: number
+        date:
+          description: The day this row corresponds to, in `YYYY-MM-DD` format. Present only when `filter[daily]=true`; omitted for the monthly roll-up returned by default.
+          example: "2026-02-15"
+          type: string
+        metric:
+          description: The Cloud Cost Management metric this row aggregates, for example `aws.cost.net.amortized`.
+          example: aws.cost.net.amortized
+          type: string
+        row_count:
+          description: Number of cost rows that carry this tag key over the requested period.
+          example: 100
+          format: int64
+          type: integer
+        tag_sources:
+          description: Origins where this tag key was observed (for example, `aws-user-defined`).
+          example:
+            - aws-user-defined
+          items:
+            description: A tag source.
+            type: string
+          type: array
+        top_values_by_account:
+          $ref: "#/components/schemas/CostTagKeyMetadataTopValuesByAccount"
+      required:
+        - cardinality_by_account
+        - cost_covered
+        - metric
+        - row_count
+        - tag_sources
+        - top_values_by_account
+      type: object
+    CostTagKeyMetadataCardinalityByAccount:
+      additionalProperties:
+        description: Number of unique tag values observed in the account.
+        format: int64
+        type: integer
+      description: Number of unique tag values observed for this tag key, keyed by cloud account ID.
+      example:
+        "123456789012": 42
+      type: object
+    CostTagKeyMetadataResponse:
+      description: List of Cloud Cost Management tag key metadata entries for the requested period.
+      example:
+        data:
+          - attributes:
+              cardinality_by_account:
+                "123456789012": 42
+              cost_covered: 1234.56
+              metric: aws.cost.net.amortized
+              row_count: 100
+              tag_sources:
+                - aws-user-defined
+              top_values_by_account:
+                "123456789012":
+                  - prod
+                  - staging
+            id: env:aws.cost.net.amortized
+            type: cost_tag_key_metadata
+      properties:
+        data:
+          description: List of tag key metadata entries.
+          items:
+            $ref: "#/components/schemas/CostTagKeyMetadata"
+          type: array
+      required:
+        - data
+      type: object
+    CostTagKeyMetadataTopValuesByAccount:
+      additionalProperties:
+        description: A sample of the most frequent tag values observed in the account.
+        items:
+          description: A tag value observed for this tag key.
+          type: string
+        type: array
+      description: A sample of the most frequent tag values observed for this tag key, keyed by cloud account ID.
+      example:
+        "123456789012":
+          - prod
+          - staging
+      type: object
+    CostTagKeyMetadataType:
+      default: cost_tag_key_metadata
+      description: Type of the Cloud Cost Management tag key metadata resource.
+      enum:
+        - cost_tag_key_metadata
+      example: cost_tag_key_metadata
+      type: string
+      x-enum-varnames:
+        - COST_TAG_KEY_METADATA
     CostTagKeyResponse:
       description: A single Cloud Cost Management tag key.
       example:
@@ -16840,6 +17074,77 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/CostTagKey"
+      required:
+        - data
+      type: object
+    CostTagKeySource:
+      description: A Cloud Cost Management tag key paired with the sources that produced it.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostTagKeySourceAttributes"
+        id:
+          description: The tag key identifier. Equal to the empty-tag sentinel `__empty_tag_key__` when the tag key is empty.
+          example: env
+          type: string
+        type:
+          $ref: "#/components/schemas/CostTagKeySourceType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    CostTagKeySourceAttributes:
+      description: Attributes of a Cloud Cost Management tag source.
+      properties:
+        tag_key:
+          description: The tag key name.
+          example: env
+          type: string
+        tag_sources:
+          description: Origins where this tag key was observed (for example, `aws-user-defined`).
+          example:
+            - aws-user-defined
+            - custom
+          items:
+            description: A tag source.
+            type: string
+          type: array
+      required:
+        - tag_key
+        - tag_sources
+      type: object
+    CostTagKeySourceType:
+      default: cost_tag_key_source
+      description: Type of the Cloud Cost Management tag source resource.
+      enum:
+        - cost_tag_key_source
+      example: cost_tag_key_source
+      type: string
+      x-enum-varnames:
+        - COST_TAG_KEY_SOURCE
+    CostTagKeySourcesResponse:
+      description: List of Cloud Cost Management tag keys with their origin sources for the requested period.
+      example:
+        data:
+          - attributes:
+              tag_key: env
+              tag_sources:
+                - aws-user-defined
+                - custom
+            id: env
+            type: cost_tag_key_source
+          - attributes:
+              tag_key: service
+              tag_sources:
+                - aws
+            id: service
+            type: cost_tag_key_source
+      properties:
+        data:
+          description: List of tag keys with their origin sources.
+          items:
+            $ref: "#/components/schemas/CostTagKeySource"
+          type: array
       required:
         - data
       type: object
@@ -16876,6 +17181,16 @@ components:
       required:
         - data
       type: object
+    CostTagMetadataDailyFilter:
+      description: Granularity for tag metadata results. `true` returns one row per day, `false` (or omitted) returns the monthly roll-up.
+      enum:
+        - "true"
+        - "false"
+      example: "true"
+      type: string
+      x-enum-varnames:
+        - "TRUE"
+        - "FALSE"
     CostTagType:
       default: cost_tag
       description: Type of the Cloud Cost Management tag resource.
@@ -101594,6 +101909,348 @@ paths:
         operator: OR
         permissions:
           - cloud_cost_management_read
+  /api/v2/cost/tag_metadata:
+    get:
+      description: List Cloud Cost Management tag key metadata, including row counts, cost covered, cardinality, and a sample of top tag values per cloud account. Use `filter[daily]=true` to return daily rows instead of the default monthly roll-up.
+      operationId: ListCostTagMetadata
+      parameters:
+        - description: The month to scope the query to, in `YYYY-MM` format.
+          example: "2026-02"
+          in: query
+          name: filter[month]
+          required: true
+          schema:
+            type: string
+        - description: Filter results to a specific provider. Common cloud values are `aws`, `azure`, `gcp`, `Oracle` (OCI), and `custom`. SaaS billing integrations (for example, `Snowflake`, `MongoDB`, `Databricks`) are also accepted using their display-name string. Values are case-sensitive.
+          in: query
+          name: filter[provider]
+          schema:
+            type: string
+        - description: Filter results to a specific Cloud Cost Management metric (for example, `aws.cost.net.amortized`). When omitted, every available metric for the requested period is returned.
+          in: query
+          name: filter[metric]
+          schema:
+            type: string
+        - description: Restrict results to a single tag key.
+          in: query
+          name: filter[tag_key]
+          schema:
+            type: string
+        - description: When `true`, return one row per day with the day in the `date` attribute. Defaults to the monthly roll-up when omitted.
+          in: query
+          name: filter[daily]
+          schema:
+            $ref: "#/components/schemas/CostTagMetadataDailyFilter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          cardinality_by_account:
+                            "123456789012": 42
+                          cost_covered: 1234.56
+                          metric: aws.cost.net.amortized
+                          row_count: 100
+                          tag_sources:
+                            - aws-user-defined
+                          top_values_by_account:
+                            "123456789012":
+                              - prod
+                              - staging
+                        id: env:aws.cost.net.amortized
+                        type: cost_tag_key_metadata
+              schema:
+                $ref: "#/components/schemas/CostTagKeyMetadataResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management tag key metadata
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 56
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/tag_metadata/currency:
+    get:
+      description: Get the dominant billing currency observed in Cloud Cost Management data for the requested period. The response wraps the currency in a JSON:API `data` array containing at most one entry; the array is empty when no currency data is available.
+      operationId: GetCostTagMetadataCurrency
+      parameters:
+        - description: The month to scope the query to, in `YYYY-MM` format.
+          example: "2026-02"
+          in: query
+          name: filter[month]
+          required: true
+          schema:
+            type: string
+        - description: Filter results to a specific provider. Common cloud values are `aws`, `azure`, `gcp`, `Oracle` (OCI), and `custom`. SaaS billing integrations (for example, `Snowflake`, `MongoDB`, `Databricks`) are also accepted using their display-name string. Values are case-sensitive.
+          in: query
+          name: filter[provider]
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: USD
+                        type: cost_currency
+              schema:
+                $ref: "#/components/schemas/CostCurrencyResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Get the Cloud Cost Management billing currency
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 60
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/tag_metadata/metrics:
+    get:
+      description: List Cloud Cost Management metrics that have data for the requested period.
+      operationId: ListCostTagMetadataMetrics
+      parameters:
+        - description: The month to scope the query to, in `YYYY-MM` format.
+          example: "2026-02"
+          in: query
+          name: filter[month]
+          required: true
+          schema:
+            type: string
+        - description: Filter results to a specific provider. Common cloud values are `aws`, `azure`, `gcp`, `Oracle` (OCI), and `custom`. SaaS billing integrations (for example, `Snowflake`, `MongoDB`, `Databricks`) are also accepted using their display-name string. Values are case-sensitive.
+          in: query
+          name: filter[provider]
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: aws.cost.net.amortized
+                        type: cost_metric
+                      - id: gcp.cost.amortized
+                        type: cost_metric
+              schema:
+                $ref: "#/components/schemas/CostMetricsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List available Cloud Cost Management metrics
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 58
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/tag_metadata/orchestrators:
+    get:
+      description: List container orchestrators (for example, `kubernetes`, `ecs`) detected in Cloud Cost Management data for the requested period.
+      operationId: ListCostTagMetadataOrchestrators
+      parameters:
+        - description: The month to scope the query to, in `YYYY-MM` format.
+          example: "2026-02"
+          in: query
+          name: filter[month]
+          required: true
+          schema:
+            type: string
+        - description: Filter results to a specific provider. Common cloud values are `aws`, `azure`, `gcp`, `Oracle` (OCI), and `custom`. SaaS billing integrations (for example, `Snowflake`, `MongoDB`, `Databricks`) are also accepted using their display-name string. Values are case-sensitive.
+          in: query
+          name: filter[provider]
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: ecs
+                        type: cost_orchestrator
+                      - id: kubernetes
+                        type: cost_orchestrator
+              schema:
+                $ref: "#/components/schemas/CostOrchestratorsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management orchestrators
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 59
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/tag_metadata/tag_sources:
+    get:
+      description: List Cloud Cost Management tag keys observed for the requested period, along with the origin sources that produced them (for example, `aws-user-defined`, `custom`).
+      operationId: ListCostTagKeySources
+      parameters:
+        - description: The month to scope the query to, in `YYYY-MM` format.
+          example: "2026-02"
+          in: query
+          name: filter[month]
+          required: true
+          schema:
+            type: string
+        - description: Filter results to a specific provider. Common cloud values are `aws`, `azure`, `gcp`, `Oracle` (OCI), and `custom`. SaaS billing integrations (for example, `Snowflake`, `MongoDB`, `Databricks`) are also accepted using their display-name string. Values are case-sensitive.
+          in: query
+          name: filter[provider]
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          tag_key: env
+                          tag_sources:
+                            - aws-user-defined
+                            - custom
+                        id: env
+                        type: cost_tag_key_source
+                      - attributes:
+                          tag_key: service
+                          tag_sources:
+                            - aws
+                        id: service
+                        type: cost_tag_key_source
+              schema:
+                $ref: "#/components/schemas/CostTagKeySourcesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management tag sources
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 57
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cost/tags:
     get:
       description: List Cloud Cost Management tags for a given metric.
