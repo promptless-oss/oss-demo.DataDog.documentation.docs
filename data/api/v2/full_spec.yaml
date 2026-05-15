@@ -40264,33 +40264,19 @@ components:
       type: object
     LLMObsAnnotatedInteractionItem:
       description: An interaction with its associated annotations.
-      properties:
-        annotations:
-          description: List of annotations for this interaction.
-          items:
-            $ref: "#/components/schemas/LLMObsAnnotationItem"
-          type: array
-        content_id:
-          description: Identifier of the content (trace ID or session ID) for this interaction.
-          example: "trace-abc-123"
-          type: string
-        id:
-          description: Unique identifier of the interaction.
-          example: "interaction-456"
-          type: string
-        type:
-          $ref: "#/components/schemas/LLMObsInteractionType"
-      required:
-        - id
-        - type
-        - content_id
-        - annotations
-      type: object
+      oneOf:
+        - $ref: "#/components/schemas/LLMObsTraceAnnotatedInteractionItem"
+        - $ref: "#/components/schemas/LLMObsDisplayBlockAnnotatedInteractionItem"
     LLMObsAnnotatedInteractionsDataAttributesResponse:
       description: Attributes containing the list of annotated interactions.
       properties:
         annotated_interactions:
           description: List of interactions with their annotations.
+          example:
+            - annotations: []
+              content_id: trace-abc-123
+              id: "interaction-456"
+              type: trace
           items:
             $ref: "#/components/schemas/LLMObsAnnotatedInteractionItem"
           type: array
@@ -40472,45 +40458,22 @@ components:
       type: object
     LLMObsAnnotationQueueInteractionItem:
       description: A single interaction to add to an annotation queue.
-      properties:
-        content_id:
-          description: Identifier of the content (trace ID or session ID) for this interaction.
-          example: "trace-abc-123"
-          type: string
-        type:
-          $ref: "#/components/schemas/LLMObsInteractionType"
-      required:
-        - type
-        - content_id
-      type: object
+      oneOf:
+        - $ref: "#/components/schemas/LLMObsTraceInteractionItem"
+        - $ref: "#/components/schemas/LLMObsDisplayBlockInteractionItem"
     LLMObsAnnotationQueueInteractionResponseItem:
       description: A single interaction result.
-      properties:
-        already_existed:
-          description: Whether this interaction already existed in the queue.
-          example: false
-          type: boolean
-        content_id:
-          description: Identifier of the content (trace ID or session ID) for this interaction.
-          example: "trace-abc-123"
-          type: string
-        id:
-          description: Unique identifier of the interaction.
-          example: "00000000-0000-0000-0000-000000000000"
-          type: string
-        type:
-          $ref: "#/components/schemas/LLMObsInteractionType"
-      required:
-        - id
-        - type
-        - content_id
-        - already_existed
-      type: object
+      oneOf:
+        - $ref: "#/components/schemas/LLMObsTraceInteractionResponseItem"
+        - $ref: "#/components/schemas/LLMObsDisplayBlockInteractionResponseItem"
     LLMObsAnnotationQueueInteractionsDataAttributesRequest:
       description: Attributes for adding interactions to an annotation queue.
       properties:
         interactions:
           description: List of interactions to add to the queue. Must contain at least one item.
+          example:
+            - content_id: trace-abc-123
+              type: trace
           items:
             $ref: "#/components/schemas/LLMObsAnnotationQueueInteractionItem"
           minItems: 1
@@ -40523,6 +40486,11 @@ components:
       properties:
         interactions:
           description: List of interactions that were processed.
+          example:
+            - already_existed: false
+              content_id: trace-abc-123
+              id: "00000000-0000-0000-0000-000000000000"
+              type: trace
           items:
             $ref: "#/components/schemas/LLMObsAnnotationQueueInteractionResponseItem"
           type: array
@@ -40718,6 +40686,144 @@ components:
       required:
         - label_schemas
       type: object
+    LLMObsContentBlock:
+      description: |-
+        A single content block rendered inside a `display_block` interaction.
+        `type` discriminates which other fields are meaningful:
+
+        - `markdown` / `text`: `content` must be a string.
+        - `header`: `content` must be a string; `level`, when set, must be one of `sm`, `md`, `lg`, `xl`.
+        - `json`: `content` must be a well-formed JSON value (object, array, or scalar).
+        - `image`: `url` is required.
+        - `widget`: `tileDef` is required (any well-formed JSON; the frontend owns the renderable schema).
+        - `llmobs_trace`: `traceId` is required; `interactionType`, when set, must be `trace` or `experiment_trace`.
+
+        `height`, when set, must be positive.
+      properties:
+        alt:
+          description: Alternative text for an `image` block.
+          example: "Example image"
+          type: string
+        content:
+          description: |-
+            Block payload. A string for `markdown`, `header`, and `text`; an
+            arbitrary JSON value (object, array, or scalar) for `json`. Omitted
+            for `image`, `widget`, and `llmobs_trace`.
+          example: "## Triage Instructions"
+        height:
+          description: Optional rendered height. Must be positive when set.
+          example: 240
+          format: int64
+          type: integer
+        interactionType:
+          $ref: "#/components/schemas/LLMObsContentBlockLLMObsTraceInteractionType"
+        label:
+          description: Optional label rendered alongside the block.
+          example: "Triage Instructions"
+          type: string
+        level:
+          $ref: "#/components/schemas/LLMObsContentBlockHeaderLevel"
+        tileDef:
+          description: |-
+            Tile definition for a `widget` block. Required for `widget`. The
+            schema is owned by the frontend renderer.
+          example:
+            requests:
+              - queries:
+                  - data_source: metrics
+                    name: q
+                    query: "avg:system.cpu.user{*}"
+                response_format: timeseries
+                type: line
+            viz: timeseries
+        timeFrame:
+          $ref: "#/components/schemas/LLMObsContentBlockTimeFrame"
+        traceId:
+          description: Trace identifier. Required for `llmobs_trace` blocks.
+          example: "69fcc2bb0000000003113989d83069ba"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsContentBlockType"
+        url:
+          description: URL of the image. Required for `image` blocks.
+          example: "https://example.com/image.png"
+          type: string
+      required:
+        - type
+      type: object
+    LLMObsContentBlockHeaderLevel:
+      description: Visual size for a `header` block.
+      enum:
+        - sm
+        - md
+        - lg
+        - xl
+      example: md
+      type: string
+      x-enum-varnames:
+        - SM
+        - MD
+        - LG
+        - XL
+    LLMObsContentBlockLLMObsTraceInteractionType:
+      description: |-
+        Upstream interaction type referenced by an `llmobs_trace` block.
+        Restricted to `trace` or `experiment_trace`.
+      enum:
+        - trace
+        - experiment_trace
+      example: trace
+      type: string
+      x-enum-varnames:
+        - TRACE
+        - EXPERIMENT_TRACE
+    LLMObsContentBlockTimeFrame:
+      description: Unix-millis time range used by chart blocks.
+      properties:
+        end:
+          description: End of the range, in Unix milliseconds.
+          example: 1705315800000
+          format: int64
+          type: integer
+        start:
+          description: Start of the range, in Unix milliseconds.
+          example: 1705312200000
+          format: int64
+          type: integer
+      required:
+        - start
+        - end
+      type: object
+    LLMObsContentBlockType:
+      description: |-
+        Discriminator for a single `display_block` content block. Adding a
+        variant requires coordinated changes in the frontend renderer.
+      enum:
+        - markdown
+        - header
+        - text
+        - json
+        - image
+        - widget
+        - llmobs_trace
+      example: markdown
+      type: string
+      x-enum-varnames:
+        - MARKDOWN
+        - HEADER
+        - TEXT
+        - JSON
+        - IMAGE
+        - WIDGET
+        - LLMOBS_TRACE
+    LLMObsContentBlocks:
+      description: |-
+        List of content blocks that make up a `display_block` interaction.
+        Must contain at least one block.
+      items:
+        $ref: "#/components/schemas/LLMObsContentBlock"
+      minItems: 1
+      type: array
     LLMObsCursorMeta:
       description: Pagination cursor metadata.
       properties:
@@ -41628,6 +41734,81 @@ components:
       required:
         - data
       type: object
+    LLMObsDisplayBlockAnnotatedInteractionItem:
+      description: A display_block interaction with its associated annotations.
+      properties:
+        annotations:
+          description: List of annotations for this interaction.
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotationItem"
+          type: array
+        content_id:
+          description: Server-generated deterministic identifier derived from the block list.
+          example: "9a87f3e2b1d4c5a6f8b3e2d1c4a7b5f6e3d2a1c4b7e5f8a3d6c2e1b4a7d5f8c2"
+          type: string
+        display_block:
+          $ref: "#/components/schemas/LLMObsContentBlocks"
+        id:
+          description: Unique identifier of the interaction.
+          example: "interaction-456"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsDisplayBlockInteractionType"
+      required:
+        - id
+        - type
+        - content_id
+        - annotations
+        - display_block
+      type: object
+    LLMObsDisplayBlockInteractionItem:
+      description: |-
+        An interaction whose rendered content is supplied directly as a list
+        of display blocks. The server generates `content_id` deterministically
+        from the block list.
+      properties:
+        display_block:
+          $ref: "#/components/schemas/LLMObsContentBlocks"
+        type:
+          $ref: "#/components/schemas/LLMObsDisplayBlockInteractionType"
+      required:
+        - type
+        - display_block
+      type: object
+    LLMObsDisplayBlockInteractionResponseItem:
+      description: A display_block interaction result.
+      properties:
+        already_existed:
+          description: Whether this interaction already existed in the queue.
+          example: false
+          type: boolean
+        content_id:
+          description: Server-generated deterministic identifier derived from the block list.
+          example: "9a87f3e2b1d4c5a6f8b3e2d1c4a7b5f6e3d2a1c4b7e5f8a3d6c2e1b4a7d5f8c2"
+          type: string
+        display_block:
+          $ref: "#/components/schemas/LLMObsContentBlocks"
+        id:
+          description: Unique identifier of the interaction.
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsDisplayBlockInteractionType"
+      required:
+        - id
+        - type
+        - content_id
+        - already_existed
+        - display_block
+      type: object
+    LLMObsDisplayBlockInteractionType:
+      description: Type discriminator for a `display_block` interaction.
+      enum:
+        - display_block
+      example: display_block
+      type: string
+      x-enum-varnames:
+        - DISPLAY_BLOCK
     LLMObsEventType:
       description: Resource type for LLM Observability experiment events.
       enum:
@@ -42005,18 +42186,6 @@ components:
       required:
         - data
       type: object
-    LLMObsInteractionType:
-      description: Type of interaction in an annotation queue.
-      enum:
-        - trace
-        - experiment_trace
-        - session
-      example: trace
-      type: string
-      x-enum-varnames:
-        - TRACE
-        - EXPERIMENT_TRACE
-        - SESSION
     LLMObsLabelSchema:
       description: Schema definition for a single label in an annotation queue.
       properties:
@@ -42258,6 +42427,78 @@ components:
       type: string
       x-enum-varnames:
         - RECORDS
+    LLMObsTraceAnnotatedInteractionItem:
+      description: A trace, experiment trace, or session interaction with its associated annotations.
+      properties:
+        annotations:
+          description: List of annotations for this interaction.
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotationItem"
+          type: array
+        content_id:
+          description: Upstream entity identifier supplied by the caller.
+          example: "trace-abc-123"
+          type: string
+        id:
+          description: Unique identifier of the interaction.
+          example: "interaction-456"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsTraceInteractionType"
+      required:
+        - id
+        - type
+        - content_id
+        - annotations
+      type: object
+    LLMObsTraceInteractionItem:
+      description: An interaction that references an upstream trace, experiment trace, or session.
+      properties:
+        content_id:
+          description: Upstream entity identifier (trace, experiment trace, or session ID).
+          example: "trace-abc-123"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsTraceInteractionType"
+      required:
+        - type
+        - content_id
+      type: object
+    LLMObsTraceInteractionResponseItem:
+      description: A trace, experiment trace, or session interaction result.
+      properties:
+        already_existed:
+          description: Whether this interaction already existed in the queue.
+          example: false
+          type: boolean
+        content_id:
+          description: Upstream entity identifier supplied by the caller.
+          example: "trace-abc-123"
+          type: string
+        id:
+          description: Unique identifier of the interaction.
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsTraceInteractionType"
+      required:
+        - id
+        - type
+        - content_id
+        - already_existed
+      type: object
+    LLMObsTraceInteractionType:
+      description: Type of an upstream-entity interaction.
+      enum:
+        - trace
+        - experiment_trace
+        - session
+      example: trace
+      type: string
+      x-enum-varnames:
+        - TRACE
+        - EXPERIMENT_TRACE
+        - SESSION
     Language:
       description: Programming language
       enum:
@@ -115149,8 +115390,16 @@ paths:
   /api/v2/llm-obs/v1/annotation-queues/{queue_id}/interactions:
     post:
       description: |-
-        Add one or more interactions (traces or sessions) to an annotation queue.
-        At least one interaction must be provided.
+        Add one or more interactions to an annotation queue. At least one
+        interaction must be provided. Each interaction has a `type`:
+
+        - `trace`, `experiment_trace`, `session`: `content_id` references the
+          upstream entity; the server fetches the actual content.
+        - `display_block`: omit `content_id` and provide the rendered content
+          in `display_block`. The server generates `content_id` as a
+          deterministic hash of the block list.
+
+        Items of different types can be mixed in a single request.
       operationId: CreateLLMObsAnnotationQueueInteractions
       parameters:
         - $ref: "#/components/parameters/LLMObsAnnotationQueueIDPathParameter"
@@ -115165,6 +115414,24 @@ paths:
                       interactions:
                         - content_id: trace-abc-123
                           type: trace
+                    type: interactions
+              display_block:
+                summary: Add a display_block interaction
+                value:
+                  data:
+                    attributes:
+                      interactions:
+                        - display_block:
+                            - content: "## Triage Instructions"
+                              type: markdown
+                            - content: "Inputs"
+                              level: md
+                              type: header
+                            - content:
+                                experiment_id: abc-123
+                              label: "Experiments"
+                              type: json
+                          type: display_block
                     type: interactions
             schema:
               $ref: "#/components/schemas/LLMObsAnnotationQueueInteractionsRequest"
@@ -115184,6 +115451,21 @@ paths:
                             content_id: trace-abc-123
                             id: 00000000-0000-0000-0000-000000000000
                             type: trace
+                      id: 00000000-0000-0000-0000-000000000001
+                      type: interactions
+                display_block:
+                  summary: display_block response
+                  value:
+                    data:
+                      attributes:
+                        interactions:
+                          - already_existed: false
+                            content_id: 9a87f3e2b1d4c5a6f8b3e2d1c4a7b5f6e3d2a1c4b7e5f8a3d6c2e1b4a7d5f8c2
+                            display_block:
+                              - content: "## Triage Instructions"
+                                type: markdown
+                            id: 00000000-0000-0000-0000-000000000000
+                            type: display_block
                       id: 00000000-0000-0000-0000-000000000001
                       type: interactions
               schema:
