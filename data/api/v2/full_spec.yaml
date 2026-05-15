@@ -4661,6 +4661,15 @@ components:
       type: string
       x-enum-varnames:
         - DEPLOYMENT
+    AppFavoriteType:
+      default: favorites
+      description: The favorite resource type.
+      enum:
+        - favorites
+      example: favorites
+      type: string
+      x-enum-varnames:
+        - FAVORITES
     AppKeyRegistrationData:
       description: Data related to the app key registration.
       properties:
@@ -4721,6 +4730,25 @@ components:
           format: int64
           type: integer
       type: object
+    AppProtectionLevel:
+      description: The publication protection level of the app. `approval_required` means changes must go through an approval workflow before being published.
+      enum:
+        - direct_publish
+        - approval_required
+      example: direct_publish
+      type: string
+      x-enum-varnames:
+        - DIRECT_PUBLISH
+        - APPROVAL_REQUIRED
+    AppProtectionLevelType:
+      default: protectionLevel
+      description: The protection-level resource type.
+      enum:
+        - protectionLevel
+      example: protectionLevel
+      type: string
+      x-enum-varnames:
+        - PROTECTIONLEVEL
     AppRelationship:
       description: The app's publication relationship and custom connections.
       properties:
@@ -4732,6 +4760,24 @@ components:
         deployment:
           $ref: "#/components/schemas/DeploymentRelationship"
       type: object
+    AppSelfServiceType:
+      default: selfService
+      description: The self-service resource type.
+      enum:
+        - selfService
+      example: selfService
+      type: string
+      x-enum-varnames:
+        - SELFSERVICE
+    AppTagsType:
+      default: tags
+      description: The tags resource type.
+      enum:
+        - tags
+      example: tags
+      type: string
+      x-enum-varnames:
+        - TAGS
     AppTriggerWrapper:
       description: "Schema for an App-based trigger."
       properties:
@@ -4743,6 +4789,80 @@ components:
       required:
         - appTrigger
       type: object
+    AppVersion:
+      description: A version of an app.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AppVersionAttributes"
+        id:
+          description: The ID of the app version.
+          example: 9e20cbaf-68da-45a6-9ccf-54193ac29fa5
+          format: uuid
+          type: string
+        type:
+          $ref: "#/components/schemas/AppVersionType"
+      type: object
+    AppVersionAttributes:
+      description: Attributes describing an app version.
+      properties:
+        app_id:
+          description: The ID of the app this version belongs to.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          format: uuid
+          type: string
+        created_at:
+          description: Timestamp of when the version was created.
+          format: date-time
+          type: string
+        has_ever_been_published:
+          description: Whether this version has ever been published.
+          example: true
+          type: boolean
+        name:
+          description: The optional human-readable name of the version.
+          example: v1.2.0 - bug fix release
+          type: string
+        updated_at:
+          description: Timestamp of when the version was last updated.
+          format: date-time
+          type: string
+        user_id:
+          description: The ID of the user who created the version.
+          format: int64
+          type: integer
+        user_name:
+          description: The name (or email) of the user who created the version.
+          example: jane.doe@example.com
+          type: string
+        user_uuid:
+          description: The UUID of the user who created the version.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          format: uuid
+          type: string
+        version:
+          description: The version number of the app, starting at 1.
+          example: 3
+          format: int64
+          type: integer
+      type: object
+    AppVersionNameType:
+      default: versionNames
+      description: The version-name resource type.
+      enum:
+        - versionNames
+      example: versionNames
+      type: string
+      x-enum-varnames:
+        - VERSIONNAMES
+    AppVersionType:
+      default: appVersions
+      description: The app-version resource type.
+      enum:
+        - appVersions
+      example: appVersions
+      type: string
+      x-enum-varnames:
+        - APPVERSIONS
     ApplicationKeyCreateAttributes:
       description: Attributes used to create an application Key.
       properties:
@@ -18526,6 +18646,40 @@ components:
       required:
         - type
         - number
+      type: object
+    CreatePublishRequestRequest:
+      description: A request to ask for approval to publish an app whose protection level is `approval_required`.
+      example:
+        data:
+          attributes:
+            description: Adds new dashboard widgets and a few bug fixes.
+            title: Release v1.2 to production
+          type: publishRequest
+      properties:
+        data:
+          $ref: "#/components/schemas/CreatePublishRequestRequestData"
+      type: object
+    CreatePublishRequestRequestData:
+      description: Data for creating a publish request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CreatePublishRequestRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/PublishRequestType"
+      type: object
+    CreatePublishRequestRequestDataAttributes:
+      description: Attributes for creating a publish request.
+      properties:
+        description:
+          description: An optional description of the changes in this publish request.
+          example: Adds new dashboard widgets and a few bug fixes.
+          type: string
+        title:
+          description: A short title for the publish request.
+          example: Release v1.2 to production
+          type: string
+      required:
+        - title
       type: object
     CreateRuleRequest:
       description: Scorecard create rule request.
@@ -42490,6 +42644,17 @@ components:
           format: int64
           type: integer
       type: object
+    ListAppVersionsResponse:
+      description: A paginated list of versions for an app.
+      properties:
+        data:
+          description: The list of app versions.
+          items:
+            $ref: "#/components/schemas/AppVersion"
+          type: array
+        meta:
+          $ref: "#/components/schemas/ListAppsResponseMeta"
+      type: object
     ListApplicationKeysResponse:
       description: Response for a list of application keys.
       properties:
@@ -58658,6 +58823,15 @@ components:
         data:
           $ref: "#/components/schemas/Deployment"
       type: object
+    PublishRequestType:
+      default: publishRequest
+      description: The publish-request resource type.
+      enum:
+        - publishRequest
+      example: publishRequest
+      type: string
+      x-enum-varnames:
+        - PUBLISHREQUEST
     PutAppsDatastoreItemResponseArray:
       description: Response after successfully inserting multiple items into a datastore, containing the identifiers of the created items.
       properties:
@@ -82379,6 +82553,62 @@ components:
         data:
           $ref: "#/components/schemas/ActionConnectionData"
       type: object
+    UpdateAppFavoriteRequest:
+      description: A request to add or remove an app from the current user's favorites.
+      example:
+        data:
+          attributes:
+            favorite: true
+          type: favorites
+      properties:
+        data:
+          $ref: "#/components/schemas/UpdateAppFavoriteRequestData"
+      type: object
+    UpdateAppFavoriteRequestData:
+      description: Data for updating an app's favorite status.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/UpdateAppFavoriteRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/AppFavoriteType"
+      type: object
+    UpdateAppFavoriteRequestDataAttributes:
+      description: Attributes for updating an app's favorite status.
+      properties:
+        favorite:
+          description: Whether the app should be marked as a favorite for the current user.
+          example: true
+          type: boolean
+      required:
+        - favorite
+      type: object
+    UpdateAppProtectionLevelRequest:
+      description: A request to update an app's publication protection level.
+      example:
+        data:
+          attributes:
+            protectionLevel: approval_required
+          type: protectionLevel
+      properties:
+        data:
+          $ref: "#/components/schemas/UpdateAppProtectionLevelRequestData"
+      type: object
+    UpdateAppProtectionLevelRequestData:
+      description: Data for updating an app's publication protection level.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/UpdateAppProtectionLevelRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/AppProtectionLevelType"
+      type: object
+    UpdateAppProtectionLevelRequestDataAttributes:
+      description: Attributes for updating an app's publication protection level.
+      properties:
+        protectionLevel:
+          $ref: "#/components/schemas/AppProtectionLevel"
+      required:
+        - protectionLevel
+      type: object
     UpdateAppRequest:
       description: A request object for updating an existing app.
       example:
@@ -82537,6 +82767,99 @@ components:
             description: An individual tag for the app.
             type: string
           type: array
+      type: object
+    UpdateAppSelfServiceRequest:
+      description: A request to enable or disable self-service for an app.
+      example:
+        data:
+          attributes:
+            selfService: true
+          type: selfService
+      properties:
+        data:
+          $ref: "#/components/schemas/UpdateAppSelfServiceRequestData"
+      type: object
+    UpdateAppSelfServiceRequestData:
+      description: Data for updating an app's self-service status.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/UpdateAppSelfServiceRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/AppSelfServiceType"
+      type: object
+    UpdateAppSelfServiceRequestDataAttributes:
+      description: Attributes for updating an app's self-service status.
+      properties:
+        selfService:
+          description: Whether the app is enabled for self-service.
+          example: true
+          type: boolean
+      required:
+        - selfService
+      type: object
+    UpdateAppTagsRequest:
+      description: A request to replace the tags on an app.
+      example:
+        data:
+          attributes:
+            tags:
+              - team:platform
+              - service:ops
+          type: tags
+      properties:
+        data:
+          $ref: "#/components/schemas/UpdateAppTagsRequestData"
+      type: object
+    UpdateAppTagsRequestData:
+      description: Data for replacing an app's tags.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/UpdateAppTagsRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/AppTagsType"
+      type: object
+    UpdateAppTagsRequestDataAttributes:
+      description: Attributes for replacing an app's tags.
+      properties:
+        tags:
+          description: The full list of tags that should be set on the app. Existing tags not present in this list are removed.
+          example:
+            - team:platform
+            - service:ops
+          items:
+            type: string
+          type: array
+      required:
+        - tags
+      type: object
+    UpdateAppVersionNameRequest:
+      description: A request to assign a human-readable name to a specific app version.
+      example:
+        data:
+          attributes:
+            name: v1.2.0 - bug fix release
+          type: versionNames
+      properties:
+        data:
+          $ref: "#/components/schemas/UpdateAppVersionNameRequestData"
+      type: object
+    UpdateAppVersionNameRequestData:
+      description: Data for naming a specific app version.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/UpdateAppVersionNameRequestDataAttributes"
+        type:
+          $ref: "#/components/schemas/AppVersionNameType"
+      type: object
+    UpdateAppVersionNameRequestDataAttributes:
+      description: Attributes for naming a specific app version.
+      properties:
+        name:
+          description: The name to assign to the app version.
+          example: v1.2.0 - bug fix release
+          type: string
+      required:
+        - name
       type: object
     UpdateAppsDatastoreItemRequest:
       description: Request to update specific fields on an existing datastore item.
@@ -91600,6 +91923,542 @@ paths:
         operator: OR
         permissions:
           - apps_write
+  "/api/v2/app-builder/apps/{app_id}/favorite":
+    patch:
+      description: Add or remove an app from the current user's favorites. Favorited apps can be filtered for using the `filter[favorite]` query parameter on the [List Apps](https://docs.datadoghq.com/api/latest/app-builder/#list-apps) endpoint.
+      operationId: UpdateAppFavorite
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      favorite: true
+                    type: favorites
+            schema:
+              $ref: "#/components/schemas/UpdateAppFavoriteRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update App Favorite Status
+      tags:
+        - App Builder
+      x-menu-order: 9
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_run
+  "/api/v2/app-builder/apps/{app_id}/protection-level":
+    patch:
+      description: Update the publication protection level of an app. When set to `approval_required`, future publishes must go through an approval workflow before going live.
+      operationId: UpdateProtectionLevel
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      protectionLevel: approval_required
+                    type: protectionLevel
+            schema:
+              $ref: "#/components/schemas/UpdateAppProtectionLevelRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        components: []
+                        description: This is a simple example app
+                        favorite: false
+                        name: Example App
+                        queries: []
+                        rootInstanceName: grid0
+                        tags: []
+                      id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                      type: appDefinitions
+              schema:
+                $ref: "#/components/schemas/UpdateAppResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update App Protection Level
+      tags:
+        - App Builder
+      x-menu-order: 10
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_write
+  "/api/v2/app-builder/apps/{app_id}/publish-request":
+    post:
+      description: Create a publish request to ask for approval to publish an app whose protection level is `approval_required`. Publishing happens automatically once the request is approved by a user with the appropriate permissions.
+      operationId: CreatePublishRequest
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: Adds new dashboard widgets and a few bug fixes.
+                      title: Release v1.2 to production
+                    type: publishRequest
+            schema:
+              $ref: "#/components/schemas/CreatePublishRequestRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        app_version_id: 9e20cbaf-68da-45a6-9ccf-54193ac29fa5
+                      id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                      meta:
+                        created_at: "2026-04-01T12:00:00Z"
+                        user_name: jane.doe@example.com
+                        user_uuid: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                      type: deployment
+              schema:
+                $ref: "#/components/schemas/PublishAppResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Create Publish Request
+      tags:
+        - App Builder
+      x-menu-order: 15
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_write
+  "/api/v2/app-builder/apps/{app_id}/revert":
+    post:
+      description: Revert an app to a previous version. The version to revert to is selected through the `version` query parameter. The reverted version becomes the new latest version of the app.
+      operationId: RevertApp
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: The version number of the app to revert to. Cannot be `latest`. The special value `deployed` can be used to revert to the currently published version.
+          example: "2"
+          in: query
+          name: version
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        components: []
+                        description: This is a simple example app
+                        favorite: false
+                        name: Example App
+                        queries: []
+                        rootInstanceName: grid0
+                        tags: []
+                      id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                      type: appDefinitions
+              schema:
+                $ref: "#/components/schemas/UpdateAppResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Revert App
+      tags:
+        - App Builder
+      x-menu-order: 16
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_write
+  "/api/v2/app-builder/apps/{app_id}/self-service":
+    patch:
+      description: Enable or disable self-service for an app. Self-service apps can be discovered and run by users in your organization without explicit access being granted.
+      operationId: UpdateAppSelfService
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      selfService: true
+                    type: selfService
+            schema:
+              $ref: "#/components/schemas/UpdateAppSelfServiceRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update App Self-Service Status
+      tags:
+        - App Builder
+      x-menu-order: 11
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_write
+  "/api/v2/app-builder/apps/{app_id}/tags":
+    patch:
+      description: Replace the tags on an app. The provided list overwrites the existing tags entirely; tags not present in the request body are removed.
+      operationId: UpdateAppTags
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      tags:
+                        - team:platform
+                        - service:ops
+                    type: tags
+            schema:
+              $ref: "#/components/schemas/UpdateAppTagsRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update App Tags
+      tags:
+        - App Builder
+      x-menu-order: 12
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_write
+  "/api/v2/app-builder/apps/{app_id}/version-name":
+    patch:
+      description: Assign a human-readable name to a specific version of an app. The version is selected through the `version` query parameter.
+      operationId: UpdateAppVersionName
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: The version number of the app to name. The special values `latest` and `deployed` can also be used to target the latest or currently published version.
+          example: "3"
+          in: query
+          name: version
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: v1.2.0 - bug fix release
+                    type: versionNames
+            schema:
+              $ref: "#/components/schemas/UpdateAppVersionNameRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Name App Version
+      tags:
+        - App Builder
+      x-menu-order: 14
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_write
+  "/api/v2/app-builder/apps/{app_id}/versions":
+    get:
+      description: List the versions of an app. This endpoint is paginated.
+      operationId: ListAppVersions
+      parameters:
+        - description: The ID of the app.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: app_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: The number of versions to return per page.
+          in: query
+          name: limit
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: The page number to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          app_id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                          created_at: "2026-04-01T12:00:00Z"
+                          has_ever_been_published: true
+                          name: v1.2.0 - bug fix release
+                          updated_at: "2026-04-01T12:00:00Z"
+                          user_name: jane.doe@example.com
+                          user_uuid: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                          version: 3
+                        id: 9e20cbaf-68da-45a6-9ccf-54193ac29fa5
+                        type: appVersions
+                    meta:
+                      page:
+                        totalCount: 1
+              schema:
+                $ref: "#/components/schemas/ListAppVersionsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List App Versions
+      tags:
+        - App Builder
+      x-menu-order: 13
+      "x-permission":
+        operator: AND
+        permissions:
+          - apps_run
+          - connections_read
   /api/v2/application_keys:
     get:
       description: List all application keys available for your org
