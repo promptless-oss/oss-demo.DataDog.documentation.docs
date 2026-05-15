@@ -43628,6 +43628,122 @@ components:
           example: "/api/v2/scorecard/rules?page%5Blimit%5D=2&page%5Boffset%5D=2&page%5Bsize%5D=2"
           type: string
       type: object
+    ListSCIMResourceTypesResponse:
+      description: List resource types response object.
+      example:
+        Resources:
+          - description: https://tools.ietf.org/html/rfc7643#section-8.7.1
+            endpoint: /Groups
+            id: Group
+            meta:
+              location: https://app.datadoghq.com/api/v2/scim/ResourceTypes/Group
+              resourceType: ResourceType
+            name: Group
+            schema: urn:ietf:params:scim:schemas:core:2.0:Group
+            schemas:
+              - urn:ietf:params:scim:schemas:core:2.0:ResourceType
+          - description: https://tools.ietf.org/html/rfc7643#section-8.7.1
+            endpoint: /Users
+            id: User
+            meta:
+              location: https://app.datadoghq.com/api/v2/scim/ResourceTypes/User
+              resourceType: ResourceType
+            name: User
+            schema: urn:ietf:params:scim:schemas:core:2.0:User
+            schemas:
+              - urn:ietf:params:scim:schemas:core:2.0:ResourceType
+        itemsPerPage: 2
+        schemas:
+          - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex: 1
+        totalResults: 2
+      properties:
+        Resources:
+          description: List of resource types supported by this SCIM service provider.
+          items:
+            $ref: "#/components/schemas/SCIMResourceType"
+          type: array
+        itemsPerPage:
+          description: Number of resource types returned per page.
+          format: int64
+          maximum: 4294967295
+          minimum: 0
+          type: integer
+        schemas:
+          description: List response JSON Schemas.
+          example:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+          items:
+            description: A SCIM schema URI identifying the protocol or schema used in this object.
+            type: string
+          type: array
+        startIndex:
+          description: Starting index of the resource types for this page (1-indexed).
+          format: int64
+          maximum: 4294967295
+          minimum: 0
+          type: integer
+        totalResults:
+          description: Total number of resource types.
+          format: int64
+          maximum: 4294967295
+          minimum: 0
+          type: integer
+      type: object
+    ListSCIMSchemasResponse:
+      description: List schemas response object.
+      example:
+        Resources:
+          - description: User Schema
+            id: urn:ietf:params:scim:schemas:core:2.0:User
+            meta:
+              location: https://app.datadoghq.com/api/v2/scim/Schemas/urn:ietf:params:scim:schemas:core:2.0:User
+              resourceType: Schema
+            name: User
+          - description: Group Schema
+            id: urn:ietf:params:scim:schemas:core:2.0:Group
+            meta:
+              location: https://app.datadoghq.com/api/v2/scim/Schemas/urn:ietf:params:scim:schemas:core:2.0:Group
+              resourceType: Schema
+            name: Group
+        itemsPerPage: 2
+        schemas:
+          - urn:ietf:params:scim:api:messages:2.0:ListResponse
+        startIndex: 1
+        totalResults: 2
+      properties:
+        Resources:
+          description: List of schemas supported by this SCIM service provider.
+          items:
+            $ref: "#/components/schemas/SCIMSchema"
+          type: array
+        itemsPerPage:
+          description: Number of schemas returned per page.
+          format: int64
+          maximum: 4294967295
+          minimum: 0
+          type: integer
+        schemas:
+          description: List response JSON Schemas.
+          example:
+            - urn:ietf:params:scim:api:messages:2.0:ListResponse
+          items:
+            description: A SCIM schema URI identifying the protocol or schema used in this object.
+            type: string
+          type: array
+        startIndex:
+          description: Starting index of the schemas for this page (1-indexed).
+          format: int64
+          maximum: 4294967295
+          minimum: 0
+          type: integer
+        totalResults:
+          description: Total number of schemas.
+          format: int64
+          maximum: 4294967295
+          minimum: 0
+          type: integer
+      type: object
     ListScorecardsResponse:
       description: Response containing a list of scorecards.
       properties:
@@ -64028,6 +64144,188 @@ components:
       type: string
       x-enum-varnames:
         - SBOMS
+    SCIMResourceType:
+      description: Definition of a SCIM resource type.
+      properties:
+        description:
+          description: Human-readable description of the resource type.
+          example: https://tools.ietf.org/html/rfc7643#section-8.7.1
+          type: string
+        endpoint:
+          description: HTTP-addressable endpoint relative to the base URL where the resource is located.
+          example: /Users
+          type: string
+        id:
+          description: The resource type's server unique id.
+          example: User
+          type: string
+        meta:
+          $ref: "#/components/schemas/SCIMResourceTypeMeta"
+        name:
+          description: The resource type name.
+          example: User
+          type: string
+        schema:
+          description: The resource type's primary or base SCIM schema URI.
+          example: urn:ietf:params:scim:schemas:core:2.0:User
+          type: string
+        schemas:
+          description: A list of SCIM schema URI identifying the protocol or schema used in this object.
+          example:
+            - urn:ietf:params:scim:schemas:core:2.0:ResourceType
+          items:
+            description: A SCIM schema URI identifying the protocol or schema used in this object.
+            type: string
+          type: array
+      type: object
+    SCIMResourceTypeMeta:
+      description: Metadata associated with a resource type.
+      properties:
+        location:
+          description: URL identifying the resource type.
+          example: https://app.datadoghq.com/api/v2/scim/ResourceTypes/User
+          type: string
+        resourceType:
+          description: Type of resource.
+          example: ResourceType
+          type: string
+      type: object
+    SCIMSchema:
+      description: Definition of a SCIM schema.
+      properties:
+        attributes:
+          description: A list of attributes that make up the schema.
+          items:
+            $ref: "#/components/schemas/SCIMSchemaAttribute"
+          type: array
+        description:
+          description: Human-readable description of the schema.
+          example: User Schema
+          type: string
+        id:
+          description: The unique URI of the schema.
+          example: urn:ietf:params:scim:schemas:core:2.0:User
+          type: string
+        meta:
+          $ref: "#/components/schemas/SCIMSchemaMeta"
+        name:
+          description: The human-readable name of the schema.
+          example: User
+          type: string
+      type: object
+    SCIMSchemaAttribute:
+      description: Definition of an attribute on a SCIM schema.
+      properties:
+        canonicalValues:
+          description: A collection of canonical values.
+          items:
+            type: string
+          type: array
+        caseExact:
+          description: A Boolean value that specifies whether or not a string attribute is case sensitive.
+          type: boolean
+        description:
+          description: The attribute's human-readable description.
+          type: string
+        multiValued:
+          description: A Boolean value indicating an attribute's plurality.
+          type: boolean
+        mutability:
+          description: |-
+            A single keyword indicating the circumstances under which the value of
+            the attribute can be (re)defined.
+          type: string
+        name:
+          description: The attribute's name.
+          type: string
+        referenceTypes:
+          description: A list of resource types or external resources the reference may refer to.
+          items:
+            type: string
+          type: array
+        required:
+          description: A Boolean value that specifies whether or not the attribute is required.
+          type: boolean
+        returned:
+          description: |-
+            A single keyword that indicates when an attribute and associated values
+            are returned in response to a GET request or in response to a PUT, POST,
+            or PATCH request.
+          type: string
+        subAttributes:
+          description: A list of sub-attributes for complex attributes.
+          items:
+            $ref: "#/components/schemas/SCIMSchemaAttributeSubAttribute"
+          type: array
+        type:
+          description: The data type of the attribute.
+          type: string
+        uniqueness:
+          description: |-
+            A single keyword value that specifies how the service provider enforces
+            uniqueness of attribute values.
+          type: string
+      type: object
+    SCIMSchemaAttributeSubAttribute:
+      description: Definition of a sub-attribute on a SCIM schema attribute.
+      properties:
+        canonicalValues:
+          description: A collection of canonical values.
+          items:
+            type: string
+          type: array
+        caseExact:
+          description: A Boolean value that specifies whether or not a string attribute is case sensitive.
+          type: boolean
+        description:
+          description: The attribute's human-readable description.
+          type: string
+        multiValued:
+          description: A Boolean value indicating an attribute's plurality.
+          type: boolean
+        mutability:
+          description: |-
+            A single keyword indicating the circumstances under which the value of
+            the attribute can be (re)defined.
+          type: string
+        name:
+          description: The sub-attribute's name.
+          type: string
+        referenceTypes:
+          description: A list of resource types or external resources the reference may refer to.
+          items:
+            type: string
+          type: array
+        required:
+          description: A Boolean value that specifies whether or not the attribute is required.
+          type: boolean
+        returned:
+          description: |-
+            A single keyword that indicates when an attribute and associated values
+            are returned in response to a GET request or in response to a PUT, POST,
+            or PATCH request.
+          type: string
+        type:
+          description: The data type of the attribute.
+          type: string
+        uniqueness:
+          description: |-
+            A single keyword value that specifies how the service provider enforces
+            uniqueness of attribute values.
+          type: string
+      type: object
+    SCIMSchemaMeta:
+      description: Metadata associated with a SCIM schema.
+      properties:
+        location:
+          description: URL identifying the schema.
+          example: https://app.datadoghq.com/api/v2/scim/Schemas/urn:ietf:params:scim:schemas:core:2.0:User
+          type: string
+        resourceType:
+          description: Type of resource.
+          example: Schema
+          type: string
+      type: object
     SLOReportInterval:
       description: |-
         The frequency at which report data is to be generated.
@@ -132035,6 +132333,216 @@ paths:
       summary: Update group
       tags: ["SCIM"]
       x-menu-order: 10
+      "x-permission":
+        operator: AND
+        permissions:
+          - user_access_invite
+          - user_access_manage
+  /api/v2/scim/ResourceTypes:
+    get:
+      description: |-
+        List the SCIM resource types supported by this service provider.
+        See [RFC 7644 Section 4](https://tools.ietf.org/html/rfc7644#section-4) for more information.
+      operationId: ListSCIMResourceTypes
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    Resources:
+                      - description: https://tools.ietf.org/html/rfc7643#section-8.7.1
+                        endpoint: /Groups
+                        id: Group
+                        meta:
+                          location: https://app.datadoghq.com/api/v2/scim/ResourceTypes/Group
+                          resourceType: ResourceType
+                        name: Group
+                        schemas:
+                          - urn:ietf:params:scim:schemas:core:2.0:ResourceType
+                      - description: https://tools.ietf.org/html/rfc7643#section-8.7.1
+                        endpoint: /Users
+                        id: User
+                        meta:
+                          location: https://app.datadoghq.com/api/v2/scim/ResourceTypes/User
+                          resourceType: ResourceType
+                        name: User
+                        schemas:
+                          - urn:ietf:params:scim:schemas:core:2.0:ResourceType
+                    itemsPerPage: 2
+                    schemas:
+                      - urn:ietf:params:scim:api:messages:2.0:ListResponse
+                    startIndex: 1
+                    totalResults: 2
+              schema:
+                $ref: "#/components/schemas/ListSCIMResourceTypesResponse"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - bearerAuth: []
+      summary: List resource types
+      tags: ["SCIM"]
+      x-menu-order: 13
+      "x-permission":
+        operator: AND
+        permissions:
+          - user_access_invite
+          - user_access_manage
+  /api/v2/scim/ResourceTypes/{resource_id}:
+    get:
+      description: |-
+        Get a single SCIM resource type using the `resource_id`.
+        Supported `resource_id` values are `User` and `Group`.
+      operationId: GetSCIMResourceType
+      parameters:
+        - description: The id of the resource type to retrieve.
+          in: path
+          name: resource_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    description: https://tools.ietf.org/html/rfc7643#section-8.7.1
+                    endpoint: /Users
+                    id: User
+                    meta:
+                      location: https://app.datadoghq.com/api/v2/scim/ResourceTypes/User
+                      resourceType: ResourceType
+                    name: User
+                    schemas:
+                      - urn:ietf:params:scim:schemas:core:2.0:ResourceType
+              schema:
+                $ref: "#/components/schemas/SCIMResourceType"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - bearerAuth: []
+      summary: Get resource type
+      tags: ["SCIM"]
+      x-menu-order: 14
+      "x-permission":
+        operator: AND
+        permissions:
+          - user_access_invite
+          - user_access_manage
+  /api/v2/scim/Schemas:
+    get:
+      description: |-
+        List the SCIM schemas supported by this service provider.
+        See [RFC 7644 Section 4](https://tools.ietf.org/html/rfc7644#section-4) for more information.
+      operationId: ListSCIMSchemas
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    Resources:
+                      - description: User Schema
+                        id: urn:ietf:params:scim:schemas:core:2.0:User
+                        meta:
+                          location: https://app.datadoghq.com/api/v2/scim/Schemas/urn:ietf:params:scim:schemas:core:2.0:User
+                          resourceType: Schema
+                        name: User
+                      - description: Group Schema
+                        id: urn:ietf:params:scim:schemas:core:2.0:Group
+                        meta:
+                          location: https://app.datadoghq.com/api/v2/scim/Schemas/urn:ietf:params:scim:schemas:core:2.0:Group
+                          resourceType: Schema
+                        name: Group
+                    itemsPerPage: 2
+                    schemas:
+                      - urn:ietf:params:scim:api:messages:2.0:ListResponse
+                    startIndex: 1
+                    totalResults: 2
+              schema:
+                $ref: "#/components/schemas/ListSCIMSchemasResponse"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - bearerAuth: []
+      summary: List schemas
+      tags: ["SCIM"]
+      x-menu-order: 15
+      "x-permission":
+        operator: AND
+        permissions:
+          - user_access_invite
+          - user_access_manage
+  /api/v2/scim/Schemas/{schema_id}:
+    get:
+      description: |-
+        Get a single SCIM schema using the `schema_id`. Supported `schema_id`
+        values are `urn:ietf:params:scim:schemas:core:2.0:User` and
+        `urn:ietf:params:scim:schemas:core:2.0:Group`.
+      operationId: GetSCIMSchema
+      parameters:
+        - description: The id of the schema to retrieve.
+          in: path
+          name: schema_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    attributes:
+                      - caseExact: false
+                        description: Unique identifier for the User.
+                        multiValued: false
+                        mutability: immutable
+                        name: userName
+                        required: true
+                        returned: default
+                        type: string
+                        uniqueness: server
+                      - description: A Boolean value indicating the User's administrative status.
+                        multiValued: false
+                        mutability: readWrite
+                        name: active
+                        required: false
+                        returned: default
+                        type: boolean
+                        uniqueness: none
+                    description: User Schema
+                    id: urn:ietf:params:scim:schemas:core:2.0:User
+                    meta:
+                      location: https://app.datadoghq.com/api/v2/scim/Schemas/urn:ietf:params:scim:schemas:core:2.0:User
+                      resourceType: Schema
+                    name: User
+              schema:
+                $ref: "#/components/schemas/SCIMSchema"
+          description: OK
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - bearerAuth: []
+      summary: Get schema
+      tags: ["SCIM"]
+      x-menu-order: 16
       "x-permission":
         operator: AND
         permissions:
