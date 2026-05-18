@@ -25467,7 +25467,7 @@ components:
       properties:
         elf_symbol_file:
           description: The ELF symbol file.
-          example: ""
+          example: libmyapp.so
           format: binary
           type: string
         event:
@@ -25475,6 +25475,7 @@ components:
       required:
         - event
         - elf_symbol_file
+      title: ELF Symbol File
       type: object
     ELFSymbolFileFormDataType:
       description: Must be `elf_symbol_file`.
@@ -31517,12 +31518,13 @@ components:
           $ref: "#/components/schemas/FlutterSymbolFileEvent"
         flutter_symbol_file:
           description: The Flutter symbol file.
-          example: ""
+          example: app.symbols
           format: binary
           type: string
       required:
         - event
         - flutter_symbol_file
+      title: Flutter Symbol File
       type: object
     FlutterSymbolFileFormDataType:
       description: Must be `flutter_symbol_file`.
@@ -34752,12 +34754,13 @@ components:
           $ref: "#/components/schemas/IL2CPPMappingFileEvent"
         il2cpp_mapping_file:
           description: The IL2CPP mapping file.
-          example: ""
+          example: il2cpp_data.dat
           format: binary
           type: string
       required:
         - event
         - il2cpp_mapping_file
+      title: Unity IL2CPP Mapping File
       type: object
     IL2CPPMappingFileFormDataType:
       description: Must be `il2cpp_mapping_file`.
@@ -34787,12 +34790,13 @@ components:
           $ref: "#/components/schemas/IOSSymbolsEvent"
         symbols_archive:
           description: The dSYM archive file (.zip).
-          example: ""
+          example: MyApp.dSYM.zip
           format: binary
           type: string
       required:
         - event
         - symbols_archive
+      title: iOS dSYM Archive
       type: object
     IOSSymbolsFormDataType:
       description: Must be `ios_symbols`.
@@ -39832,7 +39836,7 @@ components:
           $ref: "#/components/schemas/JSSourceMapEvent"
         minified_file:
           description: The minified JavaScript file.
-          example: ""
+          example: main.min.js
           format: binary
           type: string
         repository:
@@ -39841,13 +39845,14 @@ components:
           type: string
         source_map:
           description: The source map file.
-          example: ""
+          example: main.min.js.map
           format: binary
           type: string
       required:
         - event
         - source_map
         - minified_file
+      title: JavaScript Source Map
       type: object
     JSSourceMapFormDataType:
       description: Must be `js_sourcemap`.
@@ -39898,7 +39903,7 @@ components:
           $ref: "#/components/schemas/JVMMappingFileEvent"
         jvm_mapping_file:
           description: The ProGuard/R8 mapping file.
-          example: ""
+          example: mapping.txt
           format: binary
           type: string
         repository:
@@ -39908,6 +39913,7 @@ components:
       required:
         - event
         - jvm_mapping_file
+      title: ProGuard/R8 Mapping File
       type: object
     JVMMappingFileFormDataType:
       description: Must be `jvm_mapping_file`.
@@ -48634,12 +48640,13 @@ components:
           $ref: "#/components/schemas/NDKSymbolFileEvent"
         ndk_symbol_file:
           description: The NDK symbol file.
-          example: ""
+          example: libnative.so
           format: binary
           type: string
       required:
         - event
         - ndk_symbol_file
+      title: Android NDK Symbol File
       type: object
     NDKSymbolFileFormDataType:
       description: Must be `ndk_symbol_file`.
@@ -56611,12 +56618,13 @@ components:
           $ref: "#/components/schemas/PESymbolFileEvent"
         pe_symbol_file:
           description: The PDB symbol file.
-          example: ""
+          example: myapp.pdb
           format: binary
           type: string
       required:
         - event
         - pe_symbol_file
+      title: Windows PE/PDB Symbol File
       type: object
     PESymbolFileFormDataType:
       description: Must be `pe_symbol_file`.
@@ -60758,12 +60766,13 @@ components:
           type: string
         source_map:
           description: The source map file.
-          example: ""
+          example: main.jsbundle.map
           format: binary
           type: string
       required:
         - event
         - source_map
+      title: React Native Source Map
       type: object
     ReactNativeSourceMapFormDataType:
       description: Must be `react_native_sourcemap`.
@@ -61712,12 +61721,13 @@ components:
           $ref: "#/components/schemas/RepositoryEvent"
         repository:
           description: Repository metadata file.
-          example: ""
+          example: repository.json
           format: binary
           type: string
       required:
         - event
         - repository
+      title: Repository Metadata
       type: object
     RepositoryFormDataType:
       description: Must be `repository`.
@@ -143690,19 +143700,64 @@ paths:
                 summary: JavaScript Source Map Upload
                 value:
                   event:
+                    git_commit_sha: a1b2c3d4e5f6789012345678901234567890abcd
+                    git_repository_url: https://github.com/myorg/my-web-app
                     minified_url: https://example.com/static/js/main.min.js
                     service: my-web-app
                     type: js_sourcemap
                     version: "1.2.3"
+                  minified_file: main.min.js
+                  source_map: main.min.js.map
+              elf_symbol_file:
+                description: Upload an ELF symbol file for Linux/Unix crash symbolication.
+                summary: ELF Symbol File Upload
+                value:
+                  elf_symbol_file: libmyapp.so
+                  event:
+                    arch: x86_64
+                    gnu_build_id: abcdef1234567890abcdef1234567890
+                    type: elf_symbol_file
+              flutter_symbol_file:
+                description: Upload a Flutter symbol file for crash symbolication.
+                summary: Flutter Symbol File Upload
+                value:
+                  event:
+                    arch: arm64
+                    platform: android
+                    service: my-flutter-app
+                    type: flutter_symbol_file
+                    variant: release
+                    version: "1.0.0"
+                  flutter_symbol_file: app.symbols
+              il2cpp_mapping_file:
+                description: Upload a Unity IL2CPP mapping file for crash symbolication.
+                summary: Unity IL2CPP Mapping File Upload
+                value:
+                  event:
+                    build_id: unity-build-12345
+                    type: il2cpp_mapping_file
+                  il2cpp_mapping_file: il2cpp_data.dat
+              ios_symbols:
+                description: Upload a dSYM archive for iOS crash symbolication.
+                summary: iOS dSYM Upload
+                value:
+                  event:
+                    type: ios_symbols
+                    uuids: A1B2C3D4-E5F6-7890-ABCD-EF1234567890
+                  symbols_archive: MyApp.dSYM.zip
               js_sourcemap:
                 description: Upload a JavaScript source map for browser RUM applications.
                 summary: JavaScript Source Map Upload
                 value:
                   event:
+                    git_commit_sha: a1b2c3d4e5f6789012345678901234567890abcd
+                    git_repository_url: https://github.com/myorg/my-web-app
                     minified_url: https://example.com/static/js/main.min.js
                     service: my-web-app
                     type: js_sourcemap
                     version: "1.2.3"
+                  minified_file: main.min.js
+                  source_map: main.min.js.map
               jvm_mapping_file:
                 description: Upload a ProGuard or R8 mapping file for Android crash deobfuscation.
                 summary: ProGuard/R8 Mapping File Upload
@@ -143712,6 +143767,26 @@ paths:
                     type: jvm_mapping_file
                     variant: release
                     version: "3.1.0"
+                  jvm_mapping_file: mapping.txt
+              ndk_symbol_file:
+                description: Upload an Android NDK symbol file for native crash symbolication.
+                summary: Android NDK Symbol File Upload
+                value:
+                  event:
+                    arch: arm64-v8a
+                    build_id: abc123def456
+                    type: ndk_symbol_file
+                  ndk_symbol_file: libnative.so
+              pe_symbol_file:
+                description: Upload a PE/PDB symbol file for Windows crash symbolication.
+                summary: Windows PE/PDB Symbol File Upload
+                value:
+                  event:
+                    arch: x64
+                    pdb_age: 1
+                    pdb_sig: A1B2C3D4-E5F6-7890-ABCD-EF1234567890
+                    type: pe_symbol_file
+                  pe_symbol_file: myapp.pdb
               react_native_sourcemap:
                 description: Upload a React Native source map for mobile applications.
                 summary: React Native Source Map Upload
@@ -143723,6 +143798,16 @@ paths:
                     service: my-mobile-app
                     type: react_native_sourcemap
                     version: "2.0.0"
+                  source_map: main.jsbundle.map
+              repository:
+                description: Upload repository metadata for source code linking.
+                summary: Repository Metadata Upload
+                value:
+                  event:
+                    git_commit_sha: a1b2c3d4e5f6789012345678901234567890abcd
+                    git_repository_url: https://github.com/myorg/my-web-app
+                    type: repository
+                  repository: repository.json
             schema:
               $ref: "#/components/schemas/RequestSchema"
         required: true
