@@ -50208,9 +50208,9 @@ components:
           description: The unique identifier for this component.
           example: databricks-zerobus-destination
           type: string
-        ingestion_endpoint:
-          description: Your Databricks Zerobus ingestion endpoint. This is the endpoint used to stream data directly into your Databricks Lakehouse.
-          example: https://my-workspace-id.zerobus.us-east-1.cloud.databricks.com
+        ingestion_endpoint_key:
+          description: Name of the environment variable or the secret identifier that references the Databricks Zerobus ingestion endpoint, which is used to stream data directly into your Databricks Lakehouse.
+          example: DD_OP_DESTINATION_DATABRICKS_ZEROBUS_INGESTION_ENDPOINT
           type: string
         inputs:
           description: A list of component IDs whose output is used as the `input` for this component.
@@ -50225,17 +50225,15 @@ components:
           type: string
         type:
           $ref: "#/components/schemas/ObservabilityPipelineDatabricksZerobusDestinationType"
-        unity_catalog_endpoint:
-          description: Your Databricks workspace URL. This is used to communicate with the Unity Catalog API.
-          example: https://my-workspace.cloud.databricks.com
+        unity_catalog_endpoint_key:
+          description: Name of the environment variable or the secret identifier that references your Databricks workspace URL, which is used to communicate with the Unity Catalog API.
+          example: DD_OP_DESTINATION_DATABRICKS_ZEROBUS_UNITY_CATALOG_ENDPOINT
           type: string
       required:
         - id
         - type
         - inputs
-        - ingestion_endpoint
         - table_name
-        - unity_catalog_endpoint
         - auth
       type: object
       x-pipeline-types: [logs, rehydration]
