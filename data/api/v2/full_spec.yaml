@@ -76347,6 +76347,8 @@ components:
           example: 1
           format: int64
           type: integer
+        weekdayPositions:
+          $ref: "#/components/schemas/SyntheticsDowntimeWeekdayPositions"
         weekdays:
           $ref: "#/components/schemas/SyntheticsDowntimeWeekdays"
       required:
@@ -76364,6 +76366,8 @@ components:
           type: integer
         until:
           $ref: "#/components/schemas/SyntheticsDowntimeTimeSlotDate"
+        weekdayPositions:
+          $ref: "#/components/schemas/SyntheticsDowntimeWeekdayPositions"
         weekdays:
           $ref: "#/components/schemas/SyntheticsDowntimeWeekdays"
       required:
@@ -76475,6 +76479,32 @@ components:
         - FRIDAY
         - SATURDAY
         - SUNDAY
+    SyntheticsDowntimeWeekdayPosition:
+      description: >-
+        The position of a weekday within a month for a monthly Synthetics downtime recurrence. `1` through `4` select the first through fourth occurrence of the weekday in the month, and `-1` selects the last occurrence.
+      enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - -1
+      example: 1
+      format: int64
+      type: integer
+      x-enum-varnames:
+        - FIRST
+        - SECOND
+        - THIRD
+        - FOURTH
+        - LAST
+    SyntheticsDowntimeWeekdayPositions:
+      description: >-
+        Positions of the weekdays within a month for a monthly Synthetics downtime recurrence. Used in combination with `weekdays` to schedule occurrences such as "the first Monday of the month".
+      example:
+        - 1
+      items:
+        $ref: "#/components/schemas/SyntheticsDowntimeWeekdayPosition"
+      type: array
     SyntheticsDowntimeWeekdays:
       description: Days of the week for a Synthetics downtime recurrence schedule.
       example:
@@ -146428,6 +146458,7 @@ paths:
         operator: AND
         permissions:
           - synthetics_write
+          - synthetics_default_settings_write
   /api/v2/synthetics/downtimes/{downtime_id}:
     delete:
       description: Delete a Synthetics downtime by its ID.
@@ -146471,6 +146502,7 @@ paths:
         operator: AND
         permissions:
           - synthetics_write
+          - synthetics_default_settings_write
     get:
       description: Get a Synthetics downtime by its ID.
       operationId: GetSyntheticsDowntime
@@ -146646,6 +146678,7 @@ paths:
         operator: AND
         permissions:
           - synthetics_write
+          - synthetics_default_settings_write
   /api/v2/synthetics/downtimes/{downtime_id}/tests/{test_id}:
     delete:
       description: Disassociate a Synthetics test from a downtime.
