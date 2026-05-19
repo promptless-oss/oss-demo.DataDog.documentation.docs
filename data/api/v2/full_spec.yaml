@@ -22862,6 +22862,136 @@ components:
         - INTEGRATION_SCREENBOARD
         - INTEGRATION_TIMEBOARD
         - HOST_TIMEBOARD
+    DashboardUsage:
+      description: A single dashboard usage record.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/DashboardUsageAttributes"
+        id:
+          description: The dashboard ID.
+          example: "q5j-nti-fv6"
+          type: string
+        type:
+          $ref: "#/components/schemas/DashboardUsageType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    DashboardUsageAttributes:
+      description: Usage statistics for a dashboard.
+      properties:
+        author:
+          $ref: "#/components/schemas/DashboardUsageUser"
+        created_at:
+          description: When the dashboard was created.
+          example: "2026-01-15T09:30:00.000Z"
+          format: date-time
+          nullable: true
+          type: string
+        dashboard_quality_score:
+          description: The dashboard quality score, or `null` when no score is available.
+          example: 0.85
+          format: double
+          nullable: true
+          type: number
+        edited_at:
+          description: When the dashboard was most recently edited.
+          example: "2026-04-20T11:05:00.000Z"
+          format: date-time
+          nullable: true
+          type: string
+        org_id:
+          description: The Datadog organization that owns the dashboard.
+          example: 100
+          format: int64
+          type: integer
+        teams:
+          description: Teams the dashboard is tagged with.
+          items:
+            description: A team handle.
+            type: string
+          nullable: true
+          type: array
+        title:
+          description: The dashboard title.
+          example: My production overview
+          type: string
+        total_views:
+          description: The total number of times the dashboard has been viewed.
+          example: 42
+          format: int64
+          type: integer
+        total_views_by_type:
+          additionalProperties:
+            description: View count for that view type.
+            format: int64
+            type: integer
+          description: View counts keyed by view type. Possible keys are `in_app`, `embed`, `public`, `shared`, `api`, and `unknown`.
+          nullable: true
+          type: object
+        viewed_at:
+          description: When the dashboard was most recently viewed.
+          example: "2026-05-01T14:22:10.000Z"
+          format: date-time
+          nullable: true
+          type: string
+        viewer:
+          $ref: "#/components/schemas/DashboardUsageUser"
+        widget_count:
+          description: The total number of widgets on the dashboard.
+          example: 12
+          format: int64
+          nullable: true
+          type: integer
+        widget_count_by_type:
+          additionalProperties:
+            description: Widget count for that widget type.
+            format: int64
+            type: integer
+          description: Widget counts keyed by widget type. The map includes group widgets and widgets without requests.
+          nullable: true
+          type: object
+      required:
+        - org_id
+      type: object
+    DashboardUsageResponse:
+      description: Response containing usage statistics for a single dashboard.
+      properties:
+        data:
+          $ref: "#/components/schemas/DashboardUsage"
+      required:
+        - data
+      type: object
+    DashboardUsageType:
+      default: dashboards-usages
+      description: The type of the resource. Always `dashboards-usages`.
+      enum:
+        - dashboards-usages
+      example: dashboards-usages
+      type: string
+      x-enum-varnames:
+        - DASHBOARDS_USAGES
+    DashboardUsageUser:
+      description: A user referenced from a dashboard usage record (author or viewer).
+      nullable: true
+      properties:
+        handle:
+          description: Datadog handle (login) of the user.
+          example: jane.doe@example.com
+          type: string
+        id:
+          description: The user ID.
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        is_disabled:
+          description: Whether the user account is disabled.
+          type: boolean
+        name:
+          description: Display name of the user.
+          example: Jane Doe
+          type: string
+      type: object
     DataAttributesRulesItemsIfTagExists:
       description: The behavior when the tag already exists.
       enum:
@@ -43489,6 +43619,52 @@ components:
       type: string
       x-enum-varnames:
         - LIST_CONNECTIONS_RESPONSE
+    ListDashboardsUsageResponse:
+      description: Paginated list of dashboard usage records.
+      properties:
+        data:
+          description: Dashboard usage records, one per dashboard in the caller's organization.
+          items:
+            $ref: "#/components/schemas/DashboardUsage"
+          type: array
+        links:
+          $ref: "#/components/schemas/ListDashboardsUsageResponseLinks"
+        meta:
+          $ref: "#/components/schemas/ListDashboardsUsageResponseMeta"
+      required:
+        - data
+        - meta
+      type: object
+    ListDashboardsUsageResponseLinks:
+      description: Pagination links for a list of dashboard usage records.
+      properties:
+        first:
+          description: Link to the first page.
+          example: "https://api.datadoghq.com/api/v2/dashboards/usage?page[offset]=0&page[limit]=250"
+          type: string
+        last:
+          description: Link to the last page, or `null` if the total is unknown.
+          nullable: true
+          type: string
+        next:
+          description: Link to the next page. Absent when there is no next page.
+          nullable: true
+          type: string
+        prev:
+          description: Link to the previous page. Absent when there is no previous page.
+          nullable: true
+          type: string
+        self:
+          description: Link to the current page.
+          example: "https://api.datadoghq.com/api/v2/dashboards/usage"
+          type: string
+      type: object
+    ListDashboardsUsageResponseMeta:
+      description: Pagination metadata for a list of dashboard usage records.
+      properties:
+        page:
+          $ref: "#/components/schemas/PaginationMetaPage"
+      type: object
     ListDeploymentRuleResponseData:
       description: Data for a list of deployment rules.
       properties:
@@ -103722,6 +103898,183 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/dashboards/usage:
+    get:
+      description: Get paginated usage statistics for every dashboard in the caller's organization. Use `page[limit]` and `page[offset]` to walk the result set.
+      operationId: ListDashboardsUsage
+      parameters:
+        - description: Maximum number of dashboards to return per page. Server-side maximum is 500; values above 500 return a 400 Bad Request.
+          in: query
+          name: page[limit]
+          required: false
+          schema:
+            default: 250
+            format: int64
+            type: integer
+        - description: Zero-based offset into the result set.
+          in: query
+          name: page[offset]
+          required: false
+          schema:
+            default: 0
+            format: int64
+            minimum: 0
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          author:
+                            handle: "jane.doe@example.com"
+                            id: "00000000-0000-0000-0000-000000000000"
+                            is_disabled: false
+                            name: "Jane Doe"
+                          created_at: "2026-01-15T09:30:00.000Z"
+                          dashboard_quality_score: 0.85
+                          edited_at: "2026-04-20T11:05:00.000Z"
+                          org_id: 100
+                          teams: ["sre"]
+                          title: "My production overview"
+                          total_views: 42
+                          total_views_by_type:
+                            embed: 12
+                            in_app: 30
+                          viewed_at: "2026-05-01T14:22:10.000Z"
+                          viewer:
+                            handle: "john.smith@example.com"
+                            id: "00000000-0000-0000-0000-000000000001"
+                            is_disabled: false
+                            name: "John Smith"
+                          widget_count: 12
+                          widget_count_by_type:
+                            query_value: 4
+                            timeseries: 8
+                        id: "q5j-nti-fv6"
+                        type: "dashboards-usages"
+                    links:
+                      first: "https://api.datadoghq.com/api/v2/dashboards/usage?page[offset]=0&page[limit]=250"
+                      last: "https://api.datadoghq.com/api/v2/dashboards/usage?page[offset]=1000&page[limit]=250"
+                      next: "https://api.datadoghq.com/api/v2/dashboards/usage?page[offset]=250&page[limit]=250"
+                      self: "https://api.datadoghq.com/api/v2/dashboards/usage"
+                    meta:
+                      page:
+                        first_offset: 0
+                        last_offset: 1000
+                        limit: 250
+                        next_offset: 250
+                        offset: 0
+                        prev_offset:
+                        total: 1234
+                        type: offset_limit
+              schema:
+                $ref: "#/components/schemas/ListDashboardsUsageResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - dashboards_read
+      summary: Get usage stats for all dashboards
+      tags:
+        - Dashboards
+      x-menu-order: 1
+      x-pagination:
+        limitParam: page[limit]
+        pageOffsetParam: page[offset]
+        resultsPath: data
+      x-permission:
+        operator: OR
+        permissions:
+          - dashboards_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/dashboards/{dashboard_id}/usage:
+    get:
+      description: Get usage statistics for a single dashboard. The response includes view counts, the most recent view and edit times, widget counts, and the dashboard quality score.
+      operationId: GetDashboardUsage
+      parameters:
+        - description: The ID of the dashboard.
+          in: path
+          name: dashboard_id
+          required: true
+          schema:
+            example: "q5j-nti-fv6"
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        author:
+                          handle: "jane.doe"
+                          id: "00000000-0000-0000-0000-000000000000"
+                          is_disabled: false
+                          name: "Jane Doe"
+                        created_at: "2026-01-15T09:30:00.000Z"
+                        dashboard_quality_score: 0.85
+                        edited_at: "2026-04-20T11:05:00.000Z"
+                        org_id: 100
+                        teams: ["sre"]
+                        title: "My production overview"
+                        total_views: 42
+                        total_views_by_type:
+                          embed: 12
+                          in_app: 30
+                        viewed_at: "2026-05-01T14:22:10.000Z"
+                        viewer:
+                          handle: "john.smith"
+                          id: "00000000-0000-0000-0000-000000000001"
+                          is_disabled: false
+                          name: "John Smith"
+                        widget_count: 12
+                        widget_count_by_type:
+                          query_value: 4
+                          timeseries: 8
+                      id: "q5j-nti-fv6"
+                      type: "dashboards-usages"
+              schema:
+                $ref: "#/components/schemas/DashboardUsageResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - dashboards_read
+      summary: Get usage stats for a dashboard
+      tags:
+        - Dashboards
+      x-menu-order: 2
+      x-permission:
+        operator: OR
+        permissions:
+          - dashboards_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/datasets:
     get:
       description: Get all datasets that have been configured for an organization.
@@ -153932,6 +154285,12 @@ tags:
       - **Embed** sharing must be enabled under **Organization Settings** > **Public Sharing** > **Shared Dashboards**.
       - You need [an API key and an application key](https://docs.datadoghq.com/account_management/api-app-keys/) to interact with these endpoints.
     name: Dashboard Secure Embed
+  - description: |-
+      Get usage statistics for the dashboards in your organization, including view
+      counts, last-edit times, widget counts, and quality scores. See the
+      [Dashboards documentation](https://docs.datadoghq.com/dashboards/) for more
+      information.
+    name: Dashboards
   - description: |-
       Data Access Controls in Datadog is a feature that allows administrators and access managers to regulate
       access to sensitive data. By defining Restricted Datasets, you can ensure that only specific teams or roles can
