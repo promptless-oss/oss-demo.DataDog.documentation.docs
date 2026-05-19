@@ -249,7 +249,7 @@ components:
       schema:
         $ref: "#/components/schemas/CaseSortableField"
     CaseTypeIDPathParameter:
-      description: Case type's UUID
+      description: The UUID of the case type.
       example: "f98a5a5b-e0ff-45d4-b2f5-afe6e74de505"
       in: path
       name: case_type_id
@@ -257,7 +257,7 @@ components:
       schema:
         type: string
     CellIDPathParameter:
-      description: Timeline cell's UUID
+      description: The UUID of the timeline cell (comment) to update.
       example: "f98a5a5b-e0ff-45d4-b2f5-afe6e74de504"
       in: path
       name: cell_id
@@ -853,6 +853,22 @@ components:
       required: true
       schema:
         type: string
+    LinkIDPathParameter:
+      description: "The UUID of the case link."
+      in: path
+      name: link_id
+      required: true
+      schema:
+        example: "804cd682-55f6-4541-ab00-b608b282ea7d"
+        type: string
+    MaintenanceWindowIDPathParameter:
+      description: The UUID of the maintenance window.
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      in: path
+      name: maintenance_window_id
+      required: true
+      schema:
+        type: string
     MembershipSort:
       description: >-
         Field to sort memberships by. Supported values: `name`, `uuid`, `-name`, `-uuid`. Defaults to `uuid`.
@@ -1409,6 +1425,14 @@ components:
       schema:
         example: "1"
         type: string
+    RuleIDPathParameter:
+      description: The UUID of the automation rule.
+      example: "e6773723-fe58-49ff-9975-dff00f14e28d"
+      in: path
+      name: rule_id
+      required: true
+      schema:
+        type: string
     RuleId:
       description: The ID of the rule.
       in: path
@@ -1586,6 +1610,22 @@ components:
       required: true
       schema:
         example: "00000000-0000-9999-0000-000000000000"
+        type: string
+    UserUUIDPathParameter:
+      description: The UUID of the user to add or remove as a watcher.
+      example: "8146583c-0b5f-11ec-abf8-da7ad0900001"
+      in: path
+      name: user_uuid
+      required: true
+      schema:
+        type: string
+    ViewIDPathParameter:
+      description: The UUID of the case view.
+      example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      in: path
+      name: view_id
+      required: true
+      schema:
         type: string
     WorkflowId:
       description: The ID of the workflow.
@@ -7594,6 +7634,219 @@ components:
           description: Whether to auto-transition cases when self-assigned.
           type: boolean
       type: object
+    AutomationRule:
+      description: An automation rule that executes an action (such as running a Datadog workflow or assigning an AI agent) when a specified case event occurs within a project.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AutomationRuleAttributes"
+        id:
+          description: Automation rule identifier.
+          example: "e6773723-fe58-49ff-9975-dff00f14e28d"
+          type: string
+        relationships:
+          $ref: "#/components/schemas/AutomationRuleRelationships"
+        type:
+          $ref: "#/components/schemas/CaseAutomationRuleResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    AutomationRuleAction:
+      description: Defines what happens when the rule triggers. Combines an action type with action-specific configuration data.
+      properties:
+        data:
+          $ref: "#/components/schemas/AutomationRuleActionData"
+        type:
+          $ref: "#/components/schemas/AutomationRuleActionType"
+      required:
+        - type
+        - data
+      type: object
+    AutomationRuleActionData:
+      description: Configuration for the action to execute, dependent on the action type.
+      properties:
+        agent_type:
+          description: The type of AI agent to assign. Required when the action type is `assign_agent`.
+          type: string
+        assigned_agent_id:
+          description: The identifier of the AI agent to assign to the case. Required when the action type is `assign_agent`.
+          type: string
+        handle:
+          description: The handle of the Datadog workflow to execute. Required when the action type is `execute_workflow`.
+          example: "workflow-handle-123"
+          type: string
+      type: object
+    AutomationRuleActionType:
+      description: The type of automated action to perform when the rule triggers. `execute_workflow` runs a Datadog workflow; `assign_agent` assigns an AI agent to the case.
+      enum:
+        - execute_workflow
+        - assign_agent
+      example: execute_workflow
+      type: string
+      x-enum-varnames:
+        - EXECUTE_WORKFLOW
+        - ASSIGN_AGENT
+    AutomationRuleAttributes:
+      description: Core attributes of an automation rule, including its name, trigger condition, action to execute, and current state.
+      properties:
+        action:
+          $ref: "#/components/schemas/AutomationRuleAction"
+        created_at:
+          description: Timestamp when the automation rule was created.
+          example: "2024-01-01T00:00:00.000Z"
+          format: date-time
+          readOnly: true
+          type: string
+        modified_at:
+          description: Timestamp when the automation rule was last modified.
+          format: date-time
+          readOnly: true
+          type: string
+        name:
+          description: A human-readable name for the automation rule, used to identify the rule in the UI and API responses.
+          example: "Auto-assign workflow"
+          type: string
+        state:
+          $ref: "#/components/schemas/CaseAutomationRuleState"
+        trigger:
+          $ref: "#/components/schemas/AutomationRuleTrigger"
+      required:
+        - name
+        - trigger
+        - action
+        - state
+        - created_at
+      type: object
+    AutomationRuleCreate:
+      description: Data object for creating an automation rule.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AutomationRuleCreateAttributes"
+        type:
+          $ref: "#/components/schemas/CaseAutomationRuleResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    AutomationRuleCreateAttributes:
+      description: Attributes required to create an automation rule.
+      properties:
+        action:
+          $ref: "#/components/schemas/AutomationRuleAction"
+        name:
+          description: Name of the automation rule.
+          example: "Auto-assign workflow"
+          type: string
+        state:
+          $ref: "#/components/schemas/CaseAutomationRuleState"
+        trigger:
+          $ref: "#/components/schemas/AutomationRuleTrigger"
+      required:
+        - name
+        - trigger
+        - action
+      type: object
+    AutomationRuleCreateRequest:
+      description: Request payload for creating an automation rule.
+      properties:
+        data:
+          $ref: "#/components/schemas/AutomationRuleCreate"
+      required:
+        - data
+      type: object
+    AutomationRuleRelationships:
+      description: Related resources for the automation rule, including the users who created and last modified it.
+      properties:
+        created_by:
+          $ref: "#/components/schemas/NullableUserRelationship"
+        modified_by:
+          $ref: "#/components/schemas/NullableUserRelationship"
+      type: object
+    AutomationRuleResponse:
+      description: Response containing a single automation rule.
+      properties:
+        data:
+          $ref: "#/components/schemas/AutomationRule"
+      required:
+        - data
+      type: object
+    AutomationRuleTrigger:
+      description: Defines when the rule activates. Combines a trigger type (the case event to listen for) with optional trigger data (conditions that narrow when the trigger fires).
+      properties:
+        data:
+          $ref: "#/components/schemas/AutomationRuleTriggerData"
+        type:
+          $ref: "#/components/schemas/AutomationRuleTriggerType"
+      required:
+        - type
+      type: object
+    AutomationRuleTriggerData:
+      description: Additional configuration for the trigger, dependent on the trigger type. For `status_transitioned` triggers, specify `from_status_name` and `to_status_name`. For `attribute_value_changed` triggers, specify `field` and `change_type`.
+      properties:
+        approval_type:
+          description: The approval outcome to match. Used with `case_review_approved` triggers.
+          type: string
+        change_type:
+          description: "The kind of attribute change to match. Allowed values: `VALUE_ADDED`, `VALUE_DELETED`, `ANY_CHANGES`. Used with `attribute_value_changed` triggers."
+          type: string
+        field:
+          description: The case attribute field name to monitor for changes. Used with `attribute_value_changed` triggers.
+          type: string
+        from_status_name:
+          description: The originating status name. Used with `status_transitioned` triggers to match transitions from this status.
+          type: string
+        to_status_name:
+          description: The destination status name. Used with `status_transitioned` triggers to match transitions to this status.
+          type: string
+      type: object
+    AutomationRuleTriggerType:
+      description: The case event that activates the automation rule.
+      enum:
+        - case_created
+        - status_transitioned
+        - attribute_value_changed
+        - event_correlation_signal_correlated
+        - case_review_approved
+        - comment_added
+      example: case_created
+      type: string
+      x-enum-varnames:
+        - CASE_CREATED
+        - STATUS_TRANSITIONED
+        - ATTRIBUTE_VALUE_CHANGED
+        - EVENT_CORRELATION_SIGNAL_CORRELATED
+        - CASE_REVIEW_APPROVED
+        - COMMENT_ADDED
+    AutomationRuleUpdate:
+      description: Data object for updating an automation rule.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AutomationRuleCreateAttributes"
+        type:
+          $ref: "#/components/schemas/CaseAutomationRuleResourceType"
+      required:
+        - type
+      type: object
+    AutomationRuleUpdateRequest:
+      description: Request payload for updating an automation rule.
+      properties:
+        data:
+          $ref: "#/components/schemas/AutomationRuleUpdate"
+      required:
+        - data
+      type: object
+    AutomationRulesResponse:
+      description: Response containing a list of automation rules for a project.
+      properties:
+        data:
+          description: List of automation rules.
+          items:
+            $ref: "#/components/schemas/AutomationRule"
+          type: array
+      required:
+        - data
+      type: object
     AwsAccountId:
       description: The ID of the AWS account.
       example: "123456789012"
@@ -10850,6 +11103,128 @@ components:
         - IN_PROGRESS
         - COMPLETED
         - FAILED
+    CaseAggregateGroup:
+      description: A single group within the aggregation results, containing the group key and its associated count values.
+      properties:
+        group:
+          description: "The value of the field being grouped on (for example, `OPEN` when grouping by status)."
+          example: "OPEN"
+          type: string
+        value:
+          description: The count of cases in this group.
+          example:
+            - 42.0
+          items:
+            format: double
+            type: number
+          type: array
+      required:
+        - group
+        - value
+      type: object
+    CaseAggregateGroupBy:
+      description: Configuration for grouping aggregated results by one or more case fields.
+      properties:
+        groups:
+          description: Fields to group by.
+          example:
+            - "status"
+          items:
+            type: string
+          type: array
+        limit:
+          description: Maximum number of groups to return.
+          example: 14
+          format: int32
+          maximum: 1000
+          type: integer
+      required:
+        - groups
+        - limit
+      type: object
+    CaseAggregateRequest:
+      description: Request payload for aggregating case counts with grouping. Use this to get faceted breakdowns of cases (for example, count of cases grouped by priority and status).
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseAggregateRequestData"
+      required:
+        - data
+      type: object
+    CaseAggregateRequestAttributes:
+      description: Attributes for the aggregation request, including the search query and grouping configuration.
+      properties:
+        group_by:
+          $ref: "#/components/schemas/CaseAggregateGroupBy"
+        query_filter:
+          description: "A search query to filter which cases are included in the aggregation. Uses the same syntax as the Case Management search bar."
+          example: "service:case-api"
+          type: string
+      required:
+        - query_filter
+        - group_by
+      type: object
+    CaseAggregateRequestData:
+      description: Data object wrapping the aggregation query type and attributes.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseAggregateRequestAttributes"
+        type:
+          $ref: "#/components/schemas/CaseAggregateResourceType"
+      required:
+        - attributes
+        - type
+      type: object
+    CaseAggregateResourceType:
+      description: JSON:API resource type for case aggregation requests.
+      enum:
+        - aggregate
+      example: aggregate
+      type: string
+      x-enum-varnames:
+        - AGGREGATE
+    CaseAggregateResponse:
+      description: Response containing aggregated case counts grouped by the requested fields.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseAggregateResponseData"
+      required:
+        - data
+      type: object
+    CaseAggregateResponseAttributes:
+      description: Attributes of the aggregation result, including the total count across all groups and the per-group breakdowns.
+      properties:
+        groups:
+          description: Aggregated groups.
+          items:
+            $ref: "#/components/schemas/CaseAggregateGroup"
+          type: array
+        total:
+          description: Total count of aggregated cases.
+          example: 100.0
+          format: double
+          type: number
+      required:
+        - total
+        - groups
+      type: object
+    CaseAggregateResponseData:
+      description: Data object containing the aggregation results, including total count and per-group breakdowns.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseAggregateResponseAttributes"
+        id:
+          description: Aggregate response identifier.
+          example: "agg-result-001"
+          type: string
+        type:
+          description: Aggregate resource type.
+          example: "aggregate"
+          type: string
+      required:
+        - type
+        - id
+        - attributes
+      type: object
     CaseAssign:
       description: Case assign
       properties:
@@ -10942,6 +11317,102 @@ components:
           example: "3b010bde-09ce-4449-b745-71dd5f861963"
           type: string
       type: object
+    CaseAutomationRuleResourceType:
+      default: rule
+      description: JSON:API resource type for case automation rules.
+      enum:
+        - rule
+      example: rule
+      type: string
+      x-enum-varnames:
+        - RULE
+    CaseAutomationRuleState:
+      description: Whether the automation rule is active. Enabled rules trigger on matching case events; disabled rules are inactive but preserve their configuration.
+      enum:
+        - ENABLED
+        - DISABLED
+      example: ENABLED
+      type: string
+      x-enum-varnames:
+        - ENABLED
+        - DISABLED
+    CaseBulkActionType:
+      description: "The type of action to apply in a bulk update. Allowed values are `priority`, `status`, `assign`, `unassign`, `archive`, `unarchive`, `jira`, `servicenow`, `linear`, `update_project`."
+      enum:
+        - priority
+        - status
+        - assign
+        - unassign
+        - archive
+        - unarchive
+        - jira
+        - servicenow
+        - linear
+        - update_project
+      example: priority
+      type: string
+      x-enum-varnames:
+        - PRIORITY
+        - STATUS
+        - ASSIGN
+        - UNASSIGN
+        - ARCHIVE
+        - UNARCHIVE
+        - JIRA
+        - SERVICENOW
+        - LINEAR
+        - UPDATE_PROJECT
+    CaseBulkResourceType:
+      description: JSON:API resource type for bulk case operations.
+      enum:
+        - bulk
+      example: bulk
+      type: string
+      x-enum-varnames:
+        - BULK
+    CaseBulkUpdateRequest:
+      description: Request payload for applying a single action (such as changing priority, status, or assignment) to multiple cases at once.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseBulkUpdateRequestData"
+      required:
+        - data
+      type: object
+    CaseBulkUpdateRequestAttributes:
+      description: Attributes for the bulk update, specifying which cases to update and the action to apply.
+      properties:
+        case_ids:
+          description: An array of case identifiers to apply the bulk action to.
+          example:
+            - "case-id-1"
+            - "case-id-2"
+          items:
+            type: string
+          type: array
+        payload:
+          additionalProperties:
+            type: string
+          description: A key-value map of action-specific parameters. The required keys depend on the action type (for example, `priority` for the priority action, `assignee_id` for assign).
+          example:
+            priority: "P1"
+          type: object
+        type:
+          $ref: "#/components/schemas/CaseBulkActionType"
+      required:
+        - case_ids
+        - type
+      type: object
+    CaseBulkUpdateRequestData:
+      description: Data object wrapping the bulk update type and attributes.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseBulkUpdateRequestAttributes"
+        type:
+          $ref: "#/components/schemas/CaseBulkResourceType"
+      required:
+        - attributes
+        - type
+      type: object
     CaseComment:
       description: Case comment
       properties:
@@ -10970,6 +11441,75 @@ components:
           $ref: "#/components/schemas/CaseComment"
       required:
         - data
+      type: object
+    CaseCountGroup:
+      description: A facet group containing counts broken down by the distinct values of a case field (for example, status or priority).
+      properties:
+        group:
+          description: "The name of the field being grouped on (for example, `status` or `priority`)."
+          example: "status"
+          type: string
+        group_values:
+          description: Values within this group.
+          items:
+            $ref: "#/components/schemas/CaseCountGroupValue"
+          type: array
+      required:
+        - group
+        - group_values
+      type: object
+    CaseCountGroupValue:
+      description: A single value within a count group, representing the number of cases with that specific field value.
+      properties:
+        count:
+          description: Count of cases for this value.
+          example: 42
+          format: int64
+          type: integer
+        value:
+          description: The group value.
+          example: "OPEN"
+          type: string
+      required:
+        - value
+        - count
+      type: object
+    CaseCountResponse:
+      description: Response containing the total number of cases matching a query, optionally grouped by specified fields.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseCountResponseData"
+      required:
+        - data
+      type: object
+    CaseCountResponseAttributes:
+      description: Attributes for the count response, including the total count and optional facet breakdowns.
+      properties:
+        groups:
+          description: List of facet groups, one per field specified in `group_bys`.
+          items:
+            $ref: "#/components/schemas/CaseCountGroup"
+          type: array
+      required:
+        - groups
+      type: object
+    CaseCountResponseData:
+      description: Data object containing the count results, including per-field group breakdowns.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseCountResponseAttributes"
+        id:
+          description: Count response identifier.
+          example: "count-result-001"
+          type: string
+        type:
+          description: Count resource type.
+          example: "count"
+          type: string
+      required:
+        - type
+        - id
+        - attributes
       type: object
     CaseCreate:
       description: Case creation data
@@ -11054,6 +11594,86 @@ components:
       required:
         - data
       type: object
+    CaseInsight:
+      description: A reference to an external Datadog resource that provides investigative context for a case, such as a security signal, monitor alert, error tracking issue, or incident.
+      properties:
+        ref:
+          description: "The URL path or deep link to the insight resource within Datadog (for example, `/monitors/12345?q=total`)."
+          example: "/monitors/12345?q=total"
+          type: string
+        resource_id:
+          description: The unique identifier of the referenced Datadog resource (for example, a monitor ID, incident ID, or signal ID).
+          example: "12345"
+          type: string
+        type:
+          $ref: "#/components/schemas/CaseInsightType"
+      required:
+        - type
+        - ref
+        - resource_id
+      type: object
+    CaseInsightType:
+      description: The type of Datadog resource linked to the case as contextual evidence. Each type corresponds to a different Datadog product signal (for example, a security finding, a monitor alert, or an incident).
+      enum:
+        - SECURITY_SIGNAL
+        - MONITOR
+        - EVENT_CORRELATION
+        - ERROR_TRACKING
+        - CLOUD_COST_RECOMMENDATION
+        - INCIDENT
+        - SENSITIVE_DATA_SCANNER_ISSUE
+        - EVENT
+        - WATCHDOG_STORY
+        - WIDGET
+        - SECURITY_FINDING
+        - INSIGHT_SCORECARD_CAMPAIGN
+        - RESOURCE_POLICY
+        - APM_RECOMMENDATION
+        - SCM_URL
+        - PROFILING_DOWNSIZING_EXPERIMENT
+      example: SECURITY_SIGNAL
+      type: string
+      x-enum-varnames:
+        - SECURITY_SIGNAL
+        - MONITOR
+        - EVENT_CORRELATION
+        - ERROR_TRACKING
+        - CLOUD_COST_RECOMMENDATION
+        - INCIDENT
+        - SENSITIVE_DATA_SCANNER_ISSUE
+        - EVENT
+        - WATCHDOG_STORY
+        - WIDGET
+        - SECURITY_FINDING
+        - INSIGHT_SCORECARD_CAMPAIGN
+        - RESOURCE_POLICY
+        - APM_RECOMMENDATION
+        - SCM_URL
+        - PROFILING_DOWNSIZING_EXPERIMENT
+    CaseInsightsAttributes:
+      description: Attributes for adding or removing insights from a case.
+      properties:
+        insights:
+          description: Array of insights to add to or remove from a case.
+          items:
+            $ref: "#/components/schemas/CaseInsight"
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+        - insights
+      type: object
+    CaseInsightsData:
+      description: Data object containing the insights to add or remove.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseInsightsAttributes"
+        type:
+          $ref: "#/components/schemas/CaseResourceType"
+      required:
+        - type
+        - attributes
+      type: object
     CaseInsightsItems:
       description: An insight of the case.
       properties:
@@ -11069,6 +11689,106 @@ components:
           description: Type of the resource. For example, the type of a security finding is "SECURITY_FINDING".
           example: "SECURITY_FINDING"
           type: string
+      type: object
+    CaseInsightsRequest:
+      description: Request payload for adding or removing case insights.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseInsightsData"
+      required:
+        - data
+      type: object
+    CaseLink:
+      description: "A directional link representing a relationship between two entities. At least one entity must be a case."
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseLinkAttributes"
+        id:
+          description: "The case link identifier."
+          example: "804cd682-55f6-4541-ab00-b608b282ea7d"
+          type: string
+        type:
+          $ref: "#/components/schemas/CaseLinkResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    CaseLinkAttributes:
+      description: "Attributes describing a directional relationship between two entities (cases, incidents, or pages)."
+      properties:
+        child_entity_id:
+          description: "The UUID of the child (target) entity in the relationship."
+          example: "4417921d-0866-4a38-822c-6f2a0f65f77d"
+          type: string
+        child_entity_type:
+          description: "The type of the child entity. Allowed values: `CASE`, `INCIDENT`, `PAGE`, `AGENT_CONVERSATION`."
+          example: "CASE"
+          type: string
+        parent_entity_id:
+          description: "The UUID of the parent (source) entity in the relationship."
+          example: "bf0cbac6-4c16-4cfb-b6bf-ca5e0ec37a4f"
+          type: string
+        parent_entity_type:
+          description: "The type of the parent entity. Allowed values: `CASE`, `INCIDENT`, `PAGE`, `AGENT_CONVERSATION`."
+          example: "CASE"
+          type: string
+        relationship:
+          description: "The type of directional relationship. Allowed values: `RELATES_TO` (bidirectional association), `CAUSES` (parent causes child), `BLOCKS` (parent blocks child), `DUPLICATES` (parent duplicates child), `PARENT_OF` (hierarchical), `SUCCESSOR_OF` (sequence), `ESCALATES_TO` (priority escalation)."
+          example: "BLOCKS"
+          type: string
+      required:
+        - relationship
+        - parent_entity_id
+        - parent_entity_type
+        - child_entity_id
+        - child_entity_type
+      type: object
+    CaseLinkCreate:
+      description: "Data object for creating a case link."
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseLinkAttributes"
+        type:
+          $ref: "#/components/schemas/CaseLinkResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    CaseLinkCreateRequest:
+      description: "Request payload for creating a link between two entities."
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseLinkCreate"
+      required:
+        - data
+      type: object
+    CaseLinkResourceType:
+      description: "JSON:API resource type for case links."
+      enum:
+        - link
+      example: link
+      type: string
+      x-enum-varnames:
+        - LINK
+    CaseLinkResponse:
+      description: "Response containing a single case link."
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseLink"
+      required:
+        - data
+      type: object
+    CaseLinksResponse:
+      description: "Response containing a list of case links."
+      properties:
+        data:
+          description: "A list of case links."
+          items:
+            $ref: "#/components/schemas/CaseLink"
+          type: array
+      required:
+        - data
       type: object
     CaseManagementProject:
       description: Case management project.
@@ -11312,7 +12032,7 @@ components:
           description: An attribute value.
           type: string
         type: array
-      description: The definition of `CaseObjectAttributes` object.
+      description: Key-value pairs of case attributes. Each key maps to an array of string values, used for flexible metadata such as labels or tags.
       type: object
     CasePriority:
       default: NOT_DEFINED
@@ -11347,7 +12067,7 @@ components:
       type: object
     CaseResourceType:
       default: case
-      description: Case resource type
+      description: JSON:API resource type for cases.
       enum:
         - case
       example: case
@@ -11427,7 +12147,7 @@ components:
       x-enum-varnames:
         - STANDARD
     CaseTypeCreate:
-      description: Case type
+      description: Data object for creating a case type.
       properties:
         attributes:
           $ref: "#/components/schemas/CaseTypeResourceAttributes"
@@ -11438,7 +12158,7 @@ components:
         - type
       type: object
     CaseTypeCreateRequest:
-      description: Case type create request
+      description: Request payload for creating a case type.
       properties:
         data:
           $ref: "#/components/schemas/CaseTypeCreate"
@@ -11446,7 +12166,7 @@ components:
         - data
       type: object
     CaseTypeResource:
-      description: The definition of `CaseType` object.
+      description: A case type that defines a classification category for cases. Each case type can have its own custom attributes, statuses, and automation rules.
       properties:
         attributes:
           $ref: "#/components/schemas/CaseTypeResourceAttributes"
@@ -11458,24 +12178,24 @@ components:
           $ref: "#/components/schemas/CaseTypeResourceType"
       type: object
     CaseTypeResourceAttributes:
-      description: Case Type resource attributes
+      description: "Attributes of a case type, which define a classification category for cases. Organizations use case types to model different workflows (for example, Security Incident, Bug Report, Change Request)."
       properties:
         deleted_at:
-          description: Timestamp of when the case type was deleted
+          description: Timestamp when the case type was marked as deleted. A null value indicates the case type is active.
           format: date-time
           nullable: true
           readOnly: true
           type: string
         description:
-          description: Case type description.
+          description: A detailed description explaining when this case type should be used.
           example: "Investigations done in case management"
           type: string
         emoji:
-          description: Case type emoji.
+          description: An emoji icon representing the case type in the UI.
           example: "🕵🏻‍♂️"
           type: string
         name:
-          description: Case type name.
+          description: The display name of the case type, shown in the Case Management UI when creating or viewing cases.
           example: "Investigation"
           type: string
       required:
@@ -11483,7 +12203,7 @@ components:
       type: object
     CaseTypeResourceType:
       default: case_type
-      description: Case type resource type
+      description: JSON:API resource type for case types.
       enum:
         - case_type
       example: case_type
@@ -11491,13 +12211,31 @@ components:
       x-enum-varnames:
         - CASE_TYPE
     CaseTypeResponse:
-      description: Case type response
+      description: Response containing a single case type.
       properties:
         data:
           $ref: "#/components/schemas/CaseTypeResource"
       type: object
+    CaseTypeUpdate:
+      description: Data object for updating a case type.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseTypeResourceAttributes"
+        type:
+          $ref: "#/components/schemas/CaseTypeResourceType"
+      required:
+        - type
+      type: object
+    CaseTypeUpdateRequest:
+      description: Request payload for updating a case type.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseTypeUpdate"
+      required:
+        - data
+      type: object
     CaseTypesResponse:
-      description: Case types response.
+      description: Response containing a list of case types.
       properties:
         data:
           description: List of case types
@@ -11529,6 +12267,35 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/CaseUpdateAttributes"
+      required:
+        - data
+      type: object
+    CaseUpdateComment:
+      description: Data object for updating a case comment.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseUpdateCommentAttributes"
+        type:
+          $ref: "#/components/schemas/CaseResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    CaseUpdateCommentAttributes:
+      description: Attributes for updating a comment.
+      properties:
+        comment:
+          description: The updated comment message.
+          example: "Updated comment text"
+          type: string
+      required:
+        - comment
+      type: object
+    CaseUpdateCommentRequest:
+      description: Request payload for updating a comment on a case timeline.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseUpdateComment"
       required:
         - data
       type: object
@@ -11580,6 +12347,35 @@ components:
       required:
         - data
       type: object
+    CaseUpdateDueDate:
+      description: Data object for updating a case's due date.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseUpdateDueDateAttributes"
+        type:
+          $ref: "#/components/schemas/CaseResourceType"
+      required:
+        - attributes
+        - type
+      type: object
+    CaseUpdateDueDateAttributes:
+      description: Attributes for setting or clearing a case's due date.
+      properties:
+        due_date:
+          description: "The target resolution date for the case, in `YYYY-MM-DD` format. Set to `null` to clear the due date."
+          example: "2026-12-31"
+          type: string
+      required:
+        - due_date
+      type: object
+    CaseUpdateDueDateRequest:
+      description: Request payload for updating a case's due date.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseUpdateDueDate"
+      required:
+        - data
+      type: object
     CaseUpdatePriority:
       description: Case priority status
       properties:
@@ -11604,6 +12400,35 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/CaseUpdatePriority"
+      required:
+        - data
+      type: object
+    CaseUpdateResolvedReason:
+      description: Data object for updating a case's resolved reason.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseUpdateResolvedReasonAttributes"
+        type:
+          $ref: "#/components/schemas/CaseResourceType"
+      required:
+        - attributes
+        - type
+      type: object
+    CaseUpdateResolvedReasonAttributes:
+      description: Attributes for setting the resolution reason on a security case.
+      properties:
+        security_resolved_reason:
+          description: "The reason the security case was resolved (for example, `FALSE_POSITIVE`, `TRUE_POSITIVE`, `BENIGN_POSITIVE`)."
+          example: "FALSE_POSITIVE"
+          type: string
+      required:
+        - security_resolved_reason
+      type: object
+    CaseUpdateResolvedReasonRequest:
+      description: Request payload for updating the resolution reason on a closed security case.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseUpdateResolvedReason"
       required:
         - data
       type: object
@@ -11661,6 +12486,217 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/CaseUpdateTitle"
+      required:
+        - data
+      type: object
+    CaseView:
+      description: A saved case view that provides a filtered, reusable list of cases matching a specific query. Views act as persistent dashboards for monitoring case subsets.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseViewAttributes"
+        id:
+          description: The view's identifier.
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+          type: string
+        relationships:
+          $ref: "#/components/schemas/CaseViewRelationships"
+        type:
+          $ref: "#/components/schemas/CaseViewResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    CaseViewAttributes:
+      description: Attributes of a case view, including the filter query and optional notification rule.
+      properties:
+        created_at:
+          description: Timestamp when the view was created.
+          example: "2024-01-01T00:00:00.000Z"
+          format: date-time
+          readOnly: true
+          type: string
+        modified_at:
+          description: Timestamp when the view was last modified.
+          format: date-time
+          readOnly: true
+          type: string
+        name:
+          description: A human-readable name for the view, displayed in the Case Management UI.
+          example: Open bugs
+          type: string
+        np_rule_id:
+          description: The identifier of a notification rule linked to this view. When set, users subscribed to the view receive alerts for matching cases.
+          type: string
+        query:
+          description: "The search query that determines which cases appear in this view. Uses the same syntax as the Case Management search bar (for example, `status:open priority:P1`)."
+          example: "status:open type:bug"
+          type: string
+      required:
+        - name
+        - query
+        - created_at
+      type: object
+    CaseViewCreate:
+      description: Data object for creating a case view.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseViewCreateAttributes"
+        type:
+          $ref: "#/components/schemas/CaseViewResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    CaseViewCreateAttributes:
+      description: Attributes required to create a case view.
+      properties:
+        name:
+          description: The name of the view.
+          example: Open bugs
+          type: string
+        np_rule_id:
+          description: The identifier of a notification rule linked to this view. When set, users subscribed to the view receive alerts for matching cases.
+          type: string
+        project_id:
+          description: The UUID of the project this view belongs to. Views are scoped to a single project.
+          example: e555e290-ed65-49bd-ae18-8acbfcf18db7
+          type: string
+        query:
+          description: The query used to filter cases in this view.
+          example: "status:open type:bug"
+          type: string
+      required:
+        - name
+        - query
+        - project_id
+      type: object
+    CaseViewCreateRequest:
+      description: Request payload for creating a case view.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseViewCreate"
+      required:
+        - data
+      type: object
+    CaseViewRelationships:
+      description: Related resources for the case view, including the creator, last modifier, and associated project.
+      properties:
+        created_by:
+          $ref: "#/components/schemas/NullableUserRelationship"
+        modified_by:
+          $ref: "#/components/schemas/NullableUserRelationship"
+        project:
+          $ref: "#/components/schemas/ProjectRelationship"
+      type: object
+    CaseViewResourceType:
+      default: view
+      description: "JSON:API resource type for case views."
+      enum:
+        - view
+      example: view
+      type: string
+      x-enum-varnames:
+        - VIEW
+    CaseViewResponse:
+      description: Response containing a single case view.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseView"
+      required:
+        - data
+      type: object
+    CaseViewUpdate:
+      description: Data object for updating a case view.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CaseViewUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/CaseViewResourceType"
+      required:
+        - type
+      type: object
+    CaseViewUpdateAttributes:
+      description: Attributes that can be updated on a case view. All fields are optional; only provided fields are changed.
+      properties:
+        name:
+          description: The name of the view.
+          type: string
+        np_rule_id:
+          description: The identifier of a notification rule linked to this view. When set, users subscribed to the view receive alerts for matching cases.
+          type: string
+        query:
+          description: The query used to filter cases in this view.
+          type: string
+      type: object
+    CaseViewUpdateRequest:
+      description: Request payload for updating a case view.
+      properties:
+        data:
+          $ref: "#/components/schemas/CaseViewUpdate"
+      required:
+        - data
+      type: object
+    CaseViewsResponse:
+      description: Response containing a list of case views.
+      properties:
+        data:
+          description: A list of case views.
+          items:
+            $ref: "#/components/schemas/CaseView"
+          type: array
+      required:
+        - data
+      type: object
+    CaseWatcher:
+      description: Represents a user who is subscribed to notifications for a case. Watchers receive updates when the case's status, priority, assignee, or comments change.
+      properties:
+        id:
+          description: The primary identifier of the case watcher.
+          example: "8146583c-0b5f-11ec-abf8-da7ad0900001"
+          type: string
+        relationships:
+          $ref: "#/components/schemas/CaseWatcherRelationships"
+        type:
+          $ref: "#/components/schemas/CaseWatcherResourceType"
+      required:
+        - id
+        - type
+        - relationships
+      type: object
+    CaseWatcherRelationships:
+      description: Relationships for a case watcher, linking to the underlying user resource.
+      properties:
+        user:
+          $ref: "#/components/schemas/CaseWatcherUserRelationship"
+      required:
+        - user
+      type: object
+    CaseWatcherResourceType:
+      default: watcher
+      description: JSON:API resource type for case watchers.
+      enum:
+        - watcher
+      example: watcher
+      type: string
+      x-enum-varnames:
+        - WATCHER
+    CaseWatcherUserRelationship:
+      description: The user relationship for a case watcher.
+      properties:
+        data:
+          $ref: "#/components/schemas/UserRelationshipData"
+      required:
+        - data
+      type: object
+    CaseWatchersResponse:
+      description: Response containing the list of users watching a case.
+      properties:
+        data:
+          description: List of case watchers.
+          items:
+            $ref: "#/components/schemas/CaseWatcher"
+          type: array
       required:
         - data
       type: object
@@ -20251,7 +21287,7 @@ components:
           $ref: "#/components/schemas/CsmServerlessCoverageAnalysisData"
       type: object
     CustomAttributeConfig:
-      description: The definition of `CustomAttributeConfig` object.
+      description: "A custom attribute configuration that defines an organization-specific metadata field on cases. Custom attributes are scoped to a case type and can hold text, URLs, numbers, or predefined select options."
       properties:
         attributes:
           $ref: "#/components/schemas/CustomAttributeConfigResourceAttributes"
@@ -20263,22 +21299,22 @@ components:
           $ref: "#/components/schemas/CustomAttributeConfigResourceType"
       type: object
     CustomAttributeConfigAttributesCreate:
-      description: Custom attribute config resource attributes
+      description: Attributes required to create a custom attribute configuration.
       properties:
         description:
-          description: Custom attribute description.
+          description: A description explaining the purpose and expected values for this custom attribute.
           example: "AWS Region, must be a valid region supported by AWS"
           type: string
         display_name:
-          description: Custom attribute name.
+          description: The human-readable label shown in the Case Management UI for this custom attribute.
           example: "AWS Region"
           type: string
         is_multi:
-          description: Whether multiple values can be set
+          description: "If `true`, this attribute accepts an array of values. If `false`, only a single value is allowed."
           example: true
           type: boolean
         key:
-          description: Custom attribute key. This will be the value use to search on this custom attribute
+          description: The programmatic key used to reference this custom attribute in search queries and API calls.
           example: "aws_region"
           type: string
         type:
@@ -20290,7 +21326,7 @@ components:
         - is_multi
       type: object
     CustomAttributeConfigCreate:
-      description: Custom attribute config
+      description: Data object for creating a custom attribute configuration.
       properties:
         attributes:
           $ref: "#/components/schemas/CustomAttributeConfigAttributesCreate"
@@ -20301,7 +21337,7 @@ components:
         - type
       type: object
     CustomAttributeConfigCreateRequest:
-      description: Custom attribute config create request
+      description: Request payload for creating a custom attribute configuration.
       properties:
         data:
           $ref: "#/components/schemas/CustomAttributeConfigCreate"
@@ -20309,26 +21345,26 @@ components:
         - data
       type: object
     CustomAttributeConfigResourceAttributes:
-      description: Custom attribute resource attributes
+      description: "Attributes of a custom attribute configuration, defining an organization-specific metadata field that can be added to cases of a given type."
       properties:
         case_type_id:
-          description: Custom attribute config identifier.
+          description: The UUID of the case type this custom attribute belongs to.
           example: "aeadc05e-98a8-11ec-ac2c-da7ad0900001"
           type: string
         description:
-          description: Custom attribute description.
+          description: A description explaining the purpose and expected values for this custom attribute.
           example: "AWS Region, must be a valid region supported by AWS"
           type: string
         display_name:
-          description: Custom attribute name.
+          description: The human-readable label shown in the Case Management UI for this custom attribute.
           example: "AWS Region"
           type: string
         is_multi:
-          description: Whether multiple values can be set
+          description: "If `true`, this attribute accepts an array of values. If `false`, only a single value is allowed."
           example: true
           type: boolean
         key:
-          description: Custom attribute key. This will be the value use to search on this custom attribute
+          description: The programmatic key used to reference this custom attribute in search queries and API calls.
           example: "aws_region"
           type: string
         type:
@@ -20342,7 +21378,7 @@ components:
       type: object
     CustomAttributeConfigResourceType:
       default: custom_attribute
-      description: Custom attributes config JSON:API resource type
+      description: JSON:API resource type for custom attribute configurations.
       enum:
         - custom_attribute
       example: custom_attribute
@@ -20350,13 +21386,50 @@ components:
       x-enum-varnames:
         - CUSTOM_ATTRIBUTE
     CustomAttributeConfigResponse:
-      description: Custom attribute config response.
+      description: Response containing a single custom attribute configuration.
       properties:
         data:
           $ref: "#/components/schemas/CustomAttributeConfig"
       type: object
+    CustomAttributeConfigUpdate:
+      description: Data object for updating a custom attribute configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CustomAttributeConfigUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/CustomAttributeConfigResourceType"
+      required:
+        - type
+      type: object
+    CustomAttributeConfigUpdateAttributes:
+      description: Attributes that can be updated on a custom attribute configuration. All fields are optional; only provided fields are changed.
+      properties:
+        description:
+          description: A description explaining the purpose and expected values for this custom attribute.
+          example: "Updated description."
+          type: string
+        display_name:
+          description: The human-readable label shown in the Case Management UI for this custom attribute.
+          example: "AWS Region"
+          type: string
+        map_from:
+          description: An external field identifier to auto-populate this attribute from (used for integrations with external systems).
+          type: string
+        type:
+          $ref: "#/components/schemas/CustomAttributeType"
+        type_data:
+          $ref: "#/components/schemas/CustomAttributeTypeData"
+      type: object
+    CustomAttributeConfigUpdateRequest:
+      description: Request payload for updating a custom attribute configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/CustomAttributeConfigUpdate"
+      required:
+        - data
+      type: object
     CustomAttributeConfigsResponse:
-      description: Custom attribute configs response.
+      description: Response containing a list of custom attribute configurations.
       properties:
         data:
           description: List of custom attribute configs of case type
@@ -20365,27 +21438,37 @@ components:
           type: array
       type: object
     CustomAttributeMultiNumberValue:
-      description: Values of multi NUMBER custom attribute
+      description: An array of numeric values for a multi-value NUMBER-type custom attribute.
       items:
         description: NUMBER value
         format: double
         type: number
       type: array
     CustomAttributeMultiStringValue:
-      description: Value of multi TEXT/URL/NUMBER/SELECT custom attribute
+      description: An array of string values for a multi-value TEXT, URL, or SELECT-type custom attribute.
       items:
         description: TEXT/URL/NUMBER/SELECT Value
         type: string
       type: array
     CustomAttributeNumberValue:
-      description: Value of NUMBER custom attribute
+      description: A numeric value for a NUMBER-type custom attribute.
       format: double
       type: number
+    CustomAttributeSelectOption:
+      description: A selectable option for a SELECT-type custom attribute.
+      properties:
+        value:
+          description: Option value.
+          example: "us-east-1"
+          type: string
+      required:
+        - value
+      type: object
     CustomAttributeStringValue:
-      description: Value of TEXT/URL/NUMBER/SELECT custom attribute
+      description: A string value for a TEXT, URL, or SELECT-type custom attribute.
       type: string
     CustomAttributeType:
-      description: Custom attributes type
+      description: "The data type of the custom attribute, which determines the allowed values and UI input control."
       enum:
         - URL
         - TEXT
@@ -20398,8 +21481,17 @@ components:
         - TEXT
         - NUMBER
         - SELECT
+    CustomAttributeTypeData:
+      description: "Type-specific configuration for the custom attribute. For SELECT-type attributes, this contains the list of allowed options."
+      properties:
+        options:
+          description: Options for SELECT type custom attributes.
+          items:
+            $ref: "#/components/schemas/CustomAttributeSelectOption"
+          type: array
+      type: object
     CustomAttributeValue:
-      description: Custom attribute values
+      description: A typed value for a custom attribute on a specific case.
       properties:
         is_multi:
           description: If true, value must be an array
@@ -20415,7 +21507,7 @@ components:
         - value
       type: object
     CustomAttributeValuesUnion:
-      description: Union of supported value for a custom attribute
+      description: The value of a custom attribute. The accepted format depends on the attribute's type and whether it accepts multiple values.
       example: ""
       oneOf:
         - $ref: "#/components/schemas/CustomAttributeStringValue"
@@ -45998,6 +47090,167 @@ components:
         - type
         - id
       type: object
+    MaintenanceWindow:
+      description: A maintenance window that defines a scheduled time period during which case-related notifications and automation rules are suppressed. Each maintenance window applies to cases matching a specified query.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/MaintenanceWindowAttributes"
+        id:
+          description: The maintenance window's identifier.
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          type: string
+        type:
+          $ref: "#/components/schemas/MaintenanceWindowResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    MaintenanceWindowAttributes:
+      description: Attributes of a maintenance window, including its schedule and the query that determines which cases are affected.
+      properties:
+        created_by:
+          description: The UUID of the user who created this maintenance window. Read-only.
+          readOnly: true
+          type: string
+        end_at:
+          description: The ISO 8601 timestamp when the maintenance window ends and normal notification behavior resumes.
+          example: "2026-06-01T06:00:00Z"
+          format: date-time
+          type: string
+        name:
+          description: "A human-readable name for the maintenance window (for example, `Database migration - Dec 15`)."
+          example: "Weekly maintenance"
+          type: string
+        query:
+          description: A case search query that determines which cases are affected during the maintenance window. Uses the same syntax as the Case Management search bar.
+          example: "project:SEC"
+          type: string
+        start_at:
+          description: The ISO 8601 timestamp when the maintenance window begins and notifications start being suppressed.
+          example: "2026-06-01T00:00:00Z"
+          format: date-time
+          type: string
+        updated_by:
+          description: The UUID of the user who last modified this maintenance window. Read-only.
+          readOnly: true
+          type: string
+      required:
+        - name
+        - query
+        - start_at
+        - end_at
+      type: object
+    MaintenanceWindowCreate:
+      description: Data object for creating a maintenance window.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/MaintenanceWindowCreateAttributes"
+        type:
+          $ref: "#/components/schemas/MaintenanceWindowResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    MaintenanceWindowCreateAttributes:
+      description: Attributes required to create a maintenance window.
+      properties:
+        end_at:
+          description: The end time of the maintenance window.
+          example: "2026-06-01T06:00:00Z"
+          format: date-time
+          type: string
+        name:
+          description: The name of the maintenance window.
+          example: "Weekly maintenance"
+          type: string
+        query:
+          description: The query to filter event management cases for this maintenance window.
+          example: "project:SEC"
+          type: string
+        start_at:
+          description: The start time of the maintenance window.
+          example: "2026-06-01T00:00:00Z"
+          format: date-time
+          type: string
+      required:
+        - name
+        - query
+        - start_at
+        - end_at
+      type: object
+    MaintenanceWindowCreateRequest:
+      description: Request payload for creating a maintenance window.
+      properties:
+        data:
+          $ref: "#/components/schemas/MaintenanceWindowCreate"
+      required:
+        - data
+      type: object
+    MaintenanceWindowResourceType:
+      default: maintenance_window
+      description: JSON:API resource type for maintenance windows.
+      enum:
+        - maintenance_window
+      example: maintenance_window
+      type: string
+      x-enum-varnames:
+        - MAINTENANCE_WINDOW
+    MaintenanceWindowResponse:
+      description: Response containing a single maintenance window.
+      properties:
+        data:
+          $ref: "#/components/schemas/MaintenanceWindow"
+      required:
+        - data
+      type: object
+    MaintenanceWindowUpdate:
+      description: Data object for updating a maintenance window.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/MaintenanceWindowUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/MaintenanceWindowResourceType"
+      required:
+        - type
+      type: object
+    MaintenanceWindowUpdateAttributes:
+      description: Attributes that can be updated on a maintenance window. All fields are optional; only provided fields are changed.
+      properties:
+        end_at:
+          description: The end time of the maintenance window.
+          format: date-time
+          type: string
+        name:
+          description: The name of the maintenance window.
+          type: string
+        query:
+          description: The query to filter event management cases for this maintenance window.
+          type: string
+        start_at:
+          description: The start time of the maintenance window.
+          format: date-time
+          type: string
+      type: object
+    MaintenanceWindowUpdateRequest:
+      description: Request payload for updating a maintenance window.
+      properties:
+        data:
+          $ref: "#/components/schemas/MaintenanceWindowUpdate"
+      required:
+        - data
+      type: object
+    MaintenanceWindowsResponse:
+      description: Response containing a list of maintenance windows.
+      properties:
+        data:
+          description: List of maintenance windows.
+          items:
+            $ref: "#/components/schemas/MaintenanceWindow"
+          type: array
+      required:
+        - data
+      type: object
     ManagedOrgsData:
       description: The managed organizations resource.
       properties:
@@ -59486,6 +60739,39 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/ProjectCreate"
+      required:
+        - data
+      type: object
+    ProjectFavorite:
+      description: Represents a case project that the current user has bookmarked for quick access. Favorited projects appear prominently in the Case Management UI.
+      properties:
+        id:
+          description: The UUID of the favorited project.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          type: string
+        type:
+          $ref: "#/components/schemas/ProjectFavoriteResourceType"
+      required:
+        - id
+        - type
+      type: object
+    ProjectFavoriteResourceType:
+      default: project_favorite
+      description: "JSON:API resource type for project favorites."
+      enum:
+        - project_favorite
+      example: project_favorite
+      type: string
+      x-enum-varnames:
+        - PROJECT_FAVORITE
+    ProjectFavoritesResponse:
+      description: Response containing the list of projects the current user has favorited.
+      properties:
+        data:
+          description: List of project favorites.
+          items:
+            $ref: "#/components/schemas/ProjectFavorite"
+          type: array
       required:
         - data
       type: object
@@ -82991,7 +84277,7 @@ components:
         - restrictions
       type: object
     TimelineCell:
-      description: timeline cell
+      description: "Attributes of a timeline cell, representing a single event in a case's chronological activity log (for example, a comment, status change, or assignment update)."
       properties:
         author:
           $ref: "#/components/schemas/TimelineCellAuthor"
@@ -83016,11 +84302,11 @@ components:
           $ref: "#/components/schemas/TimelineCellType"
       type: object
     TimelineCellAuthor:
-      description: author of the timeline cell
+      description: The author of the timeline cell. Currently only user authors are supported.
       oneOf:
         - $ref: "#/components/schemas/TimelineCellAuthorUser"
     TimelineCellAuthorUser:
-      description: timeline cell user author
+      description: A user who authored a timeline cell.
       properties:
         content:
           $ref: "#/components/schemas/TimelineCellAuthorUserContent"
@@ -83028,23 +84314,23 @@ components:
           $ref: "#/components/schemas/TimelineCellAuthorUserType"
       type: object
     TimelineCellAuthorUserContent:
-      description: user author content.
+      description: Profile information for the user who authored the timeline cell.
       properties:
         email:
-          description: user email
+          description: The email address of the user.
           type: string
         handle:
-          description: user handle
+          description: The Datadog handle of the user.
           type: string
         id:
-          description: user UUID
+          description: The UUID of the user.
           type: string
         name:
-          description: user name
+          description: The display name of the user.
           type: string
       type: object
     TimelineCellAuthorUserType:
-      description: user author type.
+      description: The type of timeline cell author. Currently only `USER` is supported.
       enum:
         - USER
       example: USER
@@ -83052,18 +84338,18 @@ components:
       x-enum-varnames:
         - USER
     TimelineCellContent:
-      description: timeline cell content
+      description: The content payload of a timeline cell, varying by cell type.
       oneOf:
         - $ref: "#/components/schemas/TimelineCellContentComment"
     TimelineCellContentComment:
-      description: comment content
+      description: The content of a comment timeline cell.
       properties:
         message:
-          description: comment message
+          description: The text content of the comment. Supports Markdown formatting.
           type: string
       type: object
     TimelineCellResource:
-      description: Timeline cell JSON:API resource
+      description: A timeline cell resource representing a single entry in a case's activity timeline.
       properties:
         attributes:
           $ref: "#/components/schemas/TimelineCell"
@@ -83080,7 +84366,7 @@ components:
       type: object
     TimelineCellResourceType:
       default: timeline_cell
-      description: Timeline cell JSON:API resource type
+      description: JSON:API resource type for timeline cells.
       enum:
         - timeline_cell
       example: timeline_cell
@@ -83088,7 +84374,7 @@ components:
       x-enum-varnames:
         - TIMELINE_CELL
     TimelineCellType:
-      description: Timeline cell content type
+      description: The type of content in the timeline cell. Currently only `COMMENT` is supported in this endpoint.
       enum:
         - COMMENT
       example: COMMENT
@@ -83096,7 +84382,7 @@ components:
       x-enum-varnames:
         - COMMENT
     TimelineResponse:
-      description: Timeline response
+      description: Response containing the chronological list of timeline cells for a case.
       properties:
         data:
           description: The `TimelineResponse` `data`.
@@ -87600,6 +88886,7 @@ components:
             bits_investigations_read: View Bits AI investigations.
             bits_investigations_write: Create and manage Bits AI investigations.
             cases_read: View Cases.
+            cases_shared_settings_write: Update shared case management settings.
             cases_write: Create and update cases.
             ci_visibility_pipelines_write: Create CI Visibility pipeline spans using the API.
             ci_visibility_read: View CI Visibility.
@@ -87621,6 +88908,8 @@ components:
             embeddable_graphs_share: Generate public links to share embeddable graphs externally.
             error_tracking_read: Read Error Tracking data.
             error_tracking_write: Edit Error Tracking issues.
+            event_correlation_config_read: View event correlation configurations.
+            event_correlation_config_write: Create and update event correlation configurations.
             events_read: Read Events data.
             hosts_read: List hosts and their attributes.
             incident_notification_settings_read: View Incident Notification Rule Settings.
@@ -94482,7 +95771,7 @@ paths:
       summary: Search cases
       tags:
         - Case Management
-      x-menu-order: 1
+      x-menu-order: 9
       x-pagination:
         limitParam: page[size]
         pageParam: page[number]
@@ -94560,7 +95849,343 @@ paths:
       summary: Create a case
       tags:
         - Case Management
-      x-menu-order: 2
+      x-menu-order: 8
+  /api/v2/cases/aggregate:
+    post:
+      description: Performs an aggregation query over cases, grouping results by specified fields and returning counts per group along with a total. Useful for dashboards and analytics.
+      operationId: AggregateCases
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      group_by:
+                        groups:
+                          - "status"
+                        limit: 14
+                      query_filter: "service:case-api"
+                    type: aggregate
+            schema:
+              $ref: "#/components/schemas/CaseAggregateRequest"
+        description: Case aggregate request payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        groups:
+                          - group: OPEN
+                            value:
+                              - 42.0
+                        total: 100.0
+                      id: agg-result-001
+                      type: aggregate
+              schema:
+                $ref: "#/components/schemas/CaseAggregateResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: Aggregate cases
+      tags:
+        - Case Management
+      x-menu-order: 27
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/bulk:
+    post:
+      description: Applies a single action (such as changing priority, status, assignment, or archiving) to multiple cases at once. The list of case IDs and the action type with its payload are specified in the request body.
+      operationId: BulkUpdateCases
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      case_ids:
+                        - "case-id-1"
+                        - "case-id-2"
+                      payload:
+                        priority: "P1"
+                      type: priority
+                    type: bulk
+            schema:
+              $ref: "#/components/schemas/CaseBulkUpdateRequest"
+        description: Case bulk update request payload.
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Bulk update cases
+      tags:
+        - Case Management
+      x-menu-order: 29
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/count:
+    get:
+      description: Returns case counts, optionally grouped by one or more fields (for example, status, priority). Supports a query filter to narrow the scope.
+      operationId: CountCases
+      parameters:
+        - description: Filter query for cases.
+          in: query
+          name: query_filter
+          required: false
+          schema:
+            type: string
+        - description: Comma-separated fields to group by.
+          example: "status,priority"
+          in: query
+          name: group_bys
+          required: false
+          schema:
+            type: string
+        - description: Maximum facet values to return.
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        groups:
+                          - group: status
+                            group_values:
+                              - count: 42
+                                value: OPEN
+                      id: count-result-001
+                      type: count
+              schema:
+                $ref: "#/components/schemas/CaseCountResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: Count cases
+      tags:
+        - Case Management
+      x-menu-order: 28
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/link:
+    get:
+      description: Returns all links associated with a case. Links define relationships (for example, BLOCKS) between cases. Requires entity_type and entity_id query parameters.
+      operationId: ListCaseLinks
+      parameters:
+        - description: "The entity type to look up links for. Use `CASE` to find links for a specific case."
+          in: query
+          name: entity_type
+          required: true
+          schema:
+            example: "CASE"
+            type: string
+        - description: "The UUID of the entity to look up links for."
+          in: query
+          name: entity_id
+          required: true
+          schema:
+            example: "bf0cbac6-4c16-4cfb-b6bf-ca5e0ec37a4f"
+            type: string
+        - description: "Optional filter to only return links of a specific relationship type (for example, `BLOCKS` or `CAUSES`)."
+          in: query
+          name: relationship
+          required: false
+          schema:
+            example: "BLOCKS"
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          child_entity_id: 4417921d-0866-4a38-822c-6f2a0f65f77d
+                          child_entity_type: CASE
+                          parent_entity_id: bf0cbac6-4c16-4cfb-b6bf-ca5e0ec37a4f
+                          parent_entity_type: CASE
+                          relationship: BLOCKS
+                        id: 804cd682-55f6-4541-ab00-b608b282ea7d
+                        type: link
+              schema:
+                $ref: "#/components/schemas/CaseLinksResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: List case links
+      tags:
+        - Case Management
+      x-menu-order: 35
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Creates a directional link between two cases (for example, case A blocks case B). The parent and child cases and their relationship type must be specified.
+      operationId: CreateCaseLink
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      child_entity_id: 4417921d-0866-4a38-822c-6f2a0f65f77d
+                      child_entity_type: CASE
+                      parent_entity_id: bf0cbac6-4c16-4cfb-b6bf-ca5e0ec37a4f
+                      parent_entity_type: CASE
+                      relationship: BLOCKS
+                    type: link
+            schema:
+              $ref: "#/components/schemas/CaseLinkCreateRequest"
+        description: "Case link create request."
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        child_entity_id: 4417921d-0866-4a38-822c-6f2a0f65f77d
+                        child_entity_type: CASE
+                        parent_entity_id: bf0cbac6-4c16-4cfb-b6bf-ca5e0ec37a4f
+                        parent_entity_type: CASE
+                        relationship: BLOCKS
+                      id: 804cd682-55f6-4541-ab00-b608b282ea7d
+                      type: link
+              schema:
+                $ref: "#/components/schemas/CaseLinkResponse"
+          description: Created
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Create a case link
+      tags:
+        - Case Management
+      x-menu-order: 36
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/link/{link_id}:
+    delete:
+      description: Deletes an existing link between cases by link ID.
+      operationId: DeleteCaseLink
+      parameters:
+        - $ref: "#/components/parameters/LinkIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Delete a case link
+      tags:
+        - Case Management
+      x-menu-order: 37
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/projects:
     get:
       description: >-
@@ -94600,7 +96225,7 @@ paths:
       summary: Get all projects
       tags:
         - Case Management
-      x-menu-order: 29
+      x-menu-order: 47
     post:
       description: Create a project.
       operationId: CreateProject
@@ -94653,7 +96278,46 @@ paths:
       summary: Create a project
       tags:
         - Case Management
-      x-menu-order: 28
+      x-menu-order: 46
+  /api/v2/cases/projects/favorites:
+    get:
+      description: Returns the list of case projects that the current authenticated user has marked as favorites.
+      operationId: ListUserCaseProjectFavorites
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: e555e290-ed65-49bd-ae18-8acbfcf18db7
+                        type: project_favorite
+              schema:
+                $ref: "#/components/schemas/ProjectFavoritesResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: List project favorites
+      tags:
+        - Case Management
+      x-menu-order: 30
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/projects/{project_id}:
     delete:
       description: Remove a project using the project's `id`.
@@ -94681,7 +96345,7 @@ paths:
       summary: Remove a project
       tags:
         - Case Management
-      x-menu-order: 31
+      x-menu-order: 49
     get:
       description: >-
         Get the details of a project by `project_id`.
@@ -94722,7 +96386,7 @@ paths:
       summary: Get the details of a project
       tags:
         - Case Management
-      x-menu-order: 30
+      x-menu-order: 48
     patch:
       description: >-
         Update a project.
@@ -94775,7 +96439,68 @@ paths:
       summary: Update a project
       tags:
         - Case Management
+      x-menu-order: 50
+  /api/v2/cases/projects/{project_id}/favorites:
+    delete:
+      description: Removes a case project from the current user's favorites list.
+      operationId: UnfavoriteCaseProject
+      parameters:
+        - $ref: "#/components/parameters/ProjectIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Unfavorite a project
+      tags:
+        - Case Management
       x-menu-order: 32
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Marks a case project as a favorite for the current authenticated user.
+      operationId: FavoriteCaseProject
+      parameters:
+        - $ref: "#/components/parameters/ProjectIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Favorite a project
+      tags:
+        - Case Management
+      x-menu-order: 31
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/projects/{project_id}/notification_rules:
     get:
       description: >-
@@ -94830,7 +96555,7 @@ paths:
       summary: Get notification rules
       tags:
         - Case Management
-      x-menu-order: 17
+      x-menu-order: 42
     post:
       description: Create a notification rule for a project.
       operationId: CreateProjectNotificationRule
@@ -94900,7 +96625,7 @@ paths:
       summary: Create a notification rule
       tags:
         - Case Management
-      x-menu-order: 18
+      x-menu-order: 43
   /api/v2/cases/projects/{project_id}/notification_rules/{notification_rule_id}:
     delete:
       description: Delete a notification rule using the notification rule's `id`.
@@ -94935,7 +96660,7 @@ paths:
       summary: Delete a notification rule
       tags:
         - Case Management
-      x-menu-order: 20
+      x-menu-order: 45
     put:
       description: >-
         Update a notification rule.
@@ -94987,7 +96712,426 @@ paths:
       summary: Update a notification rule
       tags:
         - Case Management
-      x-menu-order: 19
+      x-menu-order: 44
+  /api/v2/cases/projects/{project_id}/rules:
+    get:
+      description: Returns all automation rules configured for a project. Automation rules allow automatic actions to be triggered by case events like creation, status transitions, or attribute changes.
+      operationId: ListCaseAutomationRules
+      parameters:
+        - description: The UUID of the project that owns the automation rules.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          action:
+                            data:
+                              handle: workflow-handle-123
+                            type: execute_workflow
+                          created_at: "2024-01-01T00:00:00.000Z"
+                          name: Auto-assign workflow
+                          state: ENABLED
+                          trigger:
+                            type: case_created
+                        id: e6773723-fe58-49ff-9975-dff00f14e28d
+                        type: rule
+              schema:
+                $ref: "#/components/schemas/AutomationRulesResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: List automation rules
+      tags:
+        - Case Management
+      x-menu-order: 1
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Creates an automation rule for a project. The rule defines a trigger event (for example, case created, status transitioned) and an action to execute.
+      operationId: CreateCaseAutomationRule
+      parameters:
+        - description: The UUID of the project that owns the automation rules.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      action:
+                        data:
+                          handle: workflow-handle-123
+                        type: execute_workflow
+                      name: Auto-assign workflow
+                      state: ENABLED
+                      trigger:
+                        type: case_created
+                    type: rule
+            schema:
+              $ref: "#/components/schemas/AutomationRuleCreateRequest"
+        description: Automation rule payload.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        action:
+                          data:
+                            handle: workflow-handle-123
+                          type: execute_workflow
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Auto-assign workflow
+                        state: ENABLED
+                        trigger:
+                          type: case_created
+                      id: e6773723-fe58-49ff-9975-dff00f14e28d
+                      type: rule
+              schema:
+                $ref: "#/components/schemas/AutomationRuleResponse"
+          description: Created
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Create an automation rule
+      tags:
+        - Case Management
+      x-menu-order: 2
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/projects/{project_id}/rules/{rule_id}:
+    delete:
+      description: Permanently deletes an automation rule from a project.
+      operationId: DeleteCaseAutomationRule
+      parameters:
+        - description: The UUID of the project that owns the automation rules.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/RuleIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Delete an automation rule
+      tags:
+        - Case Management
+      x-menu-order: 5
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Returns a single automation rule identified by its UUID, including its trigger, action, and current state (enabled/disabled).
+      operationId: GetCaseAutomationRule
+      parameters:
+        - description: The UUID of the project that owns the automation rules.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/RuleIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        action:
+                          data:
+                            handle: workflow-handle-123
+                          type: execute_workflow
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Auto-assign workflow
+                        state: ENABLED
+                        trigger:
+                          type: case_created
+                      id: e6773723-fe58-49ff-9975-dff00f14e28d
+                      type: rule
+              schema:
+                $ref: "#/components/schemas/AutomationRuleResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: Get an automation rule
+      tags:
+        - Case Management
+      x-menu-order: 3
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: Updates the trigger, action, name, or state of an existing automation rule.
+      operationId: UpdateCaseAutomationRule
+      parameters:
+        - description: The UUID of the project that owns the automation rules.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/RuleIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      action:
+                        data:
+                          handle: workflow-handle-123
+                        type: execute_workflow
+                      name: Auto-assign workflow
+                      state: ENABLED
+                      trigger:
+                        type: case_created
+                    type: rule
+            schema:
+              $ref: "#/components/schemas/AutomationRuleUpdateRequest"
+        description: Automation rule payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        action:
+                          data:
+                            handle: workflow-handle-123
+                          type: execute_workflow
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Auto-assign workflow
+                        state: ENABLED
+                        trigger:
+                          type: case_created
+                      id: e6773723-fe58-49ff-9975-dff00f14e28d
+                      type: rule
+              schema:
+                $ref: "#/components/schemas/AutomationRuleResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Update an automation rule
+      tags:
+        - Case Management
+      x-menu-order: 4
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/projects/{project_id}/rules/{rule_id}/disable:
+    post:
+      description: Disables an automation rule so it no longer triggers on case events. The rule configuration is preserved.
+      operationId: DisableCaseAutomationRule
+      parameters:
+        - description: The UUID of the project that owns the automation rules.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/RuleIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        action:
+                          data:
+                            handle: workflow-handle-123
+                          type: execute_workflow
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Auto-assign workflow
+                        state: DISABLED
+                        trigger:
+                          type: case_created
+                      id: e6773723-fe58-49ff-9975-dff00f14e28d
+                      type: rule
+              schema:
+                $ref: "#/components/schemas/AutomationRuleResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Disable an automation rule
+      tags:
+        - Case Management
+      x-menu-order: 7
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/projects/{project_id}/rules/{rule_id}/enable:
+    post:
+      description: Enables a previously disabled automation rule so it triggers on matching case events.
+      operationId: EnableCaseAutomationRule
+      parameters:
+        - description: The UUID of the project that owns the automation rules.
+          example: "e555e290-ed65-49bd-ae18-8acbfcf18db7"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/RuleIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        action:
+                          data:
+                            handle: workflow-handle-123
+                          type: execute_workflow
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Auto-assign workflow
+                        state: ENABLED
+                        trigger:
+                          type: case_created
+                      id: e6773723-fe58-49ff-9975-dff00f14e28d
+                      type: rule
+              schema:
+                $ref: "#/components/schemas/AutomationRuleResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Enable an automation rule
+      tags:
+        - Case Management
+      x-menu-order: 6
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/types:
     get:
       description: Get all case types
@@ -95120,6 +97264,66 @@ paths:
       tags:
         - Case Management Type
       x-menu-order: 3
+    put:
+      description: Updates the name, emoji, or description of an existing case type.
+      operationId: UpdateCaseType
+      parameters:
+        - $ref: "#/components/parameters/CaseTypeIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: Investigations done in case management
+                      emoji: "🕵🏻‍♂️"
+                      name: Investigation
+                    type: case_type
+            schema:
+              $ref: "#/components/schemas/CaseTypeUpdateRequest"
+        description: Case type payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        description: Investigations done in case management
+                        emoji: "🕵🏻‍♂️"
+                        name: Investigation
+                      id: 00000000-0000-0000-0000-000000000001
+                      type: case_type
+              schema:
+                $ref: "#/components/schemas/CaseTypeResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_shared_settings_write
+      summary: Update a case type
+      tags:
+        - Case Management Type
+      x-menu-order: 4
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/types/{case_type_id}/custom_attributes:
     get:
       description: Get all custom attribute config of case type
@@ -95237,6 +97441,311 @@ paths:
       tags:
         - Case Management Attribute
       x-menu-order: 4
+    put:
+      description: Updates the display name, description, type, or options of an existing custom attribute configuration for a case type.
+      operationId: UpdateCustomAttributeConfig
+      parameters:
+        - $ref: "#/components/parameters/CaseTypeIDPathParameter"
+        - $ref: "#/components/parameters/CaseCustomAttributeIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: Updated description.
+                      display_name: AWS Region
+                    type: custom_attribute
+            schema:
+              $ref: "#/components/schemas/CustomAttributeConfigUpdateRequest"
+        description: Custom attribute config payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        case_type_id: 00000000-0000-0000-0000-000000000006
+                        description: Updated description.
+                        display_name: AWS Region
+                        is_multi: true
+                        key: aws_region
+                        type: TEXT
+                      id: 00000000-0000-0000-0000-000000000005
+                      type: custom_attribute
+              schema:
+                $ref: "#/components/schemas/CustomAttributeConfigResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_shared_settings_write
+      summary: Update custom attribute config
+      tags:
+        - Case Management Attribute
+      x-menu-order: 5
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/views:
+    get:
+      description: Returns all saved case views for a given project. Views are saved search queries that allow quick access to filtered lists of cases.
+      operationId: ListCaseViews
+      parameters:
+        - description: Filter views by project identifier.
+          example: e555e290-ed65-49bd-ae18-8acbfcf18db7
+          in: query
+          name: project_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          created_at: "2024-01-01T00:00:00.000Z"
+                          name: Open bugs
+                          query: "status:open type:bug"
+                        id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        type: view
+              schema:
+                $ref: "#/components/schemas/CaseViewsResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: List case views
+      tags:
+        - Case Management
+      x-menu-order: 59
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Creates a new saved case view with a name, filter query, and associated project. Optionally, a notification rule can be linked to the view.
+      operationId: CreateCaseView
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: Open bugs
+                      project_id: e555e290-ed65-49bd-ae18-8acbfcf18db7
+                      query: "status:open type:bug"
+                    type: view
+            schema:
+              $ref: "#/components/schemas/CaseViewCreateRequest"
+        description: Case view payload.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Open bugs
+                        query: "status:open type:bug"
+                      id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      type: view
+              schema:
+                $ref: "#/components/schemas/CaseViewResponse"
+          description: Created
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Create a case view
+      tags:
+        - Case Management
+      x-menu-order: 60
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/views/{view_id}:
+    delete:
+      description: Permanently deletes a saved case view.
+      operationId: DeleteCaseView
+      parameters:
+        - $ref: "#/components/parameters/ViewIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Delete a case view
+      tags:
+        - Case Management
+      x-menu-order: 63
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Returns a single saved case view identified by its UUID, including its query, associated project, and timestamps.
+      operationId: GetCaseView
+      parameters:
+        - $ref: "#/components/parameters/ViewIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Open bugs
+                        query: "status:open type:bug"
+                      id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      type: view
+              schema:
+                $ref: "#/components/schemas/CaseViewResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: Get a case view
+      tags:
+        - Case Management
+      x-menu-order: 61
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: Updates the name, query, or notification rule of an existing case view.
+      operationId: UpdateCaseView
+      parameters:
+        - $ref: "#/components/parameters/ViewIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: Updated view name
+                    type: view
+            schema:
+              $ref: "#/components/schemas/CaseViewUpdateRequest"
+        description: Case view payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00.000Z"
+                        name: Updated view name
+                        query: "status:open type:bug"
+                      id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      type: view
+              schema:
+                $ref: "#/components/schemas/CaseViewResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Update a case view
+      tags:
+        - Case Management
+      x-menu-order: 62
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/{case_id}:
     get:
       description: >-
@@ -95287,7 +97796,7 @@ paths:
       summary: Get the details of a case
       tags:
         - Case Management
-      x-menu-order: 3
+      x-menu-order: 10
   /api/v2/cases/{case_id}/archive:
     post:
       description: Archive case
@@ -95349,7 +97858,7 @@ paths:
       summary: Archive case
       tags:
         - Case Management
-      x-menu-order: 10
+      x-menu-order: 17
   /api/v2/cases/{case_id}/assign:
     post:
       description: Assign case to a user
@@ -95413,7 +97922,7 @@ paths:
       summary: Assign case
       tags:
         - Case Management
-      x-menu-order: 8
+      x-menu-order: 15
   /api/v2/cases/{case_id}/attributes:
     post:
       description: Update case attributes
@@ -95484,7 +97993,7 @@ paths:
       summary: Update case attributes
       tags:
         - Case Management
-      x-menu-order: 12
+      x-menu-order: 19
   /api/v2/cases/{case_id}/comment:
     post:
       description: Comment case
@@ -95536,7 +98045,7 @@ paths:
       summary: Comment case
       tags:
         - Case Management
-      x-menu-order: 13
+      x-menu-order: 20
   /api/v2/cases/{case_id}/comment/{cell_id}:
     delete:
       description: Delete case comment
@@ -95560,7 +98069,52 @@ paths:
       summary: Delete case comment
       tags:
         - Case Management
-      x-menu-order: 14
+      x-menu-order: 22
+    put:
+      description: Updates the text content of an existing comment on a case timeline. The comment is identified by its cell ID.
+      operationId: UpdateCaseComment
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+        - $ref: "#/components/parameters/CellIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      comment: Updated comment text
+                    type: case
+            schema:
+              $ref: "#/components/schemas/CaseUpdateCommentRequest"
+        description: Case update comment payload.
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Update case comment
+      tags:
+        - Case Management
+      x-menu-order: 21
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/{case_id}/custom_attributes/{custom_attribute_key}:
     delete:
       description: Delete custom attribute from case
@@ -95609,7 +98163,7 @@ paths:
       summary: Delete custom attribute from case
       tags:
         - Case Management
-      x-menu-order: 16
+      x-menu-order: 24
     post:
       description: Update case custom attribute
       operationId: UpdateCaseCustomAttribute
@@ -95675,7 +98229,7 @@ paths:
       summary: Update case custom attribute
       tags:
         - Case Management
-      x-menu-order: 15
+      x-menu-order: 23
   /api/v2/cases/{case_id}/description:
     post:
       description: Update case description
@@ -95739,7 +98293,246 @@ paths:
       summary: Update case description
       tags:
         - Case Management
-      x-menu-order: 5
+      x-menu-order: 12
+  /api/v2/cases/{case_id}/due_date:
+    post:
+      description: Sets or updates the due date for a case. The due date is a calendar date (without a time component) indicating when the case should be resolved.
+      operationId: UpdateCaseDueDate
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      due_date: "2026-12-31"
+                    type: case
+            schema:
+              $ref: "#/components/schemas/CaseUpdateDueDateRequest"
+        description: Case due date update payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        key: CASEM-1234
+                        priority: NOT_DEFINED
+                        status: OPEN
+                        status_name: Open
+                        title: Memory leak investigation on API
+                      id: 00000000-0000-0000-0000-000000000001
+                      relationships:
+                        project:
+                          data:
+                            id: 00000000-0000-0000-0000-000000000002
+                            type: project
+                      type: case
+              schema:
+                $ref: "#/components/schemas/CaseResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Update case due date
+      tags:
+        - Case Management
+      x-menu-order: 25
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/{case_id}/insights:
+    delete:
+      description: Removes one or more previously added insights from a case by specifying their type and resource identifier in the request body.
+      operationId: RemoveCaseInsights
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      insights:
+                        - ref: "/monitors/12345?q=total"
+                          resource_id: "12345"
+                          type: SECURITY_SIGNAL
+                    type: case
+            schema:
+              $ref: "#/components/schemas/CaseInsightsRequest"
+        description: Case insights request.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        key: CASEM-1234
+                        priority: NOT_DEFINED
+                        status: OPEN
+                        status_name: Open
+                        title: Memory leak investigation on API
+                      id: 00000000-0000-0000-0000-000000000001
+                      relationships:
+                        project:
+                          data:
+                            id: 00000000-0000-0000-0000-000000000002
+                            type: project
+                      type: case
+              schema:
+                $ref: "#/components/schemas/CaseResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Remove insights from a case
+      tags:
+        - Case Management
+      x-menu-order: 34
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: >-
+        Adds one or more insights to a case. Insights are references to related Datadog resources (such as monitors, security signals, incidents, or error tracking issues) that provide investigative context. Up to 100 insights can be added per request. Each insight requires a type (see `CaseInsightType` for allowed values), a ref (URL path to the resource), and a resource_id.
+      operationId: AddCaseInsights
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      insights:
+                        - ref: "/monitors/12345?q=total"
+                          resource_id: "12345"
+                          type: SECURITY_SIGNAL
+                    type: case
+            schema:
+              $ref: "#/components/schemas/CaseInsightsRequest"
+        description: Case insights request.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        key: CASEM-1234
+                        priority: NOT_DEFINED
+                        status: OPEN
+                        status_name: Open
+                        title: Memory leak investigation on API
+                      id: 00000000-0000-0000-0000-000000000001
+                      relationships:
+                        project:
+                          data:
+                            id: 00000000-0000-0000-0000-000000000002
+                            type: project
+                      type: case
+              schema:
+                $ref: "#/components/schemas/CaseResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Add insights to a case
+      tags:
+        - Case Management
+      x-menu-order: 33
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/{case_id}/priority:
     post:
       description: Update case priority
@@ -95803,7 +98596,7 @@ paths:
       summary: Update case priority
       tags:
         - Case Management
-      x-menu-order: 7
+      x-menu-order: 14
   /api/v2/cases/{case_id}/relationships/incidents:
     post:
       description: Link an incident to a case
@@ -95875,7 +98668,7 @@ paths:
       summary: Link incident to case
       tags:
         - Case Management
-      x-menu-order: 22
+      x-menu-order: 52
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -95922,7 +98715,7 @@ paths:
       summary: Remove Jira issue link from case
       tags:
         - Case Management
-      x-menu-order: 25
+      x-menu-order: 55
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -95988,7 +98781,7 @@ paths:
       summary: Link existing Jira issue to case
       tags:
         - Case Management
-      x-menu-order: 24
+      x-menu-order: 54
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -96051,7 +98844,7 @@ paths:
       summary: Create Jira issue for case
       tags:
         - Case Management
-      x-menu-order: 23
+      x-menu-order: 53
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -96110,7 +98903,7 @@ paths:
       summary: Create investigation notebook for case
       tags:
         - Case Management
-      x-menu-order: 27
+      x-menu-order: 57
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -96185,7 +98978,7 @@ paths:
       summary: Update case project
       tags:
         - Case Management
-      x-menu-order: 21
+      x-menu-order: 51
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -96245,6 +99038,73 @@ paths:
         - AuthZ:
             - cases_write
       summary: Create ServiceNow ticket for case
+      tags:
+        - Case Management
+      x-menu-order: 56
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/{case_id}/resolved_reason:
+    post:
+      description: Sets the resolved reason for a security case (for example, FALSE_POSITIVE, TRUE_POSITIVE). Applicable to security-type cases.
+      operationId: UpdateCaseResolvedReason
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      security_resolved_reason: "FALSE_POSITIVE"
+                    type: case
+            schema:
+              $ref: "#/components/schemas/CaseUpdateResolvedReasonRequest"
+        description: Case resolved reason update payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        key: CASEM-1234
+                        priority: NOT_DEFINED
+                        status: OPEN
+                        status_name: Open
+                        title: Memory leak investigation on API
+                      id: 00000000-0000-0000-0000-000000000001
+                      relationships:
+                        project:
+                          data:
+                            id: 00000000-0000-0000-0000-000000000002
+                            type: project
+                      type: case
+              schema:
+                $ref: "#/components/schemas/CaseResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Update case resolved reason
       tags:
         - Case Management
       x-menu-order: 26
@@ -96315,7 +99175,74 @@ paths:
       summary: Update case status
       tags:
         - Case Management
-      x-menu-order: 6
+      x-menu-order: 13
+  /api/v2/cases/{case_id}/timelines:
+    get:
+      description: Returns the timeline of events for a case, including comments, status changes, and other activity. Supports pagination and sort order.
+      operationId: ListCaseTimeline
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+        - description: Number of timeline cells to return per page.
+          in: query
+          name: page[size]
+          required: false
+          schema:
+            default: 100
+            type: integer
+        - description: Zero-based page number for pagination.
+          in: query
+          name: page[number]
+          required: false
+          schema:
+            default: 0
+            type: integer
+        - description: "If `true`, returns timeline cells in chronological order (oldest first). Defaults to `false` (newest first)."
+          in: query
+          name: sort[ascending]
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          cell_content:
+                            message: This is a comment
+                          created_at: "2024-01-01T00:00:00+00:00"
+                          type: COMMENT
+                        id: 00000000-0000-0000-0000-000000000001
+                        type: timeline_cell
+              schema:
+                $ref: "#/components/schemas/TimelineResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: Get case timeline
+      tags:
+        - Case Management
+      x-menu-order: 58
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cases/{case_id}/title:
     post:
       description: Update case title
@@ -96379,7 +99306,7 @@ paths:
       summary: Update case title
       tags:
         - Case Management
-      x-menu-order: 4
+      x-menu-order: 11
   /api/v2/cases/{case_id}/unarchive:
     post:
       description: Unarchive case
@@ -96441,7 +99368,7 @@ paths:
       summary: Unarchive case
       tags:
         - Case Management
-      x-menu-order: 11
+      x-menu-order: 18
   /api/v2/cases/{case_id}/unassign:
     post:
       description: Unassign case
@@ -96503,7 +99430,116 @@ paths:
       summary: Unassign case
       tags:
         - Case Management
-      x-menu-order: 9
+      x-menu-order: 16
+  /api/v2/cases/{case_id}/watchers:
+    get:
+      description: Returns the list of users who are watching a case. Watchers receive notifications about updates to the case.
+      operationId: ListCaseWatchers
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: 8146583c-0b5f-11ec-abf8-da7ad0900001
+                        relationships:
+                          user:
+                            data:
+                              id: 8146583c-0b5f-11ec-abf8-da7ad0900001
+                              type: user
+                        type: watcher
+              schema:
+                $ref: "#/components/schemas/CaseWatchersResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_read
+      summary: List case watchers
+      tags:
+        - Case Management
+      x-menu-order: 64
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cases/{case_id}/watchers/{user_uuid}:
+    delete:
+      description: Removes a user from the watchers list of a case. The user no longer receives notifications about updates to the case.
+      operationId: UnwatchCase
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+        - $ref: "#/components/parameters/UserUUIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Unwatch a case
+      tags:
+        - Case Management
+      x-menu-order: 66
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Adds a user (identified by their UUID) as a watcher of a case. The user receives notifications about subsequent updates to the case.
+      operationId: WatchCase
+      parameters:
+        - $ref: "#/components/parameters/CaseIDPathParameter"
+        - $ref: "#/components/parameters/UserUUIDPathParameter"
+      responses:
+        "201":
+          description: Created
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cases_write
+      summary: Watch a case
+      tags:
+        - Case Management
+      x-menu-order: 65
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/catalog/entity:
     get:
       description: Get a list of entities from Software Catalog.
@@ -120307,6 +123343,203 @@ paths:
         operator: OR
         permissions:
           - logs_read_data
+  /api/v2/maintenance_windows:
+    get:
+      description: Returns all configured maintenance windows for event management cases. Maintenance windows define time periods during which case notifications and automation rules are suppressed for cases matching a given query.
+      operationId: ListMaintenanceWindows
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          end_at: "2026-06-01T06:00:00Z"
+                          name: Weekly maintenance
+                          query: "project:SEC"
+                          start_at: "2026-06-01T00:00:00Z"
+                        id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        type: maintenance_window
+              schema:
+                $ref: "#/components/schemas/MaintenanceWindowsResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - event_correlation_config_read
+      summary: List maintenance windows
+      tags:
+        - Case Management
+      x-menu-order: 38
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Creates a maintenance window for event management cases with a name, case filter query, and time range (start and end).
+      operationId: CreateMaintenanceWindow
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      end_at: "2026-06-01T06:00:00Z"
+                      name: Weekly maintenance
+                      query: "project:SEC"
+                      start_at: "2026-06-01T00:00:00Z"
+                    type: maintenance_window
+            schema:
+              $ref: "#/components/schemas/MaintenanceWindowCreateRequest"
+        description: Maintenance window payload.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        end_at: "2026-06-01T06:00:00Z"
+                        name: Weekly maintenance
+                        query: "project:SEC"
+                        start_at: "2026-06-01T00:00:00Z"
+                      id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      type: maintenance_window
+              schema:
+                $ref: "#/components/schemas/MaintenanceWindowResponse"
+          description: Created
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - event_correlation_config_write
+      summary: Create a maintenance window
+      tags:
+        - Case Management
+      x-menu-order: 39
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/maintenance_windows/{maintenance_window_id}:
+    delete:
+      description: Permanently deletes a maintenance window.
+      operationId: DeleteMaintenanceWindow
+      parameters:
+        - $ref: "#/components/parameters/MaintenanceWindowIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - event_correlation_config_write
+      summary: Delete a maintenance window
+      tags:
+        - Case Management
+      x-menu-order: 41
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: Updates the name, query, start time, or end time of an existing maintenance window.
+      operationId: UpdateMaintenanceWindow
+      parameters:
+        - $ref: "#/components/parameters/MaintenanceWindowIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      end_at: "2026-06-01T06:00:00Z"
+                      name: Weekly maintenance
+                      query: "project:SEC"
+                      start_at: "2026-06-01T00:00:00Z"
+                    type: maintenance_window
+            schema:
+              $ref: "#/components/schemas/MaintenanceWindowUpdateRequest"
+        description: Maintenance window payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        end_at: "2026-06-01T06:00:00Z"
+                        name: Weekly maintenance
+                        query: "project:SEC"
+                        start_at: "2026-06-01T00:00:00Z"
+                      id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      type: maintenance_window
+              schema:
+                $ref: "#/components/schemas/MaintenanceWindowResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - event_correlation_config_write
+      summary: Update a maintenance window
+      tags:
+        - Case Management
+      x-menu-order: 40
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/metrics:
     get:
       description: |-
