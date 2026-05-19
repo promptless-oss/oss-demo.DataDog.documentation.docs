@@ -45598,6 +45598,39 @@ components:
           minimum: 0
           type: integer
       type: object
+    ListScorecardScoresMeta:
+      description: Pagination metadata for scores.
+      properties:
+        count:
+          description: The number of results returned in this page.
+          format: int64
+          type: integer
+        limit:
+          description: The page limit.
+          format: int64
+          type: integer
+        offset:
+          description: The page offset.
+          format: int64
+          type: integer
+        total:
+          description: The total number of results.
+          format: int64
+          type: integer
+      type: object
+    ListScorecardScoresResponse:
+      description: A list of scorecard scores for a given aggregation type.
+      properties:
+        data:
+          description: Array of score objects.
+          items:
+            $ref: "#/components/schemas/ScorecardScoreData"
+          type: array
+        links:
+          $ref: "#/components/schemas/ListRulesResponseLinks"
+        meta:
+          $ref: "#/components/schemas/ListScorecardScoresMeta"
+      type: object
     ListScorecardsResponse:
       description: Response containing a list of scorecards.
       properties:
@@ -67547,6 +67580,119 @@ components:
       type: string
       x-enum-varnames:
         - SCORECARD
+    ScorecardScoreAttributes:
+      description: Attributes of a scorecard score.
+      properties:
+        aggregation:
+          $ref: "#/components/schemas/ScorecardScoresAggregation"
+        denominator:
+          description: The denominator used to compute the score ratio.
+          format: int64
+          type: integer
+        level:
+          description: The maturity level of the associated rule.
+          format: int64
+          type: integer
+        numerator:
+          description: The numerator used to compute the score ratio.
+          format: int64
+          type: integer
+        score:
+          description: The computed score ratio (numerator/denominator), from 0 to 1.
+          format: double
+          type: number
+        total_entities:
+          description: The total number of entities evaluated.
+          format: int64
+          type: integer
+        total_fail:
+          description: The number of rules that failed.
+          format: int64
+          type: integer
+        total_no_data:
+          description: The number of rules with no data.
+          format: int64
+          type: integer
+        total_pass:
+          description: The number of rules that passed.
+          format: int64
+          type: integer
+        total_skip:
+          description: The number of rules that were skipped.
+          format: int64
+          type: integer
+      type: object
+    ScorecardScoreData:
+      description: A scorecard score object for a single entity, rule, scorecard, service, or team.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ScorecardScoreAttributes"
+        id:
+          description: The ID of the entity or resource being scored.
+          example: ""
+          type: string
+        relationships:
+          $ref: "#/components/schemas/ScorecardScoreRelationships"
+        type:
+          $ref: "#/components/schemas/ScorecardScoreDataType"
+      required:
+        - id
+        - type
+      type: object
+    ScorecardScoreDataType:
+      default: score
+      description: The JSON:API resource type.
+      enum: [score]
+      example: score
+      type: string
+      x-enum-varnames:
+        - SCORE
+    ScorecardScoreRelationshipData:
+      description: A relationship data object for a score.
+      properties:
+        id:
+          description: The ID of the related resource.
+          example: ""
+          type: string
+        type:
+          description: The type of the related resource.
+          example: ""
+          type: string
+      required:
+        - id
+        - type
+      type: object
+    ScorecardScoreRelationshipItem:
+      description: A relationship item for a score.
+      properties:
+        data:
+          $ref: "#/components/schemas/ScorecardScoreRelationshipData"
+      type: object
+    ScorecardScoreRelationships:
+      description: Relationships for a scorecard score, depending on the aggregation type.
+      properties:
+        entity:
+          $ref: "#/components/schemas/ScorecardScoreRelationshipItem"
+        rule:
+          $ref: "#/components/schemas/ScorecardScoreRelationshipItem"
+        scorecard:
+          $ref: "#/components/schemas/ScorecardScoreRelationshipItem"
+        service:
+          $ref: "#/components/schemas/ScorecardScoreRelationshipItem"
+        team:
+          $ref: "#/components/schemas/ScorecardScoreRelationshipItem"
+      type: object
+    ScorecardScoresAggregation:
+      description: Dimension to group scores by.
+      enum: [by-entity, by-rule, by-scorecard, by-team, by-kind]
+      example: by-entity
+      type: string
+      x-enum-varnames:
+        - BY_ENTITY
+        - BY_RULE
+        - BY_SCORECARD
+        - BY_TEAM
+        - BY_KIND
     ScorecardType:
       default: scorecard
       description: The JSON:API type for scorecard.
@@ -138527,6 +138673,122 @@ paths:
       tags:
         - Scorecards
       x-menu-order: 13
+  /api/v2/scorecard/scores/{aggregation}:
+    get:
+      description: Returns a list of scorecard scores for each aggregation type, with score breakdowns.
+      operationId: ListScorecardScores
+      parameters:
+        - description: The type of scores being requested.
+          in: path
+          name: aggregation
+          required: true
+          schema:
+            $ref: "#/components/schemas/ScorecardScoresAggregation"
+        - description: Filter scores by rule ID(s), comma-separated.
+          in: query
+          name: filter[rule][id]
+          required: false
+          schema:
+            type: string
+        - description: Filter scores by rule name.
+          in: query
+          name: filter[rule][name]
+          required: false
+          schema:
+            type: string
+        - description: Filter scores by rule level(s), comma-separated.
+          in: query
+          name: filter[rule][level]
+          required: false
+          schema:
+            type: string
+        - description: Filter scores by scorecard ID(s), comma-separated.
+          in: query
+          name: filter[rule][scorecard_id]
+          required: false
+          schema:
+            type: string
+        - description: Filter scores to show only custom rules.
+          in: query
+          name: filter[rule][is_custom]
+          required: false
+          schema:
+            type: boolean
+        - description: Filter scores to show only enabled rules.
+          in: query
+          name: filter[rule][is_enabled]
+          required: false
+          schema:
+            type: boolean
+        - description: "Sort scores by field. Use a hyphen prefix for descending order. Options: score, numerator, denominator, total_pass, total_fail, total_skip, total_no_data."
+          in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+        - description: Offset for pagination.
+          in: query
+          name: page[offset]
+          required: false
+          schema:
+            default: 0
+            type: integer
+        - description: Number of scores to return. Max is 1000.
+          in: query
+          name: page[limit]
+          required: false
+          schema:
+            default: 100
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          aggregation: by-entity
+                          denominator: 4
+                          numerator: 3
+                          score: 0.75
+                          total_fail: 1
+                          total_no_data: 0
+                          total_pass: 3
+                          total_skip: 0
+                        id: service:my-service
+                        relationships:
+                          entity:
+                            data:
+                              id: service:my-service
+                              type: entity
+                        type: score
+                    links:
+                      next: /api/v2/scorecard/scores/by-entity?page[offset]=100&page[limit]=100
+                    meta:
+                      count: 1
+                      limit: 100
+                      offset: 0
+                      total: 42
+              schema:
+                $ref: "#/components/schemas/ListScorecardScoresResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - apm_service_catalog_read
+      summary: List all scores
+      tags:
+        - Scorecards
+      x-menu-order: 14
   /api/v2/seats/users:
     delete:
       description: |-
