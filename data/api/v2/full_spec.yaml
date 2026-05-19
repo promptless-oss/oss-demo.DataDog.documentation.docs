@@ -42760,9 +42760,19 @@ components:
           description: Upstream entity identifier supplied by the caller.
           example: "trace-abc-123"
           type: string
+        created_at:
+          description: Timestamp when the interaction was added to the queue.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
         id:
           description: Unique identifier of the interaction.
           example: "interaction-456"
+          type: string
+        modified_at:
+          description: Timestamp when the interaction was last updated.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
           type: string
         type:
           $ref: "#/components/schemas/LLMObsTraceInteractionType"
@@ -42770,6 +42780,8 @@ components:
         - id
         - type
         - content_id
+        - created_at
+        - modified_at
         - annotations
       type: object
     LLMObsTraceInteractionItem:
@@ -42796,9 +42808,19 @@ components:
           description: Upstream entity identifier supplied by the caller.
           example: "trace-abc-123"
           type: string
+        created_at:
+          description: Timestamp when the interaction was added to the queue.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
         id:
           description: Unique identifier of the interaction.
           example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        modified_at:
+          description: Timestamp when the interaction was last updated.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
           type: string
         type:
           $ref: "#/components/schemas/LLMObsTraceInteractionType"
@@ -42807,6 +42829,8 @@ components:
         - type
         - content_id
         - already_existed
+        - created_at
+        - modified_at
       type: object
     LLMObsTraceInteractionType:
       description: Type of an upstream-entity interaction.
