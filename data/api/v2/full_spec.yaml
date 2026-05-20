@@ -66445,6 +66445,7 @@ components:
         - $ref: "#/components/schemas/SendSlackMessageAction"
         - $ref: "#/components/schemas/SendTeamsMessageAction"
         - $ref: "#/components/schemas/TriggerWorkflowAutomationAction"
+        - $ref: "#/components/schemas/RoutingRuleEscalationPolicyAction"
     RoutingRuleAttributes:
       description: Defines the configurable attributes of a routing rule, such as actions, query, time restriction, and urgency.
       properties:
@@ -66462,6 +66463,52 @@ components:
         urgency:
           $ref: "#/components/schemas/Urgency"
       type: object
+    RoutingRuleEscalationPolicyAction:
+      description: "Triggers an escalation policy."
+      properties:
+        ack_timeout_minutes:
+          description: "The number of minutes before an acknowledged page is re-triggered."
+          example: 30
+          format: int64
+          type: integer
+        policy_id:
+          description: "The ID of the escalation policy to route to."
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        support_hours:
+          $ref: "#/components/schemas/RoutingRuleEscalationPolicyActionSupportHours"
+        type:
+          $ref: "#/components/schemas/RoutingRuleEscalationPolicyActionType"
+        urgency:
+          $ref: "#/components/schemas/Urgency"
+      required:
+        - type
+        - policy_id
+      type: object
+    RoutingRuleEscalationPolicyActionSupportHours:
+      description: "Support hours during which the escalation policy will be executed. Outside of these hours, the escalation policy will be on hold and triggered once the next support hours window starts. This is mutually exclusive with the top-level `time_restriction` field on the routing rule."
+      properties:
+        restrictions:
+          description: "The list of support hours time windows."
+          items:
+            $ref: "#/components/schemas/TimeRestriction"
+          type: array
+        time_zone:
+          description: "The time zone in which the support hours are expressed."
+          example: ""
+          type: string
+      required:
+        - time_zone
+      type: object
+    RoutingRuleEscalationPolicyActionType:
+      default: escalation_policy
+      description: "Indicates that the action pages an escalation policy. This action can be set once per routing rule item, and is mutually exclusive with the top-level `policy_id` field on the routing rule."
+      enum:
+        - escalation_policy
+      example: escalation_policy
+      type: string
+      x-enum-varnames:
+        - ESCALATION_POLICY
     RoutingRuleRelationships:
       description: Specifies relationships for a routing rule, linking to associated policy resources.
       properties:
@@ -86391,7 +86438,7 @@ components:
           type: string
       type: object
     TimeRestrictions:
-      description: Holds time zone information and a list of time restrictions for a routing rule.
+      description: Time restrictions during which the routing rule is active. Outside of these hours, the rule does not match and routing continues to subsequent rules. This is mutually exclusive with the action-level `support_hours` field.
       properties:
         restrictions:
           description: Defines the list of time-based restrictions.
