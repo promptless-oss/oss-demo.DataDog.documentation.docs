@@ -55023,6 +55023,16 @@ components:
           description: Name of the environment variable or secret that holds the username (used when `auth_strategy` is `plain`).
           example: HTTP_AUTH_USERNAME
           type: string
+        valid_tokens:
+          description: |-
+            A list of tokens that are accepted for authenticating incoming HTTP requests. When set,
+            the source rejects any request whose token does not match an enabled entry in this list.
+            Cannot be combined with the `plain` auth strategy.
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineHttpServerSourceValidToken"
+          maxItems: 1000
+          minItems: 1
+          type: array
       required:
         - id
         - type
@@ -55048,6 +55058,55 @@ components:
       type: string
       x-enum-varnames:
         - HTTP_SERVER
+    ObservabilityPipelineHttpServerSourceValidToken:
+      description: An accepted token used to authenticate incoming HTTP server requests.
+      properties:
+        enabled:
+          default: true
+          description: |-
+            Indicates whether this token is currently accepted. Disabled tokens are rejected without
+            being removed from the configuration.
+          example: true
+          type: boolean
+        field_to_add:
+          $ref: "#/components/schemas/ObservabilityPipelineSourceValidTokenFieldToAdd"
+        path_to_token:
+          $ref: "#/components/schemas/ObservabilityPipelineHttpServerSourceValidTokenPathToToken"
+        token_key:
+          description: Name of the environment variable or secret that holds the expected token value.
+          example: HTTP_SERVER_TOKEN
+          pattern: "^[A-Za-z0-9_]+$"
+          type: string
+      required:
+        - token_key
+      type: object
+    ObservabilityPipelineHttpServerSourceValidTokenPathToToken:
+      description: |-
+        Specifies where the worker extracts the token from in the incoming HTTP request.
+        This can be either a built-in location (`path` or `address`) or an HTTP header object.
+      oneOf:
+        - $ref: "#/components/schemas/ObservabilityPipelineHttpServerSourceValidTokenPathToTokenLocation"
+        - $ref: "#/components/schemas/ObservabilityPipelineHttpServerSourceValidTokenPathToTokenHeader"
+    ObservabilityPipelineHttpServerSourceValidTokenPathToTokenHeader:
+      description: Extract the token from a specific HTTP request header.
+      properties:
+        header:
+          description: The name of the HTTP header that carries the token.
+          example: X-Token
+          type: string
+      required:
+        - header
+      type: object
+    ObservabilityPipelineHttpServerSourceValidTokenPathToTokenLocation:
+      description: Built-in token location on the incoming HTTP request.
+      enum:
+        - path
+        - address
+      example: path
+      type: string
+      x-enum-varnames:
+        - PATH
+        - ADDRESS
     ObservabilityPipelineKafkaDestination:
       description: |-
         The `kafka` destination sends logs to Apache Kafka topics.
@@ -57071,6 +57130,27 @@ components:
       type: string
       x-enum-varnames:
         - SOCKET
+    ObservabilityPipelineSourceValidTokenFieldToAdd:
+      description: |-
+        An optional metadata field that is attached to every event authenticated by the
+        associated token. Both `key` and `value` must match `^[A-Za-z0-9_]+$`.
+      properties:
+        key:
+          description: The metadata field name to add to incoming events.
+          example: token_name
+          maxLength: 256
+          pattern: "^[A-Za-z0-9_]+$"
+          type: string
+        value:
+          description: The metadata field value to add to incoming events.
+          example: my_token
+          maxLength: 1024
+          pattern: "^[A-Za-z0-9_]+$"
+          type: string
+      required:
+        - key
+        - value
+      type: object
     ObservabilityPipelineSpec:
       description: Input schema representing an observability pipeline configuration. Used in create and validate requests.
       properties:
@@ -57267,6 +57347,15 @@ components:
           $ref: "#/components/schemas/ObservabilityPipelineTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineSplunkHecSourceType"
+        valid_tokens:
+          description: |-
+            A list of tokens that are accepted for authenticating incoming HEC requests. When set, the source
+            rejects any request whose HEC token does not match an enabled entry in this list.
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineSplunkHecSourceValidToken"
+          maxItems: 1000
+          minItems: 1
+          type: array
       required:
         - id
         - type
@@ -57281,6 +57370,26 @@ components:
       type: string
       x-enum-varnames:
         - SPLUNK_HEC
+    ObservabilityPipelineSplunkHecSourceValidToken:
+      description: An accepted HEC token used to authenticate incoming Splunk HEC requests.
+      properties:
+        enabled:
+          default: true
+          description: |-
+            Indicates whether this token is currently accepted. Disabled tokens are rejected without
+            being removed from the configuration.
+          example: true
+          type: boolean
+        field_to_add:
+          $ref: "#/components/schemas/ObservabilityPipelineSourceValidTokenFieldToAdd"
+        token_key:
+          description: Name of the environment variable or secret that holds the expected HEC token value.
+          example: SPLUNK_HEC_TOKEN
+          pattern: "^[A-Za-z0-9_]+$"
+          type: string
+      required:
+        - token_key
+      type: object
     ObservabilityPipelineSplunkTcpSource:
       description: |-
         The `splunk_tcp` source receives logs from a Splunk Universal Forwarder over TCP.
