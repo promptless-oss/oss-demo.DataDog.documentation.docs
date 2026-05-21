@@ -19216,10 +19216,6 @@ components:
           description: The title of the degradation.
           example: Elevated API Latency
           type: string
-        updates:
-          items:
-            $ref: "#/components/schemas/CreateDegradationRequestDataAttributesUpdatesItems"
-          type: array
       required:
         - components_affected
         - status
@@ -19257,48 +19253,6 @@ components:
         - IDENTIFIED
         - MONITORING
         - RESOLVED
-    CreateDegradationRequestDataAttributesUpdatesItems:
-      description: A degradation update entry.
-      properties:
-        components_affected:
-          description: The components affected.
-          items:
-            $ref: "#/components/schemas/CreateDegradationRequestDataAttributesUpdatesItemsComponentsAffectedItems"
-          type: array
-        description:
-          description: A description of the update.
-          example: ""
-          type: string
-        started_at:
-          description: Timestamp of when the update occurred.
-          example: ""
-          format: date-time
-          type: string
-        status:
-          $ref: "#/components/schemas/CreateDegradationRequestDataAttributesStatus"
-      required:
-        - components_affected
-        - description
-        - started_at
-        - status
-      type: object
-    CreateDegradationRequestDataAttributesUpdatesItemsComponentsAffectedItems:
-      description: A component affected by a degradation update.
-      properties:
-        id:
-          description: The ID of the component. Must be a component of type `component`.
-          example: ""
-          type: string
-        name:
-          description: The name of the component.
-          readOnly: true
-          type: string
-        status:
-          $ref: "#/components/schemas/StatusPagesComponentDataAttributesStatus"
-      required:
-        - id
-        - status
-      type: object
     CreateDeploymentGateParams:
       description: Parameters for creating a deployment gate.
       properties:
@@ -19667,10 +19621,6 @@ components:
           description: The title of the maintenance.
           example: "API Maintenance"
           type: string
-        updates:
-          items:
-            $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItems"
-          type: array
       required:
         - components_affected
         - title
@@ -19687,48 +19637,6 @@ components:
           description: The ID of the component. Must be a component of type `component`.
           example: "1234abcd-12ab-34cd-56ef-123456abcdef"
           format: uuid
-          type: string
-        name:
-          description: The name of the component.
-          readOnly: true
-          type: string
-        status:
-          $ref: "#/components/schemas/PatchMaintenanceRequestDataAttributesComponentsAffectedItemsStatus"
-      required:
-        - id
-        - status
-      type: object
-    CreateMaintenanceRequestDataAttributesUpdatesItems:
-      description: A maintenance update entry.
-      properties:
-        components_affected:
-          description: The components affected.
-          items:
-            $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItemsComponentsAffectedItems"
-          type: array
-        description:
-          description: A description of the update.
-          example: ""
-          type: string
-        started_at:
-          description: Timestamp of when the update occurred.
-          example: ""
-          format: date-time
-          type: string
-        status:
-          $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItemsStatus"
-      required:
-        - components_affected
-        - description
-        - started_at
-        - status
-      type: object
-    CreateMaintenanceRequestDataAttributesUpdatesItemsComponentsAffectedItems:
-      description: A component affected by a maintenance update.
-      properties:
-        id:
-          description: The ID of the component. Must be a component of type `component`.
-          example: ""
           type: string
         name:
           description: The name of the component.
@@ -24794,6 +24702,9 @@ components:
           description: Identifier of the update.
           format: uuid
           readOnly: true
+          type: string
+        last_modified_by_user_uuid:
+          description: UUID of the user who last modified the resource.
           type: string
         modified_at:
           description: Timestamp of when the update was last modified.
