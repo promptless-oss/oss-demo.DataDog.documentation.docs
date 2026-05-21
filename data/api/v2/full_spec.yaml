@@ -813,6 +813,14 @@ components:
       schema:
         example: "my-job"
         type: string
+    LLMObsAccountIDPathParameter:
+      description: The ID of the integration account.
+      example: "account-abc123"
+      in: path
+      name: account_id
+      required: true
+      schema:
+        type: string
     LLMObsAnnotationQueueIDPathParameter:
       description: The ID of the LLM Observability annotation queue.
       example: "00000000-0000-0000-0000-000000000001"
@@ -845,6 +853,14 @@ components:
       required: true
       schema:
         type: string
+    LLMObsIntegrationPathParameter:
+      description: The name of the LLM integration.
+      example: openai
+      in: path
+      name: integration
+      required: true
+      schema:
+        $ref: "#/components/schemas/LLMObsIntegrationName"
     LLMObsProjectIDPathParameter:
       description: The ID of the LLM Observability project.
       example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
@@ -42158,6 +42174,80 @@ components:
       required:
         - label_schemas
       type: object
+    LLMObsAnthropicEffort:
+      description: The effort level for Anthropic inference.
+      enum:
+        - low
+        - medium
+        - high
+        - max
+      example: medium
+      nullable: true
+      type: string
+      x-enum-varnames:
+        - LOW
+        - MEDIUM
+        - HIGH
+        - MAX
+    LLMObsAnthropicMetadata:
+      description: Anthropic-specific metadata for an inference request.
+      properties:
+        effort:
+          $ref: "#/components/schemas/LLMObsAnthropicEffort"
+        thinking:
+          $ref: "#/components/schemas/LLMObsAnthropicThinkingConfig"
+          nullable: true
+      type: object
+    LLMObsAnthropicThinkingConfig:
+      description: Configuration for Anthropic extended thinking feature.
+      properties:
+        budget_tokens:
+          description: Maximum token budget for extended thinking. Required when type is `enabled`.
+          example: 1024
+          format: int64
+          nullable: true
+          type: integer
+        type:
+          $ref: "#/components/schemas/LLMObsAnthropicThinkingType"
+      required:
+        - type
+      type: object
+    LLMObsAnthropicThinkingType:
+      description: The thinking mode for Anthropic extended thinking.
+      enum:
+        - enabled
+        - disabled
+        - adaptive
+      example: enabled
+      type: string
+      x-enum-varnames:
+        - ENABLED
+        - DISABLED
+        - ADAPTIVE
+    LLMObsAzureOpenAIMetadata:
+      description: Azure OpenAI-specific metadata for an integration account or inference request.
+      properties:
+        deployment_id:
+          description: The Azure OpenAI deployment ID.
+          example: "my-gpt4-deployment"
+          type: string
+        model_version:
+          description: The model version deployed in Azure.
+          example: "0613"
+          type: string
+        resource_name:
+          description: The Azure OpenAI resource name.
+          example: "my-azure-resource"
+          type: string
+      type: object
+    LLMObsBedrockMetadata:
+      description: Amazon Bedrock-specific metadata for an inference request.
+      properties:
+        region:
+          description: The AWS region for the Bedrock request.
+          example: "us-east-1"
+          type: string
+      type: object
     LLMObsContentBlock:
       description: |-
         A single content block rendered inside a `display_block` interaction.
@@ -44483,6 +44573,536 @@ components:
       required:
         - data
       type: object
+    LLMObsInferenceCode:
+      description: A generated code snippet for running an inference request programmatically.
+      properties:
+        code:
+          description: The generated code content.
+          example: "import openai\nclient = openai.OpenAI()\n..."
+          type: string
+        id:
+          description: Unique identifier for the code snippet.
+          example: "code-python-001"
+          type: string
+        type:
+          description: The programming language or SDK type of the code snippet.
+          example: "python"
+          type: string
+      required:
+        - id
+        - type
+        - code
+      type: object
+    LLMObsInferenceContent:
+      description: A structured content block within a message.
+      properties:
+        type:
+          description: The content block type.
+          example: "text"
+          type: string
+        value:
+          $ref: "#/components/schemas/LLMObsInferenceContentValue"
+      required:
+        - type
+        - value
+      type: object
+    LLMObsInferenceContentList:
+      description: List of structured content blocks in a message.
+      items:
+        $ref: "#/components/schemas/LLMObsInferenceContent"
+      type: array
+    LLMObsInferenceContentValue:
+      description: The typed value of a message content block.
+      properties:
+        text:
+          description: Plain text content.
+          example: "Hello, how can I help you?"
+          type: string
+        tool_call:
+          $ref: "#/components/schemas/LLMObsInferenceToolCall"
+        tool_call_result:
+          $ref: "#/components/schemas/LLMObsInferenceToolResult"
+      type: object
+    LLMObsInferenceErrorResponse:
+      description: Error details returned when an inference provider returns an error.
+      properties:
+        message:
+          description: A human-readable description of the error.
+          example: "The model does not exist."
+          type: string
+        type:
+          description: The provider-specific error type.
+          example: "invalid_request_error"
+          type: string
+      required:
+        - type
+        - message
+      type: object
+    LLMObsInferenceFunction:
+      description: A function definition for a tool available to the model.
+      properties:
+        description:
+          description: A description of what the function does.
+          example: "Get the current weather for a location."
+          type: string
+        name:
+          description: The name of the function.
+          example: "get_weather"
+          type: string
+        parameters:
+          additionalProperties: {}
+          description: JSON schema describing the function parameters.
+          example:
+            properties:
+              location:
+                type: string
+            type: object
+          type: object
+      required:
+        - name
+        - parameters
+      type: object
+    LLMObsInferenceMessage:
+      description: A single message in an LLM inference conversation.
+      properties:
+        content:
+          description: Plain text content of the message.
+          example: "What is the capital of France?"
+          type: string
+        contents:
+          $ref: "#/components/schemas/LLMObsInferenceContentList"
+        id:
+          description: Unique identifier for the message.
+          example: "msg_001"
+          type: string
+        role:
+          description: The role of the message author.
+          example: "user"
+          type: string
+        tool_calls:
+          $ref: "#/components/schemas/LLMObsInferenceToolCallsList"
+        tool_results:
+          $ref: "#/components/schemas/LLMObsInferenceToolResultsList"
+      type: object
+    LLMObsInferenceMessagesList:
+      description: List of messages in an inference conversation.
+      items:
+        $ref: "#/components/schemas/LLMObsInferenceMessage"
+      type: array
+    LLMObsInferenceRunResult:
+      description: The output of a completed LLM inference call.
+      properties:
+        assessment:
+          description: An optional assessment of the inference output quality.
+          example: "pass"
+          nullable: true
+          type: string
+        content:
+          description: The text content of the model response.
+          example: "The capital of France is Paris."
+          type: string
+        finish_reason:
+          description: The reason the model stopped generating tokens.
+          example: "stop"
+          type: string
+        inference_codes:
+          $ref: "#/components/schemas/LLMObsIntegrationInferenceCodesResponse"
+        input_tokens:
+          description: Number of input tokens consumed.
+          example: 15
+          format: int64
+          type: integer
+        internal_reasoning:
+          $ref: "#/components/schemas/LLMObsInternalReasoning"
+          nullable: true
+        latency:
+          description: Request latency in milliseconds.
+          example: 843
+          format: int64
+          type: integer
+        output_tokens:
+          description: Number of output tokens generated.
+          example: 10
+          format: int64
+          type: integer
+        tools:
+          $ref: "#/components/schemas/LLMObsInferenceToolsList"
+        total_tokens:
+          description: Total tokens used (input plus output).
+          example: 25
+          format: int64
+          type: integer
+      required:
+        - content
+        - input_tokens
+        - output_tokens
+        - total_tokens
+        - latency
+        - finish_reason
+        - inference_codes
+        - tools
+        - assessment
+      type: object
+    LLMObsInferenceTool:
+      description: A tool definition available to the model during inference.
+      properties:
+        function:
+          $ref: "#/components/schemas/LLMObsInferenceFunction"
+        type:
+          description: The type of tool.
+          example: "function"
+          type: string
+      required:
+        - type
+        - function
+      type: object
+    LLMObsInferenceToolCall:
+      description: A tool call made during LLM inference.
+      properties:
+        arguments:
+          additionalProperties: {}
+          description: The arguments passed to the tool.
+          example:
+            location: "San Francisco"
+          type: object
+        name:
+          description: The name of the tool being called.
+          example: "get_weather"
+          type: string
+        tool_id:
+          description: Unique identifier for the tool call.
+          example: "call_abc123"
+          type: string
+        type:
+          description: The type of tool call.
+          example: "function"
+          type: string
+      type: object
+    LLMObsInferenceToolCallsList:
+      description: List of tool calls in a message.
+      items:
+        $ref: "#/components/schemas/LLMObsInferenceToolCall"
+      type: array
+    LLMObsInferenceToolResult:
+      description: The result returned by a tool call during LLM inference.
+      properties:
+        name:
+          description: The name of the tool that produced this result.
+          example: "get_weather"
+          type: string
+        result:
+          description: The result content returned by the tool.
+          example: "The weather in San Francisco is 68°F and sunny."
+          type: string
+        tool_id:
+          description: Identifier matching the corresponding tool call.
+          example: "call_abc123"
+          type: string
+        type:
+          description: The type of tool result.
+          example: "function"
+          type: string
+      type: object
+    LLMObsInferenceToolResultsList:
+      description: List of tool results in a message.
+      items:
+        $ref: "#/components/schemas/LLMObsInferenceToolResult"
+      type: array
+    LLMObsInferenceToolsList:
+      description: List of tools available to the model.
+      items:
+        $ref: "#/components/schemas/LLMObsInferenceTool"
+      type: array
+    LLMObsIntegrationAccount:
+      description: A configured account for an LLM provider integration.
+      properties:
+        account_id:
+          description: Provider-specific account identifier.
+          example: "org-XYZ123"
+          type: string
+        account_name:
+          description: Human-readable name for the integration account.
+          example: "Production OpenAI"
+          type: string
+        account_region:
+          description: Provider region associated with the account, if applicable.
+          example: "us-east-1"
+          type: string
+        azure_openai_metadata:
+          $ref: "#/components/schemas/LLMObsAzureOpenAIMetadata"
+        id:
+          description: Unique identifier for the integration account.
+          example: "account-abc123"
+          type: string
+        integration:
+          description: The name of the LLM provider integration.
+          example: openai
+          type: string
+        vertex_ai_metadata:
+          $ref: "#/components/schemas/LLMObsVertexAIMetadata"
+      required:
+        - id
+        - account_id
+        - account_name
+        - integration
+      type: object
+    LLMObsIntegrationInferenceCodesResponse:
+      description: List of generated code snippets for the inference configuration.
+      items:
+        $ref: "#/components/schemas/LLMObsInferenceCode"
+      type: array
+    LLMObsIntegrationInferenceRequest:
+      description: Parameters for an LLM inference request.
+      properties:
+        anthropic_metadata:
+          $ref: "#/components/schemas/LLMObsAnthropicMetadata"
+          nullable: true
+        azure_openai_metadata:
+          $ref: "#/components/schemas/LLMObsAzureOpenAIMetadata"
+          nullable: true
+        bedrock_metadata:
+          $ref: "#/components/schemas/LLMObsBedrockMetadata"
+          nullable: true
+        frequency_penalty:
+          description: Penalty for token frequency to reduce repetition.
+          example: 0.0
+          format: double
+          nullable: true
+          type: number
+        json_schema:
+          description: JSON schema for structured output, if supported by the model.
+          example: '{"type":"object","properties":{"answer":{"type":"string"}}}'
+          nullable: true
+          type: string
+        max_completion_tokens:
+          description: Maximum number of completion tokens to generate (alternative to max_tokens for some providers).
+          example: 1024
+          format: int64
+          nullable: true
+          type: integer
+        max_tokens:
+          description: Maximum number of tokens to generate.
+          example: 1024
+          format: int64
+          nullable: true
+          type: integer
+        messages:
+          $ref: "#/components/schemas/LLMObsInferenceMessagesList"
+        model_id:
+          description: The model identifier to use for inference.
+          example: "gpt-4o"
+          type: string
+        openai_metadata:
+          $ref: "#/components/schemas/LLMObsOpenAIMetadata"
+          nullable: true
+        presence_penalty:
+          description: Penalty for token presence to encourage topic diversity.
+          example: 0.0
+          format: double
+          nullable: true
+          type: number
+        temperature:
+          description: Sampling temperature between 0 and 2. Higher values produce more random output.
+          example: 0.7
+          format: double
+          nullable: true
+          type: number
+        tools:
+          $ref: "#/components/schemas/LLMObsInferenceToolsList"
+        top_k:
+          description: Top-K sampling parameter.
+          example: 50
+          format: int64
+          nullable: true
+          type: integer
+        top_p:
+          description: Nucleus sampling probability mass.
+          example: 1.0
+          format: double
+          nullable: true
+          type: number
+        vertex_ai_metadata:
+          $ref: "#/components/schemas/LLMObsVertexAIMetadata"
+          nullable: true
+      required:
+        - model_id
+        - messages
+      type: object
+    LLMObsIntegrationInferenceResponse:
+      description: The result of an LLM inference request, including input parameters and the model response.
+      properties:
+        anthropic_metadata:
+          $ref: "#/components/schemas/LLMObsAnthropicMetadata"
+          nullable: true
+        azure_openai_metadata:
+          $ref: "#/components/schemas/LLMObsAzureOpenAIMetadata"
+          nullable: true
+        bedrock_metadata:
+          $ref: "#/components/schemas/LLMObsBedrockMetadata"
+          nullable: true
+        error_response:
+          $ref: "#/components/schemas/LLMObsInferenceErrorResponse"
+        frequency_penalty:
+          description: Frequency penalty that was applied.
+          example: 0.0
+          format: double
+          nullable: true
+          type: number
+        json_schema:
+          description: JSON schema that was applied for structured output.
+          example: '{"type":"object","properties":{"answer":{"type":"string"}}}'
+          nullable: true
+          type: string
+        max_completion_tokens:
+          description: Maximum number of completion tokens that were configured.
+          example: 1024
+          format: int64
+          nullable: true
+          type: integer
+        max_tokens:
+          description: Maximum number of tokens that were configured.
+          example: 1024
+          format: int64
+          nullable: true
+          type: integer
+        messages:
+          $ref: "#/components/schemas/LLMObsInferenceMessagesList"
+        model_id:
+          description: The model identifier used for inference.
+          example: "gpt-4o"
+          type: string
+        openai_metadata:
+          $ref: "#/components/schemas/LLMObsOpenAIMetadata"
+          nullable: true
+        presence_penalty:
+          description: Presence penalty that was applied.
+          example: 0.0
+          format: double
+          nullable: true
+          type: number
+        response:
+          $ref: "#/components/schemas/LLMObsInferenceRunResult"
+        temperature:
+          description: Sampling temperature that was used.
+          example: 0.7
+          format: double
+          nullable: true
+          type: number
+        tools:
+          $ref: "#/components/schemas/LLMObsInferenceToolsList"
+        top_k:
+          description: Top-K sampling parameter that was used.
+          example: 50
+          format: int64
+          nullable: true
+          type: integer
+        top_p:
+          description: Nucleus sampling parameter that was used.
+          example: 1.0
+          format: double
+          nullable: true
+          type: number
+        vertex_ai_metadata:
+          $ref: "#/components/schemas/LLMObsVertexAIMetadata"
+          nullable: true
+      required:
+        - model_id
+        - messages
+        - response
+      type: object
+    LLMObsIntegrationModel:
+      description: A model available for a given LLM provider integration and account.
+      properties:
+        has_access:
+          description: Whether the account has access to this model.
+          example: true
+          type: boolean
+        id:
+          description: Unique identifier for the model entry.
+          example: "gpt-4o"
+          type: string
+        integration:
+          description: The name of the LLM provider integration.
+          example: "openai"
+          type: string
+        integration_display_name:
+          description: Human-readable name of the LLM provider integration.
+          example: "OpenAI"
+          type: string
+        json_schema:
+          description: Whether the model supports structured output via JSON schema.
+          example: true
+          type: boolean
+        model_display_name:
+          description: Human-readable model name.
+          example: "GPT-4o"
+          type: string
+        model_id:
+          description: Provider-specific model identifier used in inference calls.
+          example: "gpt-4o"
+          type: string
+        provider:
+          description: The underlying model provider.
+          example: "openai"
+          type: string
+        provider_display_name:
+          description: Human-readable name of the underlying model provider.
+          example: "OpenAI"
+          type: string
+        region_prefix_overrides:
+          $ref: "#/components/schemas/LLMObsIntegrationModelRegionPrefixOverrides"
+      required:
+        - id
+        - model_id
+        - model_display_name
+        - integration
+        - integration_display_name
+        - provider
+        - provider_display_name
+        - json_schema
+        - has_access
+      type: object
+    LLMObsIntegrationModelRegionPrefixOverrides:
+      additionalProperties:
+        type: string
+      description: Map of region-specific model ID prefix overrides.
+      example:
+        us-east-1: "us."
+      type: object
+    LLMObsIntegrationName:
+      description: The name of a supported LLM provider integration.
+      enum:
+        - openai
+        - amazon_bedrock
+        - anthropic
+        - azure_openai
+        - vertex_ai
+        - llmproxy
+      example: openai
+      type: string
+      x-enum-varnames:
+        - OPENAI
+        - AMAZON_BEDROCK
+        - ANTHROPIC
+        - AZURE_OPENAI
+        - VERTEX_AI
+        - LLMPROXY
+    LLMObsInternalReasoning:
+      description: The model's internal reasoning or thinking output, if available.
+      properties:
+        reasoning_tokens:
+          description: Number of tokens used for internal reasoning.
+          example: 256
+          format: int64
+          nullable: true
+          type: integer
+        text:
+          description: The reasoning text produced by the model.
+          example: "Let me think about this step by step..."
+          type: string
+      required:
+        - text
+      type: object
     LLMObsLabelSchema:
       description: Schema definition for a single label in an annotation queue.
       properties:
@@ -44582,6 +45202,44 @@ components:
         - CATEGORICAL
         - BOOLEAN
         - JSON
+    LLMObsOpenAIMetadata:
+      description: OpenAI-specific metadata for an inference request.
+      properties:
+        reasoning_effort:
+          $ref: "#/components/schemas/LLMObsOpenAIReasoningEffort"
+        reasoning_summary:
+          $ref: "#/components/schemas/LLMObsOpenAIReasoningSummary"
+      type: object
+    LLMObsOpenAIReasoningEffort:
+      description: The reasoning effort level for OpenAI models that support it.
+      enum:
+        - none
+        - low
+        - medium
+        - high
+        - xhigh
+      example: medium
+      nullable: true
+      type: string
+      x-enum-varnames:
+        - NONE
+        - LOW
+        - MEDIUM
+        - HIGH
+        - XHIGH
+    LLMObsOpenAIReasoningSummary:
+      description: The verbosity of the reasoning summary.
+      enum:
+        - auto
+        - concise
+        - detailed
+      example: auto
+      nullable: true
+      type: string
+      x-enum-varnames:
+        - AUTO
+        - CONCISE
+        - DETAILED
     LLMObsProjectDataAttributesRequest:
       description: Attributes for creating an LLM Observability project.
       properties:
@@ -45209,6 +45867,25 @@ components:
         - TRACE
         - EXPERIMENT_TRACE
         - SESSION
+    LLMObsVertexAIMetadata:
+      description: Vertex AI-specific metadata for an integration account or inference request.
+      properties:
+        location:
+          description: The Vertex AI region.
+          example: "us-central1"
+          type: string
+        project:
+          description: The Google Cloud project ID.
+          example: "my-gcp-project"
+          type: string
+        project_ids:
+          description: List of Google Cloud project IDs available to the service account.
+          example:
+            - "my-gcp-project"
+          items:
+            type: string
+          type: array
+      type: object
     Language:
       description: Programming language
       enum:
@@ -122839,6 +123516,202 @@ paths:
       x-menu-order: 17
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/integrations/{integration}/accounts:
+    get:
+      description: Retrieve the list of configured accounts for the specified LLM provider integration.
+      operationId: ListLLMObsIntegrationAccounts
+      parameters:
+        - $ref: "#/components/parameters/LLMObsIntegrationPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    - account_id: "org-XYZ123"
+                      account_name: "Production OpenAI"
+                      account_region: ""
+                      id: "account-abc123"
+                      integration: "openai"
+              schema:
+                items:
+                  $ref: "#/components/schemas/LLMObsIntegrationAccount"
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List LLM integration accounts
+      tags:
+        - LLM Observability
+      x-menu-order: 37
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/integrations/{integration}/{account_id}/inference:
+    post:
+      description: Run an LLM inference request through the specified integration and account, returning the model response and token usage.
+      operationId: CreateLLMObsIntegrationInference
+      parameters:
+        - $ref: "#/components/parameters/LLMObsIntegrationPathParameter"
+        - $ref: "#/components/parameters/LLMObsAccountIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  max_tokens: 256
+                  messages:
+                    - content: "What is the capital of France?"
+                      role: "user"
+                  model_id: "gpt-4o"
+                  temperature: 0.7
+            schema:
+              $ref: "#/components/schemas/LLMObsIntegrationInferenceRequest"
+        description: Inference request parameters.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    max_tokens: 256
+                    messages:
+                      - content: "What is the capital of France?"
+                        role: "user"
+                    model_id: "gpt-4o"
+                    response:
+                      assessment: "pass"
+                      content: "The capital of France is Paris."
+                      finish_reason: "stop"
+                      inference_codes: []
+                      input_tokens: 15
+                      latency: 843
+                      output_tokens: 9
+                      tools: []
+                      total_tokens: 24
+                    temperature: 0.7
+              schema:
+                $ref: "#/components/schemas/LLMObsIntegrationInferenceResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Run an LLM inference
+      tags:
+        - LLM Observability
+      x-menu-order: 39
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/integrations/{integration}/{account_id}/models:
+    get:
+      description: Retrieve the list of models available for the specified LLM provider integration and account.
+      operationId: ListLLMObsIntegrationModels
+      parameters:
+        - $ref: "#/components/parameters/LLMObsIntegrationPathParameter"
+        - $ref: "#/components/parameters/LLMObsAccountIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    - has_access: true
+                      id: "gpt-4o"
+                      integration: "openai"
+                      integration_display_name: "OpenAI"
+                      json_schema: true
+                      model_display_name: "GPT-4o"
+                      model_id: "gpt-4o"
+                      provider: "openai"
+                      provider_display_name: "OpenAI"
+              schema:
+                items:
+                  $ref: "#/components/schemas/LLMObsIntegrationModel"
+                type: array
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List LLM integration models
+      tags:
+        - LLM Observability
+      x-menu-order: 38
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/llm-obs/v1/projects:
     get:
