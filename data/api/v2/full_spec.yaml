@@ -4717,6 +4717,15 @@ components:
         - OPENURL
         - DOWNLOADFILE
         - SETSTATEVARIABLEVALUE
+    AppBuilderListTagsResponse:
+      description: The response for listing tags associated with apps.
+      properties:
+        data:
+          description: An array of tags.
+          items:
+            $ref: "#/components/schemas/TagData"
+          type: array
+      type: object
     AppDefinitionType:
       default: appDefinitions
       description: The app definition type.
@@ -9163,6 +9172,161 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/BillingDimensionsMappingBody"
+      type: object
+    BlueprintAttributes:
+      description: The attributes of a blueprint resource.
+      properties:
+        created_at:
+          description: The timestamp when the blueprint was created.
+          example: ""
+          format: date-time
+          type: string
+        definition:
+          $ref: "#/components/schemas/AppDefinitionType"
+        description:
+          description: A description of what the blueprint does.
+          example: ""
+          type: string
+        embedded_datastore_blueprints:
+          additionalProperties: {}
+          description: Embedded datastore blueprints.
+          type: object
+        embedded_native_actions:
+          description: Embedded native actions.
+          items:
+            $ref: "#/components/schemas/BlueprintNativeAction"
+          type: array
+        embedded_workflow_blueprints:
+          additionalProperties: {}
+          description: Embedded workflow blueprints.
+          type: object
+        integration_id:
+          description: The integration ID associated with the blueprint.
+          type: string
+        mocked_outputs:
+          additionalProperties: {}
+          description: Mocked outputs for testing the blueprint.
+          type: object
+        name:
+          description: The human-readable name of the blueprint.
+          example: AWS Service Manager
+          type: string
+        slug:
+          description: The unique slug identifier of the blueprint.
+          example: aws-service-manager
+          type: string
+        tags:
+          description: Tags associated with the blueprint.
+          items:
+            type: string
+          type: array
+        tile_background:
+          description: The background style of the blueprint tile.
+          type: string
+        tile_icon_action_fqn:
+          description: The fully qualified name of the action used as the tile icon.
+          type: string
+        updated_at:
+          description: The timestamp when the blueprint was last updated.
+          example: ""
+          format: date-time
+          type: string
+      required:
+        - slug
+        - name
+        - description
+        - definition
+        - created_at
+        - updated_at
+      type: object
+    BlueprintData:
+      description: A blueprint resource.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/BlueprintAttributes"
+        id:
+          description: The ID of the blueprint.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          format: uuid
+          type: string
+        type:
+          $ref: "#/components/schemas/BlueprintDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    BlueprintDataType:
+      description: The resource type for a blueprint.
+      enum:
+        - blueprint
+      example: blueprint
+      type: string
+      x-enum-varnames:
+        - BLUEPRINT
+    BlueprintMetadataAttributes:
+      description: The attributes of a blueprint metadata resource.
+      properties:
+        created_at:
+          description: The timestamp when the blueprint was created.
+          example: ""
+          format: date-time
+          type: string
+        description:
+          description: A description of what the blueprint does.
+          example: ""
+          type: string
+        name:
+          description: The human-readable name of the blueprint.
+          example: AWS Service Manager
+          type: string
+        slug:
+          description: The unique slug identifier of the blueprint.
+          example: aws-service-manager
+          type: string
+        tags:
+          description: Tags associated with the blueprint.
+          items:
+            type: string
+          type: array
+        tile_background:
+          description: The background style of the blueprint tile.
+          type: string
+        tile_icon_action_fqn:
+          description: The fully qualified name of the action used as the tile icon.
+          type: string
+        updated_at:
+          description: The timestamp when the blueprint was last updated.
+          example: ""
+          format: date-time
+          type: string
+      required:
+        - slug
+        - name
+        - description
+        - created_at
+        - updated_at
+      type: object
+    BlueprintMetadataData:
+      description: A blueprint metadata resource.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/BlueprintMetadataAttributes"
+        id:
+          description: The ID of the blueprint.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          format: uuid
+          type: string
+        type:
+          $ref: "#/components/schemas/BlueprintDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    BlueprintNativeAction:
+      additionalProperties: {}
+      description: An embedded native action in a blueprint.
       type: object
     BranchCoverageSummaryRequest:
       description: Request object for getting code coverage summary for a branch.
@@ -33997,6 +34161,21 @@ components:
             type: string
           type: array
       type: object
+    GetBlueprintResponse:
+      description: The response for retrieving a single blueprint.
+      properties:
+        data:
+          $ref: "#/components/schemas/BlueprintData"
+      type: object
+    GetBlueprintsResponse:
+      description: The response for retrieving multiple blueprints.
+      properties:
+        data:
+          description: An array of blueprints.
+          items:
+            $ref: "#/components/schemas/BlueprintData"
+          type: array
+      type: object
     GetCustomFrameworkResponse:
       description: Response object to get a custom framework.
       properties:
@@ -46469,6 +46648,15 @@ components:
           $ref: "#/components/schemas/Metadata"
       required:
         - data
+      type: object
+    ListBlueprintsResponse:
+      description: The response for listing available blueprints.
+      properties:
+        data:
+          description: An array of blueprint metadata.
+          items:
+            $ref: "#/components/schemas/BlueprintMetadataData"
+          type: array
       type: object
     ListCampaignsResponse:
       description: Response containing a list of campaigns.
@@ -84757,6 +84945,28 @@ components:
         - type
         - id
       type: object
+    TagData:
+      description: A tag resource associated with an app.
+      properties:
+        id:
+          description: The name of the tag.
+          example: production
+          type: string
+        type:
+          $ref: "#/components/schemas/TagDataType"
+      required:
+        - id
+        - type
+      type: object
+    TagDataType:
+      description: The resource type for a tag.
+      enum:
+        - tag
+      example: tag
+      minLength: 3
+      type: string
+      x-enum-varnames:
+        - TAG
     TagsEventAttribute:
       description: Array of tags associated with your event.
       example: ["team:A"]
@@ -97881,6 +98091,257 @@ paths:
         permissions:
           - apps_run
           - connections_read
+  "/api/v2/app-builder/blueprint/{blueprint_id}":
+    get:
+      description: Retrieve an app blueprint by its ID.
+      operationId: GetBlueprint
+      parameters:
+        - description: The ID of the blueprint to retrieve.
+          example: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+          in: path
+          name: blueprint_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00Z"
+                        definition: {}
+                        description: Manage your AWS services from Datadog.
+                        name: AWS Service Manager
+                        slug: aws-service-manager
+                        updated_at: "2024-01-01T00:00:00Z"
+                      id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                      type: blueprint
+              schema:
+                $ref: "#/components/schemas/GetBlueprintResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get Blueprint
+      tags:
+        - App Builder
+      x-menu-order: 19
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_run
+          - apps_write
+          - connections_read
+          - connections_write
+  /api/v2/app-builder/blueprints:
+    get:
+      description: List available app blueprints.
+      operationId: ListBlueprints
+      parameters:
+        - description: The number of blueprints to return per page. Defaults to 10. Maximum is 100.
+          in: query
+          name: limit
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: The page of results to return. Starts at 0.
+          in: query
+          name: page
+          required: false
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          created_at: "2024-01-01T00:00:00Z"
+                          description: Manage your AWS services from Datadog.
+                          name: AWS Service Manager
+                          slug: aws-service-manager
+                          updated_at: "2024-01-01T00:00:00Z"
+                        id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                        type: blueprint
+              schema:
+                $ref: "#/components/schemas/ListBlueprintsResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List Blueprints
+      tags:
+        - App Builder
+      x-menu-order: 18
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_run
+          - apps_write
+          - connections_read
+          - connections_write
+  "/api/v2/app-builder/blueprints/integration-id/{integration_id}":
+    get:
+      description: List app blueprints associated with a specific integration ID.
+      operationId: GetBlueprintsByIntegrationId
+      parameters:
+        - description: The integration ID to filter blueprints by.
+          example: aws
+          in: path
+          name: integration_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          created_at: "2024-01-01T00:00:00Z"
+                          definition: {}
+                          description: Manage your AWS services from Datadog.
+                          integration_id: aws
+                          name: AWS Service Manager
+                          slug: aws-service-manager
+                          updated_at: "2024-01-01T00:00:00Z"
+                        id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                        type: blueprint
+              schema:
+                $ref: "#/components/schemas/GetBlueprintsResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get Blueprints by Integration ID
+      tags:
+        - App Builder
+      x-menu-order: 21
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_run
+          - apps_write
+          - connections_read
+          - connections_write
+  "/api/v2/app-builder/blueprints/slugs/{slugs}":
+    get:
+      description: Retrieve app blueprints by their slugs.
+      operationId: GetBlueprintsBySlugs
+      parameters:
+        - description: A comma-separated list of blueprint slugs.
+          example: aws-service-manager
+          in: path
+          name: slugs
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          created_at: "2024-01-01T00:00:00Z"
+                          definition: {}
+                          description: Manage your AWS services from Datadog.
+                          name: AWS Service Manager
+                          slug: aws-service-manager
+                          updated_at: "2024-01-01T00:00:00Z"
+                        id: 65bb1f25-52e1-4510-9f8d-22d1516ed693
+                        type: blueprint
+              schema:
+                $ref: "#/components/schemas/GetBlueprintsResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get Blueprints by Slugs
+      tags:
+        - App Builder
+      x-menu-order: 20
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_run
+          - apps_write
+          - connections_read
+          - connections_write
+  /api/v2/app-builder/tags:
+    get:
+      description: List all tags associated with the authenticated user's apps.
+      operationId: ListTags
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: production
+                        type: tag
+              schema:
+                $ref: "#/components/schemas/AppBuilderListTagsResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List Tags
+      tags:
+        - App Builder
+      x-menu-order: 17
+      "x-permission":
+        operator: OR
+        permissions:
+          - apps_run
   /api/v2/application_keys:
     get:
       description: List all application keys available for your org
