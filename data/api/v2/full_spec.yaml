@@ -17825,6 +17825,76 @@ components:
       required:
         - data
       type: object
+    CostRecommendationArray:
+      description: A page of cost recommendations with pagination metadata.
+      properties:
+        data:
+          description: The list of cost recommendations on this page.
+          items:
+            $ref: "#/components/schemas/CostRecommendationData"
+          type: array
+        meta:
+          $ref: "#/components/schemas/RecommendationsPageMeta"
+      required:
+        - data
+      type: object
+    CostRecommendationData:
+      description: A single cost recommendation entry in JSON:API form.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/CostRecommendationDataAttributes"
+        id:
+          description: Unique identifier for the recommendation.
+          type: string
+        type:
+          $ref: "#/components/schemas/CostRecommendationDataType"
+      required:
+        - type
+      type: object
+    CostRecommendationDataAttributes:
+      description: Attributes describing a single cost recommendation.
+      properties:
+        dd_resource_key:
+          description: Datadog resource key identifying the recommended resource.
+          type: string
+        potential_daily_savings:
+          $ref: "#/components/schemas/CostRecommendationDataAttributesPotentialDailySavings"
+        recommendation_type:
+          description: The kind of recommendation (for example, `terminate` or `rightsize`).
+          type: string
+        resource_id:
+          description: Cloud provider identifier of the resource.
+          type: string
+        resource_type:
+          description: Resource type (for example, `aws_ec2_instance`).
+          type: string
+        tags:
+          description: Tags attached to the recommended resource.
+          items:
+            description: A single resource tag.
+            type: string
+          type: array
+      type: object
+    CostRecommendationDataAttributesPotentialDailySavings:
+      description: Estimated daily savings if the recommendation is applied.
+      properties:
+        amount:
+          description: Numeric amount of the potential daily savings.
+          format: double
+          type: number
+        currency:
+          description: ISO 4217 currency code for the savings amount.
+          type: string
+      type: object
+    CostRecommendationDataType:
+      default: recommendation
+      description: Recommendation resource type.
+      enum:
+        - recommendation
+      example: recommendation
+      type: string
+      x-enum-varnames:
+        - RECOMMENDATION
     CostTag:
       description: A Cloud Cost Management tag.
       properties:
@@ -65038,6 +65108,64 @@ components:
       type: string
       x-enum-varnames:
         - RECOMMENDATION
+    RecommendationsFilterRequest:
+      description: Request body for filtering cost recommendations.
+      example:
+        filter: "@resource_table:aws_ec2_instance"
+        sort:
+          - expression: potential_daily_savings.amount
+            order: DESC
+      properties:
+        filter:
+          description: Filter expression applied to the recommendations.
+          type: string
+        scope:
+          description: Recommendations scope. Defaults to `ccm`; use `experiment` for experimental recommendations or `*` for both.
+          type: string
+        sort:
+          description: Ordered list of sort clauses applied to the result set.
+          items:
+            $ref: "#/components/schemas/RecommendationsFilterRequestSortItems"
+          type: array
+        view:
+          description: Active view name (for example, `active`, `dismissed`, `open`, `in-progress`, or `completed`).
+          type: string
+      type: object
+    RecommendationsFilterRequestSortItems:
+      description: A single sort clause applied to the cost recommendations result set.
+      properties:
+        expression:
+          description: Field to sort by (for example, `potential_daily_savings.amount`).
+          type: string
+        order:
+          description: Sort direction, either `ASC` or `DESC`.
+          type: string
+      type: object
+    RecommendationsPageMeta:
+      description: Top-level JSON:API meta object for paginated cost recommendation responses.
+      properties:
+        page:
+          $ref: "#/components/schemas/RecommendationsPageMetaPage"
+      type: object
+    RecommendationsPageMetaPage:
+      description: Pagination metadata for a page of cost recommendations.
+      properties:
+        filter:
+          description: The filter expression that was applied to produce this page.
+          type: string
+        next_page_token:
+          description: Opaque token used to fetch the next page; absent on the last page.
+          type: string
+        page_size:
+          description: Number of items returned in this page (1–10000).
+          format: int32
+          maximum: 10000
+          minimum: 1
+          type: integer
+        page_token:
+          description: Pagination token echoed back from the request.
+          type: string
+      type: object
     ReferenceTableCreateSourceType:
       description: The source type for creating reference table data. Only these source types can be created through this API.
       enum:
@@ -107871,6 +107999,77 @@ paths:
         operator: OR
         permissions:
           - cloud_cost_management_read
+  /api/v2/cost/recommendations:
+    post:
+      description: List cost recommendations matching a filter, with pagination and sorting.
+      operationId: SearchCostRecommendations
+      parameters:
+        - description: Number of results per page (1–10000).
+          in: query
+          name: page[size]
+          schema:
+            type: string
+        - description: Pagination token from a previous response.
+          in: query
+          name: page[token]
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  filter: "@resource_table:aws_ec2_instance"
+                  sort:
+                    - expression: potential_daily_savings.amount
+                      order: DESC
+            schema:
+              $ref: "#/components/schemas/RecommendationsFilterRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          dd_resource_key: "arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0"
+                          potential_daily_savings:
+                            amount: 1.23
+                            currency: USD
+                          recommendation_type: terminate
+                          resource_id: i-1234567890abcdef0
+                          resource_type: aws_ec2_instance
+                          tags:
+                            - "env:prod"
+                            - "team:ccm"
+                        id: encoded-event-id-1
+                        type: recommendation
+                    meta:
+                      page:
+                        filter: "@resource_table:aws_ec2_instance"
+                        next_page_token: ""
+                        page_size: 100
+              schema:
+                $ref: "#/components/schemas/CostRecommendationArray"
+          description: OK
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: Search cost recommendations
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 61
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/cost/tag_descriptions:
     get:
       description: List Cloud Cost Management tag key descriptions for the organization. Use `filter[cloud]` to scope the result to a single cloud provider; when omitted, both cross-cloud defaults and cloud-specific descriptions are returned.
