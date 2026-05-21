@@ -77732,10 +77732,16 @@ components:
               packets_sent_by_server: 20
               rtt_micro_seconds: 800
               tcp_closed_connections: 30
+              tcp_delivered_ce: 12
               tcp_established_connections: 40
+              tcp_probe0_count: 2
+              tcp_rcv_ooo_pack: 15
+              tcp_recovery_count: 8
               tcp_refusals: 7
+              tcp_reord_seen: 4
               tcp_resets: 5
               tcp_retransmits: 30
+              tcp_rto_count: 3
               tcp_timeouts: 6
             id: client_team:networks, server_service:hucklebuck
             type: aggregated_connection
@@ -77793,12 +77799,32 @@ components:
           description: The number of TCP connections in a closed state. Measured in connections per second from the client.
           format: int64
           type: integer
+        tcp_delivered_ce:
+          description: The number of TCP segments acknowledged with the ECN Congestion Experienced (CE) mark, indicating that an upstream router marked packets as experiencing congestion.
+          format: int64
+          type: integer
         tcp_established_connections:
           description: The number of TCP connections in an established state. Measured in connections per second from the client.
           format: int64
           type: integer
+        tcp_probe0_count:
+          description: The number of TCP zero-window probes sent. These probes are sent when the receiver advertises a zero receive window, indicating it cannot accept more data.
+          format: int64
+          type: integer
+        tcp_rcv_ooo_pack:
+          description: The number of TCP packets received out of order. This indicates network-level packet reordering, which can degrade TCP performance by triggering spurious retransmissions and reducing throughput.
+          format: int64
+          type: integer
+        tcp_recovery_count:
+          description: The number of TCP fast recovery events. Fast recovery retransmits lost segments detected through duplicate ACKs or selective acknowledgment (SACK) without waiting for a retransmission timeout.
+          format: int64
+          type: integer
         tcp_refusals:
           description: The number of TCP connections that were refused by the server. Typically this indicates an attempt to connect to an IP/port that is not receiving connections, or a firewall/security misconfiguration.
+          format: int64
+          type: integer
+        tcp_reord_seen:
+          description: The number of times reordering of sent packets was detected. Reordering detection adjusts the duplicate ACK threshold, preventing spurious retransmissions caused by out-of-order delivery.
           format: int64
           type: integer
         tcp_resets:
@@ -77807,6 +77833,10 @@ components:
           type: integer
         tcp_retransmits:
           description: TCP Retransmits represent detected failures that are retransmitted to ensure delivery. Measured in count of retransmits from the client.
+          format: int64
+          type: integer
+        tcp_rto_count:
+          description: The number of TCP retransmission timeouts (RTOs). An RTO occurs when an ACK is not received within the estimated round-trip time, forcing the sender to retransmit and halve its congestion window.
           format: int64
           type: integer
         tcp_timeouts:
