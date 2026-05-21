@@ -71851,11 +71851,20 @@ components:
       properties:
         baselineUserLocations:
           $ref: "#/components/schemas/SecurityMonitoringRuleImpossibleTravelOptionsBaselineUserLocations"
+        baselineUserLocationsDuration:
+          $ref: "#/components/schemas/SecurityMonitoringRuleImpossibleTravelOptionsBaselineUserLocationsDuration"
       type: object
     SecurityMonitoringRuleImpossibleTravelOptionsBaselineUserLocations:
       description: "If true, signals are suppressed for the first 24 hours. In that time, Datadog learns the user's regular\naccess locations. This can be helpful to reduce noise and infer VPN usage or credentialed API access."
       example: true
       type: boolean
+    SecurityMonitoringRuleImpossibleTravelOptionsBaselineUserLocationsDuration:
+      description: The duration in days during which Datadog learns the user's regular access locations. After this period, signals are generated for accesses from unknown locations.
+      format: int32
+      maximum: 30
+      minimum: 1
+      nullable: true
+      type: integer
     SecurityMonitoringRuleInstantaneousBaseline:
       description: When set to true, Datadog uses previous values that fall within the defined learning window to construct the baseline, enabling the system to establish an accurate baseline more rapidly rather than relying solely on gradual learning over time.
       example: false
@@ -146010,6 +146019,7 @@ paths:
                     hardcodedEvaluatorType: log4shell
                     impossibleTravelOptions:
                       baselineUserLocations: true
+                      baselineUserLocationsDuration: 7
                     newValueOptions:
                       instantaneousBaseline: false
                       learningMethod: duration
@@ -146780,6 +146790,7 @@ paths:
                     hardcodedEvaluatorType: log4shell
                     impossibleTravelOptions:
                       baselineUserLocations: true
+                      baselineUserLocationsDuration: 7
                     keepAlive: 3600
                     maxSignalDuration: 86400
                     newValueOptions:
@@ -146882,6 +146893,7 @@ paths:
                       hardcodedEvaluatorType: log4shell
                       impossibleTravelOptions:
                         baselineUserLocations: true
+                        baselineUserLocationsDuration: 7
                       keepAlive: 0
                       maxSignalDuration: 0
                       newValueOptions:
@@ -146996,6 +147008,7 @@ paths:
                     hardcodedEvaluatorType: log4shell
                     impossibleTravelOptions:
                       baselineUserLocations: true
+                      baselineUserLocationsDuration: 7
                     keepAlive: 1800
                     maxSignalDuration: 1800
                     newValueOptions:
