@@ -435,6 +435,14 @@ components:
       schema:
         example: "service:myservice"
         type: string
+    EntityIntegrationConfigID:
+      description: The identifier of the integration whose configuration is being managed. Supported values are `github`, `jira`, and `pagerduty`.
+      in: path
+      name: integration_id
+      required: true
+      schema:
+        example: github
+        type: string
     FastlyAccountID:
       description: Fastly Account id.
       in: path
@@ -27052,6 +27060,103 @@ components:
           description: Entity.
           type: string
       type: object
+    EntityIntegrationConfigAttributes:
+      description: The organization ID, integration identifier, and integration-specific configuration payload for an entity integration configuration.
+      properties:
+        config:
+          $ref: "#/components/schemas/EntityIntegrationConfigPayload"
+        integration_id:
+          description: The identifier of the integration this configuration applies to (for example, `github`, `jira`, or `pagerduty`).
+          example: github
+          type: string
+        org_id:
+          description: The Datadog organization identifier that owns this configuration.
+          example: 1234
+          format: int64
+          type: integer
+      required:
+        - org_id
+        - integration_id
+        - config
+      type: object
+    EntityIntegrationConfigData:
+      description: JSON:API resource object for an entity integration configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/EntityIntegrationConfigAttributes"
+        id:
+          description: Unique identifier of the entity integration configuration.
+          example: 01HJABCD12345678ABCDEFGHIJ
+          type: string
+        type:
+          $ref: "#/components/schemas/EntityIntegrationConfigType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    EntityIntegrationConfigPayload:
+      additionalProperties: {}
+      description: Integration-specific configuration payload. The shape of this object depends on the integration identified by the path parameter. For `github`, the object must contain an `enabled_repos` array. For `jira`, it must contain an `enabled_projects` array. For `pagerduty`, it must contain an `accounts` array.
+      example:
+        enabled_repos:
+          - github_org_name: myorg
+            hostname: github.com
+            repo_name: myrepo
+      type: object
+    EntityIntegrationConfigRequest:
+      description: Request body used to create or replace the configuration for a given integration.
+      properties:
+        data:
+          $ref: "#/components/schemas/EntityIntegrationConfigRequestData"
+      required:
+        - data
+      type: object
+    EntityIntegrationConfigRequestAttributes:
+      description: Attributes used to create or update an entity integration configuration.
+      properties:
+        config:
+          $ref: "#/components/schemas/EntityIntegrationConfigPayload"
+      required:
+        - config
+      type: object
+    EntityIntegrationConfigRequestData:
+      description: JSON:API resource object used in a request to create or update an entity integration configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/EntityIntegrationConfigRequestAttributes"
+        type:
+          $ref: "#/components/schemas/EntityIntegrationConfigRequestType"
+      required:
+        - type
+        - attributes
+      type: object
+    EntityIntegrationConfigRequestType:
+      default: entity_integration_config_requests
+      description: JSON:API resource type for the entity integration configuration create or update request. Always `entity_integration_config_requests`.
+      enum:
+        - entity_integration_config_requests
+      example: entity_integration_config_requests
+      type: string
+      x-enum-varnames:
+        - ENTITY_INTEGRATION_CONFIG_REQUESTS
+    EntityIntegrationConfigResponse:
+      description: JSON:API document containing a single entity integration configuration resource.
+      properties:
+        data:
+          $ref: "#/components/schemas/EntityIntegrationConfigData"
+      required:
+        - data
+      type: object
+    EntityIntegrationConfigType:
+      default: entity_integration_configs
+      description: JSON:API resource type for an entity integration configuration. Always `entity_integration_configs`.
+      enum:
+        - entity_integration_configs
+      example: entity_integration_configs
+      type: string
+      x-enum-varnames:
+        - ENTITY_INTEGRATION_CONFIGS
     EntityMeta:
       description: Entity metadata.
       properties:
@@ -116068,6 +116173,183 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in public beta and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/idp/entity_integrations/{integration_id}:
+    delete:
+      description: Delete the configuration stored for a given integration in the caller's organization.
+      operationId: DeleteEntityIntegrationConfig
+      parameters:
+        - $ref: "#/components/parameters/EntityIntegrationConfigID"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Delete an entity integration configuration
+      tags:
+        - Entity Integration Configs
+      x-menu-order: 3
+      x-permission:
+        operator: OR
+        permissions:
+          - manage_integrations
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Retrieve the configuration currently stored for a given integration in the caller's organization.
+      operationId: GetEntityIntegrationConfig
+      parameters:
+        - $ref: "#/components/parameters/EntityIntegrationConfigID"
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                data:
+                  attributes:
+                    config:
+                      enabled_repos:
+                        - github_org_name: myorg
+                          hostname: github.com
+                          repo_name: myrepo
+                    integration_id: github
+                    org_id: 1234
+                  id: 01HJABCD12345678ABCDEFGHIJ
+                  type: entity_integration_configs
+              schema:
+                $ref: "#/components/schemas/EntityIntegrationConfigResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get an entity integration configuration
+      tags:
+        - Entity Integration Configs
+      x-menu-order: 1
+      x-permission:
+        operator: OR
+        permissions:
+          - integrations_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: |-
+        Create or replace the configuration for a given integration in the caller's organization. The shape of `data.attributes.config` depends on the integration:
+
+        - For `github`: `config` must contain an `enabled_repos` array of objects with `hostname`, `github_org_name`, and `repo_name`.
+        - For `jira`: `config` must contain an `enabled_projects` array of objects with `hostname`, `account_id`, and `project_key`.
+        - For `pagerduty`: `config` must contain an `accounts` array of objects with a required `enabled` boolean and an optional `subdomain` string.
+      operationId: UpdateEntityIntegrationConfig
+      parameters:
+        - $ref: "#/components/parameters/EntityIntegrationConfigID"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                summary: GitHub integration configuration
+                value:
+                  data:
+                    attributes:
+                      config:
+                        enabled_repos:
+                          - github_org_name: myorg
+                            hostname: github.com
+                            repo_name: myrepo
+                    type: entity_integration_config_requests
+              jira:
+                summary: Jira integration configuration
+                value:
+                  data:
+                    attributes:
+                      config:
+                        enabled_projects:
+                          - account_id: "123456789"
+                            hostname: mycompany.atlassian.net
+                            project_key: AAA
+                    type: entity_integration_config_requests
+              pagerduty:
+                summary: PagerDuty integration configuration
+                value:
+                  data:
+                    attributes:
+                      config:
+                        accounts:
+                          - enabled: true
+                            subdomain: mycompany
+                    type: entity_integration_config_requests
+            schema:
+              $ref: "#/components/schemas/EntityIntegrationConfigRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                data:
+                  attributes:
+                    config:
+                      enabled_repos:
+                        - github_org_name: myorg
+                          hostname: github.com
+                          repo_name: myrepo
+                    integration_id: github
+                    org_id: 1234
+                  id: 01HJABCD12345678ABCDEFGHIJ
+                  type: entity_integration_configs
+              schema:
+                $ref: "#/components/schemas/EntityIntegrationConfigResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Create or update entity integration configuration
+      tags:
+        - Entity Integration Configs
+      x-codegen-request-body-name: body
+      x-menu-order: 2
+      x-permission:
+        operator: OR
+        permissions:
+          - integrations_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/incidents:
     get:
       description: >-
@@ -165216,6 +165498,8 @@ tags:
       scopes from alerting. Downtime settings, which can be scheduled with start and
       end times, prevent all alerting related to specified Datadog tags.
     name: Downtimes
+  - description: Manage per-integration configurations for the Internal Developer Portal (IDP). These configurations control which external resources (for example, GitHub repositories, Jira projects, or PagerDuty services) are synced as entities into the Software Catalog.
+    name: Entity Integration Configs
   - description: Retrieves security risk scores for entities in your organization.
     name: Entity Risk Scores
   - description: View and manage issues within Error Tracking. See the [Error Tracking page](https://docs.datadoghq.com/error_tracking/) for more information.
