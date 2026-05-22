@@ -53808,6 +53808,118 @@ components:
       type: string
       x-enum-varnames:
         - ADD_HOSTNAME
+    ObservabilityPipelineAddMetricTagsProcessor:
+      description: |-
+        The `add_metric_tags` processor adds static tags to metrics.
+
+        **Supported pipeline types:** metrics
+      properties:
+        display_name:
+          $ref: "#/components/schemas/ObservabilityPipelineComponentDisplayName"
+        enabled:
+          description: Indicates whether the processor is enabled.
+          example: true
+          type: boolean
+        id:
+          description: The unique identifier for this component. Used in other parts of the pipeline to reference this component (for example, as the `input` to downstream components).
+          example: "add-metric-tags-processor"
+          type: string
+        include:
+          description: A Datadog search query used to determine which metrics this processor targets.
+          example: "*"
+          type: string
+        tags:
+          description: A list of static tags (key-value pairs) added to each metric processed by this component.
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineFieldValue"
+          maxItems: 15
+          type: array
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineAddMetricTagsProcessorType"
+      required:
+        - id
+        - type
+        - include
+        - tags
+        - enabled
+      type: object
+      x-pipeline-types: [metrics]
+    ObservabilityPipelineAddMetricTagsProcessorType:
+      default: add_metric_tags
+      description: The processor type. The value must be `add_metric_tags`.
+      enum: [add_metric_tags]
+      example: add_metric_tags
+      type: string
+      x-enum-varnames:
+        - ADD_METRIC_TAGS
+    ObservabilityPipelineAggregateProcessor:
+      description: |-
+        The `aggregate` processor combines metrics that share the same name and tags into a single metric over a configurable interval.
+
+        **Supported pipeline types:** metrics
+      properties:
+        display_name:
+          $ref: "#/components/schemas/ObservabilityPipelineComponentDisplayName"
+        enabled:
+          description: Indicates whether the processor is enabled.
+          example: true
+          type: boolean
+        id:
+          description: The unique identifier for this component. Used in other parts of the pipeline to reference this component (for example, as the `input` to downstream components).
+          example: "aggregate-processor"
+          type: string
+        include:
+          description: A Datadog search query used to determine which metrics this processor targets.
+          example: "*"
+          type: string
+        interval_secs:
+          description: The interval, in seconds, over which metrics are aggregated.
+          example: 10
+          format: int64
+          maximum: 60
+          minimum: 1
+          type: integer
+        mode:
+          $ref: "#/components/schemas/ObservabilityPipelineAggregateProcessorMode"
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineAggregateProcessorType"
+      required:
+        - id
+        - type
+        - include
+        - interval_secs
+        - mode
+        - enabled
+      type: object
+      x-pipeline-types: [metrics]
+    ObservabilityPipelineAggregateProcessorMode:
+      description: The aggregation mode applied to metrics that share the same name and tags within the interval.
+      enum:
+        - auto
+        - sum
+        - latest
+        - count
+        - max
+        - min
+        - mean
+      example: auto
+      type: string
+      x-enum-varnames:
+        - AUTO
+        - SUM
+        - LATEST
+        - COUNT
+        - MAX
+        - MIN
+        - MEAN
+    ObservabilityPipelineAggregateProcessorType:
+      default: aggregate
+      description: The processor type. The value must be `aggregate`.
+      enum: [aggregate]
+      example: aggregate
+      type: string
+      x-enum-varnames:
+        - AGGREGATE
     ObservabilityPipelineAmazonDataFirehoseSource:
       description: |-
         The `amazon_data_firehose` source ingests logs from AWS Data Firehose.
@@ -54523,7 +54635,11 @@ components:
         - $ref: "#/components/schemas/ObservabilityPipelineSensitiveDataScannerProcessor"
         - $ref: "#/components/schemas/ObservabilityPipelineSplitArrayProcessor"
         - $ref: "#/components/schemas/ObservabilityPipelineThrottleProcessor"
+        - $ref: "#/components/schemas/ObservabilityPipelineAddMetricTagsProcessor"
+        - $ref: "#/components/schemas/ObservabilityPipelineAggregateProcessor"
         - $ref: "#/components/schemas/ObservabilityPipelineMetricTagsProcessor"
+        - $ref: "#/components/schemas/ObservabilityPipelineRenameMetricTagsProcessor"
+        - $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessor"
     ObservabilityPipelineConfigSourceItem:
       description: "A data source for the pipeline."
       oneOf:
@@ -57571,6 +57687,65 @@ components:
       type: string
       x-enum-varnames:
         - RENAME_FIELDS
+    ObservabilityPipelineRenameMetricTagsProcessor:
+      description: |-
+        The `rename_metric_tags` processor changes the keys of tags on metrics.
+
+        **Supported pipeline types:** metrics
+      properties:
+        display_name:
+          $ref: "#/components/schemas/ObservabilityPipelineComponentDisplayName"
+        enabled:
+          description: Indicates whether the processor is enabled.
+          example: true
+          type: boolean
+        id:
+          description: The unique identifier for this component. Used in other parts of the pipeline to reference this component (for example, as the `input` to downstream components).
+          example: "rename-metric-tags-processor"
+          type: string
+        include:
+          description: A Datadog search query used to determine which metrics this processor targets.
+          example: "*"
+          type: string
+        tags:
+          description: A list of rename rules specifying which tag keys to rename on each metric.
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineRenameMetricTagsProcessorTag"
+          maxItems: 15
+          type: array
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineRenameMetricTagsProcessorType"
+      required:
+        - id
+        - type
+        - include
+        - tags
+        - enabled
+      type: object
+      x-pipeline-types: [metrics]
+    ObservabilityPipelineRenameMetricTagsProcessorTag:
+      description: Defines how to rename a tag on metric events.
+      properties:
+        rename_to:
+          description: The new tag key to assign in place of the original.
+          example: "destination_tag"
+          type: string
+        tag:
+          description: The original tag key on the metric event.
+          example: "source_tag"
+          type: string
+      required:
+        - tag
+        - rename_to
+      type: object
+    ObservabilityPipelineRenameMetricTagsProcessorType:
+      default: rename_metric_tags
+      description: The processor type. The value must be `rename_metric_tags`.
+      enum: [rename_metric_tags]
+      example: rename_metric_tags
+      type: string
+      x-enum-varnames:
+        - RENAME_METRIC_TAGS
     ObservabilityPipelineRsyslogDestination:
       description: |-
         The `rsyslog` destination forwards logs to an external `rsyslog` server over TCP or UDP using the syslog protocol.
@@ -58812,6 +58987,138 @@ components:
       x-enum-varnames:
         - TCP
         - UDP
+    ObservabilityPipelineTagCardinalityLimitProcessor:
+      description: |-
+        The `tag_cardinality_limit` processor caps the number of distinct tag value combinations on metrics, dropping tags or events once the limit is exceeded.
+
+        **Supported pipeline types:** metrics
+      properties:
+        display_name:
+          $ref: "#/components/schemas/ObservabilityPipelineComponentDisplayName"
+        enabled:
+          description: Indicates whether the processor is enabled.
+          example: true
+          type: boolean
+        id:
+          description: The unique identifier for this component. Used in other parts of the pipeline to reference this component (for example, as the `input` to downstream components).
+          example: "tag-cardinality-limit-processor"
+          type: string
+        include:
+          description: A Datadog search query used to determine which metrics this processor targets.
+          example: "*"
+          type: string
+        limit_exceeded_action:
+          $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessorAction"
+        per_metric_limits:
+          description: A list of per-metric cardinality overrides that take precedence over the default `value_limit`.
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessorPerMetricLimit"
+          maxItems: 100
+          type: array
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessorType"
+        value_limit:
+          description: The default maximum number of distinct tag value combinations allowed per metric.
+          example: 10000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+      required:
+        - id
+        - type
+        - include
+        - limit_exceeded_action
+        - value_limit
+        - enabled
+      type: object
+      x-pipeline-types: [metrics]
+    ObservabilityPipelineTagCardinalityLimitProcessorAction:
+      description: The action to take when the cardinality limit is exceeded.
+      enum:
+        - drop_tag
+        - drop_event
+      example: drop_tag
+      type: string
+      x-enum-varnames:
+        - DROP_TAG
+        - DROP_EVENT
+    ObservabilityPipelineTagCardinalityLimitProcessorPerMetricLimit:
+      description: A cardinality override applied to a specific metric.
+      properties:
+        limit_exceeded_action:
+          $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessorAction"
+        metric_name:
+          description: The name of the metric this override applies to.
+          example: "system.cpu.user"
+          type: string
+        mode:
+          $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessorPerMetricMode"
+        per_tag_limits:
+          description: A list of per-tag cardinality overrides that apply within this metric. Must be omitted when `mode` is `excluded`.
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessorPerTagLimit"
+          maxItems: 50
+          type: array
+        value_limit:
+          description: The maximum number of distinct tag value combinations allowed for this metric. Required when `mode` is `tracked`. Must be omitted when `mode` is `excluded`.
+          example: 10000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+      required:
+        - metric_name
+        - mode
+      type: object
+    ObservabilityPipelineTagCardinalityLimitProcessorPerMetricMode:
+      description: How the per-metric override is applied. `tracked` enforces a custom limit; `excluded` skips the metric entirely.
+      enum:
+        - tracked
+        - excluded
+      example: tracked
+      type: string
+      x-enum-varnames:
+        - TRACKED
+        - EXCLUDED
+    ObservabilityPipelineTagCardinalityLimitProcessorPerTagLimit:
+      description: A cardinality override for a specific tag key within a per-metric limit.
+      properties:
+        mode:
+          $ref: "#/components/schemas/ObservabilityPipelineTagCardinalityLimitProcessorPerTagMode"
+        tag_key:
+          description: The tag key this override applies to.
+          example: "host"
+          type: string
+        value_limit:
+          description: The maximum number of distinct values allowed for this tag. Required when `mode` is `limit_override`. Must be omitted when `mode` is `excluded`.
+          example: 5000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+      required:
+        - tag_key
+        - mode
+      type: object
+    ObservabilityPipelineTagCardinalityLimitProcessorPerTagMode:
+      description: How the per-tag override is applied. `limit_override` enforces a custom limit on the tag; `excluded` skips the tag from cardinality tracking.
+      enum:
+        - limit_override
+        - excluded
+      example: limit_override
+      type: string
+      x-enum-varnames:
+        - LIMIT_OVERRIDE
+        - EXCLUDED
+    ObservabilityPipelineTagCardinalityLimitProcessorType:
+      default: tag_cardinality_limit
+      description: The processor type. The value must be `tag_cardinality_limit`.
+      enum: [tag_cardinality_limit]
+      example: tag_cardinality_limit
+      type: string
+      x-enum-varnames:
+        - TAG_CARDINALITY_LIMIT
     ObservabilityPipelineThrottleProcessor:
       description: |-
         The `throttle` processor limits the number of events that pass through over a given time window.
