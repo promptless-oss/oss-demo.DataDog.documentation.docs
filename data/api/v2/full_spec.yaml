@@ -55318,7 +55318,7 @@ components:
           example: "fluent-source"
           type: string
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineFluentBitSourceType"
       required:
@@ -55350,7 +55350,7 @@ components:
           example: "fluent-source"
           type: string
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineFluentdSourceType"
       required:
@@ -55951,7 +55951,7 @@ components:
           example: HTTP_AUTH_PASSWORD
           type: string
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineHttpServerSourceType"
         username_key:
@@ -56265,7 +56265,7 @@ components:
           example: logstash-source
           type: string
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineLogstashSourceType"
       required:
@@ -56416,6 +56416,29 @@ components:
       oneOf:
         - $ref: "#/components/schemas/ObservabilityPipelineGeneratedMetricIncrementByOne"
         - $ref: "#/components/schemas/ObservabilityPipelineGeneratedMetricIncrementByField"
+    ObservabilityPipelineMtlsServerTls:
+      description: Configuration for enabling TLS encryption between the pipeline component and external connecting clients.
+      properties:
+        ca_file:
+          description: Path to the Certificate Authority (CA) file used to validate connecting clients' TLS certificates.
+          type: string
+        crt_file:
+          description: Path to the TLS server certificate file used to used to identify the pipeline component to connecting clients.
+          example: "/path/to/cert.crt"
+          type: string
+        key_file:
+          description: Path to the private key file associated with the TLS server certificate.
+          type: string
+        key_pass_key:
+          description: Name of the environment variable or secret that holds the passphrase for the private key file.
+          example: TLS_KEY_PASSPHRASE
+          type: string
+        verify_certificate:
+          description: When `true`, requires client connections to present a valid certificate, enabling mutual TLS authentication.
+          type: boolean
+      required:
+        - crt_file
+      type: object
     ObservabilityPipelineNewRelicDestination:
       description: |-
         The `new_relic` destination sends logs to the New Relic platform.
@@ -56755,7 +56778,7 @@ components:
           example: opentelemetry-source
           type: string
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineOpentelemetrySourceType"
       required:
@@ -57383,7 +57406,7 @@ components:
         mode:
           $ref: "#/components/schemas/ObservabilityPipelineSyslogSourceMode"
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineRsyslogSourceType"
       required:
@@ -57954,7 +57977,7 @@ components:
         mode:
           $ref: "#/components/schemas/ObservabilityPipelineSocketSourceMode"
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
           description: TLS configuration. Relevant only when `mode` is `tcp`.
         type:
           $ref: "#/components/schemas/ObservabilityPipelineSocketSourceType"
@@ -58279,7 +58302,7 @@ components:
           example: true
           type: boolean
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineSplunkHecSourceType"
         valid_tokens:
@@ -58341,7 +58364,7 @@ components:
           example: splunk-tcp-source
           type: string
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineSplunkTcpSourceType"
       required:
@@ -58535,7 +58558,7 @@ components:
         mode:
           $ref: "#/components/schemas/ObservabilityPipelineSyslogSourceMode"
         tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          $ref: "#/components/schemas/ObservabilityPipelineMtlsServerTls"
         type:
           $ref: "#/components/schemas/ObservabilityPipelineSyslogNgSourceType"
       required:
