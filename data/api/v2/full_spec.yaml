@@ -1495,6 +1495,13 @@ components:
       required: true
       schema:
         type: string
+    SampleLogGenerationContentPackID:
+      description: The identifier of the Cloud SIEM content pack to operate on (for example, `aws-cloudtrail`).
+      in: path
+      name: content_pack_id
+      required: true
+      schema:
+        type: string
     SchemaVersion:
       description: The schema version desired in the response.
       in: query
@@ -1531,6 +1538,13 @@ components:
       description: The ID of the critical asset.
       in: path
       name: critical_asset_id
+      required: true
+      schema:
+        type: string
+    SecurityMonitoringIntegrationConfigID:
+      description: The ID of the entity context sync configuration.
+      in: path
+      name: integration_config_id
       required: true
       schema:
         type: string
@@ -26940,6 +26954,101 @@ components:
             description: A tag string in the format key:value.
             type: string
           type: array
+      type: object
+    EntityContextEntity:
+      description: A single entity returned by the entity context endpoint.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/EntityContextEntityAttributes"
+        id:
+          description: The unique identifier of the entity.
+          example: user@example.com
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringEntityContextEntityType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    EntityContextEntityAttributes:
+      description: The attributes of an entity context entry, grouping all the historical revisions of the entity.
+      properties:
+        revisions:
+          description: The historical revisions of the entity, ordered chronologically.
+          items:
+            $ref: "#/components/schemas/EntityContextRevision"
+          type: array
+      required:
+        - revisions
+      type: object
+    EntityContextPage:
+      description: Pagination metadata for the entity context response.
+      properties:
+        next_token:
+          description: An opaque token to pass as `page_token` in a subsequent request to retrieve the next page of results. Empty when there are no more results.
+          example: ""
+          type: string
+      required:
+        - next_token
+      type: object
+    EntityContextResponse:
+      description: Response from the entity context endpoint, containing the matching entities and pagination metadata.
+      properties:
+        data:
+          description: The list of entities matching the query.
+          items:
+            $ref: "#/components/schemas/EntityContextEntity"
+          type: array
+        meta:
+          $ref: "#/components/schemas/EntityContextResponseMeta"
+      required:
+        - data
+        - meta
+      type: object
+    EntityContextResponseMeta:
+      description: Metadata returned alongside the entity context response.
+      properties:
+        page:
+          $ref: "#/components/schemas/EntityContextPage"
+        total_count:
+          description: The total number of entities matching the query, irrespective of pagination.
+          example: 1
+          format: int32
+          maximum: 2147483647
+          type: integer
+      required:
+        - page
+        - total_count
+      type: object
+    EntityContextRevision:
+      description: A single historical revision of an entity, including the time range during which the revision was observed.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/EntityContextRevisionAttributes"
+        first_seen_at:
+          description: The first time the entity was observed at this revision.
+          example: "2026-04-01T00:00:00Z"
+          format: date-time
+          type: string
+        last_seen_at:
+          description: The last time the entity was observed at this revision.
+          example: "2026-05-01T00:00:00Z"
+          format: date-time
+          type: string
+      required:
+        - attributes
+        - first_seen_at
+        - last_seen_at
+      type: object
+    EntityContextRevisionAttributes:
+      additionalProperties: {}
+      description: The set of attributes recorded for the entity at this revision. The keys depend on the kind of entity.
+      example:
+        display_name: Test User
+        emails:
+          - user@example.com
+        principal_id: user@example.com
       type: object
     EntityData:
       description: Entity data.
@@ -69547,6 +69656,272 @@ components:
           example: "report_id"
           type: string
       type: object
+    SampleLogGenerationBulkSubscriptionAttributes:
+      description: The attributes for creating sample log generation subscriptions for multiple content packs.
+      properties:
+        content_pack_ids:
+          description: The identifiers of the Cloud SIEM content packs to subscribe to. At most five content packs can be requested in a single call.
+          example:
+            - aws-cloudtrail
+          items:
+            description: A Cloud SIEM content pack identifier.
+            type: string
+          maxItems: 5
+          type: array
+        duration:
+          $ref: "#/components/schemas/SampleLogGenerationDuration"
+      required:
+        - content_pack_ids
+      type: object
+    SampleLogGenerationBulkSubscriptionData:
+      description: The bulk subscription request body.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SampleLogGenerationBulkSubscriptionAttributes"
+        type:
+          $ref: "#/components/schemas/SampleLogGenerationBulkSubscriptionRequestType"
+      required:
+        - type
+        - attributes
+      type: object
+    SampleLogGenerationBulkSubscriptionItemMeta:
+      description: Per-item status returned for a bulk subscription request.
+      properties:
+        error:
+          description: A description of the error encountered for this content pack, if the subscription could not be created.
+          example: content pack does not exist
+          type: string
+        status:
+          description: The HTTP status code that resulted from creating the subscription for this content pack.
+          example: 200
+          format: int32
+          maximum: 599
+          type: integer
+      required:
+        - status
+      type: object
+    SampleLogGenerationBulkSubscriptionRequest:
+      description: Request body to create sample log generation subscriptions for multiple content packs at once.
+      properties:
+        data:
+          $ref: "#/components/schemas/SampleLogGenerationBulkSubscriptionData"
+      required:
+        - data
+      type: object
+    SampleLogGenerationBulkSubscriptionRequestType:
+      default: bulk_subscription_requests
+      description: The type of the resource. The value should always be `bulk_subscription_requests`.
+      enum:
+        - bulk_subscription_requests
+      example: bulk_subscription_requests
+      type: string
+      x-enum-varnames:
+        - BULK_SUBSCRIPTION_REQUESTS
+    SampleLogGenerationBulkSubscriptionResponse:
+      description: Response containing the per-content-pack results of a bulk subscription request.
+      properties:
+        data:
+          description: The list of bulk subscription results, one per requested content pack.
+          items:
+            $ref: "#/components/schemas/SampleLogGenerationBulkSubscriptionResultItem"
+          type: array
+      required:
+        - data
+      type: object
+    SampleLogGenerationBulkSubscriptionResultItem:
+      description: A single result entry returned by the bulk subscription endpoint.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionAttributes"
+        id:
+          description: The unique identifier of the subscription, when one was created.
+          example: "123"
+          type: string
+        meta:
+          $ref: "#/components/schemas/SampleLogGenerationBulkSubscriptionItemMeta"
+        type:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionResourceType"
+      required:
+        - id
+        - type
+        - attributes
+        - meta
+      type: object
+    SampleLogGenerationDuration:
+      default: 3d
+      description: How long the subscription should remain active before expiring.
+      enum:
+        - 1h
+        - 1d
+        - 3d
+        - 7d
+      example: 3d
+      type: string
+      x-enum-varnames:
+        - ONE_HOUR
+        - ONE_DAY
+        - THREE_DAYS
+        - SEVEN_DAYS
+    SampleLogGenerationSubscriptionAttributes:
+      description: The attributes describing a sample log generation subscription.
+      properties:
+        content_pack_id:
+          description: The identifier of the Cloud SIEM content pack the subscription targets.
+          example: aws-cloudtrail
+          type: string
+        created_at:
+          description: The time at which the subscription was created.
+          example: "2026-05-08T20:02:13.77481Z"
+          format: date-time
+          type: string
+        expires_at:
+          description: The time at which the subscription expires and stops generating logs.
+          example: "2026-05-11T20:02:13.77481Z"
+          format: date-time
+          type: string
+        is_active:
+          description: Whether the subscription is currently active and generating logs.
+          example: true
+          type: boolean
+        status:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionStatus"
+      required:
+        - content_pack_id
+        - status
+        - is_active
+        - created_at
+        - expires_at
+      type: object
+    SampleLogGenerationSubscriptionCreateAttributes:
+      description: The attributes for creating a sample log generation subscription.
+      properties:
+        content_pack_id:
+          description: The identifier of the Cloud SIEM content pack to subscribe to.
+          example: aws-cloudtrail
+          type: string
+        duration:
+          $ref: "#/components/schemas/SampleLogGenerationDuration"
+      required:
+        - content_pack_id
+      type: object
+    SampleLogGenerationSubscriptionCreateData:
+      description: The subscription request body.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionCreateAttributes"
+        type:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionRequestType"
+      required:
+        - type
+        - attributes
+      type: object
+    SampleLogGenerationSubscriptionCreateRequest:
+      description: Request body to create a sample log generation subscription for a single content pack.
+      properties:
+        data:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionCreateData"
+      required:
+        - data
+      type: object
+    SampleLogGenerationSubscriptionData:
+      description: A sample log generation subscription.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionAttributes"
+        id:
+          description: The unique identifier of the subscription.
+          example: "789"
+          type: string
+        type:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SampleLogGenerationSubscriptionRequestType:
+      default: subscription_requests
+      description: The type of the resource. The value should always be `subscription_requests`.
+      enum:
+        - subscription_requests
+      example: subscription_requests
+      type: string
+      x-enum-varnames:
+        - SUBSCRIPTION_REQUESTS
+    SampleLogGenerationSubscriptionResourceType:
+      default: subscriptions
+      description: The type of the resource. The value should always be `subscriptions`.
+      enum:
+        - subscriptions
+      example: subscriptions
+      type: string
+      x-enum-varnames:
+        - SUBSCRIPTIONS
+    SampleLogGenerationSubscriptionResponse:
+      description: Response containing a single sample log generation subscription.
+      properties:
+        data:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionData"
+      required:
+        - data
+      type: object
+    SampleLogGenerationSubscriptionStatus:
+      description: The status of the subscription.
+      enum:
+        - subscribed
+        - renewed
+        - unsubscribed
+        - no_active_subscription
+        - not_available
+        - active
+        - expired
+      example: subscribed
+      type: string
+      x-enum-varnames:
+        - SUBSCRIBED
+        - RENEWED
+        - UNSUBSCRIBED
+        - NO_ACTIVE_SUBSCRIPTION
+        - NOT_AVAILABLE
+        - ACTIVE
+        - EXPIRED
+    SampleLogGenerationSubscriptionsResponse:
+      description: Response containing a list of sample log generation subscriptions.
+      properties:
+        data:
+          description: The list of sample log generation subscriptions.
+          items:
+            $ref: "#/components/schemas/SampleLogGenerationSubscriptionData"
+          type: array
+        meta:
+          $ref: "#/components/schemas/SampleLogGenerationSubscriptionsResponseMeta"
+      required:
+        - data
+        - meta
+      type: object
+    SampleLogGenerationSubscriptionsResponseMeta:
+      description: Metadata returned alongside a list of sample log generation subscriptions.
+      properties:
+        total_subscriptions:
+          description: The total number of subscriptions matching the request, irrespective of pagination.
+          example: 1
+          format: int32
+          maximum: 2147483647
+          type: integer
+      required:
+        - total_subscriptions
+      type: object
+    SampleLogGenerationSubscriptionsStatusFilter:
+      default: active
+      description: Filter that controls whether to return only active subscriptions or every subscription on record.
+      enum:
+        - active
+        - all
+      example: active
+      type: string
+      x-enum-varnames:
+        - ACTIVE
+        - ALL
     ScaRequest:
       description: The top-level request object for submitting a Software Composition Analysis (SCA) scan result.
       properties:
@@ -71927,6 +72302,112 @@ components:
       required:
         - data
       type: object
+    SecurityFilterVersion:
+      description: A snapshot of all security filters at a specific configuration version.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityFilterVersionAttributes"
+        id:
+          description: The identifier of the configuration version.
+          example: "1"
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityFilterVersionType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SecurityFilterVersionAttributes:
+      description: The attributes describing a single security filter configuration version.
+      properties:
+        date:
+          description: The Unix timestamp in milliseconds at which this configuration version was applied.
+          example: 1758177253469
+          format: int64
+          type: integer
+        filters:
+          description: The set of security filters at this configuration version.
+          items:
+            $ref: "#/components/schemas/SecurityFilterVersionEntry"
+          type: array
+        version:
+          description: The configuration version number.
+          example: 1
+          format: int32
+          maximum: 2147483647
+          type: integer
+      required:
+        - version
+        - date
+        - filters
+      type: object
+    SecurityFilterVersionEntry:
+      description: A single security filter as it existed at a given configuration version.
+      properties:
+        exclusion_filters:
+          description: The list of exclusion filters applied in this security filter.
+          items:
+            $ref: "#/components/schemas/SecurityFilterExclusionFilterResponse"
+          type: array
+        filtered_data_type:
+          $ref: "#/components/schemas/SecurityFilterFilteredDataType"
+        id:
+          description: The ID of the security filter.
+          example: "123"
+          type: string
+        is_builtin:
+          description: Whether the security filter is the built-in filter.
+          example: false
+          type: boolean
+        is_enabled:
+          description: Whether the security filter is enabled.
+          example: true
+          type: boolean
+        name:
+          description: The name of the security filter.
+          example: Test Security Filter
+          type: string
+        query:
+          description: The query of the security filter.
+          example: source:test
+          type: string
+        version:
+          description: The version of this security filter.
+          example: 1
+          format: int32
+          maximum: 2147483647
+          type: integer
+      required:
+        - id
+        - name
+        - version
+        - query
+        - is_enabled
+        - exclusion_filters
+        - filtered_data_type
+        - is_builtin
+      type: object
+    SecurityFilterVersionType:
+      default: security_filters_configuration
+      description: The type of the resource. The value should always be `security_filters_configuration`.
+      enum:
+        - security_filters_configuration
+      example: security_filters_configuration
+      type: string
+      x-enum-varnames:
+        - SECURITY_FILTERS_CONFIGURATION
+    SecurityFilterVersionsResponse:
+      description: Response containing the version history of security filters.
+      properties:
+        data:
+          description: A list of historical security filter configurations, ordered from the most recent to the oldest.
+          items:
+            $ref: "#/components/schemas/SecurityFilterVersion"
+          type: array
+      required:
+        - data
+      type: object
     SecurityFiltersResponse:
       description: All the available security filters objects.
       properties:
@@ -72463,6 +72944,13 @@ components:
             $ref: "#/components/schemas/SecurityMonitoringCriticalAsset"
           type: array
       type: object
+    SecurityMonitoringEntityContextEntityType:
+      default: entity
+      description: |-
+        The type of the entity. Reflects the underlying entity kind from the entity context store
+        (for example, `siem_entity_identity` for identities). Defaults to `entity` when the kind is unknown.
+      example: siem_entity_identity
+      type: string
     SecurityMonitoringFilter:
       description: The rule's suppression filter.
       properties:
@@ -72481,6 +72969,240 @@ components:
       x-enum-varnames:
         - REQUIRE
         - SUPPRESS
+    SecurityMonitoringIntegrationConfigAttributes:
+      description: The attributes of an entity context sync configuration as returned by the API.
+      properties:
+        created_at:
+          description: The time at which the entity context sync configuration was created.
+          example: "2026-05-01T12:00:00Z"
+          format: date-time
+          type: string
+        domain:
+          description: The domain associated with the external entity source (for example, the customer's identity provider domain).
+          example: siem-test.com
+          type: string
+        enabled:
+          description: Whether the sync is enabled and actively ingesting entities into Cloud SIEM.
+          example: true
+          type: boolean
+        integration_type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationType"
+        modified_at:
+          description: The time at which the entity context sync configuration was last modified.
+          example: "2026-05-01T12:00:00Z"
+          format: date-time
+          type: string
+        name:
+          description: The display name of the entity context sync configuration.
+          example: My GWS Integration
+          type: string
+        settings:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigSettings"
+        state:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigState"
+      required:
+        - enabled
+        - domain
+        - integration_type
+      type: object
+    SecurityMonitoringIntegrationConfigCreateAttributes:
+      description: The attributes of the entity context sync configuration to create.
+      properties:
+        domain:
+          description: The domain associated with the external entity source.
+          example: siem-test.com
+          type: string
+        integration_type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationType"
+        name:
+          description: The display name for the entity context sync configuration.
+          example: My GWS Integration
+          type: string
+        secrets:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigSecrets"
+        settings:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigSettings"
+      required:
+        - integration_type
+        - domain
+        - name
+        - secrets
+      type: object
+    SecurityMonitoringIntegrationConfigCreateData:
+      description: The entity context sync configuration to create.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigCreateAttributes"
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringIntegrationConfigCreateRequest:
+      description: Request body to create an entity context sync configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigCreateData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringIntegrationConfigData:
+      description: An entity context sync configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigAttributes"
+        id:
+          description: The unique identifier of the integration configuration.
+          example: 11111111-2222-3333-4444-555555555555
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringIntegrationConfigResourceType:
+      default: integration_config
+      description: The type of the resource. The value should always be `integration_config`.
+      enum:
+        - integration_config
+      example: integration_config
+      type: string
+      x-enum-varnames:
+        - INTEGRATION_CONFIG
+    SecurityMonitoringIntegrationConfigResponse:
+      description: Response containing a single entity context sync configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringIntegrationConfigSecrets:
+      additionalProperties: {}
+      description: The secrets used to authenticate against the external entity source. The accepted keys depend on the source type (for example, `admin_email` for Google Workspace).
+      example:
+        admin_email: test@example.com
+      type: object
+    SecurityMonitoringIntegrationConfigSettings:
+      additionalProperties: {}
+      description: Free-form, non-sensitive settings for the entity context sync. The accepted keys depend on the source type.
+      example:
+        setting1: value1
+      type: object
+    SecurityMonitoringIntegrationConfigState:
+      description: The state of the credentials configured on the entity context sync.
+      enum:
+        - valid
+        - invalid
+        - initializing
+      example: valid
+      type: string
+      x-enum-varnames:
+        - VALID
+        - INVALID
+        - INITIALIZING
+    SecurityMonitoringIntegrationConfigUpdateAttributes:
+      description: Fields to update on the entity context sync configuration. All fields are optional.
+      properties:
+        domain:
+          description: The new domain associated with the external entity source.
+          example: siem-test.com
+          type: string
+        enabled:
+          description: Whether the entity context sync should be enabled.
+          example: true
+          type: boolean
+        integration_type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationType"
+        name:
+          description: The new display name for the entity context sync configuration.
+          example: My GWS Integration (renamed)
+          type: string
+        secrets:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigSecrets"
+        settings:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigSettings"
+      type: object
+    SecurityMonitoringIntegrationConfigUpdateData:
+      description: The entity context sync configuration fields to update.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringIntegrationConfigUpdateRequest:
+      description: Request body to update an entity context sync configuration. Supports partial updates.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigUpdateData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringIntegrationConfigsResponse:
+      description: Response containing a list of entity context sync configurations.
+      properties:
+        data:
+          description: The list of integration configurations.
+          items:
+            $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigData"
+          type: array
+      required:
+        - data
+      type: object
+    SecurityMonitoringIntegrationCredentialsValidateAttributes:
+      description: The credentials to validate against the external entity source.
+      properties:
+        domain:
+          description: The domain associated with the external entity source.
+          example: siem-test.com
+          type: string
+        integration_type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationType"
+        secrets:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigSecrets"
+      required:
+        - integration_type
+        - domain
+        - secrets
+      type: object
+    SecurityMonitoringIntegrationCredentialsValidateData:
+      description: The credentials to validate.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationCredentialsValidateAttributes"
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigResourceType"
+      required:
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringIntegrationCredentialsValidateRequest:
+      description: Request body to validate credentials against an external entity source before creating a sync configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringIntegrationCredentialsValidateData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringIntegrationType:
+      description: The type of external source that provides entities to Cloud SIEM.
+      enum:
+        - GOOGLE_WORKSPACE
+        - OKTA
+        - ENTRA_ID
+      example: GOOGLE_WORKSPACE
+      type: string
+      x-enum-varnames:
+        - GOOGLE_WORKSPACE
+        - OKTA
+        - ENTRA_ID
     SecurityMonitoringListRulesResponse:
       description: List of rules.
       properties:
@@ -77902,6 +78624,60 @@ components:
       description: Included data for shift operations.
       oneOf:
         - $ref: "#/components/schemas/ScheduleUser"
+    SignalEntitiesAttributes:
+      description: Attributes containing the entities related to the signal.
+      properties:
+        identities:
+          description: The identity entities related to the signal. Each item is a free-form object describing an identity (for example, a user or principal).
+          example:
+            - display_name: Test User
+              principal_id: user@example.com
+          items:
+            $ref: "#/components/schemas/SignalEntityIdentity"
+          type: array
+      required:
+        - identities
+      type: object
+    SignalEntitiesData:
+      description: Entities related to a security signal.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SignalEntitiesAttributes"
+        id:
+          description: The signal ID the entities are associated with.
+          example: AAAAAWgN8Xwgr1vKDQAAAABBV2dOOFh3ZzZobm1mWXJFYTR0OA
+          type: string
+        type:
+          $ref: "#/components/schemas/SignalEntitiesType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SignalEntitiesResponse:
+      description: Response containing entities related to a security signal.
+      properties:
+        data:
+          $ref: "#/components/schemas/SignalEntitiesData"
+      required:
+        - data
+      type: object
+    SignalEntitiesType:
+      default: entities
+      description: The type of the resource. The value should always be `entities`.
+      enum:
+        - entities
+      example: entities
+      type: string
+      x-enum-varnames:
+        - ENTITIES
+    SignalEntityIdentity:
+      additionalProperties: {}
+      description: An identity entity related to a signal. The set of attributes is dynamic and depends on the source providing the identity.
+      example:
+        display_name: Test User
+        principal_id: user@example.com
+      type: object
     SimpleMonitorUserTemplate:
       description: A simplified version of a monitor user template.
       properties:
@@ -92192,6 +92968,10 @@ components:
             incident_settings_read: View Incident Settings.
             incident_settings_write: Configure Incident Settings.
             incident_write: Create, view, and manage incidents in Datadog.
+            integrations_read: View configured integrations and their settings.
+            logs_modify_indexes: Modify log indexes, filters, exclusion filters, and configurations.
+            logs_read_index_data: Read indexed log data.
+            manage_integrations: Install, uninstall, and configure integrations.
             metrics_read: View custom metrics.
             monitors_downtime: Set downtimes to suppress alerts from any monitor in an organization. Mute and unmute monitors. The ability to write monitors is not required to set downtimes.
             monitors_read: View monitors.
@@ -92212,6 +92992,7 @@ components:
             security_monitoring_suppressions_write: Write Rule Suppressions.
             security_pipelines_read: View Security Pipelines.
             security_pipelines_write: Create, edit, and delete CSM Security Pipelines.
+            siem_entities_read: View Cloud SIEM entities.
             slos_corrections: Apply, edit, and delete SLO status corrections. A user with this permission can make status corrections, even if they do not have permission to edit those SLOs.
             slos_read: View SLOs and status corrections.
             slos_write: Create, edit, and delete SLOs.
@@ -147195,6 +147976,362 @@ paths:
       tags:
         - Security Monitoring
       x-menu-order: 45
+  /api/v2/security_monitoring/configuration/integration_config:
+    get:
+      description: |-
+        List the entity context sync configurations for Cloud SIEM. Each configuration connects Cloud SIEM
+        to an external source that provides entities (for example, users from an identity provider) for use
+        in signals and the entity explorer.
+      operationId: ListSecurityMonitoringIntegrationConfigs
+      parameters:
+        - description: Filter the entity context sync configurations by source type.
+          in: query
+          name: filter[integration_type]
+          required: false
+          schema:
+            $ref: "#/components/schemas/SecurityMonitoringIntegrationType"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          created_at: "2026-05-01T12:00:00Z"
+                          domain: siem-test.com
+                          enabled: true
+                          integration_type: GOOGLE_WORKSPACE
+                          modified_at: "2026-05-01T12:00:00Z"
+                          name: My GWS Integration
+                          settings:
+                            setting1: value1
+                          state: valid
+                        id: 11111111-2222-3333-4444-555555555555
+                        type: integration_config
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigsResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - integrations_read
+      summary: List entity context sync configurations
+      tags: ["Security Monitoring"]
+      x-menu-order: 100
+      x-permission:
+        operator: OR
+        permissions:
+          - integrations_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: |-
+        Create a new entity context sync configuration so Cloud SIEM can ingest entities from an external
+        source. The credentials provided in `secrets` are validated against the source before the configuration
+        is stored and never returned in subsequent responses.
+      operationId: CreateSecurityMonitoringIntegrationConfig
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      domain: siem-test.com
+                      integration_type: GOOGLE_WORKSPACE
+                      name: My GWS Integration
+                      secrets:
+                        admin_email: test@example.com
+                      settings:
+                        setting1: value1
+                    type: integration_config
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigCreateRequest"
+        description: The definition of the new integration configuration.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2026-05-01T12:00:00Z"
+                        domain: siem-test.com
+                        enabled: true
+                        integration_type: GOOGLE_WORKSPACE
+                        modified_at: "2026-05-01T12:00:00Z"
+                        name: My GWS Integration
+                        settings:
+                          setting1: value1
+                      id: 11111111-2222-3333-4444-555555555555
+                      type: integration_config
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - manage_integrations
+      summary: Create an entity context sync configuration
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 101
+      x-permission:
+        operator: OR
+        permissions:
+          - manage_integrations
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/configuration/integration_config/validate:
+    post:
+      description: |-
+        Validate a set of credentials against the external entity source before creating a sync configuration.
+        Returns a 200 status code if the credentials are valid.
+      operationId: ValidateSecurityMonitoringIntegrationCredentials
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      domain: siem-test.com
+                      integration_type: GOOGLE_WORKSPACE
+                      secrets:
+                        admin_email: test@example.com
+                    type: integration_config
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringIntegrationCredentialsValidateRequest"
+        description: The credentials to validate.
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - integrations_read
+      summary: Validate entity context sync credentials
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 105
+      x-permission:
+        operator: OR
+        permissions:
+          - integrations_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/configuration/integration_config/{integration_config_id}:
+    delete:
+      description: |-
+        Delete an entity context sync configuration. Cloud SIEM stops ingesting entities from this source,
+        and the credentials stored for the configuration are removed from the secrets store.
+      operationId: DeleteSecurityMonitoringIntegrationConfig
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringIntegrationConfigID"
+      responses:
+        "204":
+          description: OK
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - manage_integrations
+      summary: Delete an entity context sync configuration
+      tags: ["Security Monitoring"]
+      x-menu-order: 104
+      x-permission:
+        operator: OR
+        permissions:
+          - manage_integrations
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Get the details of a specific entity context sync configuration.
+      operationId: GetSecurityMonitoringIntegrationConfig
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringIntegrationConfigID"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2026-05-01T12:00:00Z"
+                        domain: siem-test.com
+                        enabled: true
+                        integration_type: GOOGLE_WORKSPACE
+                        modified_at: "2026-05-01T12:00:00Z"
+                        name: My GWS Integration
+                        settings:
+                          setting1: value1
+                        state: valid
+                      id: 11111111-2222-3333-4444-555555555555
+                      type: integration_config
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - integrations_read
+      summary: Get an entity context sync configuration
+      tags: ["Security Monitoring"]
+      x-menu-order: 102
+      x-permission:
+        operator: OR
+        permissions:
+          - integrations_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    patch:
+      description: Update an existing entity context sync configuration. Supports partial updates; only the fields provided in the request body are modified.
+      operationId: UpdateSecurityMonitoringIntegrationConfig
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringIntegrationConfigID"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      enabled: false
+                      name: My GWS Integration (renamed)
+                    type: integration_config
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigUpdateRequest"
+        description: The fields to update on the integration configuration.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2026-05-01T12:00:00Z"
+                        domain: siem-test.com
+                        enabled: false
+                        integration_type: GOOGLE_WORKSPACE
+                        modified_at: "2026-05-08T12:00:00Z"
+                        name: My GWS Integration (renamed)
+                        settings:
+                          setting1: value1
+                        state: valid
+                      id: 11111111-2222-3333-4444-555555555555
+                      type: integration_config
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringIntegrationConfigResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - manage_integrations
+      summary: Update an entity context sync configuration
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 103
+      x-permission:
+        operator: OR
+        permissions:
+          - manage_integrations
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/configuration/integration_config/{integration_config_id}/validate:
+    post:
+      description: |-
+        Validate the credentials currently stored on an existing entity context sync configuration.
+        Returns a 200 status code if the credentials are still valid against the external entity source.
+      operationId: ValidateSecurityMonitoringIntegrationConfig
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringIntegrationConfigID"
+      responses:
+        "200":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - integrations_read
+      summary: Validate an entity context sync configuration
+      tags: ["Security Monitoring"]
+      x-menu-order: 106
+      x-permission:
+        operator: OR
+        permissions:
+          - integrations_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/configuration/security_filters:
     get:
       description: Get the list of configured security filters with their definitions.
@@ -147309,6 +148446,54 @@ paths:
         operator: OR
         permissions:
           - security_monitoring_filters_write
+  /api/v2/security_monitoring/configuration/security_filters/versions:
+    get:
+      description: |-
+        Get the configured security filters at each historical version of the configuration.
+        Each entry in the response represents the set of all security filters at a given version,
+        ordered from the most recent version to the oldest.
+      operationId: ListSecurityFilterVersions
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          date: 1758177253469
+                          filters:
+                            - exclusion_filters: []
+                              filtered_data_type: logs
+                              id: "123"
+                              is_builtin: false
+                              is_enabled: true
+                              name: Test Security Filter
+                              query: source:test
+                              version: 1
+                          version: 1
+                        id: "1"
+                        type: security_filters_configuration
+              schema:
+                $ref: "#/components/schemas/SecurityFilterVersionsResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_read
+      summary: Get the version history of security filters
+      tags: ["Security Monitoring"]
+      x-menu-order: 99
+      x-permission:
+        operator: OR
+        permissions:
+          - security_monitoring_filters_read
   /api/v2/security_monitoring/configuration/security_filters/{security_filter_id}:
     delete:
       description: Delete a specific security filter.
@@ -148101,6 +149286,114 @@ paths:
         permissions:
           - security_monitoring_filters_write
           - logs_modify_indexes
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/entity_context:
+    get:
+      description: |-
+        Search the Cloud SIEM entity context store for entities that match a query, and return the historical
+        revisions of each entity in the requested time range. The endpoint can either return revisions across an
+        interval (`from` / `to`) or the snapshot of each entity at a single point in time (`as_of`); the two modes
+        are mutually exclusive.
+      operationId: GetEntityContext
+      parameters:
+        - description: A free-text query (for example, an email address or principal ID) used to filter the entities returned.
+          example: user@example.com
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+        - description: |-
+            The start of the time range to query, as an RFC3339 timestamp or a relative time (for example, `now-7d`).
+            Defaults to `now-7d`. Ignored when `as_of` is set.
+          in: query
+          name: from
+          required: false
+          schema:
+            default: now-7d
+            example: now-7d
+            type: string
+        - description: |-
+            The end of the time range to query, as an RFC3339 timestamp or a relative time (for example, `now`).
+            Defaults to `now`. Ignored when `as_of` is set.
+          in: query
+          name: to
+          required: false
+          schema:
+            default: now
+            example: now
+            type: string
+        - description: |-
+            A point in time at which to query the entity revisions, as an RFC3339 timestamp, a Unix timestamp
+            (in seconds), or a relative time (for example, `now-1d`). When set, `from` and `to` are ignored.
+            Cannot be combined with custom `from` / `to` values.
+          example: now-1d
+          in: query
+          name: as_of
+          required: false
+          schema:
+            type: string
+        - description: The maximum number of entities to return.
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 250
+            example: 100
+            format: int64
+            type: integer
+        - description: An opaque token used to fetch the next page of results, as returned in `meta.page.next_token` of a previous response.
+          in: query
+          name: page_token
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          revisions:
+                            - attributes:
+                                display_name: Test User
+                                emails:
+                                  - user@example.com
+                                principal_id: user@example.com
+                              first_seen_at: "2026-04-01T00:00:00Z"
+                              last_seen_at: "2026-05-01T00:00:00Z"
+                        id: user@example.com
+                        type: siem_entity_identity
+                    meta:
+                      page:
+                        next_token: ""
+                      total_count: 1
+              schema:
+                $ref: "#/components/schemas/EntityContextResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - siem_entities_read
+      summary: Get entity context
+      tags: ["Security Monitoring"]
+      x-menu-order: 111
+      x-permission:
+        operator: OR
+        permissions:
+          - siem_entities_read
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -148992,6 +150285,286 @@ paths:
           - security_monitoring_rules_read
       x-unstable: |-
         **Note**: This endpoint is in beta and may be subject to changes.
+  /api/v2/security_monitoring/sample_log_generation/subscriptions:
+    get:
+      description: |-
+        Get the sample log generation subscriptions for the organization.
+        Sample log generation injects representative example logs for a given Cloud SIEM content pack into the Logs platform,
+        which can be used to test detection rules without onboarding the underlying integration first.
+
+        **Availability**: this endpoint is restricted to Cloud SIEM trial organizations on an eligible
+        pricing model. Other organizations receive a `403 Forbidden` (non-trial orgs) or a `400 Bad Request`
+        (feature disabled), and legacy pricing tiers receive a response with `status: not_available`.
+      operationId: ListSampleLogGenerationSubscriptions
+      parameters:
+        - description: |-
+            Filter the subscriptions by status. Use `active` to return only currently active
+            subscriptions, or `all` to return every subscription including expired ones.
+            Ignored when `start_timestamp` is provided. Defaults to `active`.
+          in: query
+          name: status
+          required: false
+          schema:
+            $ref: "#/components/schemas/SampleLogGenerationSubscriptionsStatusFilter"
+        - description: |-
+            The start of the time range, as an RFC3339 timestamp. When provided, the response includes
+            every subscription that was active at any point in `[start_timestamp, end_timestamp]`,
+            and the `status` filter is ignored.
+          example: "2026-05-01T00:00:00Z"
+          in: query
+          name: start_timestamp
+          required: false
+          schema:
+            format: date-time
+            type: string
+        - description: |-
+            The end of the time range, as an RFC3339 timestamp. Ignored unless `start_timestamp` is set.
+            Defaults to the current time when `start_timestamp` is provided.
+          example: "2026-05-08T00:00:00Z"
+          in: query
+          name: end_timestamp
+          required: false
+          schema:
+            format: date-time
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          content_pack_id: aws-cloudtrail
+                          created_at: "2026-05-08T20:02:13.77481Z"
+                          expires_at: "2026-05-11T20:02:13.77481Z"
+                          is_active: true
+                          status: subscribed
+                        id: "999"
+                        type: subscriptions
+                    meta:
+                      total_subscriptions: 1
+              schema:
+                $ref: "#/components/schemas/SampleLogGenerationSubscriptionsResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_read
+            - logs_read_index_data
+      summary: Get sample log generation subscriptions
+      tags: ["Security Monitoring"]
+      x-menu-order: 107
+      x-permission:
+        operator: OR
+        permissions:
+          - security_monitoring_filters_read
+          - logs_read_index_data
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: |-
+        Subscribe to sample log generation for a Cloud SIEM content pack. Sample logs for the
+        requested content pack are injected into the Logs platform for the duration of the subscription,
+        so detection rules can be exercised without onboarding the underlying integration first.
+
+        **Availability**: this endpoint is restricted to Cloud SIEM trial organizations on an
+        eligible pricing model. Non-trial orgs receive `403 Forbidden`, the feature flag may also reject
+        requests with `400 Bad Request`, and legacy pricing tiers receive a response with `status: not_available`.
+      operationId: CreateSampleLogGenerationSubscription
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      content_pack_id: aws-cloudtrail
+                      duration: 3d
+                    type: subscription_requests
+            schema:
+              $ref: "#/components/schemas/SampleLogGenerationSubscriptionCreateRequest"
+        description: The content pack to subscribe to and the desired duration of the subscription.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        content_pack_id: aws-cloudtrail
+                        created_at: "2026-05-08T20:02:13.77481Z"
+                        expires_at: "2026-05-11T20:02:13.77481Z"
+                        is_active: true
+                        status: subscribed
+                      id: "789"
+                      type: subscriptions
+              schema:
+                $ref: "#/components/schemas/SampleLogGenerationSubscriptionResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_write
+            - logs_modify_indexes
+      summary: Subscribe to sample log generation
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 108
+      x-permission:
+        operator: OR
+        permissions:
+          - security_monitoring_filters_write
+          - logs_modify_indexes
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/sample_log_generation/subscriptions/bulk:
+    post:
+      description: |-
+        Subscribe to sample log generation for multiple Cloud SIEM content packs in a single call.
+        Each requested content pack is processed independently; the response includes a per-item
+        status so partial successes can be inspected.
+
+        **Availability**: this endpoint is restricted to Cloud SIEM trial organizations on an
+        eligible pricing model. Non-trial orgs receive `403 Forbidden`, the feature flag may also reject
+        requests with `400 Bad Request`, and legacy pricing tiers receive per-item responses with `status: not_available`.
+      operationId: BulkCreateSampleLogGenerationSubscriptions
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      content_pack_ids:
+                        - aws-cloudtrail
+                      duration: 3d
+                    type: bulk_subscription_requests
+            schema:
+              $ref: "#/components/schemas/SampleLogGenerationBulkSubscriptionRequest"
+        description: The content packs to subscribe to and the desired duration of the subscriptions.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          content_pack_id: aws-cloudtrail
+                          created_at: "2026-05-08T20:02:13.655716Z"
+                          expires_at: "2026-05-11T20:02:13.655716Z"
+                          is_active: true
+                          status: subscribed
+                        id: "123"
+                        meta:
+                          status: 200
+                        type: subscriptions
+              schema:
+                $ref: "#/components/schemas/SampleLogGenerationBulkSubscriptionResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_write
+            - logs_modify_indexes
+      summary: Bulk subscribe to sample log generation
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 109
+      x-permission:
+        operator: OR
+        permissions:
+          - security_monitoring_filters_write
+          - logs_modify_indexes
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/sample_log_generation/subscriptions/{content_pack_id}:
+    delete:
+      description: |-
+        Unsubscribe from sample log generation for a Cloud SIEM content pack.
+        After unsubscribing, no more sample logs are generated for the requested content pack.
+
+        **Availability**: this endpoint is restricted to Cloud SIEM trial organizations on an
+        eligible pricing model. Non-trial orgs receive `403 Forbidden`, the feature flag may also reject
+        requests with `400 Bad Request`, and legacy pricing tiers receive a response with `status: not_available`.
+      operationId: DeleteSampleLogGenerationSubscription
+      parameters:
+        - $ref: "#/components/parameters/SampleLogGenerationContentPackID"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        content_pack_id: aws-cloudtrail
+                        created_at: "2026-05-08T20:02:13.77481Z"
+                        expires_at: "2026-05-08T20:30:00Z"
+                        is_active: false
+                        status: unsubscribed
+                      id: "789"
+                      type: subscriptions
+              schema:
+                $ref: "#/components/schemas/SampleLogGenerationSubscriptionResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_filters_write
+            - logs_modify_indexes
+      summary: Unsubscribe from sample log generation
+      tags: ["Security Monitoring"]
+      x-menu-order: 110
+      x-permission:
+        operator: OR
+        permissions:
+          - security_monitoring_filters_write
+          - logs_modify_indexes
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/signals:
     get:
       description: |-
@@ -149419,6 +150992,62 @@ paths:
         operator: OR
         permissions:
           - security_monitoring_signals_write
+  /api/v2/security_monitoring/signals/{signal_id}/entities:
+    get:
+      description: Get the list of entities related to a security signal, captured at the signal's timestamp.
+      operationId: GetSignalEntities
+      parameters:
+        - $ref: "#/components/parameters/SignalID"
+        - description: The maximum number of entities to return.
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 10
+            example: 10
+            format: int32
+            maximum: 1000
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        identities:
+                          - display_name: Test User
+                            principal_id: user@example.com
+                      id: AAAAAWgN8Xwgr1vKDQAAAABBV2dOOFh3ZzZobm1mWXJFYTR0OA
+                      type: entities
+              schema:
+                $ref: "#/components/schemas/SignalEntitiesResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_signals_read
+      summary: Get entities related to a signal
+      tags: ["Security Monitoring"]
+      x-menu-order: 98
+      x-permission:
+        operator: OR
+        permissions:
+          - security_monitoring_signals_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security_monitoring/signals/{signal_id}/incidents:
     patch:
       description: |-
