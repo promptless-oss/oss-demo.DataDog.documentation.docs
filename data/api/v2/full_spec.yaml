@@ -53978,6 +53978,8 @@ components:
           description: S3 bucket name.
           example: "my-bucket"
           type: string
+        buffer:
+          $ref: "#/components/schemas/ObservabilityPipelineBufferOptions"
         compression:
           $ref: "#/components/schemas/ObservabilityPipelineAmazonS3GenericCompression"
         encoding:
@@ -54227,6 +54229,8 @@ components:
 
         **Supported pipeline types:** logs
       properties:
+        buffer:
+          $ref: "#/components/schemas/ObservabilityPipelineBufferOptions"
         endpoint_url_key:
           description: Name of the environment variable or secret that holds the CloudPrem endpoint URL.
           example: CLOUDPREM_ENDPOINT_URL
@@ -55877,6 +55881,8 @@ components:
       properties:
         auth_strategy:
           $ref: "#/components/schemas/ObservabilityPipelineHttpClientDestinationAuthStrategy"
+        buffer:
+          $ref: "#/components/schemas/ObservabilityPipelineBufferOptions"
         compression:
           $ref: "#/components/schemas/ObservabilityPipelineHttpClientDestinationCompression"
         custom_key:
@@ -56161,6 +56167,8 @@ components:
           description: Name of the environment variable or secret that holds the Kafka bootstrap servers list.
           example: KAFKA_BOOTSTRAP_SERVERS
           type: string
+        buffer:
+          $ref: "#/components/schemas/ObservabilityPipelineBufferOptions"
         compression:
           $ref: "#/components/schemas/ObservabilityPipelineKafkaDestinationCompression"
         encoding:
