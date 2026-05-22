@@ -42108,11 +42108,109 @@ components:
           format: int64
           type: integer
       type: object
+    LLMObsAnnotatedInteractionByTraceItem:
+      description: An annotated interaction returned by the cross-queue lookup, including the source queue metadata.
+      properties:
+        annotations:
+          description: List of annotations for this interaction.
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotationItem"
+          type: array
+        content_id:
+          description: Upstream entity identifier (trace ID, session ID, or deterministic display_block ID).
+          example: "trace-abc-123"
+          type: string
+        created_at:
+          description: Timestamp when the interaction was added to the queue.
+          example: "2025-06-01T12:00:00Z"
+          format: date-time
+          type: string
+        display_block:
+          $ref: "#/components/schemas/LLMObsContentBlocks"
+        id:
+          description: Unique identifier of the interaction.
+          example: "interaction-456"
+          type: string
+        modified_at:
+          description: Timestamp when the interaction was last updated.
+          example: "2025-06-01T12:00:00Z"
+          format: date-time
+          type: string
+        queue_id:
+          description: Identifier of the annotation queue this interaction belongs to.
+          example: "queue-uuid-001"
+          type: string
+        queue_name:
+          description: Name of the annotation queue this interaction belongs to.
+          example: "My Annotation Queue"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsAnyInteractionType"
+      required:
+        - id
+        - type
+        - content_id
+        - created_at
+        - modified_at
+        - queue_id
+        - queue_name
+        - annotations
+      type: object
     LLMObsAnnotatedInteractionItem:
       description: An interaction with its associated annotations.
       oneOf:
         - $ref: "#/components/schemas/LLMObsTraceAnnotatedInteractionItem"
         - $ref: "#/components/schemas/LLMObsDisplayBlockAnnotatedInteractionItem"
+    LLMObsAnnotatedInteractionsByTraceDataAttributesResponse:
+      description: Attributes of the cross-queue annotated interactions response.
+      properties:
+        annotated_interactions:
+          description: List of annotated interactions across all queues for the requested content IDs.
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotatedInteractionByTraceItem"
+          type: array
+        total_count:
+          description: Total number of annotated interactions matching the query.
+          example: 1
+          format: int32
+          maximum: 2147483647
+          type: integer
+      required:
+        - annotated_interactions
+        - total_count
+      type: object
+    LLMObsAnnotatedInteractionsByTraceDataResponse:
+      description: Data object for the cross-queue annotated interactions response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsAnnotatedInteractionsByTraceDataAttributesResponse"
+        id:
+          description: Opaque identifier for the response object.
+          example: "trace-query"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsAnnotatedInteractionsByTraceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsAnnotatedInteractionsByTraceResponse:
+      description: Response containing annotated interactions across all queues for the requested content IDs.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsAnnotatedInteractionsByTraceDataResponse"
+      required:
+        - data
+      type: object
+    LLMObsAnnotatedInteractionsByTraceType:
+      description: Resource type for cross-queue annotated interactions lookup.
+      enum:
+        - annotated_interactions_by_trace
+      example: annotated_interactions_by_trace
+      type: string
+      x-enum-varnames:
+        - ANNOTATED_INTERACTIONS_BY_TRACE
     LLMObsAnnotatedInteractionsDataAttributesResponse:
       description: Attributes containing the list of annotated interactions.
       properties:
@@ -42582,6 +42680,20 @@ components:
         - ENABLED
         - DISABLED
         - ADAPTIVE
+    LLMObsAnyInteractionType:
+      description: Type of an annotated interaction.
+      enum:
+        - trace
+        - experiment_trace
+        - session
+        - display_block
+      example: trace
+      type: string
+      x-enum-varnames:
+        - TRACE
+        - EXPERIMENT_TRACE
+        - SESSION
+        - DISPLAY_BLOCK
     LLMObsAzureOpenAIMetadata:
       description: Azure OpenAI-specific metadata for an integration account or inference request.
       properties:
@@ -123602,6 +123714,105 @@ paths:
       tags:
         - LLM Observability
       x-menu-order: 36
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/annotated-interactions:
+    get:
+      description: Returns annotated interactions across all annotation queues for the given content IDs. Results include queue metadata (ID and name) for each interaction.
+      operationId: GetLLMObsAnnotatedInteractionsByTraceIDs
+      parameters:
+        - description: One or more content IDs to retrieve annotated interactions for. At least one is required.
+          in: query
+          name: contentIds
+          required: true
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Pagination offset. Must be >= 0. Defaults to 0.
+          in: query
+          name: offset
+          schema:
+            default: 0
+            format: int32
+            maximum: 2147483647
+            minimum: 0
+            type: integer
+        - description: Maximum number of results to return. Must be > 0. Defaults to 100.
+          in: query
+          name: limit
+          schema:
+            default: 100
+            format: int32
+            maximum: 2147483647
+            minimum: 1
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        annotated_interactions:
+                          - annotations:
+                              - created_at: "0001-01-01T00:00:00Z"
+                                created_by: "00000000-0000-0000-0000-000000000002"
+                                id: annotation-789
+                                interaction_id: interaction-456
+                                label_values:
+                                  quality: good
+                                modified_at: "0001-01-01T00:00:00Z"
+                                modified_by: "00000000-0000-0000-0000-000000000002"
+                            content_id: trace-abc-123
+                            created_at: "2025-06-01T12:00:00Z"
+                            id: interaction-456
+                            modified_at: "2025-06-01T12:00:00Z"
+                            queue_id: queue-uuid-001
+                            queue_name: My Annotation Queue
+                            type: trace
+                        total_count: 1
+                      id: trace-query
+                      type: annotated_interactions_by_trace
+              schema:
+                $ref: "#/components/schemas/LLMObsAnnotatedInteractionsByTraceResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get annotated interactions by content IDs
+      tags:
+        - LLM Observability
+      x-menu-order: 40
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
