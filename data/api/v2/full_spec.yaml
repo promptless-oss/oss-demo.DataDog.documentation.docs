@@ -43584,6 +43584,78 @@ components:
         - type
         - attributes
       type: object
+    LLMObsDatasetDraftStateData:
+      description: Data object for an LLM Observability dataset draft state.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsDatasetDraftStateDataAttributes"
+        id:
+          description: Unique identifier of the dataset draft state. Matches the dataset ID.
+          example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsDatasetDraftStateType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsDatasetDraftStateDataAttributes:
+      description: Attributes of an LLM Observability dataset draft state.
+      properties:
+        drafting_since:
+          description: Timestamp when the dataset draft session started.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        user:
+          $ref: "#/components/schemas/LLMObsDatasetDraftStateUser"
+      required:
+        - user
+        - drafting_since
+      type: object
+    LLMObsDatasetDraftStateResponse:
+      description: Response containing the draft state of an LLM Observability dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsDatasetDraftStateData"
+      required:
+        - data
+      type: object
+    LLMObsDatasetDraftStateType:
+      description: Resource type of an LLM Observability dataset draft state.
+      enum:
+        - draft_state_data
+      example: draft_state_data
+      type: string
+      x-enum-varnames:
+        - DRAFT_STATE_DATA
+    LLMObsDatasetDraftStateUser:
+      description: User information associated with a dataset draft state.
+      properties:
+        email:
+          description: Email address of the user.
+          example: "jane.doe@example.com"
+          type: string
+        handle:
+          description: Handle of the user.
+          example: "jane.doe@example.com"
+          type: string
+        icon:
+          description: Icon for the user.
+          example: ""
+          type: string
+        id:
+          description: Unique identifier of the user holding the draft lock.
+          example: "00000000-0000-0000-0000-000000000010"
+          type: string
+        name:
+          description: Display name of the user.
+          example: "Jane Doe"
+          type: string
+      required:
+        - id
+      type: object
     LLMObsDatasetRecordDataResponse:
       description: A single LLM Observability dataset record.
       properties:
@@ -43810,6 +43882,67 @@ components:
       required:
         - data
       type: object
+    LLMObsDatasetVersionData:
+      description: Data object for an LLM Observability dataset version.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsDatasetVersionDataAttributes"
+        id:
+          description: Unique identifier of the dataset version.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsDatasetVersionType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsDatasetVersionDataAttributes:
+      description: Attributes of an LLM Observability dataset version.
+      properties:
+        dataset_id:
+          description: Unique identifier of the dataset this version belongs to.
+          example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
+          type: string
+        last_used:
+          description: Timestamp when this dataset version was last referenced. Null if the version has never been used.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          nullable: true
+          type: string
+        version_number:
+          description: Sequential version number for this dataset version.
+          example: 1
+          format: int32
+          maximum: 2147483647
+          type: integer
+      required:
+        - dataset_id
+        - version_number
+        - last_used
+      type: object
+    LLMObsDatasetVersionType:
+      description: Resource type of an LLM Observability dataset version.
+      enum:
+        - dataset_version
+      example: dataset_version
+      type: string
+      x-enum-varnames:
+        - DATASET_VERSION
+    LLMObsDatasetVersionsResponse:
+      description: Response containing the active versions of an LLM Observability dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsDatasetVersionsResponseData"
+      required:
+        - data
+      type: object
+    LLMObsDatasetVersionsResponseData:
+      description: List of dataset versions.
+      items:
+        $ref: "#/components/schemas/LLMObsDatasetVersionData"
+      type: array
     LLMObsDatasetsResponse:
       description: Response containing a list of LLM Observability datasets.
       properties:
@@ -126800,6 +126933,232 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/{project_id}/datasets/{dataset_id}/draft_state:
+    get:
+      description: Retrieve the draft state of a dataset, including whether it is currently locked for editing and which user holds the lock.
+      operationId: GetLLMObsDatasetDraftState
+      parameters:
+        - description: The ID of the LLM Observability project.
+          example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - description: The ID of the LLM Observability dataset.
+          example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
+          in: path
+          name: dataset_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        drafting_since: "2024-01-15T10:30:00Z"
+                        user:
+                          email: jane.doe@example.com
+                          handle: jane.doe@example.com
+                          id: 00000000-0000-0000-0000-000000000010
+                          name: Jane Doe
+                      id: 9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d
+                      type: draft_state_data
+              schema:
+                $ref: "#/components/schemas/LLMObsDatasetDraftStateResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get LLM Observability dataset draft state
+      tags:
+        - LLM Observability
+      x-menu-order: 41
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/{project_id}/datasets/{dataset_id}/draft_state/lock:
+    patch:
+      description: Acquire the draft lock on a dataset for the calling user. The lock prevents other users from concurrently editing the dataset draft.
+      operationId: LockLLMObsDatasetDraftState
+      parameters:
+        - description: The ID of the LLM Observability project.
+          example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - description: The ID of the LLM Observability dataset.
+          example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
+          in: path
+          name: dataset_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        drafting_since: "2024-01-15T10:30:00Z"
+                        user:
+                          email: jane.doe@example.com
+                          handle: jane.doe@example.com
+                          id: 00000000-0000-0000-0000-000000000010
+                          name: Jane Doe
+                      id: 9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d
+                      type: draft_state_data
+              schema:
+                $ref: "#/components/schemas/LLMObsDatasetDraftStateResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Lock LLM Observability dataset draft state
+      tags:
+        - LLM Observability
+      x-menu-order: 42
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/{project_id}/datasets/{dataset_id}/draft_state/unlock:
+    patch:
+      description: Release the draft lock on a dataset held by the calling user, allowing other users to edit the dataset draft.
+      operationId: UnlockLLMObsDatasetDraftState
+      parameters:
+        - description: The ID of the LLM Observability project.
+          example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - description: The ID of the LLM Observability dataset.
+          example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
+          in: path
+          name: dataset_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Unlock LLM Observability dataset draft state
+      tags:
+        - LLM Observability
+      x-menu-order: 43
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/llm-obs/v1/{project_id}/datasets/{dataset_id}/records:
     get:
       description: List all records in an LLM Observability dataset, sorted by creation date, newest first.
@@ -127111,6 +127470,90 @@ paths:
       tags:
         - LLM Observability
       x-menu-order: 12
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/{project_id}/datasets/{dataset_id}/versions:
+    get:
+      description: List the active versions of a dataset. A version is created each time a dataset is referenced by an experiment run.
+      operationId: ListLLMObsDatasetVersions
+      parameters:
+        - description: The ID of the LLM Observability project.
+          example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
+          in: path
+          name: project_id
+          required: true
+          schema:
+            type: string
+        - description: The ID of the LLM Observability dataset.
+          example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
+          in: path
+          name: dataset_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          dataset_id: 9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d
+                          last_used: "2024-01-15T10:30:00Z"
+                          version_number: 1
+                        id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                        type: dataset_version
+                      - attributes:
+                          dataset_id: 9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d
+                          last_used: "2024-02-20T14:45:00Z"
+                          version_number: 2
+                        id: 4ee7c6f1-9a01-5c2d-b8e1-6c95ef43a123
+                        type: dataset_version
+              schema:
+                $ref: "#/components/schemas/LLMObsDatasetVersionsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List LLM Observability dataset versions
+      tags:
+        - LLM Observability
+      x-menu-order: 44
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
