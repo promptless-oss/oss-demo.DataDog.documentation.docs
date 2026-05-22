@@ -1051,20 +1051,6 @@ components:
         example: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
         format: uuid
         type: string
-    OrgGroupInclude:
-      description: >-
-        List of related resources to include.
-      explode: false
-      in: query
-      name: include
-      required: false
-      schema:
-        example:
-          - memberships
-        items:
-          $ref: "#/components/schemas/OrgGroupIncludeOption"
-        type: array
-      style: form
     OrgGroupMembershipFilterOrgGroupId:
       description: Filter memberships by org group ID. Required when `filter[org_uuid]` is not provided.
       in: query
@@ -60304,8 +60290,6 @@ components:
           example: "a1b2c3d4-e5f6-7890-abcd-ef0123456789"
           format: uuid
           type: string
-        relationships:
-          $ref: "#/components/schemas/OrgGroupRelationships"
         type:
           $ref: "#/components/schemas/OrgGroupType"
       required:
@@ -60313,13 +60297,6 @@ components:
         - type
         - attributes
       type: object
-    OrgGroupIncludeOption:
-      description: Allowed include options for org group endpoints.
-      enum:
-        - memberships
-      type: string
-      x-enum-varnames:
-        - MEMBERSHIPS
     OrgGroupListResponse:
       description: Response containing a list of org groups.
       properties:
@@ -60327,11 +60304,6 @@ components:
           description: An array of org groups.
           items:
             $ref: "#/components/schemas/OrgGroupData"
-          type: array
-        included:
-          description: Related resources included in the response when requested with the `include` parameter.
-          items:
-            $ref: "#/components/schemas/OrgGroupMembershipData"
           type: array
         links:
           $ref: "#/components/schemas/OrgGroupPaginationLinks"
@@ -60459,20 +60431,6 @@ components:
       required:
         - data
       type: object
-    OrgGroupMembershipRelationshipData:
-      description: A reference to an org group membership.
-      properties:
-        id:
-          description: The ID of the membership.
-          example: "f1e2d3c4-b5a6-7890-1234-567890abcdef"
-          format: uuid
-          type: string
-        type:
-          $ref: "#/components/schemas/OrgGroupMembershipType"
-      required:
-        - id
-        - type
-      type: object
     OrgGroupMembershipRelationships:
       description: Relationships of an org group membership.
       properties:
@@ -60540,17 +60498,6 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/OrgGroupMembershipUpdateData"
-      required:
-        - data
-      type: object
-    OrgGroupMembershipsRelationship:
-      description: Relationship to org group memberships.
-      properties:
-        data:
-          description: An array of membership relationship references.
-          items:
-            $ref: "#/components/schemas/OrgGroupMembershipRelationshipData"
-          type: array
       required:
         - data
       type: object
@@ -60787,18 +60734,18 @@ components:
         - attributes
       type: object
     OrgGroupPolicyEnforcementTier:
-      default: DEFAULT
+      default: OVERRIDE_ALLOWED
       description: >-
-        The enforcement tier of the policy. `DEFAULT` means the policy is set but member orgs may mutate it. `ENFORCE` means the policy is strictly controlled and mutations are blocked for affected orgs. `DELEGATE` means each member org controls its own value.
+        The enforcement tier of the policy. `OVERRIDE_ALLOWED` means the policy is set but member orgs may mutate it. `GROUP_MANAGED` means the policy is strictly controlled and mutations are blocked for affected orgs. `DELEGATE` means each member org controls its own value.
       enum:
-        - DEFAULT
-        - ENFORCE
+        - OVERRIDE_ALLOWED
+        - GROUP_MANAGED
         - DELEGATE
-      example: DEFAULT
+      example: OVERRIDE_ALLOWED
       type: string
       x-enum-varnames:
-        - DEFAULT
-        - ENFORCE
+        - OVERRIDE_ALLOWED
+        - GROUP_MANAGED
         - DELEGATE
     OrgGroupPolicyListResponse:
       description: Response containing a list of org group policies.
@@ -61138,12 +61085,6 @@ components:
       required:
         - id
         - type
-      type: object
-    OrgGroupRelationships:
-      description: Relationships of an org group.
-      properties:
-        memberships:
-          $ref: "#/components/schemas/OrgGroupMembershipsRelationship"
       type: object
     OrgGroupResponse:
       description: Response containing a single org group.
@@ -135733,7 +135674,7 @@ paths:
                       - attributes:
                           content:
                             value: "UTC"
-                          enforcement_tier: "DEFAULT"
+                          enforcement_tier: "OVERRIDE_ALLOWED"
                           modified_at: "2024-01-15T10:30:00Z"
                           policy_name: "monitor_timezone"
                           policy_type: "org_config"
@@ -135806,7 +135747,7 @@ paths:
                     attributes:
                       content:
                         value: "UTC"
-                      enforcement_tier: "DEFAULT"
+                      enforcement_tier: "OVERRIDE_ALLOWED"
                       policy_name: "monitor_timezone"
                       policy_type: "org_config"
                     relationships:
@@ -135829,7 +135770,7 @@ paths:
                       attributes:
                         content:
                           value: "UTC"
-                        enforcement_tier: "DEFAULT"
+                        enforcement_tier: "OVERRIDE_ALLOWED"
                         modified_at: "2024-01-15T10:30:00Z"
                         policy_name: "monitor_timezone"
                         policy_type: "org_config"
@@ -135940,7 +135881,7 @@ paths:
                       attributes:
                         content:
                           value: "UTC"
-                        enforcement_tier: "DEFAULT"
+                        enforcement_tier: "OVERRIDE_ALLOWED"
                         modified_at: "2024-01-15T10:30:00Z"
                         policy_name: "monitor_timezone"
                         policy_type: "org_config"
@@ -136005,7 +135946,7 @@ paths:
                     attributes:
                       content:
                         value: "US/Eastern"
-                      enforcement_tier: "ENFORCE"
+                      enforcement_tier: "GROUP_MANAGED"
                     id: "1a2b3c4d-5e6f-7890-abcd-ef0123456789"
                     type: org_group_policies
             schema:
@@ -136022,7 +135963,7 @@ paths:
                       attributes:
                         content:
                           value: "US/Eastern"
-                        enforcement_tier: "ENFORCE"
+                        enforcement_tier: "GROUP_MANAGED"
                         modified_at: "2024-01-16T14:00:00Z"
                         policy_name: "monitor_timezone"
                         policy_type: "org_config"
@@ -136496,7 +136437,6 @@ paths:
         - $ref: "#/components/parameters/OrgGroupPageNumber"
         - $ref: "#/components/parameters/OrgGroupPageSize"
         - $ref: "#/components/parameters/OrgGroupSort"
-        - $ref: "#/components/parameters/OrgGroupInclude"
       responses:
         "200":
           content:
