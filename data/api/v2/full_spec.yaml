@@ -67606,9 +67606,6 @@ components:
         filter:
           description: Filter expression applied to the recommendations.
           type: string
-        scope:
-          description: Recommendations scope. Defaults to `ccm`; use `experiment` for experimental recommendations or `*` for both.
-          type: string
         sort:
           description: Ordered list of sort clauses applied to the result set.
           items:
