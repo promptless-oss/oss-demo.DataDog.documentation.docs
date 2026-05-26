@@ -3589,6 +3589,729 @@ components:
         - id
         - base_severity
       type: object
+    AiCustomRuleDataType:
+      description: AI custom rule resource type.
+      enum: [ai_rule]
+      example: ai_rule
+      type: string
+      x-enum-varnames:
+        - AI_RULE
+    AiCustomRuleItem:
+      description: An AI custom rule embedded within a ruleset response.
+      properties:
+        created_at:
+          description: The creation timestamp.
+          example: "2024-01-01T00:00:00+00:00"
+          format: date-time
+          type: string
+        created_by:
+          description: The identifier of the user who created the rule.
+          example: example-handle
+          type: string
+        last_revision:
+          $ref: "#/components/schemas/AiCustomRuleRevisionResponseAttributes"
+          description: The most recent revision of the rule.
+          nullable: true
+        name:
+          description: The rule name.
+          example: my-ai-rule
+          type: string
+      required:
+        - name
+        - created_at
+        - created_by
+        - last_revision
+      type: object
+    AiCustomRuleRequest:
+      description: Request body for creating an AI custom rule.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiCustomRuleRequestData"
+      type: object
+    AiCustomRuleRequestAttributes:
+      description: Attributes for creating an AI custom rule.
+      properties:
+        name:
+          description: The rule name.
+          example: my-ai-rule
+          type: string
+      type: object
+    AiCustomRuleRequestData:
+      description: Request data for creating an AI custom rule.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiCustomRuleRequestAttributes"
+        id:
+          description: The rule identifier, which must match the name.
+          example: my-ai-rule
+          type: string
+        type:
+          $ref: "#/components/schemas/AiCustomRuleDataType"
+      type: object
+    AiCustomRuleResponse:
+      description: Response containing a single AI custom rule.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiCustomRuleResponseData"
+      required:
+        - data
+      type: object
+    AiCustomRuleResponseData:
+      description: Response data for an AI custom rule.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiCustomRuleItem"
+        id:
+          description: The rule identifier.
+          example: my-ai-rule
+          type: string
+        type:
+          $ref: "#/components/schemas/AiCustomRuleDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    AiCustomRuleRevisionDataType:
+      description: AI custom rule revision resource type.
+      enum: [ai_rule_revision]
+      example: ai_rule_revision
+      type: string
+      x-enum-varnames:
+        - AI_RULE_REVISION
+    AiCustomRuleRevisionExecutionMode:
+      description: The execution mode for an AI rule revision.
+      enum: [auto, manual, always]
+      example: auto
+      type: string
+      x-enum-varnames:
+        - AUTO
+        - MANUAL
+        - ALWAYS
+    AiCustomRuleRevisionRequest:
+      description: Request body for creating an AI custom rule revision.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiCustomRuleRevisionRequestData"
+      type: object
+    AiCustomRuleRevisionRequestAttributes:
+      description: Attributes for creating an AI custom rule revision.
+      properties:
+        category:
+          $ref: "#/components/schemas/CustomRuleRevisionAttributesCategory"
+        content:
+          description: Base64-encoded AI model content for this revision.
+          example: Content
+          type: string
+        cwe:
+          description: The associated CWE identifier.
+          example: "79"
+          nullable: true
+          type: string
+        description:
+          description: Base64-encoded full description.
+          example: Ruleset description
+          type: string
+        directories:
+          description: Directory patterns this rule applies to.
+          example: []
+          items:
+            type: string
+          type: array
+        execution_mode:
+          $ref: "#/components/schemas/AiCustomRuleRevisionExecutionMode"
+        globs:
+          description: File glob patterns this rule applies to.
+          example:
+            - "**/*.py"
+          items:
+            type: string
+          type: array
+        is_published:
+          description: Whether this revision is published.
+          example: false
+          type: boolean
+        is_testing:
+          description: Whether this revision is for testing only.
+          example: false
+          type: boolean
+        severity:
+          $ref: "#/components/schemas/CustomRuleRevisionAttributesSeverity"
+        short_description:
+          description: Base64-encoded short description.
+          example: Ruleset short description
+          type: string
+        version_id:
+          description: The version identifier for this revision.
+          example: 1
+          format: int64
+          type: integer
+      required:
+        - short_description
+        - description
+        - content
+        - globs
+        - directories
+        - execution_mode
+        - severity
+        - category
+        - is_published
+        - is_testing
+      type: object
+    AiCustomRuleRevisionRequestData:
+      description: Request data for creating an AI custom rule revision.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiCustomRuleRevisionRequestAttributes"
+        id:
+          description: The revision identifier.
+          example: revision-abc-123
+          type: string
+        type:
+          $ref: "#/components/schemas/AiCustomRuleRevisionDataType"
+      type: object
+    AiCustomRuleRevisionResponse:
+      description: Response containing a single AI custom rule revision.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiCustomRuleRevisionResponseData"
+      required:
+        - data
+      type: object
+    AiCustomRuleRevisionResponseAttributes:
+      description: Response attributes of an AI custom rule revision.
+      properties:
+        category:
+          $ref: "#/components/schemas/CustomRuleRevisionAttributesCategory"
+        checksum:
+          description: Checksum of the revision content.
+          example: abc123def456
+          type: string
+        content:
+          description: Base64-encoded AI model content for this revision.
+          example: Content
+          type: string
+        created_at:
+          description: The creation timestamp.
+          example: "2024-01-01T00:00:00+00:00"
+          format: date-time
+          type: string
+        created_by:
+          description: The identifier of the user who created the revision.
+          example: example-handle
+          type: string
+        cwe:
+          description: The associated CWE identifier.
+          example: "79"
+          nullable: true
+          type: string
+        description:
+          description: Base64-encoded full description.
+          example: Ruleset description
+          type: string
+        directories:
+          description: Directory patterns this rule applies to.
+          example: []
+          items:
+            type: string
+          type: array
+        execution_mode:
+          $ref: "#/components/schemas/AiCustomRuleRevisionExecutionMode"
+        globs:
+          description: File glob patterns this rule applies to.
+          example:
+            - "**/*.py"
+          items:
+            type: string
+          type: array
+        is_default:
+          description: Whether this is a default Datadog rule.
+          example: false
+          type: boolean
+        is_published:
+          description: Whether this revision is published.
+          example: false
+          type: boolean
+        is_testing:
+          description: Whether this revision is for testing only.
+          example: false
+          type: boolean
+        severity:
+          $ref: "#/components/schemas/CustomRuleRevisionAttributesSeverity"
+        short_description:
+          description: Base64-encoded short description.
+          example: Ruleset short description
+          type: string
+        version_id:
+          description: The version identifier for this revision.
+          example: 1
+          format: int64
+          type: integer
+      required:
+        - version_id
+        - short_description
+        - description
+        - content
+        - globs
+        - directories
+        - execution_mode
+        - cwe
+        - checksum
+        - created_at
+        - created_by
+        - severity
+        - category
+        - is_published
+        - is_testing
+        - is_default
+      type: object
+    AiCustomRuleRevisionResponseData:
+      description: Response data for an AI custom rule revision.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiCustomRuleRevisionResponseAttributes"
+        id:
+          description: The revision identifier.
+          example: revision-abc-123
+          type: string
+        type:
+          $ref: "#/components/schemas/AiCustomRuleRevisionDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    AiCustomRuleRevisionsResponse:
+      description: Response containing a list of AI custom rule revisions.
+      properties:
+        data:
+          description: The list of AI custom rule revisions.
+          items:
+            $ref: "#/components/schemas/AiCustomRuleRevisionResponseData"
+          type: array
+      required:
+        - data
+      type: object
+    AiCustomRulesetDataType:
+      description: AI custom ruleset resource type.
+      enum: [ai_ruleset]
+      example: ai_ruleset
+      type: string
+      x-enum-varnames:
+        - AI_RULESET
+    AiCustomRulesetRequest:
+      description: Request body for creating an AI custom ruleset.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiCustomRulesetRequestData"
+      type: object
+    AiCustomRulesetRequestAttributes:
+      description: Attributes for creating an AI custom ruleset.
+      properties:
+        description:
+          description: Base64-encoded full description of the ruleset.
+          example: Ruleset description
+          type: string
+        name:
+          description: The ruleset name.
+          example: my-ai-ruleset
+          type: string
+        short_description:
+          description: Base64-encoded short description of the ruleset.
+          example: Ruleset short description
+          type: string
+      required:
+        - name
+        - short_description
+        - description
+      type: object
+    AiCustomRulesetRequestData:
+      description: Request data for creating an AI custom ruleset.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiCustomRulesetRequestAttributes"
+        id:
+          description: The ruleset identifier, which must match the name.
+          example: my-ai-ruleset
+          type: string
+        type:
+          $ref: "#/components/schemas/AiCustomRulesetDataType"
+      type: object
+    AiCustomRulesetResponse:
+      description: Response containing a single AI custom ruleset.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiCustomRulesetResponseData"
+      required:
+        - data
+      type: object
+    AiCustomRulesetResponseAttributes:
+      description: Response attributes of an AI custom ruleset.
+      properties:
+        created_at:
+          description: The creation timestamp.
+          example: "2024-01-01T00:00:00+00:00"
+          format: date-time
+          type: string
+        created_by:
+          description: The identifier of the user who created the ruleset.
+          example: example-handle
+          type: string
+        description:
+          description: Base64-encoded full description of the ruleset.
+          example: Ruleset description
+          type: string
+        name:
+          description: The ruleset name.
+          example: my-ai-ruleset
+          type: string
+        rules:
+          description: The rules contained in the ruleset.
+          items:
+            $ref: "#/components/schemas/AiCustomRuleItem"
+          nullable: true
+          type: array
+        short_description:
+          description: Base64-encoded short description of the ruleset.
+          example: Ruleset short description
+          type: string
+      required:
+        - name
+        - short_description
+        - description
+        - created_at
+        - created_by
+        - rules
+      type: object
+    AiCustomRulesetResponseData:
+      description: Response data for an AI custom ruleset.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiCustomRulesetResponseAttributes"
+        id:
+          description: The ruleset identifier.
+          example: my-ai-ruleset
+          type: string
+        type:
+          $ref: "#/components/schemas/AiCustomRulesetDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    AiCustomRulesetUpdateAttributes:
+      description: Attributes for updating an AI custom ruleset.
+      properties:
+        description:
+          description: Base64-encoded full description of the ruleset.
+          example: Ruleset description
+          type: string
+        name:
+          description: The ruleset name.
+          example: my-ai-ruleset
+          type: string
+        short_description:
+          description: Base64-encoded short description of the ruleset.
+          example: Ruleset short description
+          type: string
+      type: object
+    AiCustomRulesetUpdateData:
+      description: Request data for updating an AI custom ruleset.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiCustomRulesetUpdateAttributes"
+        id:
+          description: The ruleset identifier.
+          example: my-ai-ruleset
+          type: string
+        type:
+          $ref: "#/components/schemas/AiCustomRulesetDataType"
+      type: object
+    AiCustomRulesetUpdateRequest:
+      description: Request body for updating an AI custom ruleset.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiCustomRulesetUpdateData"
+      type: object
+    AiCustomRulesetsResponse:
+      description: Response containing a list of AI custom rulesets.
+      properties:
+        data:
+          description: The list of AI custom rulesets.
+          items:
+            $ref: "#/components/schemas/AiCustomRulesetResponseData"
+          type: array
+      required:
+        - data
+      type: object
+    AiMemoryViolationResultDataType:
+      description: AI memory violation result resource type.
+      enum: [ai_memory_violation_result]
+      example: ai_memory_violation_result
+      type: string
+      x-enum-varnames:
+        - AI_MEMORY_VIOLATION_RESULT
+    AiMemoryViolationResultRequest:
+      description: Request body for creating an AI memory violation result.
+      properties:
+        data:
+          $ref: "#/components/schemas/AiMemoryViolationResultRequestData"
+      type: object
+    AiMemoryViolationResultRequestAttributes:
+      description: Attributes for creating an AI memory violation result.
+      properties:
+        line:
+          description: The line number where the violation was found.
+          example: 10
+          format: int64
+          type: integer
+        message:
+          description: A message explaining the violation result.
+          example: This is a false positive because the input is sanitized.
+          type: string
+        name:
+          description: The file path where the violation was found.
+          example: src/main.py
+          type: string
+        repository_id:
+          description: The repository identifier.
+          example: my-repo
+          type: string
+        rule:
+          description: The rule identifier in the format ruleset/rule.
+          example: my-ai-ruleset/my-ai-rule
+          type: string
+        sha:
+          description: The git commit SHA where the violation was found.
+          example: abc123def456789012345678901234567890abcd
+          type: string
+        type:
+          $ref: "#/components/schemas/AiMemoryViolationType"
+      required:
+        - rule
+        - repository_id
+        - sha
+        - name
+        - line
+        - type
+        - message
+      type: object
+    AiMemoryViolationResultRequestData:
+      description: Request data for creating an AI memory violation result.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiMemoryViolationResultRequestAttributes"
+        id:
+          description: The violation result identifier.
+          example: violation-abc
+          type: string
+        type:
+          $ref: "#/components/schemas/AiMemoryViolationResultDataType"
+      type: object
+    AiMemoryViolationResultResponseAttributes:
+      description: Response attributes of an AI memory violation result.
+      properties:
+        created_at:
+          description: The creation timestamp.
+          example: "2024-01-01T00:00:00+00:00"
+          format: date-time
+          type: string
+        created_by:
+          description: The identifier of the user who created the result.
+          example: example-handle
+          type: string
+        line:
+          description: The line number where the violation was found.
+          example: 10
+          format: int64
+          type: integer
+        message:
+          description: A message explaining the violation result.
+          example: This is a false positive because the input is sanitized.
+          type: string
+        name:
+          description: The file path where the violation was found.
+          example: src/main.py
+          type: string
+        repository_id:
+          description: The repository identifier.
+          example: my-repo
+          type: string
+        rule:
+          description: The rule identifier in the format ruleset/rule.
+          example: my-ai-ruleset/my-ai-rule
+          type: string
+        sha:
+          description: The git commit SHA where the violation was found.
+          example: abc123def456789012345678901234567890abcd
+          type: string
+        type:
+          $ref: "#/components/schemas/AiMemoryViolationType"
+      required:
+        - rule
+        - repository_id
+        - sha
+        - name
+        - line
+        - created_at
+        - created_by
+        - type
+        - message
+      type: object
+    AiMemoryViolationResultResponseData:
+      description: Response data for an AI memory violation result.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiMemoryViolationResultResponseAttributes"
+        id:
+          description: The numeric identifier of the violation result.
+          example: "42"
+          type: string
+        type:
+          $ref: "#/components/schemas/AiMemoryViolationResultDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    AiMemoryViolationResultsResponse:
+      description: Response containing a list of AI memory violation results.
+      properties:
+        data:
+          description: The list of AI memory violation results.
+          items:
+            $ref: "#/components/schemas/AiMemoryViolationResultResponseData"
+          type: array
+      required:
+        - data
+      type: object
+    AiMemoryViolationType:
+      description: The type of AI memory violation result indicating whether it is a true positive or false positive.
+      enum: [TP, FP]
+      example: FP
+      type: string
+      x-enum-varnames:
+        - TP
+        - FP
+    AiPromptDataType:
+      description: AI prompt resource type.
+      enum: [ai_prompt]
+      example: ai_prompt
+      type: string
+      x-enum-varnames:
+        - AI_PROMPT
+    AiPromptResponseAttributes:
+      description: Response attributes of an AI prompt.
+      properties:
+        category:
+          $ref: "#/components/schemas/CustomRuleRevisionAttributesCategory"
+        checksum:
+          description: Checksum of the prompt content.
+          example: abc123
+          type: string
+        content:
+          description: Base64-encoded AI prompt content.
+          example: Content
+          type: string
+        cwe:
+          description: The CWE identifier associated with this prompt.
+          example: "79"
+          type: string
+        description:
+          description: Base64-encoded full description.
+          example: Ruleset description
+          type: string
+        directories:
+          description: Directory patterns this prompt applies to.
+          example: []
+          items:
+            type: string
+          type: array
+        execution_mode:
+          $ref: "#/components/schemas/AiCustomRuleRevisionExecutionMode"
+        file_search_keywords:
+          description: Keywords used to search for relevant files.
+          example:
+            - import
+          items:
+            type: string
+          type: array
+        globs:
+          description: File glob patterns this prompt applies to.
+          example:
+            - "**/*.py"
+          items:
+            type: string
+          type: array
+        is_default:
+          description: Whether this is a default Datadog prompt.
+          example: false
+          type: boolean
+        is_testing:
+          description: Whether this prompt is for testing only.
+          example: false
+          type: boolean
+        language:
+          $ref: "#/components/schemas/Language"
+        result_keywords_exclude:
+          description: Keywords to exclude from results.
+          example: []
+          items:
+            type: string
+          type: array
+        rule_version:
+          description: The version of the rule this prompt is associated with.
+          example: "1"
+          type: string
+        severity:
+          $ref: "#/components/schemas/CustomRuleRevisionAttributesSeverity"
+        short_description:
+          description: Base64-encoded short description.
+          example: Ruleset short description
+          type: string
+      required:
+        - rule_version
+        - globs
+        - short_description
+        - description
+        - severity
+        - category
+        - file_search_keywords
+        - result_keywords_exclude
+        - content
+        - checksum
+        - execution_mode
+        - directories
+        - is_testing
+        - is_default
+      type: object
+    AiPromptResponseData:
+      description: Response data for an AI prompt.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AiPromptResponseAttributes"
+        id:
+          description: The prompt identifier.
+          example: my-ai-ruleset/my-ai-rule
+          type: string
+        type:
+          $ref: "#/components/schemas/AiPromptDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    AiPromptsResponse:
+      description: Response containing a list of AI prompts.
+      properties:
+        data:
+          description: The list of AI prompts.
+          items:
+            $ref: "#/components/schemas/AiPromptResponseData"
+          type: array
+      required:
+        - data
+      type: object
     AlertEventAttributes:
       description: Alert event attributes.
       properties:
@@ -4100,6 +4823,312 @@ components:
       x-enum-varnames:
         - FEATURE_GATE
         - CANARY
+    AnalysisEdit:
+      description: A single edit operation within a fix suggestion for a rule violation.
+      properties:
+        content:
+          description: The content to insert or replace at the specified position, if applicable.
+          example: "safe_alternative()"
+          nullable: true
+          type: string
+        edit_type:
+          $ref: "#/components/schemas/AnalysisEditType"
+        end:
+          $ref: "#/components/schemas/AnalysisPosition"
+          description: The end position of the edit, or null for pure insertions.
+          nullable: true
+        start:
+          $ref: "#/components/schemas/AnalysisPosition"
+      required:
+        - start
+        - end
+        - edit_type
+        - content
+      type: object
+    AnalysisEditType:
+      default: ADD
+      description: The type of code edit to apply when fixing a violation.
+      enum:
+        - ADD
+        - UPDATE
+        - REMOVE
+      example: ADD
+      type: string
+      x-enum-varnames:
+        - ADD
+        - UPDATE
+        - REMOVE
+    AnalysisFix:
+      description: A fix suggestion for a rule violation, consisting of one or more edit operations.
+      properties:
+        description:
+          description: A human-readable description of what the fix does.
+          example: Replace with a safe alternative.
+          type: string
+        edits:
+          description: The list of edit operations that constitute the fix.
+          items:
+            $ref: "#/components/schemas/AnalysisEdit"
+          type: array
+      required:
+        - description
+        - edits
+      type: object
+    AnalysisPosition:
+      description: A position in source code, identified by line and column numbers.
+      properties:
+        col:
+          description: The column number in the source file (1-based).
+          example: 5
+          format: int64
+          type: integer
+        line:
+          description: The line number in the source file (1-based).
+          example: 10
+          format: int64
+          type: integer
+      required:
+        - line
+        - col
+      type: object
+    AnalysisRequest:
+      description: The request payload for running static analysis on source code.
+      properties:
+        data:
+          $ref: "#/components/schemas/AnalysisRequestData"
+      required:
+        - data
+      type: object
+    AnalysisRequestData:
+      description: The primary data object in the analysis request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AnalysisRequestDataAttributes"
+        id:
+          description: An optional identifier for the analysis request resource.
+          type: string
+        type:
+          $ref: "#/components/schemas/AnalysisRequestDataType"
+      required:
+        - type
+        - attributes
+      type: object
+    AnalysisRequestDataAttributes:
+      description: The attributes of the analysis request, containing the source code and rules to apply.
+      properties:
+        code:
+          description: The base64-encoded source code to analyze.
+          example: aW1wb3J0IHN5cw==
+          type: string
+        file_encoding:
+          description: The encoding of the source code file (must be `utf-8`).
+          example: utf-8
+          type: string
+        filename:
+          description: The name of the file being analyzed.
+          example: test.py
+          type: string
+        language:
+          description: The programming language of the source code.
+          example: python
+          type: string
+        rules:
+          description: The list of static analysis rules to apply during analysis.
+          items:
+            $ref: "#/components/schemas/AnalysisRequestRule"
+          type: array
+      required:
+        - code
+        - file_encoding
+        - filename
+        - language
+        - rules
+      type: object
+    AnalysisRequestDataType:
+      default: analysis_request
+      description: Analysis request resource type.
+      enum:
+        - analysis_request
+      example: analysis_request
+      type: string
+      x-enum-varnames:
+        - ANALYSIS_REQUEST
+    AnalysisRequestRule:
+      description: A static analysis rule to apply during code analysis.
+      properties:
+        category:
+          description: The category of the rule (for example, `BEST_PRACTICES`, `SECURITY`).
+          example: BEST_PRACTICES
+          type: string
+        checksum:
+          description: A checksum of the rule definition.
+          example: abc123def456
+          type: string
+        code:
+          description: The base64-encoded rule implementation code.
+          example: ZnVuY3Rpb24gdmlzaXQobm9kZSkge30=
+          type: string
+        entity_checked:
+          description: The code entity type checked by the rule, applicable when rule type is `AST_CHECK`.
+          nullable: true
+          type: string
+        id:
+          description: The unique identifier of the rule.
+          example: python-best-practices/no-exit
+          type: string
+        language:
+          description: The programming language this rule targets.
+          example: python
+          type: string
+        regex:
+          description: A base64-encoded regex pattern used by the rule, applicable when rule type is `REGEX`.
+          nullable: true
+          type: string
+        severity:
+          description: The severity of findings from this rule (for example, `ERROR`, `WARNING`).
+          example: WARNING
+          type: string
+        tree_sitter_query:
+          description: The base64-encoded tree-sitter query used by the rule.
+          example: KGNhbGwgbmFtZTogKGF0dHJpYnV0ZSkpQHZhbA==
+          type: string
+        type:
+          description: The rule type indicating the detection mechanism (for example, `TREE_SITTER_QUERY`).
+          example: TREE_SITTER_QUERY
+          type: string
+      required:
+        - id
+        - category
+        - checksum
+        - language
+        - severity
+        - tree_sitter_query
+        - type
+        - code
+      type: object
+    AnalysisResponse:
+      description: The response payload from running static analysis on source code.
+      properties:
+        data:
+          $ref: "#/components/schemas/AnalysisResponseData"
+      required:
+        - data
+      type: object
+    AnalysisResponseData:
+      description: The primary data object in the analysis response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AnalysisResponseDataAttributes"
+        id:
+          description: The unique identifier of the analysis response resource.
+          example: abc-123
+          type: string
+        type:
+          $ref: "#/components/schemas/AnalysisResponseDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    AnalysisResponseDataAttributes:
+      description: The attributes of the analysis response, containing rule results and any top-level errors.
+      properties:
+        errors:
+          description: Top-level error messages encountered during the analysis operation.
+          example: []
+          items:
+            type: string
+          type: array
+        rule_responses:
+          description: The list of results for each static analysis rule applied during analysis.
+          items:
+            $ref: "#/components/schemas/AnalysisRuleResponse"
+          type: array
+      required:
+        - rule_responses
+        - errors
+      type: object
+    AnalysisResponseDataType:
+      default: server_request
+      description: Analysis response resource type.
+      enum:
+        - server_request
+      example: server_request
+      type: string
+      x-enum-varnames:
+        - SERVER_REQUEST
+    AnalysisRuleResponse:
+      description: The result of applying a single static analysis rule to the analyzed source code.
+      properties:
+        errors:
+          description: A list of error messages encountered while executing the rule.
+          example: []
+          items:
+            type: string
+          type: array
+        execution_error:
+          description: An error message if the rule execution failed, or null if execution succeeded.
+          example:
+          nullable: true
+          type: string
+        execution_time_ms:
+          description: The time taken to execute the rule, in milliseconds.
+          example: 42
+          format: int64
+          type: integer
+        identifier:
+          description: The identifier of the rule that produced this response.
+          example: python-best-practices/no-exit
+          type: string
+        output:
+          description: The raw output produced by the rule engine during execution.
+          example: ""
+          type: string
+        violations:
+          description: The list of violations found by this rule.
+          items:
+            $ref: "#/components/schemas/AnalysisViolation"
+          type: array
+      required:
+        - errors
+        - execution_error
+        - execution_time_ms
+        - identifier
+        - output
+        - violations
+      type: object
+    AnalysisViolation:
+      description: A rule violation found in the analyzed source code.
+      properties:
+        category:
+          description: The category of the violation.
+          example: BEST_PRACTICES
+          type: string
+        end:
+          $ref: "#/components/schemas/AnalysisPosition"
+        fixes:
+          description: The list of suggested fixes for this violation.
+          items:
+            $ref: "#/components/schemas/AnalysisFix"
+          type: array
+        message:
+          description: A human-readable description of the violation.
+          example: Use of sys.exit() is discouraged.
+          type: string
+        severity:
+          description: The severity level of the violation.
+          example: WARNING
+          type: string
+        start:
+          $ref: "#/components/schemas/AnalysisPosition"
+      required:
+        - category
+        - severity
+        - message
+        - start
+        - end
+        - fixes
+      type: object
     Annotation:
       description: "A list of annotations used in the workflow. These are like sticky notes for your workflow!"
       properties:
@@ -23224,6 +24253,17 @@ components:
       type: string
       x-enum-varnames:
         - CUSTOM_RULESET
+    CustomRulesetListResponse:
+      description: Response containing a list of custom rulesets for the authenticated organization.
+      properties:
+        data:
+          description: The list of custom rulesets.
+          items:
+            $ref: "#/components/schemas/CustomRuleset"
+          type: array
+      required:
+        - data
+      type: object
     CustomRulesetRequest:
       description: Request body for creating or updating a custom ruleset.
       properties:
@@ -24818,6 +25858,52 @@ components:
       example: 1722439510282
       format: int64
       type: integer
+    DefaultRulesetsPerLanguageData:
+      description: The primary data object in the default rulesets per language response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/DefaultRulesetsPerLanguageDataAttributes"
+        id:
+          description: The language identifier used as the resource identifier.
+          example: python
+          type: string
+        type:
+          $ref: "#/components/schemas/DefaultRulesetsPerLanguageDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    DefaultRulesetsPerLanguageDataAttributes:
+      description: The attributes of the default rulesets per language response, containing the list of default ruleset names.
+      properties:
+        rulesets:
+          description: The list of default ruleset names for the specified programming language.
+          example:
+            - python-best-practices
+          items:
+            type: string
+          type: array
+      required:
+        - rulesets
+      type: object
+    DefaultRulesetsPerLanguageDataType:
+      default: defaultRulesetsPerLanguage
+      description: Default rulesets per language resource type.
+      enum:
+        - defaultRulesetsPerLanguage
+      example: defaultRulesetsPerLanguage
+      type: string
+      x-enum-varnames:
+        - DEFAULT_RULESETS_PER_LANGUAGE
+    DefaultRulesetsPerLanguageResponse:
+      description: The response payload containing the default ruleset names for a programming language.
+      properties:
+        data:
+          $ref: "#/components/schemas/DefaultRulesetsPerLanguageData"
+      required:
+        - data
+      type: object
     Degradation:
       description: Response object for a single degradation.
       properties:
@@ -34361,6 +35447,98 @@ components:
             type: string
           type: array
       type: object
+    GetAstRequest:
+      description: The request payload for parsing source code into an abstract syntax tree.
+      properties:
+        data:
+          $ref: "#/components/schemas/GetAstRequestData"
+      required:
+        - data
+      type: object
+    GetAstRequestData:
+      description: The primary data object in the get-AST request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GetAstRequestDataAttributes"
+        id:
+          description: An optional identifier for the get-AST request resource.
+          type: string
+        type:
+          $ref: "#/components/schemas/GetAstRequestDataType"
+      required:
+        - type
+        - attributes
+      type: object
+    GetAstRequestDataAttributes:
+      description: The attributes of the get-AST request, containing the source code to parse.
+      properties:
+        code:
+          description: The base64-encoded source code to parse into an abstract syntax tree.
+          example: aW1wb3J0IHN5cw==
+          type: string
+        file_encoding:
+          description: The encoding of the source code file (must be utf-8).
+          example: utf-8
+          type: string
+        language:
+          description: The programming language of the source code to parse.
+          example: python
+          type: string
+      required:
+        - code
+        - file_encoding
+        - language
+      type: object
+    GetAstRequestDataType:
+      default: get_ast_request
+      description: Get AST request resource type.
+      enum:
+        - get_ast_request
+      example: get_ast_request
+      type: string
+      x-enum-varnames:
+        - GET_AST_REQUEST
+    GetAstResponse:
+      description: The response payload containing the parsed abstract syntax tree.
+      properties:
+        data:
+          $ref: "#/components/schemas/GetAstResponseData"
+      required:
+        - data
+      type: object
+    GetAstResponseData:
+      description: The primary data object in the get-AST response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GetAstResponseDataAttributes"
+        id:
+          description: The identifier of the get-AST response resource.
+          type: string
+        type:
+          $ref: "#/components/schemas/GetAstResponseDataType"
+      required:
+        - type
+        - attributes
+      type: object
+    GetAstResponseDataAttributes:
+      description: The attributes of the get-AST response, containing the parsed abstract syntax tree.
+      properties:
+        ast:
+          additionalProperties: {}
+          description: The parsed abstract syntax tree as a JSON object.
+          type: object
+      required:
+        - ast
+      type: object
+    GetAstResponseDataType:
+      default: get_ast_response
+      description: Get AST response resource type.
+      enum:
+        - get_ast_response
+      example: get_ast_response
+      type: string
+      x-enum-varnames:
+        - GET_AST_RESPONSE
     GetBlueprintResponse:
       description: The response for retrieving a single blueprint.
       properties:
@@ -53416,6 +54594,54 @@ components:
       type: string
       x-enum-varnames:
         - NDK_SYMBOL_FILE
+    NodeType:
+      additionalProperties: {}
+      description: A tree-sitter node type definition for a given language, describing the node's structure, subtypes, and fields.
+      type: object
+    NodeTypesResponse:
+      description: The response payload containing tree-sitter node type definitions for a programming language.
+      properties:
+        data:
+          $ref: "#/components/schemas/NodeTypesResponseData"
+      required:
+        - data
+      type: object
+    NodeTypesResponseData:
+      description: The primary data object in the node types response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/NodeTypesResponseDataAttributes"
+        id:
+          description: The unique identifier of the node types response resource.
+          example: python
+          type: string
+        type:
+          $ref: "#/components/schemas/NodeTypesResponseDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    NodeTypesResponseDataAttributes:
+      description: The attributes of the node types response, containing the list of node type definitions for the requested language.
+      properties:
+        node_types:
+          description: The list of tree-sitter node type definitions for the language.
+          items:
+            $ref: "#/components/schemas/NodeType"
+          type: array
+      required:
+        - node_types
+      type: object
+    NodeTypesResponseDataType:
+      default: get_node_types_response
+      description: Get node types response resource type.
+      enum:
+        - get_node_types_response
+      example: get_node_types_response
+      type: string
+      x-enum-varnames:
+        - GET_NODE_TYPES_RESPONSE
     NotebookCreateData:
       description: Notebook creation data
       properties:
@@ -70528,6 +71754,67 @@ components:
       x-enum-varnames:
         - ACTIVE
         - ALL
+    SastRulesetData:
+      description: The primary data object representing a SAST ruleset.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SastRulesetDataAttributes"
+        id:
+          description: The unique identifier of the ruleset resource.
+          example: python-best-practices
+          type: string
+        type:
+          $ref: "#/components/schemas/GetMultipleRulesetsResponseDataAttributesRulesetsItemsDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SastRulesetDataAttributes:
+      description: The attributes of a SAST ruleset, including its name, description, and rules.
+      properties:
+        description:
+          description: A detailed description of the ruleset's purpose and the types of issues it targets.
+          example: A collection of Python best practice rules.
+          type: string
+        name:
+          description: The unique name of the ruleset.
+          example: python-best-practices
+          type: string
+        rules:
+          description: The list of static analysis rules included in this ruleset.
+          items:
+            $ref: "#/components/schemas/GetMultipleRulesetsResponseDataAttributesRulesetsItemsRulesItems"
+          type: array
+        short_description:
+          description: A brief summary of the ruleset, suitable for display in listings.
+          example: Python best practices ruleset.
+          type: string
+      required:
+        - name
+        - short_description
+        - description
+        - rules
+      type: object
+    SastRulesetResponse:
+      description: The response payload containing a single SAST ruleset and its rules.
+      properties:
+        data:
+          $ref: "#/components/schemas/SastRulesetData"
+      required:
+        - data
+      type: object
+    SastRulesetsResponse:
+      description: The response payload containing a list of SAST rulesets and their rules.
+      properties:
+        data:
+          description: The list of SAST rulesets returned in the response.
+          items:
+            $ref: "#/components/schemas/SastRulesetData"
+          type: array
+      required:
+        - data
+      type: object
     ScaRequest:
       description: The top-level request object for submitting a Software Composition Analysis (SCA) scan result.
       properties:
@@ -156038,6 +157325,1180 @@ paths:
         - Static Analysis
       x-menu-order: 11
       x-unstable: "**Note**: This endpoint may be subject to changes."
+  /api/v2/static-analysis/ai/memory:
+    get:
+      description: Get all AI memory violation results for the authenticated organization.
+      operationId: ListAiMemoryViolationResults
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          created_at: "2024-01-01T00:00:00+00:00"
+                          created_by: example-handle
+                          line: 10
+                          message: This is a false positive.
+                          name: src/main.py
+                          repository_id: my-repo
+                          rule: my-ai-ruleset/my-ai-rule
+                          sha: abc123def456789012345678901234567890abcd
+                          type: FP
+                        id: "42"
+                        type: ai_memory_violation_result
+              schema:
+                $ref: "#/components/schemas/AiMemoryViolationResultsResponse"
+          description: Successful response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: List AI memory violation results
+      tags:
+        - Static Analysis
+      x-menu-order: 18
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Add a new AI memory violation result for the authenticated organization.
+      operationId: CreateAiMemoryViolationResult
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      line: 10
+                      message: This is a false positive.
+                      name: src/main.py
+                      repository_id: my-repo
+                      rule: my-ai-ruleset/my-ai-rule
+                      sha: abc123def456789012345678901234567890abcd
+                      type: FP
+                    id: violation-abc
+                    type: ai_memory_violation_result
+            schema:
+              $ref: "#/components/schemas/AiMemoryViolationResultRequest"
+        required: true
+      responses:
+        "200":
+          description: Successfully created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Create an AI memory violation result
+      tags:
+        - Static Analysis
+      x-menu-order: 17
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/memory/{id}:
+    delete:
+      description: Delete an AI memory violation result by its numeric identifier.
+      operationId: DeleteAiMemoryViolationResult
+      parameters:
+        - description: The numeric identifier of the memory violation result.
+          in: path
+          name: id
+          required: true
+          schema:
+            example: "42"
+            type: string
+      responses:
+        "200":
+          description: Successfully deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Memory violation result not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Delete an AI memory violation result
+      tags:
+        - Static Analysis
+      x-menu-order: 16
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/prompts:
+    get:
+      description: Get all AI prompts, including default prompts and custom AI rule prompts for the authenticated organization.
+      operationId: ListAiPrompts
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          category: SECURITY
+                          checksum: abc123
+                          content: Ruleset content
+                          cwe: "79"
+                          description: Ruleset description
+                          directories: []
+                          execution_mode: auto
+                          file_search_keywords: []
+                          globs:
+                            - "**/*.py"
+                          is_default: false
+                          is_testing: false
+                          language: PYTHON
+                          result_keywords_exclude: []
+                          rule_version: "1"
+                          severity: ERROR
+                          short_description: Ruleset short description
+                        id: my-ai-ruleset/my-ai-rule
+                        type: ai_prompt
+              schema:
+                $ref: "#/components/schemas/AiPromptsResponse"
+          description: Successful response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: List AI prompts
+      tags:
+        - Static Analysis
+      x-menu-order: 15
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/rulesets:
+    get:
+      description: Get all AI custom rulesets for the authenticated organization.
+      operationId: ListAiCustomRulesets
+      parameters:
+        - description: The offset for pagination.
+          in: query
+          name: page[offset]
+          required: false
+          schema:
+            default: 0
+            format: int64
+            type: integer
+        - description: The maximum number of rulesets to return.
+          in: query
+          name: page[limit]
+          required: false
+          schema:
+            default: 100
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          created_at: "2024-01-01T00:00:00+00:00"
+                          created_by: example-handle
+                          description: Ruleset description
+                          name: my-ai-ruleset
+                          rules: []
+                          short_description: Ruleset short description
+                        id: my-ai-ruleset
+                        type: ai_ruleset
+              schema:
+                $ref: "#/components/schemas/AiCustomRulesetsResponse"
+          description: Successful response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: List AI custom rulesets
+      tags:
+        - Static Analysis
+      x-menu-order: 29
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Create a new AI custom ruleset for the authenticated organization.
+      operationId: CreateAiCustomRuleset
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: Ruleset description
+                      name: my-ai-ruleset
+                      short_description: Ruleset short description
+                    id: my-ai-ruleset
+                    type: ai_ruleset
+            schema:
+              $ref: "#/components/schemas/AiCustomRulesetRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        created_by: example-handle
+                        description: Ruleset description
+                        name: my-ai-ruleset
+                        rules: []
+                        short_description: Ruleset short description
+                      id: my-ai-ruleset
+                      type: ai_ruleset
+              schema:
+                $ref: "#/components/schemas/AiCustomRulesetResponse"
+          description: Successfully created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Conflict - ruleset already exists
+        "412":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Precondition Failed - validation error
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Create an AI custom ruleset
+      tags:
+        - Static Analysis
+      x-menu-order: 28
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/rulesets/{ruleset_name}:
+    delete:
+      description: Delete an AI custom ruleset by name.
+      operationId: DeleteAiCustomRuleset
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+      responses:
+        "200":
+          description: Successfully deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Ruleset not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Delete an AI custom ruleset
+      tags:
+        - Static Analysis
+      x-menu-order: 25
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Get an AI custom ruleset by name.
+      operationId: GetAiCustomRuleset
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        created_by: example-handle
+                        description: Ruleset description
+                        name: my-ai-ruleset
+                        rules: []
+                        short_description: Ruleset short description
+                      id: my-ai-ruleset
+                      type: ai_ruleset
+              schema:
+                $ref: "#/components/schemas/AiCustomRulesetResponse"
+          description: Successful response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Ruleset not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Get an AI custom ruleset
+      tags:
+        - Static Analysis
+      x-menu-order: 27
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    patch:
+      description: Update the description of an existing AI custom ruleset.
+      operationId: UpdateAiCustomRuleset
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: Ruleset description
+                      name: my-ai-ruleset
+                      short_description: Ruleset short description
+                    id: my-ai-ruleset
+                    type: ai_ruleset
+            schema:
+              $ref: "#/components/schemas/AiCustomRulesetUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: Successfully updated
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "412":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Precondition Failed - validation error or ruleset not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Update an AI custom ruleset
+      tags:
+        - Static Analysis
+      x-menu-order: 26
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/rulesets/{ruleset_name}/rules:
+    post:
+      description: Create a new AI custom rule within a ruleset.
+      operationId: CreateAiCustomRule
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: my-ai-rule
+                    type: ai_rule
+            schema:
+              $ref: "#/components/schemas/AiCustomRuleRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        created_by: example-handle
+                        last_revision:
+                        name: my-ai-rule
+                      id: my-ai-rule
+                      type: ai_rule
+              schema:
+                $ref: "#/components/schemas/AiCustomRuleResponse"
+          description: Successfully created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Conflict - rule already exists
+        "412":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Precondition Failed - validation error or ruleset not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Create an AI custom rule
+      tags:
+        - Static Analysis
+      x-menu-order: 24
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/rulesets/{ruleset_name}/rules/{rule_name}:
+    delete:
+      description: Delete an AI custom rule by name within a ruleset.
+      operationId: DeleteAiCustomRule
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+        - description: The rule name.
+          in: path
+          name: rule_name
+          required: true
+          schema:
+            example: my-ai-rule
+            type: string
+      responses:
+        "200":
+          description: Successfully deleted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Rule not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Delete an AI custom rule
+      tags:
+        - Static Analysis
+      x-menu-order: 22
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Get an AI custom rule by name within a ruleset.
+      operationId: GetAiCustomRule
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+        - description: The rule name.
+          in: path
+          name: rule_name
+          required: true
+          schema:
+            example: my-ai-rule
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        created_by: example-handle
+                        last_revision:
+                        name: my-ai-rule
+                      id: my-ai-rule
+                      type: ai_rule
+              schema:
+                $ref: "#/components/schemas/AiCustomRuleResponse"
+          description: Successful response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Rule not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Get an AI custom rule
+      tags:
+        - Static Analysis
+      x-menu-order: 23
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/rulesets/{ruleset_name}/rules/{rule_name}/revisions:
+    get:
+      description: Get all revisions for an AI custom rule.
+      operationId: ListAiCustomRuleRevisions
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+        - description: The rule name.
+          in: path
+          name: rule_name
+          required: true
+          schema:
+            example: my-ai-rule
+            type: string
+        - description: The offset for pagination.
+          in: query
+          name: page[offset]
+          required: false
+          schema:
+            default: 0
+            format: int64
+            type: integer
+        - description: The maximum number of revisions to return.
+          in: query
+          name: page[limit]
+          required: false
+          schema:
+            default: 100
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          category: SECURITY
+                          checksum: abc123
+                          content: Content
+                          created_at: "2024-01-01T00:00:00+00:00"
+                          created_by: example-handle
+                          cwe:
+                          description: Ruleset description
+                          directories: []
+                          execution_mode: auto
+                          globs:
+                            - "**/*.py"
+                          is_default: false
+                          is_published: false
+                          is_testing: false
+                          severity: ERROR
+                          short_description: Ruleset short description
+                          version_id: 1
+                        id: revision-abc-123
+                        type: ai_rule_revision
+              schema:
+                $ref: "#/components/schemas/AiCustomRuleRevisionsResponse"
+          description: Successful response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Rule not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: List AI custom rule revisions
+      tags:
+        - Static Analysis
+      x-menu-order: 21
+      x-pagination:
+        limitParam: page[limit]
+        pageOffsetParam: page[offset]
+        resultsPath: data
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Create a new revision for an AI custom rule.
+      operationId: CreateAiCustomRuleRevision
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+        - description: The rule name.
+          in: path
+          name: rule_name
+          required: true
+          schema:
+            example: my-ai-rule
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      category: SECURITY
+                      content: Content
+                      description: Ruleset description
+                      directories: []
+                      execution_mode: auto
+                      globs:
+                        - "**/*.py"
+                      is_published: false
+                      is_testing: false
+                      severity: ERROR
+                      short_description: Ruleset short description
+                      version_id: 1
+                    id: revision-abc-123
+                    type: ai_rule_revision
+            schema:
+              $ref: "#/components/schemas/AiCustomRuleRevisionRequest"
+        required: true
+      responses:
+        "200":
+          description: Successfully created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Rule not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Create an AI custom rule revision
+      tags:
+        - Static Analysis
+      x-menu-order: 20
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/ai/rulesets/{ruleset_name}/rules/{rule_name}/revisions/{id}:
+    get:
+      description: Get a specific revision of an AI custom rule.
+      operationId: GetAiCustomRuleRevision
+      parameters:
+        - description: The ruleset name.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: my-ai-ruleset
+            type: string
+        - description: The rule name.
+          in: path
+          name: rule_name
+          required: true
+          schema:
+            example: my-ai-rule
+            type: string
+        - description: The revision identifier.
+          in: path
+          name: id
+          required: true
+          schema:
+            example: revision-abc-123
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        category: SECURITY
+                        checksum: abc123
+                        content: Content
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        created_by: example-handle
+                        cwe:
+                        description: Ruleset description
+                        directories: []
+                        execution_mode: auto
+                        globs:
+                          - "**/*.py"
+                        is_default: false
+                        is_published: false
+                        is_testing: false
+                        severity: ERROR
+                        short_description: Ruleset short description
+                        version_id: 1
+                      id: revision-abc-123
+                      type: ai_rule_revision
+              schema:
+                $ref: "#/components/schemas/AiCustomRuleRevisionResponse"
+          description: Successful response
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Revision not found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Get an AI custom rule revision
+      tags:
+        - Static Analysis
+      x-menu-order: 19
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/codegen/rulesets:
+    get:
+      description: Get the rulesets relevant for code generation for the authenticated user.
+      operationId: ListStaticAnalysisCodegenRulesets
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data: []
+              schema:
+                $ref: "#/components/schemas/SastRulesetsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: List codegen rulesets
+      tags:
+        - "Security Monitoring"
+      x-menu-order: 113
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/custom/rulesets:
+    get:
+      description: Get all custom rulesets for the authenticated organization.
+      operationId: ListCustomRulesets
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data: []
+              schema:
+                $ref: "#/components/schemas/CustomRulesetListResponse"
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: List Custom Rulesets
+      tags:
+        - Static Analysis
+      x-menu-order: 13
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: Create a new custom ruleset for the authenticated organization.
+      operationId: CreateCustomRuleset
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: My custom ruleset.
+                      name: my-custom-ruleset
+                    type: custom_ruleset
+            schema:
+              $ref: "#/components/schemas/CustomRulesetRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        name: my-custom-ruleset
+                      id: my-custom-ruleset
+                      type: custom_ruleset
+              schema:
+                $ref: "#/components/schemas/CustomRulesetResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Conflict
+        "412":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Precondition Failed
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Create Custom Ruleset
+      tags:
+        - Static Analysis
+      x-menu-order: 14
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/static-analysis/custom/rulesets/{ruleset_name}:
     delete:
       description: Delete a custom ruleset
@@ -156696,6 +159157,54 @@ paths:
         - Static Analysis
       x-menu-order: 2
       x-unstable: "This endpoint is in Preview and may introduce breaking changes.\nIf you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/)."
+  /api/v2/static-analysis/default-rulesets/{language}:
+    get:
+      description: Get the default SAST ruleset names for a given programming language.
+      operationId: GetStaticAnalysisDefaultRulesets
+      parameters:
+        - description: The programming language for which to retrieve the default rulesets.
+          in: path
+          name: language
+          required: true
+          schema:
+            example: python
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        rulesets:
+                          - python-best-practices
+                      id: python
+                      type: defaultRulesetsPerLanguage
+              schema:
+                $ref: "#/components/schemas/DefaultRulesetsPerLanguageResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Get default rulesets for a language
+      tags:
+        - "Security Monitoring"
+      x-menu-order: 114
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/static-analysis/rulesets:
     post:
       description: Get rules for multiple rulesets in batch.
@@ -156738,6 +159247,74 @@ paths:
         - "Security Monitoring"
       x-menu-order: 79
       x-unstable: "**Note**: This endpoint may be subject to changes."
+  /api/v2/static-analysis/rulesets/{ruleset_name}:
+    get:
+      description: Get a SAST ruleset by name, including all its rules.
+      operationId: GetStaticAnalysisRuleset
+      parameters:
+        - description: The name of the ruleset to retrieve.
+          in: path
+          name: ruleset_name
+          required: true
+          schema:
+            example: python-best-practices
+            type: string
+        - description: When true, test cases for each rule are included in the response.
+          in: query
+          name: include_tests
+          required: false
+          schema:
+            type: boolean
+        - description: When true, rules that are in testing mode are included in the response.
+          in: query
+          name: include_testing_rules
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        description: A collection of Python best practice rules.
+                        name: python-best-practices
+                        rules: []
+                        short_description: Python best practices.
+                      id: python-best-practices
+                      type: rulesets
+              schema:
+                $ref: "#/components/schemas/SastRulesetResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Get a SAST ruleset
+      tags:
+        - "Security Monitoring"
+      x-menu-order: 112
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/static-analysis/secrets/rules:
     get:
       description: |-
@@ -156773,6 +159350,230 @@ paths:
         - "Security Monitoring"
       x-menu-order: 78
       x-unstable: "**Note**: This endpoint may be subject to changes."
+  /api/v2/static-analysis/static-analysis-server/analyze:
+    post:
+      description: Run static analysis rules against a source code file and return violations found.
+      operationId: CreateStaticAnalysisServerAnalysis
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      code: aW1wb3J0IHN5cw==
+                      file_encoding: utf-8
+                      filename: test.py
+                      language: python
+                      rules: []
+                    type: analysis_request
+            schema:
+              $ref: "#/components/schemas/AnalysisRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        errors: []
+                        rule_responses: []
+                      id: abc-123
+                      type: server_request
+              schema:
+                $ref: "#/components/schemas/AnalysisResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Analyze code
+      tags:
+        - Security Monitoring
+      x-menu-order: 115
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/static-analysis-server/get-ast:
+    post:
+      description: Parse source code into an abstract syntax tree (AST) for the specified language.
+      operationId: CreateStaticAnalysisAst
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      code: aW1wb3J0IHN5cw==
+                      file_encoding: utf-8
+                      language: python
+                    type: get_ast_request
+            schema:
+              $ref: "#/components/schemas/GetAstRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        ast: {}
+                      type: get_ast_response
+              schema:
+                $ref: "#/components/schemas/GetAstResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Get AST for source code
+      tags:
+        - Security Monitoring
+      x-menu-order: 116
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/static-analysis-server/node-types/{language}:
+    get:
+      description: Retrieve tree-sitter node type definitions for a given programming language.
+      operationId: GetStaticAnalysisNodeTypes
+      parameters:
+        - description: The programming language for which to retrieve node type definitions.
+          in: path
+          name: language
+          required: true
+          schema:
+            example: python
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        node_types: []
+                      id: python
+                      type: get_node_types_response
+              schema:
+                $ref: "#/components/schemas/NodeTypesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Get node types for a language
+      tags:
+        - Security Monitoring
+      x-menu-order: 118
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis/static-analysis-server/tree-sitter-wasm/{file}:
+    get:
+      description: Download the WebAssembly binary for a tree-sitter grammar by file name.
+      operationId: GetStaticAnalysisTreeSitterWasm
+      parameters:
+        - description: The name of the WASM file to download.
+          in: path
+          name: file
+          required: true
+          schema:
+            example: tree-sitter-python.wasm
+            type: string
+      responses:
+        "200":
+          content:
+            application/octet-stream:
+              examples:
+                default:
+                  value: ""
+              schema:
+                format: binary
+                type: string
+          description: BLOB with the content of the WASM file
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Get tree-sitter WASM file
+      tags:
+        - Security Monitoring
+      x-menu-order: 117
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/statuspages:
     get:
       description: Lists all status pages for the organization.
