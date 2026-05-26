@@ -1543,6 +1543,14 @@ components:
       required: true
       schema:
         type: string
+    SecurityMonitoringDatasetID:
+      description: The UUID of the dataset.
+      in: path
+      name: dataset_id
+      required: true
+      schema:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
     SecurityMonitoringIntegrationConfigID:
       description: The ID of the entity context sync configuration.
       in: path
@@ -75168,6 +75176,495 @@ components:
           items:
             $ref: "#/components/schemas/SecurityMonitoringCriticalAsset"
           type: array
+      type: object
+    SecurityMonitoringDatasetAttributesRequest:
+      description: The attributes of a dataset create or update request.
+      properties:
+        definition:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDefinition"
+        description:
+          description: The description of the dataset. Maximum 255 characters.
+          example: A sample dataset used for detection rules.
+          type: string
+        version:
+          description: |-
+            The expected current version of the dataset for optimistic concurrency control on updates.
+            If the dataset's current version does not match, the request is rejected with a 409 Conflict.
+          example: 1
+          format: int64
+          type: integer
+      required:
+        - definition
+      type: object
+    SecurityMonitoringDatasetAttributesResponse:
+      description: The attributes of a Cloud SIEM dataset.
+      properties:
+        createdAt:
+          description: The creation timestamp of the dataset, in ISO 8601 format.
+          example: "2025-03-20T10:00:00Z"
+          type: string
+        createdByHandle:
+          description: The Datadog handle of the user who created the dataset.
+          example: bruce.lee
+          type: string
+        createdByName:
+          description: The display name of the user who created the dataset.
+          example: Bruce Lee
+          type: string
+        definition:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDefinition"
+        description:
+          description: The description of the dataset.
+          example: A sample dataset used for detection rules.
+          type: string
+        id:
+          description: The UUID of the dataset.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        isDefault:
+          description: Whether the dataset is an out-of-the-box dataset provided by Datadog.
+          example: false
+          type: boolean
+        isDeprecated:
+          description: Whether the dataset is marked as deprecated.
+          example: false
+          type: boolean
+        modifiedAt:
+          description: The timestamp of the last modification of the dataset, in ISO 8601 format.
+          example: "2025-03-20T10:00:00Z"
+          type: string
+        name:
+          description: The unique name of the dataset.
+          example: sample_dataset
+          type: string
+        updatedByHandle:
+          description: The Datadog handle of the user who last updated the dataset.
+          example: bruce.lee
+          nullable: true
+          type: string
+        updatedByName:
+          description: The display name of the user who last updated the dataset.
+          example: Bruce Lee
+          nullable: true
+          type: string
+        version:
+          description: The current version of the dataset.
+          example: 1
+          format: int64
+          type: integer
+      required:
+        - id
+        - name
+        - description
+        - version
+        - definition
+        - createdAt
+        - createdByHandle
+        - createdByName
+        - modifiedAt
+        - updatedByHandle
+        - updatedByName
+        - isDefault
+        - isDeprecated
+      type: object
+    SecurityMonitoringDatasetColumn:
+      description: A column exposed by an event platform dataset.
+      properties:
+        column:
+          description: The name of the column.
+          example: message
+          type: string
+        type:
+          description: The type of the column value.
+          example: string
+          type: string
+      required:
+        - column
+        - type
+      type: object
+    SecurityMonitoringDatasetCreateData:
+      description: The data wrapper of a dataset create request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetAttributesRequest"
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetCreateType"
+      required:
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringDatasetCreateRequest:
+      description: Request body for creating a Cloud SIEM dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetCreateData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringDatasetCreateResponse:
+      description: Response returned after creating a dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetCreateResponseData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringDatasetCreateResponseData:
+      description: The data wrapper of a dataset create response.
+      properties:
+        id:
+          description: The UUID of the newly created dataset.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetType"
+      required:
+        - id
+        - type
+      type: object
+    SecurityMonitoringDatasetCreateType:
+      description: The type of resource for a dataset create request.
+      enum:
+        - datasetCreate
+      example: datasetCreate
+      type: string
+      x-enum-varnames:
+        - DATASET_CREATE
+    SecurityMonitoringDatasetData:
+      description: The data wrapper of a dataset response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetAttributesResponse"
+        id:
+          description: The UUID of the dataset.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringDatasetDefinition:
+      description: |-
+        The definition of the dataset. The shape depends on the value of `data_source`.
+        Use `reference_table` or `managed_resource` for a referential dataset, or one of the
+        event platform sources (for example `logs`, `audit`, `events`, `spans`, `rum`) for
+        an event platform dataset.
+      properties:
+        columns:
+          description: For event platform datasets, the list of columns exposed by the dataset.
+          items:
+            $ref: "#/components/schemas/SecurityMonitoringDatasetColumn"
+          type: array
+        data_source:
+          description: The data source backing this dataset definition.
+          example: logs
+          type: string
+        indexes:
+          description: For event platform datasets, the list of indexes to query.
+          items:
+            type: string
+          type: array
+        name:
+          description: The unique name of the dataset. Must start with a lowercase letter and contain only lowercase letters, digits, and underscores (max 255 characters).
+          example: sample_dataset
+          type: string
+        query_filter:
+          description: For referential datasets, an optional filter expression applied to the table.
+          example: status = 'active'
+          type: string
+        search:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetSearch"
+        storage:
+          description: Storage tier the dataset reads from. Applies to event platform datasets.
+          example: hot
+          type: string
+        table_name:
+          description: For referential datasets, the name of the underlying table.
+          example: my_reference_table
+          type: string
+        time_window:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetTimeWindow"
+      required:
+        - data_source
+        - name
+      type: object
+    SecurityMonitoringDatasetDependenciesRequest:
+      description: Request body for retrieving dependencies of a batch of datasets.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDependenciesRequestData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringDatasetDependenciesRequestAttributes:
+      description: The attributes of a dataset dependencies request.
+      properties:
+        datasetIds:
+          description: The list of dataset UUIDs to query dependencies for. Must contain between 1 and 100 items.
+          example:
+            - 123e4567-e89b-12d3-a456-426614174000
+          items:
+            type: string
+          type: array
+      required:
+        - datasetIds
+      type: object
+    SecurityMonitoringDatasetDependenciesRequestData:
+      description: The data wrapper of a dataset dependencies request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDependenciesRequestAttributes"
+      required:
+        - attributes
+      type: object
+    SecurityMonitoringDatasetDependenciesResponse:
+      description: Response listing the dependents of each requested dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDependenciesResponseData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringDatasetDependenciesResponseData:
+      description: The list of dataset dependents entries.
+      items:
+        $ref: "#/components/schemas/SecurityMonitoringDatasetDependentsData"
+      type: array
+    SecurityMonitoringDatasetDependentsAttributes:
+      description: The attributes of a dataset dependents entry.
+      properties:
+        count:
+          description: The number of resources that depend on the dataset.
+          example: 0
+          format: int64
+          type: integer
+        datasetId:
+          description: The UUID of the dataset whose dependencies are being reported.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        ids:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDependentsIds"
+        resource_type:
+          description: The type of resource that depends on the dataset.
+          example: security_detection_rule
+          type: string
+      required:
+        - datasetId
+        - resource_type
+        - ids
+        - count
+      type: object
+    SecurityMonitoringDatasetDependentsData:
+      description: A single entry describing the dependents of one dataset.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDependentsAttributes"
+        id:
+          description: The UUID of the dataset.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetDependentsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringDatasetDependentsIds:
+      description: The list of resource IDs that depend on the dataset.
+      example: []
+      items:
+        type: string
+      type: array
+    SecurityMonitoringDatasetDependentsType:
+      description: The type of resource for a dataset dependents entry.
+      enum:
+        - datasetDependents
+      example: datasetDependents
+      type: string
+      x-enum-varnames:
+        - DATASET_DEPENDENTS
+    SecurityMonitoringDatasetResponse:
+      description: Response containing a single Cloud SIEM dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringDatasetSearch:
+      description: The search clause applied to an event platform dataset.
+      properties:
+        query:
+          description: The search query expression.
+          example: "*"
+          type: string
+      required:
+        - query
+      type: object
+    SecurityMonitoringDatasetTimeWindow:
+      description: An optional time window that overrides the default query time range.
+      properties:
+        from:
+          description: Inclusive start of the time window, in milliseconds since the Unix epoch.
+          example: 1700000000000
+          format: int64
+          type: integer
+        to:
+          description: Exclusive end of the time window, in milliseconds since the Unix epoch.
+          example: 1700003600000
+          format: int64
+          type: integer
+      type: object
+    SecurityMonitoringDatasetType:
+      description: The type of resource for a dataset response.
+      enum:
+        - dataset
+      example: dataset
+      type: string
+      x-enum-varnames:
+        - DATASET
+    SecurityMonitoringDatasetUpdateData:
+      description: The data wrapper of a dataset update request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetAttributesRequest"
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetUpdateType"
+      required:
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringDatasetUpdateRequest:
+      description: Request body for updating a Cloud SIEM dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetUpdateData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringDatasetUpdateType:
+      description: The type of resource for a dataset update request.
+      enum:
+        - datasetUpdate
+      example: datasetUpdate
+      type: string
+      x-enum-varnames:
+        - DATASET_UPDATE
+    SecurityMonitoringDatasetVersionChanges:
+      description: The list of field changes between this version of the dataset and the previous one.
+      items:
+        $ref: "#/components/schemas/SecurityMonitoringDatasetVersionFieldChange"
+      type: array
+    SecurityMonitoringDatasetVersionEntry:
+      description: A single entry in the version history of a dataset.
+      properties:
+        changes:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetVersionChanges"
+        dataset:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetAttributesResponse"
+      required:
+        - dataset
+        - changes
+      type: object
+    SecurityMonitoringDatasetVersionFieldChange:
+      description: A single field change between two versions of a dataset.
+      properties:
+        current:
+          description: The current value of the field, serialized as a JSON value.
+          example: New description.
+        field:
+          description: The name of the field that changed.
+          example: description
+          type: string
+        previous:
+          description: The previous value of the field, serialized as a JSON value.
+          example: Old description.
+      required:
+        - field
+        - previous
+        - current
+      type: object
+    SecurityMonitoringDatasetVersionHistoryAttributes:
+      description: The attributes of a dataset version history response.
+      properties:
+        count:
+          description: The total number of versions available for this dataset.
+          example: 1
+          format: int64
+          type: integer
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetVersionHistoryEntries"
+      required:
+        - data
+        - count
+      type: object
+    SecurityMonitoringDatasetVersionHistoryData:
+      description: The data wrapper of a dataset version history response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetVersionHistoryAttributes"
+        id:
+          description: The UUID of the dataset.
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetVersionHistoryType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SecurityMonitoringDatasetVersionHistoryEntries:
+      additionalProperties:
+        $ref: "#/components/schemas/SecurityMonitoringDatasetVersionEntry"
+      description: A map from version number (as a string) to the dataset state at that version.
+      type: object
+    SecurityMonitoringDatasetVersionHistoryResponse:
+      description: Response containing the version history of a Cloud SIEM dataset.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetVersionHistoryData"
+      required:
+        - data
+      type: object
+    SecurityMonitoringDatasetVersionHistoryType:
+      description: The type of resource for a dataset version history response.
+      enum:
+        - dataset_version_history
+      example: dataset_version_history
+      type: string
+      x-enum-varnames:
+        - DATASET_VERSION_HISTORY
+    SecurityMonitoringDatasetsListData:
+      description: A list of dataset data items.
+      items:
+        $ref: "#/components/schemas/SecurityMonitoringDatasetData"
+      type: array
+    SecurityMonitoringDatasetsListMeta:
+      description: Metadata returned with a list of datasets.
+      properties:
+        totalCount:
+          description: The total number of datasets matching the request, across all pages.
+          example: 1
+          format: int64
+          type: integer
+      required:
+        - totalCount
+      type: object
+    SecurityMonitoringDatasetsListResponse:
+      description: Response containing a paginated list of Cloud SIEM datasets.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetsListData"
+        meta:
+          $ref: "#/components/schemas/SecurityMonitoringDatasetsListMeta"
+      required:
+        - data
+        - meta
       type: object
     SecurityMonitoringEntityContextEntityType:
       default: entity
@@ -152360,6 +152857,652 @@ paths:
         permissions:
           - security_monitoring_filters_write
           - logs_modify_indexes
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/datasets:
+    get:
+      description: |-
+        List all Cloud SIEM datasets available to the organization, including both
+        customer-defined datasets and Datadog out-of-the-box datasets.
+      operationId: ListSecurityMonitoringDatasets
+      parameters:
+        - description: Size for a given page. The maximum allowed value is 100.
+          in: query
+          name: page[size]
+          required: false
+          schema:
+            default: 50
+            example: 50
+            format: int64
+            type: integer
+        - description: Specific page number to return.
+          in: query
+          name: page[number]
+          required: false
+          schema:
+            default: 1
+            example: 1
+            format: int64
+            type: integer
+        - description: Attribute used to sort datasets. Prefix with `-` to sort in descending order.
+          in: query
+          name: sort
+          required: false
+          schema:
+            example: name
+            type: string
+        - description: A search query to filter datasets by name or description.
+          in: query
+          name: filter[query]
+          required: false
+          schema:
+            example: sample_dataset
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          createdAt: "2025-03-20T10:00:00Z"
+                          createdByHandle: bruce.lee
+                          createdByName: Bruce Lee
+                          definition:
+                            columns:
+                              - column: message
+                                type: string
+                            data_source: logs
+                            indexes:
+                              - main
+                            name: sample_dataset
+                            search:
+                              query: "*"
+                          description: A sample dataset used for detection rules.
+                          id: 123e4567-e89b-12d3-a456-426614174000
+                          isDefault: false
+                          isDeprecated: false
+                          modifiedAt: "2025-03-20T10:00:00Z"
+                          name: sample_dataset
+                          updatedByHandle:
+                          updatedByName:
+                          version: 1
+                        id: 123e4567-e89b-12d3-a456-426614174000
+                        type: dataset
+                    meta:
+                      totalCount: 1
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringDatasetsListResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_read
+      summary: List datasets
+      tags:
+        - Security Monitoring
+      x-menu-order: 119
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_read
+          - security_monitoring_dataset_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: |-
+        Create a new Cloud SIEM dataset. A dataset bundles a data source, a set of
+        indexes, and a search query that can be referenced from detection rules.
+      operationId: CreateSecurityMonitoringDataset
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      definition:
+                        columns:
+                          - column: message
+                            type: string
+                        data_source: logs
+                        indexes:
+                          - main
+                        name: sample_dataset
+                        search:
+                          query: "*"
+                      description: A sample dataset used for detection rules.
+                    type: datasetCreate
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringDatasetCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      id: 123e4567-e89b-12d3-a456-426614174000
+                      type: dataset
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringDatasetCreateResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Conflict
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_write
+      summary: Create a dataset
+      tags:
+        - Security Monitoring
+      x-menu-order: 120
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_write
+          - security_monitoring_dataset_write
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/datasets/dependencies:
+    post:
+      description: |-
+        Return, for each of the requested datasets, the list of detection rules that depend
+        on it. Useful for understanding the impact of updating or deleting a dataset.
+      operationId: BatchGetSecurityMonitoringDatasetDependencies
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      datasetIds:
+                        - 123e4567-e89b-12d3-a456-426614174000
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringDatasetDependenciesRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          count: 0
+                          datasetId: 123e4567-e89b-12d3-a456-426614174000
+                          ids: []
+                          resource_type: security_detection_rule
+                        id: 123e4567-e89b-12d3-a456-426614174000
+                        type: datasetDependents
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringDatasetDependenciesResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_read
+      summary: Get dataset dependencies
+      tags:
+        - Security Monitoring
+      x-menu-order: 121
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_read
+          - security_monitoring_dataset_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/datasets/{dataset_id}:
+    delete:
+      description: |-
+        Delete a Cloud SIEM dataset. Out-of-the-box datasets cannot be deleted and
+        deleting a dataset that is referenced by a detection rule is rejected.
+      operationId: DeleteSecurityMonitoringDataset
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringDatasetID"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_write
+      summary: Delete a dataset
+      tags:
+        - Security Monitoring
+      x-menu-order: 124
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_write
+          - security_monitoring_dataset_write
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Get the current version of a Cloud SIEM dataset by ID.
+      operationId: GetSecurityMonitoringDataset
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringDatasetID"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        createdAt: "2025-03-20T10:00:00Z"
+                        createdByHandle: bruce.lee
+                        createdByName: Bruce Lee
+                        definition:
+                          columns:
+                            - column: message
+                              type: string
+                          data_source: logs
+                          indexes:
+                            - main
+                          name: sample_dataset
+                          search:
+                            query: "*"
+                        description: A sample dataset used for detection rules.
+                        id: 123e4567-e89b-12d3-a456-426614174000
+                        isDefault: false
+                        isDeprecated: false
+                        modifiedAt: "2025-03-20T10:00:00Z"
+                        name: sample_dataset
+                        updatedByHandle:
+                        updatedByName:
+                        version: 1
+                      id: 123e4567-e89b-12d3-a456-426614174000
+                      type: dataset
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringDatasetResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_read
+      summary: Get a dataset
+      tags:
+        - Security Monitoring
+      x-menu-order: 122
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_read
+          - security_monitoring_dataset_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    patch:
+      description: |-
+        Update an existing Cloud SIEM dataset. The current version of the dataset can be
+        provided to detect concurrent modifications.
+      operationId: UpdateSecurityMonitoringDataset
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringDatasetID"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      definition:
+                        columns:
+                          - column: message
+                            type: string
+                        data_source: logs
+                        indexes:
+                          - main
+                        name: sample_dataset
+                        search:
+                          query: "*"
+                      description: An updated description for the dataset.
+                      version: 1
+                    type: datasetUpdate
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringDatasetUpdateRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Conflict
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_write
+      summary: Update a dataset
+      tags:
+        - Security Monitoring
+      x-menu-order: 123
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_write
+          - security_monitoring_dataset_write
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/datasets/{dataset_id}/version/{version}:
+    get:
+      description: Retrieve a specific historical version of a Cloud SIEM dataset.
+      operationId: GetSecurityMonitoringDatasetByVersion
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringDatasetID"
+        - description: The version number of the dataset to retrieve.
+          in: path
+          name: version
+          required: true
+          schema:
+            example: 1
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        createdAt: "2025-03-20T10:00:00Z"
+                        createdByHandle: bruce.lee
+                        createdByName: Bruce Lee
+                        definition:
+                          columns:
+                            - column: message
+                              type: string
+                          data_source: logs
+                          indexes:
+                            - main
+                          name: sample_dataset
+                          search:
+                            query: "*"
+                        description: A sample dataset used for detection rules.
+                        id: 123e4567-e89b-12d3-a456-426614174000
+                        isDefault: false
+                        isDeprecated: false
+                        modifiedAt: "2025-03-20T10:00:00Z"
+                        name: sample_dataset
+                        updatedByHandle:
+                        updatedByName:
+                        version: 1
+                      id: 123e4567-e89b-12d3-a456-426614174000
+                      type: dataset
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringDatasetResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_read
+      summary: Get a dataset at a specific version
+      tags:
+        - Security Monitoring
+      x-menu-order: 125
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_read
+          - security_monitoring_dataset_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security_monitoring/datasets/{dataset_id}/version_history:
+    get:
+      description: Retrieve the version history of a Cloud SIEM dataset, including the changes made at each version.
+      operationId: GetSecurityMonitoringDatasetVersionHistory
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringDatasetID"
+        - description: Size for a given page. The maximum allowed value is 100.
+          in: query
+          name: page[size]
+          required: false
+          schema:
+            default: 10
+            example: 10
+            format: int64
+            type: integer
+        - description: Specific page number to return.
+          in: query
+          name: page[number]
+          required: false
+          schema:
+            default: 0
+            example: 0
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        count: 1
+                        data:
+                          "1":
+                            changes: []
+                            dataset:
+                              createdAt: "2025-03-20T10:00:00Z"
+                              createdByHandle: bruce.lee
+                              createdByName: Bruce Lee
+                              definition:
+                                columns:
+                                  - column: message
+                                    type: string
+                                data_source: logs
+                                indexes:
+                                  - main
+                                name: sample_dataset
+                                search:
+                                  query: "*"
+                              description: A sample dataset used for detection rules.
+                              id: 123e4567-e89b-12d3-a456-426614174000
+                              isDefault: false
+                              isDeprecated: false
+                              modifiedAt: "2025-03-20T10:00:00Z"
+                              name: sample_dataset
+                              updatedByHandle:
+                              updatedByName:
+                              version: 1
+                      id: 123e4567-e89b-12d3-a456-426614174000
+                      type: dataset_version_history
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringDatasetVersionHistoryResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_read
+      summary: Get the version history of a dataset
+      tags:
+        - Security Monitoring
+      x-menu-order: 126
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_read
+          - security_monitoring_dataset_read
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
