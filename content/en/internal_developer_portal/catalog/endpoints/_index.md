@@ -4,9 +4,9 @@ further_reading:
 - link: "https://www.datadoghq.com/blog/monitor-apis-datadog-api-catalog/"
   tag: "Blog"
   text: "Manage API performance, security, and ownership with Datadog API Catalog"
-- link: "/tracing/software_catalog/"
+- link: "/internal_developer_portal/catalog/"
   tag: "Documentation"
-  text: "Datadog Software Catalog"
+  text: "Datadog Catalog"
 - link: "/synthetics/api_tests/http_tests/"
   tag: "Documentation"
   text: "Synthetic API Tests"
@@ -25,6 +25,7 @@ aliases:
     - /service_catalog/endpoints/discover_endpoints
     - /service_catalog/endpoints/
     - /software_catalog/endpoints
+    - /internal_developer_portal/software_catalog/endpoints
 ---
 
 {{% site-region region="gov,gov2" %}}
@@ -33,11 +34,11 @@ aliases:
 </div>
 {{% /site-region %}}
 
-{{< img src="tracing/software_catalog/endpoints-list.png" alt="Endpoints list in the Software Catalog, showing performance-related information for each endpoint." style="width:100%;" >}}
+{{< img src="tracing/software_catalog/endpoints-list.png" alt="Endpoints list in the Catalog, showing performance-related information for each endpoint." style="width:100%;" >}}
 
 ## Overview
 
-The Software Catalog's [Endpoints list][12] consolidates everything you need to know about your API endpoints. It provides a comprehensive view of performance, reliability, and ownership across all your APIs, whether they serve internal teams or external users. This helps you and your teams effectively monitor mission-critical, API-driven features and ensure they meet performance expectations.
+The Catalog's [Endpoints list][12] consolidates everything you need to know about your API endpoints. It provides a comprehensive view of performance, reliability, and ownership across all your APIs, whether they serve internal teams or external users. This helps you and your teams effectively monitor mission-critical, API-driven features and ensure they meet performance expectations.
 
 ## Use cases
 
@@ -107,10 +108,10 @@ Read [Adding Metadata to APIs][10] for more information.
 
 [1]: https://app.datadoghq.com/apis/catalog
 [3]: /api_catalog/explore_apis/
-[6]: /software_catalog/manage
-[7]: /internal_developer_portal/software_catalog/endpoints/monitor_endpoints/
+[6]: /internal_developer_portal/catalog/set_up/
+[7]: /internal_developer_portal/catalog/endpoints/monitor_endpoints/
 [8]: /tracing/trace_collection/
-[9]: /software_catalog/customize/create_entries
-[10]: /software_catalog/service_definitions/#add-metadata-to-endpoints
-[11]: /internal_developer_portal/software_catalog/endpoints/explore_endpoints/
+[9]: /internal_developer_portal/catalog/set_up/create_entities/
+[10]: /internal_developer_portal/catalog/entity_model/
+[11]: /internal_developer_portal/catalog/endpoints/explore_endpoints/
 [12]: https://app.datadoghq.com/services?selectedComponent=endpoint

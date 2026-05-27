@@ -2,22 +2,23 @@
 title: Native Entities
 disable_toc: false
 aliases:
-- /internal_developer_portal/software_catalog/entity_model/entity_types
+  - /internal_developer_portal/software_catalog/entity_model/entity_types
+  - /internal_developer_portal/software_catalog/entity_model/native_entities
 further_reading:
-- link: "/internal_developer_portal/software_catalog/set_up/create_entities"
+- link: "/internal_developer_portal/catalog/set_up/create_entities"
   tag: "Documentation"
-  text: "Create entities in Software Catalog"
-- link: "/internal_developer_portal/software_catalog/set_up/discover_entities"
+  text: "Create entities in Catalog"
+- link: "/internal_developer_portal/catalog/set_up/discover_entities"
   tag: "Documentation"
-  text: "Learn how entities are discovered in Software Catalog"
-- link: "/internal_developer_portal/software_catalog/set_up/import_entities"
+  text: "Learn how entities are discovered in Catalog"
+- link: "/internal_developer_portal/catalog/set_up/import_entities"
   tag: "Documentation"
-  text: "Import entities into Software Catalog"
+  text: "Import entities into Catalog"
 ---
 
 ## Overview
 
-In Software Catalog, an entity represents the smallest building block of modern microservice-based architecture. As of [schema definition v3.0][1]+, native entities include instrumented APM services, datastores, systems, APIs, queues, and frontends. You can also define [custom entity types][3] to represent components unique to your organization.
+In Catalog, an entity represents the smallest building block of modern microservice-based architecture. As of [schema definition v3.0][1]+, native entities include instrumented APM services, datastores, systems, APIs, queues, and frontends. You can also define [custom entity types][3] to represent components unique to your organization.
 
 See GitHub for [full schema definitions][2]. 
 
@@ -31,20 +32,20 @@ In APM, a [service][1] (`kind:service`) is a group of related endpoints, queries
 
 Through [custom instrumentation in APM][3], you can create an arbitrary `service`. In practice, microservice-based architecture includes multiple APM services, each measuring the performance of sub-components of the application through [Trace Metrics][2]. 
 
-In Software Catalog, you can collect non-instrumented services by declaring them through [metadata][4] or importing through external sources like [Backstage][5] or [ServiceNow][6].
+In Catalog, you can collect non-instrumented services by declaring them through [metadata][4] or importing through external sources like [Backstage][5] or [ServiceNow][6].
 
 [1]: /glossary/#service
 [2]: /opentelemetry/integrations/trace_metrics/
 [3]: /tracing/trace_collection/custom_instrumentation/
-[4]: /internal_developer_portal/software_catalog/set_up/create_entities
-[5]: /internal_developer_portal/software_catalog/set_up/import_entities#import-from-backstage
-[6]: /internal_developer_portal/software_catalog/set_up/import_entities#import-from-servicenow
+[4]: /internal_developer_portal/catalog/set_up/create_entities
+[5]: /internal_developer_portal/catalog/set_up/import_entities#entities-from-backstage
+[6]: /internal_developer_portal/catalog/set_up/import_entities#import-from-servicenow
 
 {{% /tab %}}
 
 {{% tab "System" %}}
 
-In Software Catalog, a system (`kind:system`) is a group of entities that cooperate to perform a broader function. For example, you can group multiple instrumented APM services into a system because they are operated by the same team. You can also use `system` to represent a full microservice-based architecture, and include components like APIs, datastores, queues, and other common building blocks.
+In Catalog, a system (`kind:system`) is a group of entities that cooperate to perform a broader function. For example, you can group multiple instrumented APM services into a system because they are operated by the same team. You can also use `system` to represent a full microservice-based architecture, and include components like APIs, datastores, queues, and other common building blocks.
 
 
 **Note**: **System** in Datadog has the same meaning as in Backstage's [System Model][1]. 
@@ -76,21 +77,21 @@ spec:
   - system:shopist-user-trends
 {{< /code-block >}}
 
-This user-defined system appears in Software Catalog as shown:
-{{< img src="/tracing/software_catalog/product-rec-systemV3.png" alt="System page for Product Recommendations system in Software Catalog" style="width:90%;" >}}
+This user-defined system appears in Catalog as shown:
+{{< img src="/tracing/software_catalog/product-rec-systemV3.png" alt="System page for Product Recommendations system in Catalog" style="width:90%;" >}}
 
 This page holds relationship data of components between the system and upstream/downstream dependencies as well as scorecards, logs, and events aggregated across all system components. 
 
 **Note**: If a single component is part of multiple systems, you must specify that component in the YAML for each system. 
 
 [1]: https://backstage.io/docs/features/software-catalog/system-model/
-[2]: /internal_developer_portal/software_catalog/entity_model/ai-generated-systems/
+[2]: /internal_developer_portal/catalog/entity_model/ai-generated-systems/
 
 {{% /tab %}}
 
 {{% tab "API" %}}
 
-In Software Catalog, an API (`kind:API`) refers to a collection of endpoints that belong together logically. APIs offer an alternative way to group endpoints beyond APM services (the mapping between endpoints and services are not modifiable). 
+In Catalog, an API (`kind:API`) refers to a collection of endpoints that belong together logically. APIs offer an alternative way to group endpoints beyond APM services (the mapping between endpoints and services are not modifiable). 
 
 To define components within an API, you can specify values for the `components` key in the `spec` field of the entity's v3 definition. 
 
@@ -217,22 +218,22 @@ Point to an OpenAPI file stored in GitHub using the `fileref` field.
 }
 {{< /code-block >}}
 
-The user-defined API appears in Software Catalog as shown:
-{{< img src="/tracing/software_catalog/api-page-v3.png" alt="API page for Payments API in Software Catalog" style="width:90%;" >}}
+The user-defined API appears in Catalog as shown:
+{{< img src="/tracing/software_catalog/api-page-v3.png" alt="API page for Payments API in Catalog" style="width:90%;" >}}
 
 This page holds relationship data of how the API interacts with dependencies, the API components, an OpenAPI preview, and logs and events aggregated across all endpoints. 
 
 **Test API Endpoints** 
 
-You can use the **Play Request** feature in Software Catalog to send test HTTP requests to your endpoints and inspect the responses. 
+You can use the **Play Request** feature in Catalog to send test HTTP requests to your endpoints and inspect the responses. 
 
 To send a test request: 
 
-1. Navigate to an endpoint in Software Catalog.
+1. Navigate to an endpoint in Catalog.
 2. Click an endpoint to open its details in the side panel.
 3. Click **Play Request** to configure and send the request.
 
-{{< img src="/tracing/software_catalog/play-request.png" alt="Play Request modal to test API requests in Software Catalog" style="width:90%;" >}}
+{{< img src="/tracing/software_catalog/play-request.png" alt="Play Request modal to test API requests in Catalog" style="width:90%;" >}}
 
 Before sending the request, you can configure the following: 
 - **Inputs**: Provide values for any required query parameters, path variables, or request body fields.
@@ -241,7 +242,7 @@ Before sending the request, you can configure the following:
     - Public Location (default)
     - Private Location, for APIs accessible only within your private network. These must be configured using [Synthetics Private Locations][2]. Any Private Locations you've already set up appear automatically in the dropdown.
 
-**Note**: Software Catalog contains HTTP endpoints that are automatically discovered by APM. The concept of endpoints correspond to [APM resources][1] for an APM web service.
+**Note**: Catalog contains HTTP endpoints that are automatically discovered by APM. The concept of endpoints correspond to [APM resources][1] for an APM web service.
 
 [1]: /tracing/glossary/#resources
 [2]: /synthetics/platform/private_locations
@@ -250,7 +251,7 @@ Before sending the request, you can configure the following:
 
 {{% tab "Datastore" %}}
 
-In Software Catalog, a datastore (`kind:datastore`) represents a data storage component or database that services depend on. Datastores can represent relational databases (such as PostgreSQL or MySQL), NoSQL datastores (such as Redis or MongoDB), data warehouses, and caches.
+In Catalog, a datastore (`kind:datastore`) represents a data storage component or database that services depend on. Datastores can represent relational databases (such as PostgreSQL or MySQL), NoSQL datastores (such as Redis or MongoDB), data warehouses, and caches.
 
 Datastore entities can be:
 - [**Inferred by APM**][1] when instrumented services make outbound calls to a database (for example, a PostgreSQL query).
@@ -346,8 +347,8 @@ Peer Tag | Source Attributes
 Learn more about [peer tags and inferred entities][3].
 
 
-[1]: /internal_developer_portal/software_catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum
-[2]: /internal_developer_portal/software_catalog/set_up/create_entities
+[1]: /internal_developer_portal/catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum
+[2]: /internal_developer_portal/catalog/set_up/create_entities
 [3]: /tracing/services/inferred_services/?tab=agentv7600#naming-inferred-entities
 
 {{% /tab %}}
@@ -355,7 +356,7 @@ Learn more about [peer tags and inferred entities][3].
 
 {{% tab "Queue" %}}
 
-In Software Catalog, a queue (`kind:queue`) represents a message queue or stream-based messaging component that services interact with. Queues can represent systems such as Apache Kafka, Amazon SQS, RabbitMQ, and Google Pub/Sub.
+In Catalog, a queue (`kind:queue`) represents a message queue or stream-based messaging component that services interact with. Queues can represent systems such as Apache Kafka, Amazon SQS, RabbitMQ, and Google Pub/Sub.
 
 Queue entities can be:
 - [**Inferred by APM**][1] when instrumented services produce to or consume from a messaging system.
@@ -449,20 +450,20 @@ Peer Tag | Source Attributes
 
 Learn more about [peer tags and inferred entities][4].
 
-[1]: /internal_developer_portal/software_catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum
-[2]: /internal_developer_portal/software_catalog/set_up/create_entities
+[1]: /internal_developer_portal/catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum
+[2]: /internal_developer_portal/catalog/set_up/create_entities
 [3]: /data_streams/
 [4]: /tracing/services/inferred_services/?tab=agentv7600#naming-inferred-entities
 
 {{% /tab %}}
 
 {{% tab "Frontend" %}}
-In Software Catalog, a frontend (`kind:frontend`) represents a frontend application—such as a browser-based single-page application or mobile app—that interacts with services and APIs. Frontend entities offer a structured way to model user-facing applications in the same catalog alongside backend services.
+In Catalog, a frontend (`kind:frontend`) represents a frontend application—such as a browser-based single-page application or mobile app—that interacts with services and APIs. Frontend entities offer a structured way to model user-facing applications in the same catalog alongside backend services.
 
 
 {{% collapse-content title="YAML for RUM app by name" level="h4" expanded=false id="rum-app-name" %}}
 
-This example shows a `kind:frontend` definition for a frontend application in RUM, linked by the name. You can find the name and ID under [Manage Applications][1], or you can click **Add Metadata** on an existing frontend app in Software Catalog to autofill the ID.
+This example shows a `kind:frontend` definition for a frontend application in RUM, linked by the name. You can find the name and ID under [Manage Applications][1], or you can click **Add Metadata** on an existing frontend app in Catalog to autofill the ID.
 
 ### Example YAML definitions
 ```yaml
@@ -501,7 +502,7 @@ spec:
 
 {{% collapse-content title="YAML for RUM app by ID" level="h4" expanded=false id="rum-app-id" %}}
 
-This example shows a `kind:frontend` definition for a frontend application in RUM, linked by the ID. You can find the name and ID under [Manage Applications][1], or you can click **Add Metadata** on an existing frontend app in Software Catalog to autofill the ID.
+This example shows a `kind:frontend` definition for a frontend application in RUM, linked by the ID. You can find the name and ID under [Manage Applications][1], or you can click **Add Metadata** on an existing frontend app in Catalog to autofill the ID.
 
 ### Example YAML definitions
 ```yaml
@@ -577,8 +578,8 @@ spec:
 
 When this definition is created:
 
-- The frontend app appears under the Frontend Apps section in Software Catalog.
-- If a RUM application exists with the same name or ID, its telemetry is automatically linked. You can find the name and ID under [Manage Applications][1], or you can click **Add Metadata** on an existing frontend app in Software Catalog to autofill the ID.
+- The frontend app appears under the Frontend Apps section in Catalog.
+- If a RUM application exists with the same name or ID, its telemetry is automatically linked. You can find the name and ID under [Manage Applications][1], or you can click **Add Metadata** on an existing frontend app in Catalog to autofill the ID.
 - The entity aggregates metadata, dependencies, and real-time RUM performance metrics in a unified view.
 
 [1]: https://app.datadoghq.com/rum/list
@@ -587,9 +588,9 @@ When this definition is created:
 
 {{< /tabs >}}
 
-[1]: /internal_developer_portal/software_catalog/entity_model
+[1]: /internal_developer_portal/catalog/entity_model
 [2]: https://github.com/DataDog/schema/tree/main/service-catalog/v3
-[3]: /internal_developer_portal/software_catalog/entity_model/custom_entities
+[3]: /internal_developer_portal/catalog/entity_model/custom_entities
 
 
 ## Further reading
