@@ -19875,6 +19875,45 @@ components:
       x-enum-varnames:
         - "TRUE"
         - "FALSE"
+    CostTagMetadataMonth:
+      description: A month that has Cloud Cost Management tag metadata available for a given provider.
+      properties:
+        id:
+          description: The month, in `YYYY-MM` format.
+          example: "2026-04"
+          type: string
+        type:
+          $ref: "#/components/schemas/CostTagMetadataMonthType"
+      required:
+        - id
+        - type
+      type: object
+    CostTagMetadataMonthType:
+      default: cost_tag_metadata_month
+      description: Type of the Cloud Cost Management tag metadata month resource.
+      enum:
+        - cost_tag_metadata_month
+      example: cost_tag_metadata_month
+      type: string
+      x-enum-varnames:
+        - COST_TAG_METADATA_MONTH
+    CostTagMetadataMonthsResponse:
+      description: List of months that have Cloud Cost Management tag metadata for the requested provider, ordered most-recent first and capped at 36 months.
+      example:
+        data:
+          - id: "2026-04"
+            type: cost_tag_metadata_month
+          - id: "2026-03"
+            type: cost_tag_metadata_month
+      properties:
+        data:
+          description: List of months that have tag metadata available.
+          items:
+            $ref: "#/components/schemas/CostTagMetadataMonth"
+          type: array
+      required:
+        - data
+      type: object
     CostTagType:
       default: cost_tag
       description: Type of the Cloud Cost Management tag resource.
@@ -26307,9 +26346,6 @@ components:
         description:
           description: Description of the degradation.
           type: string
-        is_backfilled:
-          description: Whether the degradation was backfilled.
-          type: boolean
         modified_at:
           description: Timestamp of when the degradation was last modified.
           format: date-time
@@ -50978,9 +51014,6 @@ components:
         in_progress_description:
           description: The description shown while the maintenance is in progress.
           type: string
-        is_backfilled:
-          description: Whether the maintenance was backfilled.
-          type: boolean
         modified_at:
           description: Timestamp of when the maintenance was last modified.
           format: date-time
@@ -112490,6 +112523,69 @@ paths:
       tags:
         - Cloud Cost Management
       x-menu-order: 58
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/cost/tag_metadata/months:
+    get:
+      description: |-
+        List months that have Cloud Cost Management tag metadata for a given provider,
+        ordered most-recent first. The response is capped at 36 months.
+      operationId: ListCostTagMetadataMonths
+      parameters:
+        - description: |-
+            Provider to scope the query to. Use the value of the `providername` tag in CCM
+            (for example, `aws`, `azure`, `gcp`, `Oracle`, `Confluent Cloud`, `Snowflake`).
+            For costs uploaded through the Custom Costs API, use `custom`.
+            Values are case-sensitive.
+          example: aws
+          in: query
+          name: filter[provider]
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - id: "2026-04"
+                        type: cost_tag_metadata_month
+                      - id: "2026-03"
+                        type: cost_tag_metadata_month
+              schema:
+                $ref: "#/components/schemas/CostTagMetadataMonthsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - cloud_cost_management_read
+      summary: List Cloud Cost Management tag metadata months
+      tags:
+        - Cloud Cost Management
+      x-menu-order: 62
       "x-permission":
         operator: OR
         permissions:
