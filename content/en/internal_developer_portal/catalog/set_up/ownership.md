@@ -1,25 +1,27 @@
 ---
-title: Define ownership for Software Catalog entities
+title: Define ownership for Catalog entities
 description: Link services and other entities to Datadog Teams so you can filter views, route notifications, and drive accountability across your software portfolio.
+aliases:
+- /internal_developer_portal/software_catalog/set_up/ownership
 further_reading:
 - link: "/account_management/teams/"
   tag: "Documentation"
   text: "Teams"
-- link: "/tracing/software_catalog/adding_metadata/#add-metadata-from-the-datadog-ui"
+- link: "/internal_developer_portal/catalog/entity_model/"
   tag: "Documentation"
   text: "Add metadata from the Datadog UI"
 ---
 
 ## Overview
 
-Define ownership in Software Catalog to connect entities to the Datadog Teams responsible for them. Ownership information appears on each entity's details page and allows you to: 
+Define ownership in Catalog to connect entities to the Datadog Teams responsible for them. Ownership information appears on each entity's details page and allows you to: 
 - Filter views by team across Datadog products.
 - Attribute Scorecards and Campaigns to the right owners.
 - Route notifications and on-call context to the correct team.
 
 ## Create a Team
 
-You can create a Team from your [Datadog Organization Settings][3] or directly from [Software Catalog][1]. For full instructions, see [Team set up and configuration][2]. 
+You can create a Team from your [Datadog Organization Settings][3] or directly from [Catalog][1]. For full instructions, see [Team set up and configuration][2]. 
 
 A Team definition includes the following:
 1. **Team name**: For example, "Bits Demo".
@@ -35,7 +37,7 @@ After creating a Team, you can add reference links, configure notifications, and
 
 To add or update an entity's owner in Datadog:
 
-1. Go to **Software Catalog**, and open the entity.
+1. Go to **Catalog**, and open the entity.
 2. Click **Edit in UI** on the entity page.
 3. In the **Ownership** section, set the **Owner** and optionally add **Additional owners**.
    - Search by team name or paste a handle (for example, `team:example-team`).

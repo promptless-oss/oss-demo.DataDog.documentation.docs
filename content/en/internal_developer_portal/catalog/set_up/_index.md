@@ -1,5 +1,5 @@
 ---
-title: Set Up Software Catalog
+title: Set Up Catalog
 aliases:
   - /software_catalog/set_up
   - /tracing/software_catalog/guides/validating-service-definition  ## aliases for Validating Service Definition page
@@ -37,6 +37,7 @@ aliases:
   - /api_catalog/add_metadata
   - /api_catalog/owners_and_tags
   - /service_catalog/manage
+  - /internal_developer_portal/software_catalog/set_up
 further_reading:
   - link: "https://www.datadoghq.com/blog/manage-service-catalog-categories-with-service-definition-json-schema/"
     tag: "Blog"
@@ -52,26 +53,26 @@ further_reading:
     text: "Best practices for end-to-end service ownership with Datadog Service Catalog"
   - link: "https://learn.datadoghq.com/courses/managing-software-catalog"
     tag: "Learning Center"
-    text: "Managing Services with the Software Catalog"
+    text: "Managing Services with the Catalog"
 
 ---
 
 ## Overview
 
-Software Catalog entities are defined through [Entity Definitions][1], which are Kubernetes-style YAML configuration files. 
+Catalog entities are defined through [Entity Definitions][1], which are Kubernetes-style YAML configuration files. 
 
-To populate Software Catalog, you can:
-- Set up Datadog Application Performance Monitoring (APM), Universal Service Monitoring (USM), Real User Monitoring (RUM), infrastructure metrics, or logs, which automatically feed entity data into Software Catalog.
+To populate Catalog, you can:
+- Set up Datadog Application Performance Monitoring (APM), Universal Service Monitoring (USM), Real User Monitoring (RUM), infrastructure metrics, or logs, which automatically feed entity data into Catalog.
 - Create entity definitions manually or through automation. 
 - Import existing entity definitions from third parties. 
 
 ## Automatically discover entities from Datadog
 
-By default, Software Catalog is automatically populated with entries discovered from APM, USM, and RUM. You can also manually import entries from other Datadog telemetries, like logs. 
+By default, Catalog is automatically populated with entries discovered from APM, USM, and RUM. You can also manually import entries from other Datadog telemetries, like logs. 
 
 {{< whatsnext desc=" " >}}
-    {{< nextlink href="/internal_developer_portal/software_catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum" >}}Discover from APM, USM, and RUM{{< /nextlink >}}
-    {{< nextlink href="/internal_developer_portal/software_catalog/set_up/discover_entities#import-entities-from-infrastructure-and-logs" >}}Import from Infrastructure and Logs{{< /nextlink >}}
+    {{< nextlink href="/internal_developer_portal/catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum" >}}Discover from APM, USM, and RUM{{< /nextlink >}}
+    {{< nextlink href="/internal_developer_portal/catalog/set_up/discover_entities#import-entities-from-infrastructure-and-logs" >}}Import from Infrastructure and Logs{{< /nextlink >}}
 {{< /whatsnext >}}
 
 ### APM
@@ -84,7 +85,7 @@ USM detects Golden Signal metrics (for example, requests, errors, and durations)
 
 ### RUM 
 
-RUM provides frontend user experience data, including page performance, errors, session events, and views. If you have RUM applications, they appear in Software Catalog as **Frontend Apps** in the component selector. 
+RUM provides frontend user experience data, including page performance, errors, session events, and views. If you have RUM applications, they appear in Catalog as **Frontend Apps** in the component selector. 
 
 ### Other Datadog telemetries
 
@@ -96,24 +97,24 @@ When you use [**Import Entities**][10] and choose a data source, Datadog queries
 
 ## Create entities
 
-[Entity definitions][1], defined in entity YAML files, are the canonical source of truth in Software Catalog. You can: 
+[Entity definitions][1], defined in entity YAML files, are the canonical source of truth in Catalog. You can: 
 - Create entity definitions manually through Datadog.
 - Store definitions in a version control system like Git, and set up [Source Code Integration][6] to sync definitions with IDP. Changes made to your files are reflected in Datadog within minutes.
 
 {{< whatsnext desc=" " >}}
-    {{< nextlink href="/internal_developer_portal/software_catalog/set_up/create_entities#through-the-datadog-ui" >}}Create through the Datadog UI{{< /nextlink >}}
-    {{< nextlink href="/internal_developer_portal/software_catalog/set_up/create_entities#through-automation" >}}Create through code automation{{< /nextlink >}}
+    {{< nextlink href="/internal_developer_portal/catalog/set_up/create_entities#through-the-datadog-ui" >}}Create through the Datadog UI{{< /nextlink >}}
+    {{< nextlink href="/internal_developer_portal/catalog/set_up/create_entities#through-automation" >}}Create through code automation{{< /nextlink >}}
 {{< /whatsnext >}}
 
 **Note**: To automatically correlate an entity to its telemetry, the `name` field in your definition must exactly match the primary identifier from the telemetry data. For most services, this is the `service` tag as defined in Datadog's Unified Service Tagging. See examples for [`kind:datastore`][7], [`kind:queue`][8], and other [`entity types`][9].
 
 ## Import entities
 
-If you maintain software inventories in Backstage or ServiceNow CMDB, you can sync these inventories into Datadog's Software Catalog.
+If you maintain software inventories in Backstage or ServiceNow CMDB, you can sync these inventories into Datadog's Catalog.
 
 {{< whatsnext desc=" " >}}
-    {{< nextlink href="/internal_developer_portal/software_catalog/set_up/import_entities#import-from-backstage" >}}Import from Backstage{{< /nextlink >}}
-    {{< nextlink href="/internal_developer_portal/software_catalog/set_up/import_entities#import-from-servicenow" >}}Import from ServiceNow{{< /nextlink >}}
+    {{< nextlink href="/internal_developer_portal/catalog/set_up/import_entities#entities-from-backstage" >}}Import from Backstage{{< /nextlink >}}
+    {{< nextlink href="/internal_developer_portal/catalog/set_up/import_entities#import-from-servicenow" >}}Import from ServiceNow{{< /nextlink >}}
 {{< /whatsnext >}}
 
 ### Backstage 
@@ -124,19 +125,19 @@ You can bring your Backstage entities into Datadog's IDP in one of two ways:
 
 ### ServiceNow
 
-Sync your ServiceNow CMDB inventories with Datadog's Software Catalog by setting up a regular query against your ServiceNow CI tables.
+Sync your ServiceNow CMDB inventories with Datadog's Catalog by setting up a regular query against your ServiceNow CI tables.
 
 ## Define entity ownership
 
-Link entities to teams to enable team-based filtering across Datadog products, route notifications to the right owners, and drive accountability through Scorecards and Campaigns. For details, see [Define ownership for Software Catalog entities][12].
+Link entities to teams to enable team-based filtering across Datadog products, route notifications to the right owners, and drive accountability through Scorecards and Campaigns. For details, see [Define ownership for Catalog entities][12].
 
 ## Verify configuration completeness 
 
-Following monitoring best practices such as tracing, logging, and code profiling helps you ensure that you have all the data you need during incident triage. Software Catalog provides automatic checks for these recommended setups. 
+Following monitoring best practices such as tracing, logging, and code profiling helps you ensure that you have all the data you need during incident triage. Catalog provides automatic checks for these recommended setups. 
 
-To view the configuration completeness for an entity, click the entity in the [Software Catalog][2], then find the **Setup Guidance** tab:
+To view the configuration completeness for an entity, click the entity in the [Catalog][2], then find the **Setup Guidance** tab:
 
-{{< img src="tracing/software_catalog/software-catalog-setup-guidance.png" alt="Software Catalog with the Setup Guidance tab highlighted." >}}
+{{< img src="tracing/software_catalog/software-catalog-setup-guidance.png" alt="Catalog with the Setup Guidance tab highlighted." >}}
 
 The Setup Guidance table does not necessarily reflect billing for individual products, but rather activity for the entity you are presently examining. For example, if the service does not emit infrastructure metrics for a long time, `Infrastructure Monitoring` might have `Not Detected` specified, even if you have hosts or containers running infrastructure monitoring. 
 
@@ -146,8 +147,8 @@ For general information, see [Role Based Access Control][3] and [Role Permission
 
 ### Read permission
 
-The Software Catalog read permission allows a user to read Software Catalog data, which enables the following features:
-- Software Catalog list
+The Catalog read permission allows a user to read Catalog data, which enables the following features:
+- Catalog list
 - Discover UI
 - Service Definition endpoint: `/api/v2/services/definition/<service_name>`
 
@@ -155,7 +156,7 @@ The permission is enabled by default in the **Datadog Read Only Role** and **Dat
 
 ### Write permission
 
-The Software Catalog write permission allows a user to modify Software Catalog data. The write permission is required for the following features:
+The Catalog write permission allows a user to modify Catalog data. The write permission is required for the following features:
 - Inserting or updating a service definition with the `POST /api/v2/services/definitions` endpoint
 - Deleting a service definition with the `DELETE /api/v2/services/definition/<service_name>` endpoint
 - Completing the onboarding process in the Discover Services UI
@@ -167,18 +168,18 @@ The permission is enabled by default in the **Datadog Admin Role** and **Datadog
 
 {{< partial name="whats-next/whats-next.html" >}}
 
-[1]: /internal_developer_portal/software_catalog/entity_model
+[1]: /internal_developer_portal/catalog/entity_model
 [2]: https://app.datadoghq.com/software
 [3]: /account_management/rbac
 [4]: /account_management/rbac/permissions
-[5]: /internal_developer_portal/software_catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum
+[5]: /internal_developer_portal/catalog/set_up/discover_entities#automatic-discovery-with-apm-usm-and-rum
 [6]: /integrations/guide/source-code-integration/
-[7]: /internal_developer_portal/software_catalog/entity_model/entity_types?tab=datastore#datastore-peer-tags
-[8]: /internal_developer_portal/software_catalog/entity_model/entity_types?tab=queue#datastore-peer-tags
-[9]: /internal_developer_portal/software_catalog/entity_model?tab=v30
+[7]: /internal_developer_portal/catalog/entity_model/native_entities/?tab=datastore#datastore-peer-tags
+[8]: /internal_developer_portal/catalog/entity_model/native_entities/?tab=queue#datastore-peer-tags
+[9]: /internal_developer_portal/catalog/entity_model?tab=v30
 [10]: https://app.datadoghq.com/software/settings/get-started
 [11]: https://www.npmjs.com/package/@datadog/backstage-plugin-datadog-entity-sync-backend
-[12]: /internal_developer_portal/software_catalog/set_up/ownership
+[12]: /internal_developer_portal/catalog/set_up/ownership
 
 
 

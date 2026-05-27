@@ -28,6 +28,7 @@ aliases:
   - /tracing/api_catalog/api_catalog_api/
   - /api_catalog/api_catalog_api
   - /service_catalog/apis
+  - /internal_developer_portal/software_catalog/entity_model
 further_reading:
   - link: "https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/service_definition_yaml"
     tag: "External Site"
@@ -46,7 +47,7 @@ further_reading:
     text: "Improve developer experience and collaboration with Service Catalog schema version 3.0"
   - link: "https://www.datadoghq.com/blog/software-catalog-custom-entities/"
     tag: "Blog"
-    text: "Model your architecture with custom entities in the Datadog Software Catalog"
+    text: "Model your architecture with custom entities in the Datadog Catalog"
 algolia:
   tags: [ "codeLocations" ]
 ---
@@ -58,9 +59,9 @@ algolia:
 
 ## Overview
 
-Software Catalog uses definition schemas to store and display relevant metadata about your entities. The schemas have built-in validation rules to ensure that only valid values are accepted. You can view warnings in the **Definition** tab on the Software Catalog side panel for any selected services.
+Catalog uses definition schemas to store and display relevant metadata about your entities. The schemas have built-in validation rules to ensure that only valid values are accepted. You can view warnings in the **Definition** tab on the Catalog side panel for any selected services.
 
-{{< img src="/tracing/internal_developer_portal/entity-model-flow-chart.png" alt="A flow chart showing how components of Software Catalog connect with each other and with your cloud environment " style="width:100%;" >}}
+{{< img src="/tracing/internal_developer_portal/catalog/entity-model-flow-chart.png" alt="A flow chart showing how components of Catalog connect with each other and with your cloud environment " style="width:100%;" >}}
 
 ## Supported versions
 
@@ -91,7 +92,7 @@ For detailed information about each version, including full schemas and example 
 
 ## Version details
 
-{{< callout url="https://forms.gle/fwzarcSww6By7tn39" d_target="#signupModal" btn_hidden="false" header="Opt in to the Preview for the latest version of Software Catalog." >}}
+{{< callout url="https://forms.gle/fwzarcSww6By7tn39" d_target="#signupModal" btn_hidden="false" header="Opt in to the Preview for the latest version of Catalog." >}}
 {{< /callout >}}
 
 {{< tabs >}}
@@ -310,7 +311,7 @@ Components (`kind:service`, `kind:datastore`, `kind:queue`, `kind:ui`) inherit a
 v3.0 supports the same methods of creating metadata as previous versions, including Github, API, Terraform, Backstage, ServiceNow, and the UI. However, there are new [API endpoints][5] and a new [Terraform resource][6] for v3.0.
 
 ### API reference documentation
-To create, get, and delete definitions for all entity types like endpoints, systems, datastores, and queues, see the [Software Catalog API reference][8].
+To create, get, and delete definitions for all entity types like endpoints, systems, datastores, and queues, see the [Catalog API reference][8].
 
 [1]: https://github.com/DataDog/schema/tree/main/service-catalog/v3
 [2]: https://github.com/DataDog/schema/tree/main/service-catalog
@@ -318,7 +319,6 @@ To create, get, and delete definitions for all entity types like endpoints, syst
 [4]: https://en.wikipedia.org/wiki/Glob_(programming)
 [5]: /api/latest/software-catalog/
 [6]: https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/software_catalog
-[7]: software_catalog/customize/import_entries_backstage
 [8]: /api/latest/software-catalog/
 
 {{% /tab %}}
@@ -402,7 +402,7 @@ extensions:
 ### API reference documentation
 
 - To create, get, and delete service definitions, see the [Service Definitions API reference][4].
-- To create, get, and delete definitions for new component types like systems, datastores, and queues, see the [Software Catalog API reference][3].
+- To create, get, and delete definitions for new component types like systems, datastores, and queues, see the [Catalog API reference][3].
 - To create and update service scorecard rules and outcomes, see the [Service Scorecards API reference][2].
 
 [1]: https://github.com/DataDog/schema/tree/main/service-catalog/v2.2
@@ -416,7 +416,7 @@ extensions:
 
 ### Key features
 - New UI elements such as service groupings and fields for `application`, `tier`, and `lifecycle`
-- `Application` and `Teams` can be used as grouping variables in Software Catalog
+- `Application` and `Teams` can be used as grouping variables in Catalog
 - `Lifecycle` field indicates development stage to differentiate between `production`, `experimental`, or `deprecated` services
 - `Tier` field indicates service criticality for prioritizing during incident triage
 
@@ -460,7 +460,7 @@ tags:
 ### API reference documentation
 
 - To create, get, and delete service definitions, see the [Service Definitions API reference][4].
-- To create, get, and delete definitions for new component types like systems, datastores, and queues, see the [Software Catalog API reference][3].
+- To create, get, and delete definitions for new component types like systems, datastores, and queues, see the [Catalog API reference][3].
 - To create and update service scorecard rules and outcomes, see the [Service Scorecards API reference][2].
 
 [1]: https://github.com/DataDog/schema/tree/main/service-catalog/v2.1
@@ -510,7 +510,7 @@ integrations:
 ### API reference documentation
 
 - To create, get, and delete service definitions, see the [Service Definitions API reference][4].
-- To create, get, and delete definitions for new component types like systems, datastores, and queues, see the [Software Catalog API reference][3].
+- To create, get, and delete definitions for new component types like systems, datastores, and queues, see the [Catalog API reference][3].
 - To create and update service scorecard rules and outcomes, see the [Service Scorecards API reference][2].
 
 [1]: https://github.com/DataDog/schema/tree/main/service-catalog/v2
@@ -589,7 +589,7 @@ The [JSON schema for Datadog definitions][20] is registered with the open source
 [8]: https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/service_definition_yaml
 [9]: https://registry.terraform.io/providers/DataDog/datadog/latest/
 [10]: https://github.com/marketplace/actions/datadog-service-catalog-metadata-provider
-[11]: /tracing/software_catalog/service_definition_api/
+[11]: /internal_developer_portal/catalog/entity_model/
 [12]: https://app.datadoghq.com/personal-settings/profile
 [13]: http://json-schema.org/
 [14]: https://www.schemastore.org/json/

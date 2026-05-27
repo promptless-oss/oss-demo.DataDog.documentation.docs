@@ -12,6 +12,7 @@ aliases:
   - /software_catalog/customize/import_entries_backstage
   - /service_catalog/customize/import_entries_servicenow/   ## alias for Import Entries from ServiceNow page
   - /software_catalog/customize/import_entries_servicenow
+  - /internal_developer_portal/software_catalog/set_up/import_entities
 further_reading:
   - link: "https://www.datadoghq.com/blog/service-catalog-backstage-yaml/"
     tag: "Blog"
@@ -28,9 +29,9 @@ If you already have data or services registered in Backstage or ServiceNow, you 
 
 ## Entities from Backstage
 
-### Sync Backstage entities into Datadog Software Catalog
+### Sync Backstage entities into Datadog Catalog
 
-Use the [Datadog Backstage plugin][3] to automatically sync your Backstage catalog entities to the Datadog Software Catalog [entity model][5] on a configurable schedule. The plugin runs as a Backstage backend service and supports entity filtering (for example, you can sync only entities with a specific Backstage component type, such as services or repositories).
+Use the [Datadog Backstage plugin][3] to automatically sync your Backstage catalog entities to the Datadog Catalog [entity model][5] on a configurable schedule. The plugin runs as a Backstage backend service and supports entity filtering (for example, you can sync only entities with a specific Backstage component type, such as services or repositories).
 
 You need a Datadog [API key][6], [application key][7], and [Datadog site][8] parameter (for example, `datadoghq.com`) to configure the plugin. For installation and configuration instructions, see the [plugin README][9].
 
@@ -60,7 +61,7 @@ During import, Datadog maps Backstage data to Datadog data:
 | Other `spec` values | Mapped to custom tags |
 
 <div class="alert alert-danger">
-The Software Catalog processes the entire YAML file as a whole. If any section of the YAML file does not have <code>kind:component</code> or <code>kind:system</code>, the entire <code>catalog-info.yaml</code> file is rejected. Schema version v3.0 is required to use kind:system and the <code>dependsOn</code> field.
+The Catalog processes the entire YAML file as a whole. If any section of the YAML file does not have <code>kind:component</code> or <code>kind:system</code>, the entire <code>catalog-info.yaml</code> file is rejected. Schema version v3.0 is required to use kind:system and the <code>dependsOn</code> field.
 </div>
 
 #### Example YAML for catalog-info.yaml
@@ -81,7 +82,7 @@ spec:
 
 ## Import from ServiceNow
 
-To populate your Datadog Software Catalog with services from your ServiceNow Configuration Management Database (CMDB), use the Service Ingestion feature in the [Datadog-ServiceNow integration][2].
+To populate your Datadog Catalog with services from your ServiceNow Configuration Management Database (CMDB), use the Service Ingestion feature in the [Datadog-ServiceNow integration][2].
 
 {{< img src="integrations/servicenow/service-metadata.jpg" alt="Screenshot of the Service Configuration panel showing metadata populated from ServiceNow" >}}
 
@@ -92,7 +93,7 @@ To populate your Datadog Software Catalog with services from your ServiceNow Con
 
 [2]: /integrations/servicenow/#service-ingestion
 [3]: https://www.npmjs.com/package/@datadog/backstage-plugin-datadog-entity-sync-backend
-[5]: /internal_developer_portal/software_catalog/entity_model/
+[5]: /internal_developer_portal/catalog/entity_model/
 [6]: /account_management/api-app-keys/#api-keys
 [7]: /account_management/api-app-keys/#application-keys
 [8]: /getting_started/site/

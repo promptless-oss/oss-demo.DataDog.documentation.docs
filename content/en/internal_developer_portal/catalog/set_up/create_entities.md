@@ -14,6 +14,7 @@ aliases:
   - /api_catalog/add_entries
   - /service_catalog/customize/create_entries/
   - /software_catalog/customize/create_entries
+  - /internal_developer_portal/software_catalog/set_up/create_entities
 further_reading:
   - link: "https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/service_definition_yaml"
     tag: "External Site"
@@ -26,22 +27,22 @@ further_reading:
     text: "Learn about the Service Definition API"
   - link: "/api/latest/software-catalog/"
     tag: "API"
-    text: "Learn about the Software Catalog API"
+    text: "Learn about the Catalog API"
 ---
 
 ## Overview
 
-To add [entity definitions][13] to Software Catalog, you can:
+To add [entity definitions][13] to Catalog, you can:
 - manually create definitions through the Datadog UI.
 - manage definitions in code and automate import through GitHub, Terraform, or the Datadog API.
 
 ## Through the Datadog UI
 
-Software Catalog provides a guided workflow for creating entity definitions. After you select an entity type from the **Kind** dropdown (Service, API, System, and others), the form presents metadata fields and options specific to that type. For example, selecting **API** surfaces fields for uploading an OpenAPI or gRPC specification, while selecting **Service** surfaces fields for defining the service type and lifecycle.
+Catalog provides a guided workflow for creating entity definitions. After you select an entity type from the **Kind** dropdown (Service, API, System, and others), the form presents metadata fields and options specific to that type. For example, selecting **API** surfaces fields for uploading an OpenAPI or gRPC specification, while selecting **Service** surfaces fields for defining the service type and lifecycle.
 
 To create an entity definition:
 
-1. Navigate to the [Software Catalog Setup & Config][3] page.
+1. Navigate to the [Catalog Setup & Config][3] page.
 1. Click **Create a New Entry**.
 1. Select the entity type from the **Kind** dropdown.
 1. Fill in the metadata fields, such as ownership and reference links.
@@ -51,7 +52,7 @@ To create an entity definition:
 
 1. Submit the metadata by clicking **Save Entry** or by running the provided cURL command.
 
-   **Note**: You must have [Software Catalog Write permission][2] to save the entry.
+   **Note**: You must have [Service Catalog Write permission][2] to save the entry.
 
 
 ## Through automation
@@ -99,14 +100,14 @@ Import the definition in one of the following ways:
 
 1. **Terraform**: Create and import the definition as a [Terraform resource][4]. 
    
-   **Note**: Creating and managing services in the Software Catalog through automated pipelines requires [Datadog Provider][5] v3.16.0 or later.
+   **Note**: Creating and managing services in the Catalog through automated pipelines requires [Datadog Provider][5] v3.16.0 or later.
 
-1. **Datadog APIs**: Import your definition using the [Service Definition API][7] (for schema v2.x) or the [Software Catalog API][8] (for schema v3+), which are both open-sourced GitHub Action solutions.
+1. **Datadog APIs**: Import your definition using the [Service Definition API][7] (for schema v2.x) or the [Catalog API][8] (for schema v3+), which are both open-sourced GitHub Action solutions.
 1. **GitHub**: Configure the [Datadog GitHub integration](#github-integration) to manage and import your definitions.
 
 #### GitHub integration
 
-Configure the [GitHub integration][9] to directly link from where you view the service's definition in the Software Catalog to where it's stored and editable in GitHub. Datadog scans for the `service.datadog.yaml` and `entity.datadog.yaml` files throughout each repository with read permissions.
+Configure the [GitHub integration][9] to directly link from where you view the service's definition in the Catalog to where it's stored and editable in GitHub. Datadog scans for the `service.datadog.yaml` and `entity.datadog.yaml` files throughout each repository with read permissions.
 
 To install the GitHub integration:
 1. Navigate to the [integration tile][10].
@@ -114,9 +115,9 @@ To install the GitHub integration:
 
 When the GitHub integration is set up for your definitions, an **Edit in GitHub** button appears in the service's **Definition** tab and links you to GitHub to commit changes.
 
-{{< img src="tracing/software_catalog/svc_cat_contextual_link.png" alt="An Edit in GitHub button appears in the Definition tab of a service in the Software Catalog" style="width:90%;" >}}
+{{< img src="tracing/software_catalog/svc_cat_contextual_link.png" alt="An Edit in GitHub button appears in the Definition tab of a service in the Catalog" style="width:90%;" >}}
 
-After you update the YAML files for your repositories, your changes propagate to the Software Catalog. You can register multiple services in one YAML file by creating multiple YAML documents. Separate each document with three dashes (`---`).
+After you update the YAML files for your repositories, your changes propagate to the Catalog. You can register multiple services in one YAML file by creating multiple YAML documents. Separate each document with three dashes (`---`).
 
 To prevent accidental overwriting, create and modify your definition files with either the GitHub integration or the [Definition API endpoints][11]. Updating the same service using both the GitHub and the API may result in unintended overwriting.  
 
@@ -130,7 +131,7 @@ To validate your service definitions ingested by Datadog's GitHub integration, y
 
 {{< partial name="whats-next/whats-next.html" >}}
 
-[2]: /internal_developer_portal/software_catalog/set_up#role-based-access-and-permissions
+[2]: /internal_developer_portal/catalog/set_up#configure-role-based-access-and-permissions
 [3]: https://app.datadoghq.com/software/settings/get-started
 [4]: https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/service_definition_yaml
 [5]: https://registry.terraform.io/providers/DataDog/datadog/latest
@@ -140,4 +141,4 @@ To validate your service definitions ingested by Datadog's GitHub integration, y
 [10]: https://app.datadoghq.com/integrations/github
 [11]: /api/latest/software-catalog/#create-or-update-entities
 [12]: https://app.datadoghq.com/event/explorer
-[13]: /internal_developer_portal/software_catalog/entity_model
+[13]: /internal_developer_portal/catalog/entity_model

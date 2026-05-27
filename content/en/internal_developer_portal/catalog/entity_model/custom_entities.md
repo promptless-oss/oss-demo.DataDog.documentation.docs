@@ -1,11 +1,13 @@
 ---
 title: Custom Entities
 disable_toc: false
+aliases:
+  - /internal_developer_portal/software_catalog/entity_model/custom_entities
 further_reading:
-- link: "/internal_developer_portal/software_catalog/set_up/create_entities"
+- link: "/internal_developer_portal/catalog/set_up/create_entities"
   tag: "Documentation"
-  text: "Create entities in Software Catalog"
-- link: "/internal_developer_portal/software_catalog/entity_model/native_entity_types"
+  text: "Create entities in Catalog"
+- link: "/internal_developer_portal/catalog/entity_model/native_entities/"
   tag: "Documentation"
   text: "Learn about native entity types"
 ---
@@ -20,11 +22,11 @@ See GitHub for [full schema definitions][7].
 
 ## Create a custom entity type
 
-You can create custom entity types in Datadog or through the Software Catalog API. After creating the type, you can add entities of that type in Datadog or programmatically through the [Software Catalog APIs][2], [GitHub integration][4], or [Terraform module][3]. 
+You can create custom entity types in Datadog or through the Catalog API. After creating the type, you can add entities of that type in Datadog or programmatically through the [Catalog APIs][2], [GitHub integration][4], or [Terraform module][3]. 
 
 ### In Datadog
 
-1. Navigate to **APM** > **Software Catalog**, and click [**Manage**][8].
+1. Navigate to **APM** > **Catalog**, and click [**Manage**][8].
 1. Click **Manage Custom Entity Types** to view existing entity types, native and custom.
 
    {{< img src="/tracing/internal_developer_portal/manage-entity-types.png" alt="The Manage Entity Types pop-up window, showing existing native and custom types and a button to create a custom entity type" style="width:100%;" >}}
@@ -37,7 +39,7 @@ If you close the window and select **Create New Entry**, your custom type appear
 
 ### Through the API 
 
-Alternatively, define your custom types through the [Software Catalog API][1].
+Alternatively, define your custom types through the [Catalog API][1].
 
 ### Example entity
 
@@ -88,7 +90,7 @@ metadata:
 [2]: /api/latest/software-catalog/#create-or-update-entities
 [3]: https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/software_catalog
 [4]: /integrations/github/
-[5]: /internal_developer_portal/software_catalog/entity_model
-[6]: /internal_developer_portal/software_catalog/entity_model/native_entities
+[5]: /internal_developer_portal/catalog/entity_model
+[6]: /internal_developer_portal/catalog/entity_model/native_entities
 [7]: https://github.com/DataDog/schema/tree/main/service-catalog/v3
 [8]: https://app.datadoghq.com/software/settings/get-started

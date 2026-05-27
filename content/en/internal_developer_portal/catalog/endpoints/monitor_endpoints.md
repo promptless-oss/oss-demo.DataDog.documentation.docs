@@ -18,6 +18,7 @@ aliases:
     - /api_catalog/monitor_apis/
     - /service_catalog/endpoints/monitor_endpoints/
     - /software_catalog/endpoints/monitor_endpoints/
+    - /internal_developer_portal/software_catalog/endpoints/monitor_endpoints
 ---
 
 ## Overview
