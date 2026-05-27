@@ -1026,6 +1026,15 @@ components:
       required: true
       schema:
         type: string
+    OAuthClientUUIDPathParameter:
+      description: UUID of the OAuth2 client.
+      in: path
+      name: client_uuid
+      required: true
+      schema:
+        example: fafa8e1c-36a5-11f0-a83d-da7ad0900001
+        format: uuid
+        type: string
     OnDemandTaskId:
       description: The UUID of the task.
       example: "6d09294c-9ad9-42fd-a759-a0c1599b4828"
@@ -19875,45 +19884,6 @@ components:
       x-enum-varnames:
         - "TRUE"
         - "FALSE"
-    CostTagMetadataMonth:
-      description: A month that has Cloud Cost Management tag metadata available for a given provider.
-      properties:
-        id:
-          description: The month, in `YYYY-MM` format.
-          example: "2026-04"
-          type: string
-        type:
-          $ref: "#/components/schemas/CostTagMetadataMonthType"
-      required:
-        - id
-        - type
-      type: object
-    CostTagMetadataMonthType:
-      default: cost_tag_metadata_month
-      description: Type of the Cloud Cost Management tag metadata month resource.
-      enum:
-        - cost_tag_metadata_month
-      example: cost_tag_metadata_month
-      type: string
-      x-enum-varnames:
-        - COST_TAG_METADATA_MONTH
-    CostTagMetadataMonthsResponse:
-      description: List of months that have Cloud Cost Management tag metadata for the requested provider, ordered most-recent first and capped at 36 months.
-      example:
-        data:
-          - id: "2026-04"
-            type: cost_tag_metadata_month
-          - id: "2026-03"
-            type: cost_tag_metadata_month
-      properties:
-        data:
-          description: List of months that have tag metadata available.
-          items:
-            $ref: "#/components/schemas/CostTagMetadataMonth"
-          type: array
-      required:
-        - data
-      type: object
     CostTagType:
       default: cost_tag
       description: Type of the Cloud Cost Management tag resource.
@@ -55407,6 +55377,256 @@ components:
         - id
         - type
       type: object
+    OAuthClientRegistrationError:
+      description: Error payload returned by OAuth2 dynamic client registration as defined by RFC 7591.
+      properties:
+        error:
+          description: Single ASCII error code per RFC 7591, such as `invalid_request` or `invalid_client_metadata`.
+          example: invalid_client_metadata
+          type: string
+        error_description:
+          description: Human-readable description of the error.
+          example: redirect URI is not well-formed
+          type: string
+      required:
+        - error
+        - error_description
+      type: object
+    OAuthClientRegistrationGrantType:
+      description: OAuth 2.0 grant type that a registered client may use.
+      enum:
+        - authorization_code
+        - refresh_token
+      example: authorization_code
+      type: string
+      x-enum-varnames:
+        - AUTHORIZATION_CODE
+        - REFRESH_TOKEN
+    OAuthClientRegistrationRequest:
+      description: Request payload for OAuth2 dynamic client registration as defined by RFC 7591.
+      properties:
+        client_name:
+          description: Human-readable name of the client. Control characters are rejected.
+          example: Example MCP Client
+          maxLength: 1000
+          type: string
+        client_uri:
+          description: URL of the home page of the client.
+          example: https://example.com
+          maxLength: 1000
+          type: string
+        grant_types:
+          description: |-
+            OAuth 2.0 grant types the client may use.
+            Defaults to `authorization_code` and `refresh_token` when omitted.
+          example:
+            - authorization_code
+            - refresh_token
+          items:
+            $ref: "#/components/schemas/OAuthClientRegistrationGrantType"
+          type: array
+        jwks_uri:
+          description: URL referencing the client's JSON Web Key Set.
+          example: https://example.com/.well-known/jwks.json
+          maxLength: 1000
+          type: string
+        logo_uri:
+          description: URL referencing a logo for the client.
+          example: https://example.com/logo.png
+          maxLength: 1000
+          type: string
+        policy_uri:
+          description: URL pointing to the client's privacy policy.
+          example: https://example.com/privacy
+          maxLength: 1000
+          type: string
+        redirect_uris:
+          description: Array of redirection URI strings used by the client in redirect-based flows.
+          example:
+            - https://example.com/oauth/callback
+          items:
+            description: Redirection URI registered for the client.
+            example: https://example.com/oauth/callback
+            maxLength: 1000
+            type: string
+          type: array
+        response_types:
+          description: OAuth 2.0 response types the client may use. Only `code` is supported.
+          example:
+            - code
+          items:
+            $ref: "#/components/schemas/OAuthClientRegistrationResponseType"
+          type: array
+        scope:
+          description: Space-separated list of scope values the client may request.
+          example: openid profile
+          maxLength: 1000
+          type: string
+        token_endpoint_auth_method:
+          description: Requested authentication method for the token endpoint. Only `none` is supported.
+          example: none
+          maxLength: 20
+          type: string
+        tos_uri:
+          description: URL pointing to the client's terms of service.
+          example: https://example.com/tos
+          maxLength: 1000
+          type: string
+      required:
+        - client_name
+        - redirect_uris
+      type: object
+    OAuthClientRegistrationResponse:
+      description: Response payload for a successful OAuth2 dynamic client registration as defined by RFC 7591.
+      properties:
+        client_id:
+          description: Unique identifier assigned to the registered client.
+          example: 72b68208-36a6-11f0-b21b-da7ad0900002
+          format: uuid
+          type: string
+        client_name:
+          description: Human-readable name of the client.
+          example: Example MCP Client
+          type: string
+        grant_types:
+          description: OAuth 2.0 grant types registered for the client.
+          example:
+            - authorization_code
+            - refresh_token
+          items:
+            $ref: "#/components/schemas/OAuthClientRegistrationGrantType"
+          type: array
+        redirect_uris:
+          description: Redirection URIs registered for the client.
+          example:
+            - https://example.com/oauth/callback
+          items:
+            description: Redirection URI registered for the client.
+            example: https://example.com/oauth/callback
+            type: string
+          type: array
+        response_types:
+          description: OAuth 2.0 response types registered for the client.
+          example:
+            - code
+          items:
+            $ref: "#/components/schemas/OAuthClientRegistrationResponseType"
+          type: array
+        token_endpoint_auth_method:
+          description: Authentication method registered for the token endpoint. Always `none`.
+          example: none
+          type: string
+      required:
+        - client_id
+        - client_name
+        - redirect_uris
+        - token_endpoint_auth_method
+        - grant_types
+        - response_types
+      type: object
+    OAuthClientRegistrationResponseType:
+      description: OAuth 2.0 response type that a registered client may use.
+      enum:
+        - code
+      example: code
+      type: string
+      x-enum-varnames:
+        - CODE
+    OAuthOidcScope:
+      description: OIDC scope a client may be restricted to.
+      enum:
+        - openid
+        - profile
+        - email
+        - offline_access
+      example: openid
+      type: string
+      x-enum-varnames:
+        - OPENID
+        - PROFILE
+        - EMAIL
+        - OFFLINE_ACCESS
+    OAuthScopesRestriction:
+      description: Allowlist of OIDC and permission scopes enforced for the OAuth2 client.
+      nullable: true
+      properties:
+        oidc_scopes:
+          description: OIDC scopes the client is restricted to.
+          example:
+            - openid
+            - email
+          items:
+            $ref: "#/components/schemas/OAuthOidcScope"
+          type: array
+        permission_scopes:
+          description: Datadog permission scopes the client is restricted to.
+          example:
+            - dashboards_read
+            - metrics_read
+          items:
+            description: Datadog permission scope name.
+            example: dashboards_read
+            type: string
+          type: array
+      required:
+        - oidc_scopes
+        - permission_scopes
+      type: object
+    OAuthScopesRestrictionResponse:
+      description: Response payload describing the scopes restriction of an OAuth2 client.
+      properties:
+        data:
+          $ref: "#/components/schemas/OAuthScopesRestrictionResponseData"
+      required:
+        - data
+      type: object
+    OAuthScopesRestrictionResponseAttributes:
+      description: Attributes of an OAuth2 client scopes restriction.
+      properties:
+        required_permission_scopes:
+          description: |-
+            Permission scopes automatically required for this client (for example, mobile-app permission scopes).
+            Returns `null` when no scopes are required.
+          example:
+            - mobile_app_access
+          items:
+            description: Datadog permission scope name.
+            example: mobile_app_access
+            type: string
+          nullable: true
+          type: array
+        scopes_restriction:
+          $ref: "#/components/schemas/OAuthScopesRestriction"
+      required:
+        - scopes_restriction
+        - required_permission_scopes
+      type: object
+    OAuthScopesRestrictionResponseData:
+      description: Data object of an OAuth2 client scopes restriction response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/OAuthScopesRestrictionResponseAttributes"
+        id:
+          description: UUID of the OAuth2 client this restriction applies to.
+          example: fafa8e1c-36a5-11f0-a83d-da7ad0900001
+          format: uuid
+          type: string
+        type:
+          $ref: "#/components/schemas/OAuthScopesRestrictionType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    OAuthScopesRestrictionType:
+      default: scopes_restriction
+      description: JSON:API resource type for an OAuth2 client scopes restriction.
+      enum:
+        - scopes_restriction
+      example: scopes_restriction
+      type: string
+      x-enum-varnames:
+        - SCOPES_RESTRICTION
     OCIConfig:
       description: OCI config.
       properties:
@@ -93390,6 +93610,57 @@ components:
         - id
         - attributes
       type: object
+    UpsertOAuthScopesRestrictionData:
+      description: Data object of an upsert OAuth2 scopes restriction request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/UpsertOAuthScopesRestrictionDataAttributes"
+        type:
+          $ref: "#/components/schemas/UpsertOAuthScopesRestrictionType"
+      required:
+        - type
+      type: object
+    UpsertOAuthScopesRestrictionDataAttributes:
+      description: Attributes of an upsert OAuth2 scopes restriction request.
+      properties:
+        oidc_scopes:
+          description: OIDC scopes the client is allowed to request.
+          example:
+            - openid
+            - email
+          items:
+            $ref: "#/components/schemas/OAuthOidcScope"
+          type: array
+        permission_scopes:
+          description: |-
+            Datadog permission scopes the client is allowed to request.
+            Each value must be a valid permission name.
+          example:
+            - dashboards_read
+            - metrics_read
+          items:
+            description: Datadog permission scope name.
+            example: dashboards_read
+            type: string
+          type: array
+      type: object
+    UpsertOAuthScopesRestrictionRequest:
+      description: Request payload for creating or updating the scopes restriction of an OAuth2 client.
+      properties:
+        data:
+          $ref: "#/components/schemas/UpsertOAuthScopesRestrictionData"
+      required:
+        - data
+      type: object
+    UpsertOAuthScopesRestrictionType:
+      default: upsert_scopes_restriction
+      description: JSON:API resource type for an upsert OAuth2 client scopes restriction request.
+      enum:
+        - upsert_scopes_restriction
+      example: upsert_scopes_restriction
+      type: string
+      x-enum-varnames:
+        - UPSERT_SCOPES_RESTRICTION
     Urgency:
       description: Specifies the level of urgency for a routing rule (low, high, or dynamic).
       enum:
@@ -112523,69 +112794,6 @@ paths:
       tags:
         - Cloud Cost Management
       x-menu-order: 58
-      "x-permission":
-        operator: OR
-        permissions:
-          - cloud_cost_management_read
-      x-unstable: |-
-        **Note**: This endpoint is in preview and is subject to change.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
-  /api/v2/cost/tag_metadata/months:
-    get:
-      description: |-
-        List months that have Cloud Cost Management tag metadata for a given provider,
-        ordered most-recent first. The response is capped at 36 months.
-      operationId: ListCostTagMetadataMonths
-      parameters:
-        - description: |-
-            Provider to scope the query to. Use the value of the `providername` tag in CCM
-            (for example, `aws`, `azure`, `gcp`, `Oracle`, `Confluent Cloud`, `Snowflake`).
-            For costs uploaded through the Custom Costs API, use `custom`.
-            Values are case-sensitive.
-          example: aws
-          in: query
-          name: filter[provider]
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    data:
-                      - id: "2026-04"
-                        type: cost_tag_metadata_month
-                      - id: "2026-03"
-                        type: cost_tag_metadata_month
-              schema:
-                $ref: "#/components/schemas/CostTagMetadataMonthsResponse"
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/APIErrorResponse"
-          description: Bad Request
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/APIErrorResponse"
-          description: Forbidden
-        "429":
-          $ref: "#/components/responses/TooManyRequestsResponse"
-      security:
-        - apiKeyAuth: []
-          appKeyAuth: []
-        - AuthZ:
-            - cloud_cost_management_read
-      summary: List Cloud Cost Management tag metadata months
-      tags:
-        - Cloud Cost Management
-      x-menu-order: 62
       "x-permission":
         operator: OR
         permissions:
@@ -135815,6 +136023,227 @@ paths:
       tags:
         - Cloud Network Monitoring
       x-menu-order: 2
+  /api/v2/oauth2/clients/{client_uuid}/scopes_restriction:
+    delete:
+      description: Delete the scopes restriction configured for the OAuth2 client.
+      operationId: DeleteScopesRestriction
+      parameters:
+        - $ref: "#/components/parameters/OAuthClientUUIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Delete an OAuth2 client scopes restriction
+      tags:
+        - OAuth2 Client Public
+      x-menu-order: 4
+      x-permission:
+        operator: OR
+        permissions:
+          - org_authorized_apps_write
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: Get the scopes restriction configured for the OAuth2 client.
+      operationId: GetScopesRestriction
+      parameters:
+        - $ref: "#/components/parameters/OAuthClientUUIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        required_permission_scopes:
+                        scopes_restriction:
+                          oidc_scopes:
+                            - openid
+                            - email
+                          permission_scopes:
+                            - dashboards_read
+                            - metrics_read
+                      id: fafa8e1c-36a5-11f0-a83d-da7ad0900001
+                      type: scopes_restriction
+              schema:
+                $ref: "#/components/schemas/OAuthScopesRestrictionResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get an OAuth2 client scopes restriction
+      tags:
+        - OAuth2 Client Public
+      x-menu-order: 2
+      x-permission:
+        operator: OR
+        permissions:
+          - org_authorized_apps_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Create or update the scopes restriction configured for the OAuth2 client.
+      operationId: UpsertScopesRestriction
+      parameters:
+        - $ref: "#/components/parameters/OAuthClientUUIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      oidc_scopes:
+                        - openid
+                        - email
+                      permission_scopes:
+                        - dashboards_read
+                        - metrics_read
+                    type: upsert_scopes_restriction
+            schema:
+              $ref: "#/components/schemas/UpsertOAuthScopesRestrictionRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        required_permission_scopes:
+                        scopes_restriction:
+                          oidc_scopes:
+                            - openid
+                            - email
+                          permission_scopes:
+                            - dashboards_read
+                            - metrics_read
+                      id: fafa8e1c-36a5-11f0-a83d-da7ad0900001
+                      type: scopes_restriction
+              schema:
+                $ref: "#/components/schemas/OAuthScopesRestrictionResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Upsert an OAuth2 client scopes restriction
+      tags:
+        - OAuth2 Client Public
+      x-codegen-request-body-name: body
+      x-menu-order: 3
+      x-permission:
+        operator: OR
+        permissions:
+          - org_authorized_apps_write
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/oauth2/register:
+    post:
+      description: Register an OAuth2 client using the Dynamic Client Registration protocol defined in RFC 7591.
+      operationId: RegisterOAuthClient
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  client_name: Example MCP Client
+                  grant_types:
+                    - authorization_code
+                    - refresh_token
+                  redirect_uris:
+                    - https://example.com/oauth/callback
+                  response_types:
+                    - code
+                  token_endpoint_auth_method: none
+            schema:
+              $ref: "#/components/schemas/OAuthClientRegistrationRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    client_id: 72b68208-36a6-11f0-b21b-da7ad0900002
+                    client_name: Example MCP Client
+                    grant_types:
+                      - authorization_code
+                      - refresh_token
+                    redirect_uris:
+                      - https://example.com/oauth/callback
+                    response_types:
+                      - code
+                    token_endpoint_auth_method: none
+              schema:
+                $ref: "#/components/schemas/OAuthClientRegistrationResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    error: invalid_client_metadata
+                    error_description: redirect URI is not well-formed
+              schema:
+                $ref: "#/components/schemas/OAuthClientRegistrationError"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security: []
+      summary: Register an OAuth2 client
+      tags:
+        - OAuth2 Client Public
+      x-codegen-request-body-name: body
+      x-menu-order: 1
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/obs-pipelines/pipelines:
     get:
       description: Retrieve a list of pipelines.
@@ -170749,6 +171178,10 @@ tags:
   - description: |-
       The Network Device Monitoring API allows you to fetch devices and interfaces and their attributes. See the [Network Device Monitoring page](https://docs.datadoghq.com/network_monitoring/) for more information.
     name: Network Device Monitoring
+  - description: |-
+      Configure OAuth2 clients for Datadog.
+      Supports RFC 7591 Dynamic Client Registration and management of OAuth2 client scopes restrictions.
+    name: OAuth2 Client Public
   - description: Auto-generated tag OCI Integration
     name: OCI Integration
   - description: |-
