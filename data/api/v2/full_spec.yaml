@@ -56396,7 +56396,6 @@ components:
         - $ref: "#/components/schemas/ObservabilityPipelineSyslogNgDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineDatabricksZerobusDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineDatadogMetricsDestination"
-        - $ref: "#/components/schemas/ObservabilityPipelineSplunkHecMetricsDestination"
     ObservabilityPipelineConfigPipelineType:
       default: logs
       description: The type of data being ingested. Defaults to `logs` if not specified.
@@ -60518,81 +60517,6 @@ components:
       type: string
       x-enum-varnames:
         - SPLUNK_HEC
-    ObservabilityPipelineSplunkHecMetricsDestination:
-      description: |-
-        The `splunk_hec_metrics` destination forwards metrics to Splunk using the HTTP Event Collector (HEC).
-
-        **Supported pipeline types:** metrics
-      properties:
-        buffer:
-          $ref: "#/components/schemas/ObservabilityPipelineBufferOptions"
-        compression:
-          $ref: "#/components/schemas/ObservabilityPipelineSplunkHecMetricsDestinationCompression"
-        default_namespace:
-          description: Optional default namespace for metrics sent to Splunk HEC.
-          example: "custom_namespace"
-          type: string
-        endpoint_url_key:
-          description: Name of the environment variable or secret that holds the Splunk HEC endpoint URL.
-          example: SPLUNK_HEC_ENDPOINT_URL
-          type: string
-        id:
-          description: The unique identifier for this component. Used in other parts of the pipeline to reference this component (for example, as the `input` to downstream components).
-          example: splunk-hec-metrics-destination
-          type: string
-        index:
-          description: Optional name of the Splunk index where metrics are written.
-          example: "metrics"
-          type: string
-        inputs:
-          description: A list of component IDs whose output is used as the `input` for this component.
-          example: ["metrics-filter-processor"]
-          items:
-            description: The ID of a component whose output is used as input for this destination.
-            type: string
-          type: array
-        source:
-          description: The Splunk source field value for metric events.
-          example: "observability_pipelines"
-          type: string
-        sourcetype:
-          description: The Splunk sourcetype to assign to metric events.
-          example: "custom_sourcetype"
-          type: string
-        tls:
-          $ref: "#/components/schemas/ObservabilityPipelineTls"
-        token_key:
-          description: Name of the environment variable or secret that holds the Splunk HEC token.
-          example: SPLUNK_HEC_TOKEN
-          type: string
-        type:
-          $ref: "#/components/schemas/ObservabilityPipelineSplunkHecMetricsDestinationType"
-      required:
-        - id
-        - type
-        - inputs
-      type: object
-      x-pipeline-types: [metrics]
-    ObservabilityPipelineSplunkHecMetricsDestinationCompression:
-      default: none
-      description: Compression algorithm applied when sending metrics to Splunk HEC.
-      enum:
-        - none
-        - gzip
-      example: none
-      type: string
-      x-enum-varnames:
-        - NONE
-        - GZIP
-    ObservabilityPipelineSplunkHecMetricsDestinationType:
-      default: splunk_hec_metrics
-      description: The destination type. Always `splunk_hec_metrics`.
-      enum:
-        - splunk_hec_metrics
-      example: splunk_hec_metrics
-      type: string
-      x-enum-varnames:
-        - SPLUNK_HEC_METRICS
     ObservabilityPipelineSplunkHecSource:
       description: |-
         The `splunk_hec` source implements the Splunk HTTP Event Collector (HEC) API.
@@ -157831,7 +157755,7 @@ paths:
         **Note**: This endpoint is in beta and may be subject to changes.
         Please check the documentation regularly for updates.
   /api/v2/siem-historical-detections/histsignals/search:
-    get:
+    post:
       description: Search hist signals.
       operationId: SearchSecurityMonitoringHistsignals
       requestBody:
@@ -157883,6 +157807,7 @@ paths:
             - security_monitoring_signals_read
       summary: Search hist signals
       tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
       x-menu-order: 72
       "x-permission":
         operator: OR
