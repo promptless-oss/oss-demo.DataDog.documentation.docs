@@ -19363,9 +19363,6 @@ components:
     ConvertJobResultsToSignalsAttributes:
       description: Attributes for converting historical job results to signals.
       properties:
-        id:
-          description: Request ID.
-          type: string
         jobResultIds:
           description: Job result IDs.
           example:
@@ -38332,10 +38329,34 @@ components:
     HistoricalJobQuery:
       description: Query for selecting logs analyzed by the historical job.
       properties:
+        additionalFilters:
+          description: Additional filters appended to the query at evaluation time.
+          type: string
         aggregation:
           $ref: "#/components/schemas/SecurityMonitoringRuleQueryAggregation"
+        correlatedByFields:
+          description: Fields used to correlate results across queries in sequence detection rules.
+          items:
+            description: Field.
+            type: string
+          type: array
+        correlatedQueryIndex:
+          description: Zero-based index of the query to correlate with in sequence detection rules. Up to 10 queries are supported, so valid values are 0 to 9.
+          format: int64
+          maximum: 9
+          minimum: 0
+          type: integer
+        customQueryExtension:
+          description: Custom query extension used to refine the base query.
+          type: string
         dataSource:
           $ref: "#/components/schemas/SecurityMonitoringStandardDataSource"
+        datasetIds:
+          description: IDs of reference datasets used by this query.
+          items:
+            description: Dataset ID.
+            type: string
+          type: array
         distinctFields:
           description: Field for which the cardinality is measured. Sent as an array.
           items:
@@ -38353,6 +38374,15 @@ components:
           description: When false, events without a group-by value are ignored by the query. When true, events with missing group-by fields are processed with `N/A`, replacing the missing values.
           example: false
           type: boolean
+        index:
+          description: Index used to load the data for this query.
+          type: string
+        indexes:
+          description: Indexes used to load the data for this query. Mutually exclusive with `index`.
+          items:
+            description: Index name.
+            type: string
+          type: array
         metrics:
           description: Group of target fields to aggregate over when using the sum, max, geo data, or new value aggregations. The sum, max, and geo data aggregations only accept one value in this list, whereas the new value aggregation accepts up to five values.
           items:
@@ -38365,6 +38395,9 @@ components:
         query:
           description: Query to run on logs.
           example: a > 3
+          type: string
+        queryLanguage:
+          description: Language used to parse the query string.
           type: string
       type: object
     HistoricalJobResponse:
@@ -38399,6 +38432,10 @@ components:
         modifiedAt:
           description: Last modification time of the job.
           type: string
+        progressRate:
+          description: Job execution progress as a value between 0 and 1. Available for ongoing jobs.
+          format: double
+          type: number
         signalOutput:
           description: Whether the job outputs signals.
           type: boolean
@@ -44145,9 +44182,10 @@ components:
             $ref: "#/components/schemas/CalculatedField"
           type: array
         cases:
-          description: Cases used for generating job results.
+          description: Cases used for generating job results. Up to 10 cases are allowed.
           items:
             $ref: "#/components/schemas/SecurityMonitoringRuleCaseCreate"
+          maxItems: 10
           type: array
         from:
           description: Starting time of data analyzed by the job.
@@ -44177,9 +44215,10 @@ components:
         options:
           $ref: "#/components/schemas/HistoricalJobOptions"
         queries:
-          description: Queries for selecting logs analyzed by the job.
+          description: Queries for selecting logs analyzed by the job. Up to 10 queries are allowed.
           items:
             $ref: "#/components/schemas/HistoricalJobQuery"
+          maxItems: 10
           type: array
         referenceTables:
           description: Reference tables used in the queries.
@@ -44193,10 +44232,11 @@ components:
             type: string
           type: array
         thirdPartyCases:
-          description: Cases for generating results from third-party detection method. Only available for third-party detection method.
+          description: Cases for generating results from third-party detection method. Only available for third-party detection method. Up to 10 cases are allowed.
           example: []
           items:
             $ref: "#/components/schemas/SecurityMonitoringThirdPartyRuleCaseCreate"
+          maxItems: 10
           type: array
         to:
           description: Ending time of data analyzed by the job.
@@ -44218,6 +44258,12 @@ components:
     JobDefinitionFromRule:
       description: Definition of a historical job based on a security monitoring rule.
       properties:
+        caseIndex:
+          description: Zero-based index of the rule case to use as the job's signal condition. When omitted, all cases are evaluated. Up to 10 cases are supported, so valid values are 0 to 9.
+          format: int32
+          maximum: 9
+          minimum: 0
+          type: integer
         from:
           description: Starting time of data analyzed by the job.
           example: 1729843470000
@@ -72329,11 +72375,11 @@ components:
       properties:
         fromRule:
           $ref: "#/components/schemas/JobDefinitionFromRule"
-        id:
-          description: Request ID.
-          type: string
         jobDefinition:
           $ref: "#/components/schemas/JobDefinition"
+        signalOutput:
+          description: Whether the job outputs signals when results are converted.
+          type: boolean
       type: object
     RunHistoricalJobRequestData:
       description: Data for running a historical job request.
