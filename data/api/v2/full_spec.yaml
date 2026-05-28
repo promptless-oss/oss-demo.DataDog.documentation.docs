@@ -93,6 +93,43 @@ components:
       required: true
       schema:
         type: string
+    AnnotationEndTimeQueryParameter:
+      description: End of the time window in milliseconds since the Unix epoch.
+      example: 1704153600000
+      in: query
+      name: end_time
+      required: true
+      schema:
+        format: int64
+        type: integer
+    AnnotationIDPathParameter:
+      description: The ID of the annotation.
+      example: "00000000-0000-0000-0000-000000000000"
+      in: path
+      name: annotation_id
+      required: true
+      schema:
+        format: uuid
+        type: string
+    AnnotationPageIDPathParameter:
+      description: |-
+        The ID of the page, prefixed with the page type and joined by a colon
+        (for example, `dashboard:abc-def-xyz` or `notebook:1234567890`).
+      example: "dashboard:abc-def-xyz"
+      in: path
+      name: page_id
+      required: true
+      schema:
+        type: string
+    AnnotationStartTimeQueryParameter:
+      description: Start of the time window in milliseconds since the Unix epoch.
+      example: 1704067200000
+      in: query
+      name: start_time
+      required: true
+      schema:
+        format: int64
+        type: integer
     AnomalyID:
       description: The UUID of the cost anomaly.
       in: path
@@ -5178,6 +5215,153 @@ components:
         - display
         - markdownTextAnnotation
       type: object
+    AnnotationAttributes:
+      description: Attributes of an annotation returned in a response.
+      properties:
+        author_id:
+          description: Identifier of the user who created the annotation.
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        color:
+          $ref: "#/components/schemas/AnnotationColor"
+        created_at:
+          description: Creation time of the annotation in milliseconds since the Unix epoch.
+          example: 1704067200000
+          format: int64
+          type: integer
+        description:
+          description: User-defined text attached to the annotation.
+          example: "Deployed v2.3.1 to production."
+          type: string
+        end_time:
+          description: End time of the annotation in milliseconds since the Unix epoch. Null for `pointInTime` annotations.
+          example: 1704070800000
+          format: int64
+          nullable: true
+          type: integer
+        modified_at:
+          description: Last modification time of the annotation in milliseconds since the Unix epoch.
+          example: 1704067200000
+          format: int64
+          type: integer
+        page_id:
+          description: |-
+            ID of the page the annotation belongs to, prefixed with the page type and joined by a colon
+            (for example, `dashboard:abc-def-xyz` or `notebook:1234567890`).
+          example: "dashboard:abc-def-xyz"
+          type: string
+        start_time:
+          description: Start time of the annotation in milliseconds since the Unix epoch.
+          example: 1704067200000
+          format: int64
+          type: integer
+        type:
+          $ref: "#/components/schemas/AnnotationKind"
+        widget_ids:
+          description: IDs of widgets the annotation is associated with. When empty or omitted, the annotation applies to the whole page.
+          example:
+            - "1234567890"
+          items:
+            description: Widget ID.
+            type: string
+          type: array
+      required:
+        - page_id
+        - description
+        - author_id
+        - type
+        - color
+        - start_time
+        - end_time
+        - created_at
+        - modified_at
+      type: object
+    AnnotationColor:
+      description: Color used to render the annotation in the UI.
+      enum:
+        - gray
+        - blue
+        - purple
+        - green
+        - yellow
+        - red
+      example: blue
+      type: string
+      x-enum-varnames:
+        - GRAY
+        - BLUE
+        - PURPLE
+        - GREEN
+        - YELLOW
+        - RED
+    AnnotationCreateAttributes:
+      description: Attributes for creating or updating an annotation.
+      properties:
+        color:
+          $ref: "#/components/schemas/AnnotationColor"
+        description:
+          description: User-defined text attached to the annotation.
+          example: "Deployed v2.3.1 to production."
+          type: string
+        end_time:
+          description: End time of the annotation in milliseconds since the Unix epoch. Required for `timeRegion` annotations; omit or set to null for `pointInTime` annotations.
+          example: 1704070800000
+          format: int64
+          nullable: true
+          type: integer
+        page_id:
+          description: |-
+            ID of the page the annotation belongs to, prefixed with the page type and joined by a colon
+            (for example, `dashboard:abc-def-xyz` or `notebook:1234567890`).
+          example: "dashboard:abc-def-xyz"
+          type: string
+        start_time:
+          description: Start time of the annotation in milliseconds since the Unix epoch.
+          example: 1704067200000
+          format: int64
+          type: integer
+        type:
+          $ref: "#/components/schemas/AnnotationKind"
+        widget_ids:
+          description: IDs of widgets the annotation is associated with. When empty or omitted, the annotation applies to the whole page.
+          example:
+            - "1234567890"
+          items:
+            description: Widget ID.
+            type: string
+          type: array
+      required:
+        - page_id
+        - description
+        - type
+        - color
+        - start_time
+      type: object
+    AnnotationCreateRequest:
+      description: Request body for creating an annotation.
+      properties:
+        data:
+          $ref: "#/components/schemas/AnnotationRequestData"
+      required:
+        - data
+      type: object
+    AnnotationData:
+      description: A single annotation resource.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AnnotationAttributes"
+        id:
+          description: Unique identifier of the annotation.
+          example: "00000000-0000-0000-0000-000000000000"
+          format: uuid
+          type: string
+        type:
+          $ref: "#/components/schemas/AnnotationType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     AnnotationDisplay:
       description: The definition of `AnnotationDisplay` object.
       properties:
@@ -5204,12 +5388,158 @@ components:
           format: double
           type: number
       type: object
+    AnnotationInPage:
+      description: A flat annotation object as it appears within a page annotations response.
+      properties:
+        author_id:
+          description: Identifier of the user who created the annotation.
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        color:
+          $ref: "#/components/schemas/AnnotationColor"
+        created_at:
+          description: Creation time of the annotation in milliseconds since the Unix epoch.
+          example: 1704067200000
+          format: int64
+          type: integer
+        description:
+          description: User-defined text attached to the annotation.
+          example: "Deployed v2.3.1 to production."
+          type: string
+        end_time:
+          description: End time of the annotation in milliseconds since the Unix epoch. Null for `pointInTime` annotations.
+          example: 1704070800000
+          format: int64
+          nullable: true
+          type: integer
+        id:
+          description: Unique identifier of the annotation.
+          example: "00000000-0000-0000-0000-000000000000"
+          format: uuid
+          type: string
+        modified_at:
+          description: Last modification time of the annotation in milliseconds since the Unix epoch.
+          example: 1704067200000
+          format: int64
+          type: integer
+        page_id:
+          description: |-
+            ID of the page the annotation belongs to, prefixed with the page type and joined by a colon
+            (for example, `dashboard:abc-def-xyz` or `notebook:1234567890`).
+          example: "dashboard:abc-def-xyz"
+          type: string
+        start_time:
+          description: Start time of the annotation in milliseconds since the Unix epoch.
+          example: 1704067200000
+          format: int64
+          type: integer
+        type:
+          $ref: "#/components/schemas/AnnotationKind"
+        widget_ids:
+          description: IDs of widgets the annotation is associated with. When empty or omitted, the annotation applies to the whole page.
+          example:
+            - "1234567890"
+          items:
+            description: Widget ID.
+            type: string
+          type: array
+      required:
+        - id
+        - page_id
+        - description
+        - author_id
+        - type
+        - color
+        - start_time
+        - end_time
+        - created_at
+        - modified_at
+      type: object
+    AnnotationKind:
+      description: |-
+        Kind of annotation. `pointInTime` annotations mark a single moment in time,
+        while `timeRegion` annotations span a window of time and require an `end_time`.
+      enum:
+        - pointInTime
+        - timeRegion
+      example: pointInTime
+      type: string
+      x-enum-varnames:
+        - POINT_IN_TIME
+        - TIME_REGION
     AnnotationMarkdownTextAnnotation:
       description: The definition of `AnnotationMarkdownTextAnnotation` object.
       properties:
         text:
           description: The `markdownTextAnnotation` `text`.
           type: string
+      type: object
+    AnnotationRequestData:
+      description: Data for creating an annotation.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AnnotationCreateAttributes"
+        type:
+          $ref: "#/components/schemas/AnnotationType"
+      required:
+        - type
+        - attributes
+      type: object
+    AnnotationResponse:
+      description: Response containing a single annotation.
+      properties:
+        data:
+          $ref: "#/components/schemas/AnnotationData"
+      required:
+        - data
+      type: object
+    AnnotationType:
+      description: Annotation resource type.
+      enum:
+        - annotation
+      example: annotation
+      type: string
+      x-enum-varnames:
+        - ANNOTATION
+    AnnotationUpdateRequest:
+      description: Request body for updating an annotation.
+      properties:
+        data:
+          $ref: "#/components/schemas/AnnotationRequestData"
+      required:
+        - data
+      type: object
+    AnnotationsData:
+      description: List of annotation resources.
+      items:
+        $ref: "#/components/schemas/AnnotationData"
+      type: array
+    AnnotationsInPageMap:
+      additionalProperties:
+        $ref: "#/components/schemas/AnnotationInPage"
+      description: Map of annotation UUID to annotation object, keyed by annotation ID.
+      example:
+        "00000000-0000-0000-0000-000000000000":
+          author_id: "00000000-0000-0000-0000-000000000001"
+          color: blue
+          created_at: 1704067200000
+          description: "Deployed v2.3.1 to production."
+          end_time:
+          id: "00000000-0000-0000-0000-000000000000"
+          modified_at: 1704067200000
+          page_id: "dashboard:abc-def-xyz"
+          start_time: 1704067200000
+          type: pointInTime
+          widget_ids:
+            - "1234567890"
+      type: object
+    AnnotationsResponse:
+      description: Response containing a list of annotations.
+      properties:
+        data:
+          $ref: "#/components/schemas/AnnotationsData"
+      required:
+        - data
       type: object
     AnonymizeUserError:
       description: Error encountered when anonymizing a specific user.
@@ -36855,6 +37185,15 @@ components:
       required:
         - type
       type: object
+    GlobalAnnotationIds:
+      description: List of annotation IDs that apply to the entire page rather than a specific widget.
+      example:
+        - "00000000-0000-0000-0000-000000000001"
+      items:
+        description: Annotation ID.
+        format: uuid
+        type: string
+      type: array
     GlobalIncidentSettingsAttributesRequest:
       description: Global incident settings attributes
       properties:
@@ -63863,6 +64202,54 @@ components:
       type: string
       x-enum-varnames:
         - PE_SYMBOL_FILE
+    PageAnnotationsAttributes:
+      description: Attributes of the annotations on a page.
+      properties:
+        annotations:
+          $ref: "#/components/schemas/AnnotationsInPageMap"
+        global_annotations:
+          $ref: "#/components/schemas/GlobalAnnotationIds"
+        widget_mapping:
+          $ref: "#/components/schemas/WidgetAnnotationsMap"
+      required:
+        - annotations
+        - widget_mapping
+        - global_annotations
+      type: object
+    PageAnnotationsData:
+      description: Annotations grouped by widget for a single page.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/PageAnnotationsAttributes"
+        id:
+          description: |-
+            ID of the page, prefixed with the page type and joined by a colon
+            (for example, `dashboard:abc-def-xyz` or `notebook:1234567890`).
+          example: "dashboard:abc-def-xyz"
+          type: string
+        type:
+          $ref: "#/components/schemas/PageAnnotationsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    PageAnnotationsResponse:
+      description: Response containing all annotations on a page, grouped by widget.
+      properties:
+        data:
+          $ref: "#/components/schemas/PageAnnotationsData"
+      required:
+        - data
+      type: object
+    PageAnnotationsType:
+      description: Page annotations resource type.
+      enum:
+        - page_annotations
+      example: page_annotations
+      type: string
+      x-enum-varnames:
+        - PAGE_ANNOTATIONS
     PageUrgency:
       default: high
       description: On-Call Page urgency level.
@@ -95599,6 +95986,23 @@ components:
         - FRIDAY
         - SATURDAY
         - SUNDAY
+    WidgetAnnotationIds:
+      description: List of annotation IDs displayed on a widget.
+      example:
+        - "00000000-0000-0000-0000-000000000000"
+      items:
+        description: Annotation ID.
+        format: uuid
+        type: string
+      type: array
+    WidgetAnnotationsMap:
+      additionalProperties:
+        $ref: "#/components/schemas/WidgetAnnotationIds"
+      description: Map from widget ID to the list of annotation IDs displayed on that widget.
+      example:
+        "1234567890":
+          - "00000000-0000-0000-0000-000000000000"
+      type: object
     WidgetAttributes:
       description: Attributes of a widget resource.
       properties:
@@ -99895,6 +100299,368 @@ paths:
         operator: OR
         permissions:
           - security_monitoring_findings_read
+  /api/v2/annotation:
+    get:
+      description: Returns a flat list of annotations matching the given page, time window, and optional widget filter.
+      operationId: ListAnnotations
+      parameters:
+        - description: |-
+            ID of the page to list annotations for, prefixed with the page type and joined by a colon
+            (for example, `dashboard:abc-def-xyz` or `notebook:1234567890`).
+          example: "dashboard:abc-def-xyz"
+          in: query
+          name: page_id
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/AnnotationStartTimeQueryParameter"
+        - $ref: "#/components/parameters/AnnotationEndTimeQueryParameter"
+        - description: Optional widget ID to restrict results to annotations on a specific widget.
+          in: query
+          name: widget_id
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          author_id: "00000000-0000-0000-0000-000000000001"
+                          color: blue
+                          created_at: 1704067200000
+                          description: "Deployed v2.3.1 to production."
+                          end_time:
+                          modified_at: 1704067200000
+                          page_id: "dashboard:abc-def-xyz"
+                          start_time: 1704067200000
+                          type: pointInTime
+                          widget_ids:
+                            - "1234567890"
+                        id: "00000000-0000-0000-0000-000000000000"
+                        type: annotation
+              schema:
+                $ref: "#/components/schemas/AnnotationsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List annotations
+      tags:
+        - Annotations
+      x-menu-order: 1
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: |-
+        Creates a new annotation on a dashboard or notebook page.
+        Valid `color` values: `gray`, `blue`, `purple`, `green`, `yellow`, `red`.
+        Valid `type` values: `pointInTime` (marks a single moment) or `timeRegion` (spans a range and requires `end_time`).
+      operationId: CreateAnnotation
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      color: blue
+                      description: "Deployed v2.3.1 to production."
+                      page_id: "dashboard:abc-def-xyz"
+                      start_time: 1704067200000
+                      type: pointInTime
+                      widget_ids:
+                        - "1234567890"
+                    type: annotation
+            schema:
+              $ref: "#/components/schemas/AnnotationCreateRequest"
+        description: Annotation to create.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        author_id: "00000000-0000-0000-0000-000000000001"
+                        color: blue
+                        created_at: 1704067200000
+                        description: "Deployed v2.3.1 to production."
+                        end_time:
+                        modified_at: 1704067200000
+                        page_id: "dashboard:abc-def-xyz"
+                        start_time: 1704067200000
+                        type: pointInTime
+                        widget_ids:
+                          - "1234567890"
+                      id: "00000000-0000-0000-0000-000000000000"
+                      type: annotation
+              schema:
+                $ref: "#/components/schemas/AnnotationResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Create an annotation
+      tags:
+        - Annotations
+      x-menu-order: 2
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/annotation/page/{page_id}:
+    get:
+      description: |-
+        Returns all annotations on a specific page for a given time window, grouped by widget.
+        Unlike `ListAnnotations`, this endpoint returns a single structured object with annotations
+        indexed by their ID and a widget-to-annotation mapping for easy UI rendering.
+      operationId: GetPageAnnotations
+      parameters:
+        - $ref: "#/components/parameters/AnnotationPageIDPathParameter"
+        - $ref: "#/components/parameters/AnnotationStartTimeQueryParameter"
+        - $ref: "#/components/parameters/AnnotationEndTimeQueryParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        annotations:
+                          "00000000-0000-0000-0000-000000000000":
+                            author_id: "00000000-0000-0000-0000-000000000001"
+                            color: blue
+                            created_at: 1704067200000
+                            description: "Deployed v2.3.1 to production."
+                            end_time:
+                            id: "00000000-0000-0000-0000-000000000000"
+                            modified_at: 1704067200000
+                            page_id: "dashboard:abc-def-xyz"
+                            start_time: 1704067200000
+                            type: pointInTime
+                            widget_ids:
+                              - "1234567890"
+                        global_annotations:
+                          - "00000000-0000-0000-0000-000000000002"
+                        widget_mapping:
+                          "1234567890":
+                            - "00000000-0000-0000-0000-000000000000"
+                      id: "dashboard:abc-def-xyz"
+                      type: page_annotations
+              schema:
+                $ref: "#/components/schemas/PageAnnotationsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get annotations for a page
+      tags:
+        - Annotations
+      x-menu-order: 3
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/annotation/{annotation_id}:
+    delete:
+      description: |-
+        Deletes an existing annotation by ID.
+        Returns `204 No Content` if the annotation does not exist (idempotent).
+      operationId: DeleteAnnotation
+      parameters:
+        - $ref: "#/components/parameters/AnnotationIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Delete an annotation
+      tags:
+        - Annotations
+      x-menu-order: 5
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: |-
+        Updates an existing annotation.
+        Valid `color` values: `gray`, `blue`, `purple`, `green`, `yellow`, `red`.
+        Valid `type` values: `pointInTime` (marks a single moment) or `timeRegion` (spans a range and requires `end_time`).
+      operationId: UpdateAnnotation
+      parameters:
+        - $ref: "#/components/parameters/AnnotationIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      color: green
+                      description: "Deployed v2.3.1 to production (updated)."
+                      page_id: "dashboard:abc-def-xyz"
+                      start_time: 1704067200000
+                      type: pointInTime
+                      widget_ids:
+                        - "1234567890"
+                    type: annotation
+            schema:
+              $ref: "#/components/schemas/AnnotationUpdateRequest"
+        description: Updated annotation payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        author_id: "00000000-0000-0000-0000-000000000001"
+                        color: green
+                        created_at: 1704067200000
+                        description: "Deployed v2.3.1 to production (updated)."
+                        end_time:
+                        modified_at: 1704070800000
+                        page_id: "dashboard:abc-def-xyz"
+                        start_time: 1704067200000
+                        type: pointInTime
+                        widget_ids:
+                          - "1234567890"
+                      id: "00000000-0000-0000-0000-000000000000"
+                      type: annotation
+              schema:
+                $ref: "#/components/schemas/AnnotationResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Update an annotation
+      tags:
+        - Annotations
+      x-menu-order: 4
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/anonymize_users:
     put:
       description: |-
@@ -171430,6 +172196,8 @@ tags:
       Agentless offers also Sensitive Data Scanning capabilities on your storage.
       Go to https://www.datadoghq.com/blog/agentless-scanning/ to learn more.
     name: "Agentless Scanning"
+  - description: Add annotations to dashboards and notebooks to mark events such as deployments, incidents, or other notable moments in time.
+    name: Annotations
   - description: |-
       Datadog App Builder provides a low-code solution to rapidly develop and integrate secure, customized applications into your monitoring stack that are built to accelerate remediation at scale. These API endpoints allow you to create, read, update, delete, and publish apps.
     name: App Builder
