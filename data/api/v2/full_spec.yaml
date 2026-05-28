@@ -1715,6 +1715,16 @@ components:
         example: 1706803070
         format: int64
         type: integer
+    TraceIDPathParameter:
+      description: |-
+        The trace ID. Accepts either a 32-character hexadecimal string (128-bit trace ID)
+        or a decimal string of up to 39 digits.
+      example: "0000000000000000abc1230000000000"
+      in: path
+      name: trace_id
+      required: true
+      schema:
+        type: string
     UserID:
       description: "The ID of the user."
       in: path
@@ -2108,6 +2118,126 @@ components:
       required:
         - apiTrigger
       type: object
+    APMSpanErrorFlag:
+      description: Error flag for a span. `1` when the span is in error, `0` otherwise.
+      enum:
+        - 0
+        - 1
+      example: 0
+      format: int32
+      type: integer
+      x-enum-varnames:
+        - NO_ERROR
+        - ERROR
+    APMTraceSpan:
+      description: A single APM span returned as part of a trace.
+      properties:
+        duration:
+          description: The duration of the span, in nanoseconds.
+          example: 500000000
+          format: int64
+          type: integer
+        endTime:
+          description: The end time of the span, in Unix nanoseconds.
+          example: 1716800000500000000
+          format: int64
+          type: integer
+        error:
+          $ref: "#/components/schemas/APMSpanErrorFlag"
+        meta:
+          additionalProperties:
+            type: string
+          description: |-
+            String-valued tags attached to the span. Tag keys starting with `_` are
+            filtered out of the response.
+          example:
+            env: production
+            http.method: GET
+          type: object
+        metrics:
+          additionalProperties:
+            format: double
+            type: number
+          description: |-
+            Numeric metrics attached to the span. Metric keys starting with `_` are
+            filtered out of the response.
+          example:
+            http.status_code: 200
+          type: object
+        name:
+          description: The operation name of the span.
+          example: web.request
+          type: string
+        parentID:
+          description: The ID of the parent span, or `0` when the span is a trace root.
+          example: 0
+          format: int64
+          type: integer
+        resource:
+          description: The resource that the span describes.
+          example: GET /products
+          type: string
+        resourceHash:
+          description: A hash of the resource field.
+          example: 6a4e9b7f
+          type: string
+        restricted:
+          description: Whether access to the span is restricted by the organization's data access policies.
+          example: false
+          type: boolean
+        self_time:
+          description: The time spent in the span itself, excluding time spent in child spans, in nanoseconds.
+          example: 250000000
+          format: double
+          type: number
+        service:
+          description: The name of the service that emitted the span.
+          example: web-store
+          type: string
+        spanID:
+          description: The span ID, as an unsigned 64-bit integer.
+          example: 9876543210987654321
+          format: int64
+          type: integer
+        startTime:
+          description: The start time of the span, in Unix nanoseconds.
+          example: 1716800000000000000
+          format: int64
+          type: integer
+        traceID:
+          description: The lower 64 bits of the trace ID, as an unsigned 64-bit integer.
+          example: 12345678901234567890
+          format: int64
+          type: integer
+        traceIDFull:
+          description: The full 128-bit trace ID, encoded as a 32-character hexadecimal string.
+          example: "0000000000000000abc1230000000000"
+          type: string
+        type:
+          description: The type of the span (for example, `web`, `db`, or `rpc`).
+          example: web
+          type: string
+      required:
+        - service
+        - name
+        - resource
+        - traceID
+        - spanID
+        - parentID
+        - startTime
+        - endTime
+        - duration
+        - error
+        - type
+        - meta
+        - metrics
+        - traceIDFull
+      type: object
+    APMTraceSpans:
+      description: The list of spans that compose the trace.
+      items:
+        $ref: "#/components/schemas/APMTraceSpan"
+      type: array
     AWSAccountConfigID:
       description: |-
         Unique Datadog ID of the AWS Account Integration Config.
@@ -67147,6 +67277,60 @@ components:
             $ref: "#/components/schemas/Project"
           type: array
       type: object
+    PrunedTraceAttributes:
+      description: The attributes of a pruned trace returned by the Get pruned trace by ID endpoint.
+      properties:
+        is_truncated:
+          description: |-
+            Indicates whether the underlying trace was truncated because its size
+            exceeded the maximum that can be retrieved from storage.
+          example: false
+          type: boolean
+        size_bytes:
+          description: The size, in bytes, of the original (non-pruned) trace before summarization.
+          example: 12345
+          format: int32
+          maximum: 2147483647
+          type: integer
+        summarized_trace:
+          $ref: "#/components/schemas/SummarizedTrace"
+      required:
+        - summarized_trace
+        - is_truncated
+        - size_bytes
+      type: object
+    PrunedTraceData:
+      description: A pruned trace resource document.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/PrunedTraceAttributes"
+        id:
+          description: The full 128-bit trace ID, encoded as a 32-character hexadecimal string.
+          example: "0000000000000000abc1230000000000"
+          type: string
+        type:
+          $ref: "#/components/schemas/PrunedTraceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    PrunedTraceResponse:
+      description: Response containing a single pruned trace.
+      properties:
+        data:
+          $ref: "#/components/schemas/PrunedTraceData"
+      required:
+        - data
+      type: object
+    PrunedTraceType:
+      description: The type of the pruned trace resource. The value is always `pruned_trace`.
+      enum:
+        - pruned_trace
+      example: pruned_trace
+      type: string
+      x-enum-varnames:
+        - PRUNED_TRACE
     PublishAppResponse:
       description: The response object after an app is successfully published.
       properties:
@@ -85047,6 +85231,110 @@ components:
       type: string
       x-enum-varnames:
         - SUITES_SEARCH
+    SummarizedSpan:
+      description: A node in the pruned trace tree.
+      properties:
+        children:
+          description: The child spans of this node in the pruned tree.
+          example: []
+          items:
+            $ref: "#/components/schemas/SummarizedSpan"
+          type: array
+        durationSeconds:
+          description: The duration of the span, in seconds.
+          example: 0.5
+          format: double
+          type: number
+        endTime:
+          description: The end time of the span, in RFC3339 format.
+          example: "2026-05-27T12:00:00.5Z"
+          format: date-time
+          type: string
+        error:
+          $ref: "#/components/schemas/APMSpanErrorFlag"
+        hidden_child_spans_count:
+          description: The number of child spans that were pruned from this node when summarizing the trace.
+          example: 0
+          format: int32
+          maximum: 2147483647
+          type: integer
+        meta:
+          additionalProperties:
+            type: string
+          description: String-valued tags attached to the span.
+          example:
+            env: production
+          type: object
+        metrics:
+          additionalProperties:
+            format: double
+            type: number
+          description: Numeric metrics attached to the span.
+          example:
+            http.status_code: 200
+          type: object
+        name:
+          description: The operation name of the span.
+          example: web.request
+          type: string
+        parentID:
+          description: The ID of the parent span, or `0` when the span is the trace root.
+          example: 0
+          format: int64
+          type: integer
+        resource:
+          description: The resource that the span describes.
+          example: GET /products
+          type: string
+        service:
+          description: The name of the service that emitted the span.
+          example: web-store
+          type: string
+        spanID:
+          description: The span ID, as an unsigned 64-bit integer.
+          example: 9876543210987654321
+          format: int64
+          type: integer
+        span_kind:
+          description: |-
+            The OpenTelemetry span kind, for example `INTERNAL`, `SERVER`, `CLIENT`,
+            `PRODUCER`, or `CONSUMER`.
+          example: SERVER
+          type: string
+        startTime:
+          description: The start time of the span, in RFC3339 format.
+          example: "2026-05-27T12:00:00Z"
+          format: date-time
+          type: string
+      required:
+        - service
+        - name
+        - resource
+        - parentID
+        - spanID
+        - startTime
+        - endTime
+        - durationSeconds
+        - error
+        - meta
+        - metrics
+        - span_kind
+        - hidden_child_spans_count
+        - children
+      type: object
+    SummarizedTrace:
+      description: A summarized, hierarchical view of a trace.
+      properties:
+        root:
+          $ref: "#/components/schemas/SummarizedSpan"
+        traceId:
+          description: The full 128-bit trace ID, encoded as a 32-character hexadecimal string.
+          example: "0000000000000000abc1230000000000"
+          type: string
+      required:
+        - traceId
+        - root
+      type: object
     SuppressionVersionHistory:
       description: Response object containing the version history of a suppression.
       properties:
@@ -92227,6 +92515,51 @@ components:
       type: string
       x-enum-varnames:
         - SECRET
+    TraceAttributes:
+      description: The attributes of a trace returned by the Get trace by ID endpoint.
+      properties:
+        is_truncated:
+          description: Indicates whether the trace was truncated because its size exceeded the maximum response payload.
+          example: false
+          type: boolean
+        spans:
+          $ref: "#/components/schemas/APMTraceSpans"
+      required:
+        - is_truncated
+        - spans
+      type: object
+    TraceData:
+      description: A trace resource document.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/TraceAttributes"
+        id:
+          description: The full 128-bit trace ID, encoded as a 32-character hexadecimal string.
+          example: "0000000000000000abc1230000000000"
+          type: string
+        type:
+          $ref: "#/components/schemas/TraceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    TraceResponse:
+      description: Response containing a single trace.
+      properties:
+        data:
+          $ref: "#/components/schemas/TraceData"
+      required:
+        - data
+      type: object
+    TraceType:
+      description: The type of the trace resource. The value is always `trace`.
+      enum:
+        - trace
+      example: trace
+      type: string
+      x-enum-varnames:
+        - TRACE
     Trigger:
       description: "One of the triggers that can start the execution of a workflow."
       oneOf:
@@ -143406,6 +143739,160 @@ paths:
         - Rum Audience Management
       x-menu-order: 7
       x-unstable: "**Note**: This endpoint may be subject to changes."
+  /api/v2/pruned_trace/{trace_id}:
+    get:
+      description: |-
+        Retrieve a pruned, hierarchical view of an APM trace by its trace ID.
+        The trace is summarized as a tree of spans rooted at the trace root and reduced in size
+        to keep rendering large traces in the UI practical.
+        This endpoint is rate limited to `60` requests per minute per organization.
+      operationId: GetPrunedTraceByID
+      parameters:
+        - $ref: "#/components/parameters/TraceIDPathParameter"
+        - description: |-
+            Span ID to expand and preserve in the pruned tree even when its branch would
+            normally be summarized.
+          example: 9876543210987654321
+          in: query
+          name: expand_span_id
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: |-
+            Optional Unix time hint, in seconds, used to optimize the lookup of the trace
+            in long-term storage.
+          example: 1716800000
+          in: query
+          name: time_hint
+          required: false
+          schema:
+            format: int32
+            maximum: 2147483647
+            type: integer
+        - description: |-
+            Force the trace to be loaded from a specific source. When unset, the API picks
+            the source automatically.
+          example: driveline
+          in: query
+          name: force_source
+          required: false
+          schema:
+            type: string
+        - description: |-
+            Restrict the pruned tree to spans matching the given `key:value` pairs.
+            Values may be passed as repeated query parameters.
+          example:
+            - service:web-store
+          in: query
+          name: include_path
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: |-
+            Regex patterns of tag keys whose values must be included in the pruned spans.
+            Values may be passed as repeated query parameters.
+          example:
+            - "^http\\."
+          in: query
+          name: tag_include
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: |-
+            Regex patterns of tag keys whose values must be excluded from the pruned spans.
+            Values may be passed as repeated query parameters.
+          example:
+            - "^_dd\\."
+          in: query
+          name: tag_exclude
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: When set to `true`, only service entry spans are included in the pruned tree.
+          example: false
+          in: query
+          name: only_service_entry_spans
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        is_truncated: false
+                        size_bytes: 12345
+                        summarized_trace:
+                          root:
+                            children: []
+                            durationSeconds: 0.5
+                            endTime: "2026-05-27T12:00:00.5Z"
+                            error: 0
+                            hidden_child_spans_count: 0
+                            meta:
+                              env: production
+                            metrics:
+                              http.status_code: 200
+                            name: web.request
+                            parentID: 0
+                            resource: GET /products
+                            service: web-store
+                            spanID: 9876543210987654321
+                            span_kind: SERVER
+                            startTime: "2026-05-27T12:00:00Z"
+                          traceId: "0000000000000000abc1230000000000"
+                      id: "0000000000000000abc1230000000000"
+                      type: pruned_trace
+              schema:
+                $ref: "#/components/schemas/PrunedTraceResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "504":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Gateway Timeout
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - apm_read
+      summary: Get a pruned trace by ID
+      tags:
+        - APM Trace
+      x-menu-order: 2
+      x-permission:
+        operator: OR
+        permissions:
+          - apm_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/query/scalar:
     post:
       description: |-
@@ -169664,6 +170151,97 @@ paths:
         operator: OR
         permissions:
           - test_optimization_read
+  /api/v2/trace/{trace_id}:
+    get:
+      description: |-
+        Retrieve a full APM trace by its trace ID, including every span in the trace.
+        Traces are returned from live storage when available and fall back to longer-term storage.
+        This endpoint is rate limited to `60` requests per minute per organization.
+      operationId: GetTraceByID
+      parameters:
+        - $ref: "#/components/parameters/TraceIDPathParameter"
+        - description: |-
+            List of span fields to include in the response. When omitted, every available field is returned.
+            Values may be passed as repeated query parameters or as a single comma-separated value.
+          example:
+            - service
+            - resource_name
+          in: query
+          name: include_fields
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        is_truncated: false
+                        spans:
+                          - duration: 500000000
+                            endTime: 1716800000500000000
+                            error: 0
+                            meta:
+                              env: production
+                              http.method: GET
+                            metrics:
+                              http.status_code: 200
+                            name: web.request
+                            parentID: 0
+                            resource: GET /products
+                            service: web-store
+                            spanID: 9876543210987654321
+                            startTime: 1716800000000000000
+                            traceID: 12345678901234567890
+                            traceIDFull: 0000000000000000abc1230000000000
+                            type: web
+                      id: "0000000000000000abc1230000000000"
+                      type: trace
+              schema:
+                $ref: "#/components/schemas/TraceResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Payload Too Large
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - apm_read
+      summary: Get a trace by ID
+      tags:
+        - APM Trace
+      x-menu-order: 1
+      x-permission:
+        operator: OR
+        permissions:
+          - apm_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/usage/application_security:
     get:
       deprecated: true
@@ -172160,6 +172738,8 @@ tags:
       description: Find out more at
       url: https://docs.datadoghq.com/tracing/trace_pipeline/trace_retention/
     name: APM Retention Filters
+  - description: Retrieve full or pruned APM traces by trace ID.
+    name: APM Trace
   - description: |-
       Configure your Datadog-AWS integration directly through the Datadog API.
       For more information, see the [AWS integration page](https://docs.datadoghq.com/integrations/amazon_web_services).
