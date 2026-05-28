@@ -26354,6 +26354,9 @@ components:
         description:
           description: Description of the degradation.
           type: string
+        is_backfilled:
+          description: Whether the degradation was backfilled.
+          type: boolean
         modified_at:
           description: Timestamp of when the degradation was last modified.
           format: date-time
@@ -51022,6 +51025,9 @@ components:
         in_progress_description:
           description: The description shown while the maintenance is in progress.
           type: string
+        is_backfilled:
+          description: Whether the maintenance was backfilled.
+          type: boolean
         modified_at:
           description: Timestamp of when the maintenance was last modified.
           format: date-time
