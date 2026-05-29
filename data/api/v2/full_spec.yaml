@@ -77508,6 +77508,53 @@ components:
       required:
         - status
       type: object
+    SecurityMonitoringRuleConvertBulkAttributes:
+      description: Attributes for bulk converting security monitoring rules to Terraform.
+      properties:
+        ruleIds:
+          description: "List of rule IDs to convert. Each rule will be included in the resulting ZIP file\nas a separate Terraform file."
+          example:
+            - def-000-u7q
+            - def-000-7dd
+          items:
+            description: A rule ID to include in the bulk convert.
+            type: string
+          minItems: 1
+          type: array
+      required:
+        - ruleIds
+      type: object
+    SecurityMonitoringRuleConvertBulkData:
+      description: Data for bulk converting security monitoring rules to Terraform.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SecurityMonitoringRuleConvertBulkAttributes"
+        id:
+          description: Request ID.
+          example: convert_bulk
+          type: string
+        type:
+          $ref: "#/components/schemas/SecurityMonitoringRuleConvertBulkDataType"
+      required:
+        - attributes
+        - type
+      type: object
+    SecurityMonitoringRuleConvertBulkDataType:
+      description: The type of the resource.
+      enum:
+        - security_monitoring_rules_convert_bulk
+      example: security_monitoring_rules_convert_bulk
+      type: string
+      x-enum-varnames:
+        - SECURITY_MONITORING_RULES_CONVERT_BULK
+    SecurityMonitoringRuleConvertBulkPayload:
+      description: Payload for bulk converting security monitoring rules to Terraform.
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityMonitoringRuleConvertBulkData"
+      required:
+        - data
+      type: object
     SecurityMonitoringRuleConvertPayload:
       description: Convert a rule from JSON to Terraform.
       oneOf:
@@ -156654,6 +156701,64 @@ paths:
         operator: OR
         permissions:
           - security_monitoring_rules_write
+  /api/v2/security_monitoring/rules/convert/bulk:
+    post:
+      description: |-
+        Convert a list of existing security monitoring rules to Terraform for the Datadog provider
+        resource `datadog_security_monitoring_rule`. Returns a ZIP archive containing one Terraform
+        file per rule. You can convert rules for the following types:
+        - App and API Protection
+        - Cloud SIEM (log detection and signal correlation)
+        - Workload Protection
+      operationId: BulkConvertExistingSecurityMonitoringRules
+      requestBody:
+        content:
+          "application/json":
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      ruleIds:
+                        - def-000-u7q
+                        - def-000-7dd
+                    id: convert_bulk
+                    type: security_monitoring_rules_convert_bulk
+            schema:
+              $ref: "#/components/schemas/SecurityMonitoringRuleConvertBulkPayload"
+        required: true
+      responses:
+        "200":
+          content:
+            application/zip:
+              examples:
+                default:
+                  value: "<binary zip data>"
+              schema:
+                format: binary
+                type: string
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_read
+      summary: Bulk convert rules to Terraform
+      tags: ["Security Monitoring"]
+      x-codegen-request-body-name: body
+      x-menu-order: 127
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_read
   /api/v2/security_monitoring/rules/test:
     post:
       description: |-
