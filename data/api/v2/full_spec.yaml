@@ -93,6 +93,14 @@ components:
       required: true
       schema:
         type: string
+    AccessTokenID:
+      description: The ID of the access token.
+      in: path
+      name: token_id
+      required: true
+      schema:
+        example: "00000000-0000-1234-0000-000000000000"
+        type: string
     AnnotationEndTimeQueryParameter:
       description: End of the time window in milliseconds since the Unix epoch.
       example: 1704153600000
@@ -1278,18 +1286,10 @@ components:
       required: true
       schema:
         type: string
-    PersonalAccessTokenID:
-      description: The ID of the personal access token.
-      in: path
-      name: pat_id
-      required: true
-      schema:
-        example: "00000000-0000-1234-0000-000000000000"
-        type: string
-    PersonalAccessTokensFilterOwnerUUIDParameter:
-      description: Filter personal access tokens by the owner's UUID. Supports multiple values.
+    PersonalAccessTokensFilterOwnerIDParameter:
+      description: Filter access tokens by the owner's ID. Supports multiple values.
       in: query
-      name: filter[owner_uuid]
+      name: filter[owned_by]
       required: false
       schema:
         items:
@@ -1297,7 +1297,7 @@ components:
           type: string
         type: array
     PersonalAccessTokensFilterParameter:
-      description: Filter personal access tokens by the specified string.
+      description: Filter access tokens by the specified string.
       in: query
       name: filter
       required: false
@@ -1305,7 +1305,7 @@ components:
         type: string
     PersonalAccessTokensSortParameter:
       description: |-
-        Personal access token attribute used to sort results. Sort order is ascending
+        Access token attribute used to sort results. Sort order is ascending
         by default. In order to specify a descending sort, prefix the
         attribute with a minus sign.
       in: query
@@ -3407,6 +3407,45 @@ components:
         xray_services:
           $ref: "#/components/schemas/XRayServicesList"
       type: object
+    AccessTokenListItem:
+      description: An access token entry returned by the personal access tokens list endpoint. May represent either a personal or a service access token.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/PersonalAccessTokenAttributes"
+        id:
+          description: ID of the access token.
+          type: string
+        relationships:
+          $ref: "#/components/schemas/AccessTokenListItemRelationships"
+        type:
+          $ref: "#/components/schemas/AccessTokensType"
+      type: object
+    AccessTokenListItemRelationships:
+      description: Resources related to the access token entry in the mixed list response.
+      properties:
+        owned_by:
+          $ref: "#/components/schemas/RelationshipToAccessTokenOwner"
+      type: object
+    AccessTokenOwnerType:
+      description: Owner resource type. Either a user or a service account.
+      enum:
+        - users
+        - service_account
+      example: users
+      type: string
+      x-enum-varnames:
+        - USERS
+        - SERVICE_ACCOUNT
+    AccessTokensType:
+      description: Resource type returned by the access tokens list endpoint. Includes both personal and service access tokens.
+      enum:
+        - personal_access_tokens
+        - service_access_tokens
+      example: personal_access_tokens
+      type: string
+      x-enum-varnames:
+        - PERSONAL_ACCESS_TOKENS
+        - SERVICE_ACCESS_TOKENS
     AccountFilteringConfig:
       description: The account filtering configuration.
       properties:
@@ -35424,12 +35463,12 @@ components:
         - requirements
       type: object
     FullPersonalAccessToken:
-      description: Datadog personal access token, including the token key.
+      description: Datadog access token, including the token key.
       properties:
         attributes:
           $ref: "#/components/schemas/FullPersonalAccessTokenAttributes"
         id:
-          description: ID of the personal access token.
+          description: ID of the access token.
           type: string
         relationships:
           $ref: "#/components/schemas/PersonalAccessTokenRelationships"
@@ -35437,36 +35476,88 @@ components:
           $ref: "#/components/schemas/PersonalAccessTokensType"
       type: object
     FullPersonalAccessTokenAttributes:
-      description: Attributes of a full personal access token, including the token key.
+      description: Attributes of a full access token, including the token key.
       properties:
         created_at:
-          description: Creation date of the personal access token.
+          description: Creation date of the access token.
           example: "2024-01-01T00:00:00+00:00"
           format: date-time
           readOnly: true
           type: string
         expires_at:
-          description: Expiration date of the personal access token.
+          description: Expiration date of the access token.
           example: "2025-12-31T23:59:59+00:00"
           format: date-time
           nullable: true
           readOnly: true
           type: string
         key:
-          description: The personal access token key. Only returned upon creation.
+          description: The access token key. Only returned upon creation.
           readOnly: true
           type: string
         name:
-          description: Name of the personal access token.
-          example: "My Personal Access Token"
+          description: Name of the access token.
+          example: "My Access Token"
           type: string
         public_portion:
-          description: The public portion of the personal access token.
+          description: The public portion of the access token.
           example: "ddpat_abc123"
           readOnly: true
           type: string
         scopes:
-          description: Array of scopes granted to the personal access token.
+          description: Array of scopes granted to the access token.
+          example:
+            - "dashboards_read"
+            - "dashboards_write"
+          items:
+            description: Name of scope.
+            type: string
+          type: array
+      type: object
+    FullServiceAccessToken:
+      description: Datadog access token, including the token key.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/FullServiceAccessTokenAttributes"
+        id:
+          description: ID of the access token.
+          type: string
+        relationships:
+          $ref: "#/components/schemas/ServiceAccessTokenRelationships"
+        type:
+          $ref: "#/components/schemas/ServiceAccessTokensType"
+      type: object
+    FullServiceAccessTokenAttributes:
+      description: Attributes of a full access token, including the token key.
+      properties:
+        created_at:
+          description: Creation date of the access token.
+          example: "2024-01-01T00:00:00+00:00"
+          format: date-time
+          readOnly: true
+          type: string
+        expires_at:
+          description: Expiration date of the access token.
+          example: "2025-12-31T23:59:59+00:00"
+          format: date-time
+          nullable: true
+          readOnly: true
+          type: string
+        key:
+          description: The access token key. Only returned upon creation.
+          readOnly: true
+          type: string
+        name:
+          description: Name of the access token.
+          example: "My Access Token"
+          type: string
+        public_portion:
+          description: The public portion of the access token.
+          example: "ddsat_abc123"
+          readOnly: true
+          type: string
+        scopes:
+          description: Array of scopes granted to the access token.
           example:
             - "dashboards_read"
             - "dashboards_write"
@@ -50096,12 +50187,12 @@ components:
           type: array
       type: object
     ListPersonalAccessTokensResponse:
-      description: Response for a list of personal access tokens.
+      description: Response for a list of access tokens. Includes both personal and service access tokens.
       properties:
         data:
-          description: Array of personal access tokens.
+          description: Array of access tokens. Includes both personal and service access tokens.
           items:
-            $ref: "#/components/schemas/PersonalAccessToken"
+            $ref: "#/components/schemas/AccessTokenListItem"
           type: array
         meta:
           $ref: "#/components/schemas/PersonalAccessTokenResponseMeta"
@@ -50386,6 +50477,17 @@ components:
           $ref: "#/components/schemas/SecurityFindingsLinks"
         meta:
           $ref: "#/components/schemas/SecurityFindingsMeta"
+      type: object
+    ListServiceAccessTokensResponse:
+      description: Response for a list of access tokens.
+      properties:
+        data:
+          description: Array of access tokens.
+          items:
+            $ref: "#/components/schemas/ServiceAccessToken"
+          type: array
+        meta:
+          $ref: "#/components/schemas/ServiceAccessTokenResponseMeta"
       type: object
     ListTagsResponse:
       description: List tags response.
@@ -65342,12 +65444,12 @@ components:
       x-enum-varnames:
         - PERMISSIONS
     PersonalAccessToken:
-      description: Datadog personal access token.
+      description: Datadog access token.
       properties:
         attributes:
           $ref: "#/components/schemas/PersonalAccessTokenAttributes"
         id:
-          description: ID of the personal access token.
+          description: ID of the access token.
           type: string
         relationships:
           $ref: "#/components/schemas/PersonalAccessTokenRelationships"
@@ -65355,46 +65457,46 @@ components:
           $ref: "#/components/schemas/PersonalAccessTokensType"
       type: object
     PersonalAccessTokenAttributes:
-      description: Attributes of a personal access token.
+      description: Attributes of an access token.
       properties:
         created_at:
-          description: Creation date of the personal access token.
+          description: Creation date of the access token.
           example: "2024-01-01T00:00:00+00:00"
           format: date-time
           readOnly: true
           type: string
         expires_at:
-          description: Expiration date of the personal access token.
+          description: Expiration date of the access token.
           example: "2025-12-31T23:59:59+00:00"
           format: date-time
           nullable: true
           readOnly: true
           type: string
         last_used_at:
-          description: Date the personal access token was last used.
+          description: Date the access token was last used.
           example: "2025-06-15T12:30:00+00:00"
           format: date-time
           nullable: true
           readOnly: true
           type: string
         modified_at:
-          description: Date of last modification of the personal access token.
+          description: Date of last modification of the access token.
           example: "2024-06-01T00:00:00+00:00"
           format: date-time
           nullable: true
           readOnly: true
           type: string
         name:
-          description: Name of the personal access token.
-          example: "My Personal Access Token"
+          description: Name of the access token.
+          example: "My Access Token"
           type: string
         public_portion:
-          description: The public portion of the personal access token.
+          description: The public portion of the access token.
           example: "ddpat_abc123"
           readOnly: true
           type: string
         scopes:
-          description: Array of scopes granted to the personal access token.
+          description: Array of scopes granted to the access token.
           example:
             - "dashboards_read"
             - "dashboards_write"
@@ -65404,19 +65506,19 @@ components:
           type: array
       type: object
     PersonalAccessTokenCreateAttributes:
-      description: Attributes used to create a personal access token.
+      description: Attributes used to create an access token.
       properties:
         expires_at:
-          description: Expiration date of the personal access token. Must be at least 24 hours in the future.
+          description: Expiration date of the access token. Must be at least 24 hours in the future.
           example: "2025-12-31T23:59:59+00:00"
           format: date-time
           type: string
         name:
-          description: Name of the personal access token.
+          description: Name of the access token.
           example: "My Personal Access Token"
           type: string
         scopes:
-          description: Array of scopes to grant the personal access token.
+          description: Array of scopes to grant the access token.
           example:
             - "dashboards_read"
             - "dashboards_write"
@@ -65430,7 +65532,7 @@ components:
         - expires_at
       type: object
     PersonalAccessTokenCreateData:
-      description: Object used to create a personal access token.
+      description: Object used to create an access token.
       properties:
         attributes:
           $ref: "#/components/schemas/PersonalAccessTokenCreateAttributes"
@@ -65441,7 +65543,7 @@ components:
         - type
       type: object
     PersonalAccessTokenCreateRequest:
-      description: Request used to create a personal access token.
+      description: Request used to create an access token.
       properties:
         data:
           $ref: "#/components/schemas/PersonalAccessTokenCreateData"
@@ -65449,25 +65551,25 @@ components:
         - data
       type: object
     PersonalAccessTokenCreateResponse:
-      description: Response for creating a personal access token. Includes the token key.
+      description: Response for creating an access token. Includes the token key.
       properties:
         data:
           $ref: "#/components/schemas/FullPersonalAccessToken"
       type: object
     PersonalAccessTokenRelationships:
-      description: Resources related to the personal access token.
+      description: Resources related to the access token.
       properties:
         owned_by:
           $ref: "#/components/schemas/RelationshipToUser"
       type: object
     PersonalAccessTokenResponse:
-      description: Response for retrieving a personal access token.
+      description: Response for retrieving an access token.
       properties:
         data:
           $ref: "#/components/schemas/PersonalAccessToken"
       type: object
     PersonalAccessTokenResponseMeta:
-      description: Additional information related to the personal access token response.
+      description: Additional information related to the access token response.
       properties:
         page:
           $ref: "#/components/schemas/PersonalAccessTokenResponseMetaPage"
@@ -65476,19 +65578,19 @@ components:
       description: Pagination information.
       properties:
         total_filtered_count:
-          description: Total filtered personal access token count.
+          description: Total filtered access token count.
           format: int64
           type: integer
       type: object
     PersonalAccessTokenUpdateAttributes:
-      description: Attributes used to update a personal access token.
+      description: Attributes used to update an access token.
       properties:
         name:
-          description: Name of the personal access token.
+          description: Name of the access token.
           example: "Updated Personal Access Token"
           type: string
         scopes:
-          description: Array of scopes to grant the personal access token.
+          description: Array of scopes to grant the access token.
           example:
             - "dashboards_read"
             - "dashboards_write"
@@ -65498,12 +65600,12 @@ components:
           type: array
       type: object
     PersonalAccessTokenUpdateData:
-      description: Object used to update a personal access token.
+      description: Object used to update an access token.
       properties:
         attributes:
           $ref: "#/components/schemas/PersonalAccessTokenUpdateAttributes"
         id:
-          description: ID of the personal access token.
+          description: ID of the access token.
           example: "00112233-4455-6677-8899-aabbccddeeff"
           type: string
         type:
@@ -65514,7 +65616,7 @@ components:
         - type
       type: object
     PersonalAccessTokenUpdateRequest:
-      description: Request used to update a personal access token.
+      description: Request used to update an access token.
       properties:
         data:
           $ref: "#/components/schemas/PersonalAccessTokenUpdateData"
@@ -65531,6 +65633,8 @@ components:
         - -created_at
         - expires_at
         - -expires_at
+        - last_used_at
+        - -last_used_at
       type: string
       x-enum-varnames:
         - NAME_ASCENDING
@@ -65539,6 +65643,8 @@ components:
         - CREATED_AT_DESCENDING
         - EXPIRES_AT_ASCENDING
         - EXPIRES_AT_DESCENDING
+        - LAST_USED_AT_ASCENDING
+        - LAST_USED_AT_DESCENDING
     PersonalAccessTokensType:
       default: personal_access_tokens
       description: Personal access tokens resource type.
@@ -68992,6 +69098,27 @@ components:
           description: Relationship type.
           type: string
       type: object
+    RelationshipToAccessTokenOwner:
+      description: Relationship to the access token's owner.
+      properties:
+        data:
+          $ref: "#/components/schemas/RelationshipToAccessTokenOwnerData"
+      required:
+        - data
+      type: object
+    RelationshipToAccessTokenOwnerData:
+      description: Relationship to the access token's owner.
+      properties:
+        id:
+          description: A unique identifier that represents the owner.
+          example: "00000000-0000-0000-2345-000000000000"
+          type: string
+        type:
+          $ref: "#/components/schemas/AccessTokenOwnerType"
+      required:
+        - id
+        - type
+      type: object
     RelationshipToIncident:
       description: Relationship to incident.
       properties:
@@ -69346,6 +69473,27 @@ components:
           type: string
         type:
           $ref: "#/components/schemas/SAMLAssertionAttributesType"
+      required:
+        - id
+        - type
+      type: object
+    RelationshipToServiceAccount:
+      description: Relationship to service account.
+      properties:
+        data:
+          $ref: "#/components/schemas/RelationshipToServiceAccountData"
+      required:
+        - data
+      type: object
+    RelationshipToServiceAccountData:
+      description: Relationship to service account object.
+      properties:
+        id:
+          description: A unique identifier that represents the service account.
+          example: "00000000-0000-0000-2345-000000000000"
+          type: string
+        type:
+          $ref: "#/components/schemas/ServiceAccountType"
       required:
         - id
         - type
@@ -80674,6 +80822,109 @@ components:
         - REPLACEMENT_STRING
         - PARTIAL_REPLACEMENT_FROM_BEGINNING
         - PARTIAL_REPLACEMENT_FROM_END
+    ServiceAccessToken:
+      description: Datadog access token.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ServiceAccessTokenAttributes"
+        id:
+          description: ID of the access token.
+          type: string
+        relationships:
+          $ref: "#/components/schemas/ServiceAccessTokenRelationships"
+        type:
+          $ref: "#/components/schemas/ServiceAccessTokensType"
+      type: object
+    ServiceAccessTokenAttributes:
+      description: Attributes of an access token.
+      properties:
+        created_at:
+          description: Creation date of the access token.
+          example: "2024-01-01T00:00:00+00:00"
+          format: date-time
+          readOnly: true
+          type: string
+        expires_at:
+          description: Expiration date of the access token.
+          example: "2025-12-31T23:59:59+00:00"
+          format: date-time
+          nullable: true
+          readOnly: true
+          type: string
+        last_used_at:
+          description: Date the access token was last used.
+          example: "2025-06-15T12:30:00+00:00"
+          format: date-time
+          nullable: true
+          readOnly: true
+          type: string
+        modified_at:
+          description: Date of last modification of the access token.
+          example: "2024-06-01T00:00:00+00:00"
+          format: date-time
+          nullable: true
+          readOnly: true
+          type: string
+        name:
+          description: Name of the access token.
+          example: "My Access Token"
+          type: string
+        public_portion:
+          description: The public portion of the access token.
+          example: "ddsat_abc123"
+          readOnly: true
+          type: string
+        scopes:
+          description: Array of scopes granted to the access token.
+          example:
+            - "dashboards_read"
+            - "dashboards_write"
+          items:
+            description: Name of scope.
+            type: string
+          type: array
+      type: object
+    ServiceAccessTokenCreateResponse:
+      description: Response for creating an access token. Includes the token key.
+      properties:
+        data:
+          $ref: "#/components/schemas/FullServiceAccessToken"
+      type: object
+    ServiceAccessTokenRelationships:
+      description: Resources related to the access token.
+      properties:
+        owned_by:
+          $ref: "#/components/schemas/RelationshipToServiceAccount"
+      type: object
+    ServiceAccessTokenResponse:
+      description: Response for retrieving an access token.
+      properties:
+        data:
+          $ref: "#/components/schemas/ServiceAccessToken"
+      type: object
+    ServiceAccessTokenResponseMeta:
+      description: Additional information related to the access token response.
+      properties:
+        page:
+          $ref: "#/components/schemas/ServiceAccessTokenResponseMetaPage"
+      type: object
+    ServiceAccessTokenResponseMetaPage:
+      description: Pagination information.
+      properties:
+        total_filtered_count:
+          description: Total filtered access token count.
+          format: int64
+          type: integer
+      type: object
+    ServiceAccessTokensType:
+      default: service_access_tokens
+      description: Service access tokens resource type.
+      enum:
+        - service_access_tokens
+      example: service_access_tokens
+      type: string
+      x-enum-varnames:
+        - SERVICE_ACCESS_TOKENS
     ServiceAccountAccessTokenCreateAttributes:
       description: Attributes used to create a service account access token.
       properties:
@@ -80705,7 +80956,7 @@ components:
         attributes:
           $ref: "#/components/schemas/ServiceAccountAccessTokenCreateAttributes"
         type:
-          $ref: "#/components/schemas/PersonalAccessTokensType"
+          $ref: "#/components/schemas/ServiceAccessTokensType"
       required:
         - attributes
         - type
@@ -80715,6 +80966,47 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/ServiceAccountAccessTokenCreateData"
+      required:
+        - data
+      type: object
+    ServiceAccountAccessTokenUpdateAttributes:
+      description: Attributes used to update a service account access token.
+      properties:
+        name:
+          description: Name of the access token.
+          example: "Updated Service Access Token"
+          type: string
+        scopes:
+          description: Array of scopes to grant the access token.
+          example:
+            - "dashboards_read"
+            - "dashboards_write"
+          items:
+            description: Name of scope.
+            type: string
+          type: array
+      type: object
+    ServiceAccountAccessTokenUpdateData:
+      description: Object used to update a service account access token.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ServiceAccountAccessTokenUpdateAttributes"
+        id:
+          description: ID of the access token.
+          example: "00112233-4455-6677-8899-aabbccddeeff"
+          type: string
+        type:
+          $ref: "#/components/schemas/ServiceAccessTokensType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    ServiceAccountAccessTokenUpdateRequest:
+      description: Request used to update a service account access token.
+      properties:
+        data:
+          $ref: "#/components/schemas/ServiceAccountAccessTokenUpdateData"
       required:
         - data
       type: object
@@ -80760,6 +81052,14 @@ components:
       required:
         - data
       type: object
+    ServiceAccountType:
+      description: Service account resource type.
+      enum:
+        - service_account
+      example: service_account
+      type: string
+      x-enum-varnames:
+        - SERVICE_ACCOUNT
     ServiceDefinitionCreateResponse:
       description: Create service definitions response.
       properties:
@@ -141878,14 +142178,14 @@ paths:
           - user_access_read
   /api/v2/personal_access_tokens:
     get:
-      description: List all personal access tokens for the organization.
+      description: List all access tokens for the organization.
       operationId: ListPersonalAccessTokens
       parameters:
         - $ref: "#/components/parameters/PageSize"
         - $ref: "#/components/parameters/PageNumber"
         - $ref: "#/components/parameters/PersonalAccessTokensSortParameter"
         - $ref: "#/components/parameters/PersonalAccessTokensFilterParameter"
-        - $ref: "#/components/parameters/PersonalAccessTokensFilterOwnerUUIDParameter"
+        - $ref: "#/components/parameters/PersonalAccessTokensFilterOwnerIDParameter"
       responses:
         "200":
           content:
@@ -141898,6 +142198,7 @@ paths:
                           created_at: "2024-01-01T00:00:00+00:00"
                           expires_at: "2025-12-31T23:59:59+00:00"
                           name: My Personal Access Token
+                          public_portion: ddpat_abc123
                           scopes:
                             - dashboards_read
                         id: 00000000-0000-0000-0000-000000000002
@@ -141922,7 +142223,7 @@ paths:
           description: Forbidden
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Get all personal access tokens
+      summary: Get all access tokens
       tags:
         - Key Management
       x-menu-order: 16
@@ -141995,12 +142296,12 @@ paths:
         operator: OR
         permissions:
           - user_app_keys
-  /api/v2/personal_access_tokens/{pat_id}:
+  /api/v2/personal_access_tokens/{token_id}:
     delete:
       description: Revoke a specific personal access token.
       operationId: RevokePersonalAccessToken
       parameters:
-        - $ref: "#/components/parameters/PersonalAccessTokenID"
+        - $ref: "#/components/parameters/AccessTokenID"
       responses:
         "204":
           description: No Content
@@ -142028,10 +142329,10 @@ paths:
           - user_app_keys
           - org_app_keys_write
     get:
-      description: Get a specific personal access token by its UUID.
+      description: Get a specific personal access token by its ID.
       operationId: GetPersonalAccessToken
       parameters:
-        - $ref: "#/components/parameters/PersonalAccessTokenID"
+        - $ref: "#/components/parameters/AccessTokenID"
       responses:
         "200":
           content:
@@ -142044,6 +142345,7 @@ paths:
                         created_at: "2024-01-01T00:00:00+00:00"
                         expires_at: "2025-12-31T23:59:59+00:00"
                         name: My Personal Access Token
+                        public_portion: ddpat_abc123
                         scopes:
                           - dashboards_read
                       id: 00000000-0000-0000-0000-000000000003
@@ -142078,7 +142380,7 @@ paths:
       description: Update a specific personal access token.
       operationId: UpdatePersonalAccessToken
       parameters:
-        - $ref: "#/components/parameters/PersonalAccessTokenID"
+        - $ref: "#/components/parameters/AccessTokenID"
       requestBody:
         content:
           application/json:
@@ -142108,6 +142410,7 @@ paths:
                         created_at: "2024-01-01T00:00:00+00:00"
                         expires_at: "2025-12-31T23:59:59+00:00"
                         name: My Personal Access Token
+                        public_portion: ddpat_abc123
                         scopes:
                           - dashboards_read
                       id: 00000000-0000-0000-0000-000000000004
@@ -158970,16 +159273,17 @@ paths:
                       - attributes:
                           created_at: "2024-01-01T00:00:00+00:00"
                           expires_at: "2025-12-31T23:59:59+00:00"
-                          name: My Personal Access Token
+                          name: My Service Access Token
+                          public_portion: ddsat_abc123
                           scopes:
                             - dashboards_read
                         id: 00000000-0000-0000-0000-000000000005
-                        type: personal_access_tokens
+                        type: service_access_tokens
                     meta:
                       page:
                         total_filtered_count: 1
               schema:
-                $ref: "#/components/schemas/ListPersonalAccessTokensResponse"
+                $ref: "#/components/schemas/ListServiceAccessTokensResponse"
           description: OK
         "400":
           content:
@@ -159026,7 +159330,7 @@ paths:
                       scopes:
                         - dashboards_read
                         - dashboards_write
-                    type: personal_access_tokens
+                    type: service_access_tokens
             schema:
               $ref: "#/components/schemas/ServiceAccountAccessTokenCreateRequest"
         required: true
@@ -159042,14 +159346,14 @@ paths:
                         created_at: "2024-01-01T00:00:00+00:00"
                         expires_at: "2025-12-31T23:59:59+00:00"
                         key: "<TOKEN>"
-                        name: My Personal Access Token
-                        public_portion: ddpat_abc123
+                        name: My Service Access Token
+                        public_portion: ddsat_abc123
                         scopes:
                           - dashboards_read
                       id: 00000000-0000-0000-0000-000000000006
-                      type: personal_access_tokens
+                      type: service_access_tokens
               schema:
-                $ref: "#/components/schemas/PersonalAccessTokenCreateResponse"
+                $ref: "#/components/schemas/ServiceAccessTokenCreateResponse"
           description: Created
         "400":
           content:
@@ -159080,13 +159384,13 @@ paths:
         operator: OR
         permissions:
           - service_account_write
-  /api/v2/service_accounts/{service_account_id}/access_tokens/{pat_id}:
+  /api/v2/service_accounts/{service_account_id}/access_tokens/{token_id}:
     delete:
       description: Revoke a specific access token for a service account.
       operationId: RevokeServiceAccountAccessToken
       parameters:
         - $ref: "#/components/parameters/ServiceAccountID"
-        - $ref: "#/components/parameters/PersonalAccessTokenID"
+        - $ref: "#/components/parameters/AccessTokenID"
       responses:
         "204":
           description: No Content
@@ -159113,11 +159417,11 @@ paths:
         permissions:
           - service_account_write
     get:
-      description: Get a specific access token for a service account by its UUID.
+      description: Get a specific access token for a service account by its ID.
       operationId: GetServiceAccountAccessToken
       parameters:
         - $ref: "#/components/parameters/ServiceAccountID"
-        - $ref: "#/components/parameters/PersonalAccessTokenID"
+        - $ref: "#/components/parameters/AccessTokenID"
       responses:
         "200":
           content:
@@ -159129,13 +159433,14 @@ paths:
                       attributes:
                         created_at: "2024-01-01T00:00:00+00:00"
                         expires_at: "2025-12-31T23:59:59+00:00"
-                        name: My Personal Access Token
+                        name: My Service Access Token
+                        public_portion: ddsat_abc123
                         scopes:
                           - dashboards_read
                       id: 00000000-0000-0000-0000-000000000007
-                      type: personal_access_tokens
+                      type: service_access_tokens
               schema:
-                $ref: "#/components/schemas/PersonalAccessTokenResponse"
+                $ref: "#/components/schemas/ServiceAccessTokenResponse"
           description: OK
         "403":
           content:
@@ -159164,7 +159469,7 @@ paths:
       operationId: UpdateServiceAccountAccessToken
       parameters:
         - $ref: "#/components/parameters/ServiceAccountID"
-        - $ref: "#/components/parameters/PersonalAccessTokenID"
+        - $ref: "#/components/parameters/AccessTokenID"
       requestBody:
         content:
           application/json:
@@ -159173,14 +159478,14 @@ paths:
                 value:
                   data:
                     attributes:
-                      name: Updated Personal Access Token
+                      name: Updated Service Access Token
                       scopes:
                         - dashboards_read
                         - dashboards_write
                     id: 00112233-4455-6677-8899-aabbccddeeff
-                    type: personal_access_tokens
+                    type: service_access_tokens
             schema:
-              $ref: "#/components/schemas/PersonalAccessTokenUpdateRequest"
+              $ref: "#/components/schemas/ServiceAccountAccessTokenUpdateRequest"
         required: true
       responses:
         "200":
@@ -159193,13 +159498,14 @@ paths:
                       attributes:
                         created_at: "2024-01-01T00:00:00+00:00"
                         expires_at: "2025-12-31T23:59:59+00:00"
-                        name: My Personal Access Token
+                        name: My Service Access Token
+                        public_portion: ddsat_abc123
                         scopes:
                           - dashboards_read
                       id: 00000000-0000-0000-0000-000000000008
-                      type: personal_access_tokens
+                      type: service_access_tokens
               schema:
-                $ref: "#/components/schemas/PersonalAccessTokenResponse"
+                $ref: "#/components/schemas/ServiceAccessTokenResponse"
           description: OK
         "400":
           content:
