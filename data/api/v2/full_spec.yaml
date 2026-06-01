@@ -138757,6 +138757,12 @@ paths:
           name: tags
           schema:
             type: string
+        - description: Free-form search query using AND/OR/NOT operators, wildcards, and parentheses. When provided, takes precedence over the `tags` parameter.
+          example: "(client_team:networks OR client_team:platform) AND server_service:hucklebuck"
+          in: query
+          name: query
+          schema:
+            type: string
         - description: The number of connections to be returned. The maximum value is 7500. The default is 100.
           in: query
           name: limit
@@ -138817,6 +138823,12 @@ paths:
         - description: Comma-separated list of tags to filter DNS traffic by.
           in: query
           name: tags
+          schema:
+            type: string
+        - description: Free-form search query using AND/OR/NOT operators, wildcards, and parentheses. When provided, takes precedence over the `tags` parameter.
+          example: "(client_team:networks OR client_team:platform) AND server_service:hucklebuck"
+          in: query
+          name: query
           schema:
             type: string
         - description: The number of aggregated DNS entries to be returned. The maximum value is 7500. The default is 100.
