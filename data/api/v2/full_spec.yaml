@@ -50481,6 +50481,51 @@ components:
           example: "/api/v2/catalog/relation?filter[from_ref]=service:service-catalog&include=entity&page[limit]=2&page[offset]=0"
           type: string
       type: object
+    ListRowsResponse:
+      description: Paginated list of reference table rows.
+      example:
+        data:
+          - attributes:
+              values:
+                category: tor
+                intention: suspicious
+                ip_address: 102.130.113.9
+            id: 102.130.113.9
+            type: row
+        links:
+          first: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Blimit%5D=100"
+          self: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Bcontinuation_token%5D=eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ%3D%3D&page%5Blimit%5D=100"
+      properties:
+        data:
+          description: The rows.
+          items:
+            $ref: "#/components/schemas/TableRowResourceData"
+          type: array
+        links:
+          $ref: "#/components/schemas/ListRowsResponseLinks"
+      required:
+        - data
+        - links
+      type: object
+    ListRowsResponseLinks:
+      description: Pagination links for the list rows response.
+      properties:
+        first:
+          description: Link to the first page of results.
+          example: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Blimit%5D=100"
+          type: string
+        next:
+          description: Link to the next page of results. Only present when more rows are available.
+          example: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Bcontinuation_token%5D=eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ%3D%3D&page%5Blimit%5D=100"
+          type: string
+        self:
+          description: Link to the current page of results.
+          example: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Bcontinuation_token%5D=eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ%3D%3D&page%5Blimit%5D=100"
+          type: string
+      required:
+        - self
+        - first
+      type: object
     ListRulesResponse:
       description: Scorecard rules response.
       properties:
@@ -138757,12 +138802,6 @@ paths:
           name: tags
           schema:
             type: string
-        - description: Free-form search query using AND/OR/NOT operators, wildcards, and parentheses. When provided, takes precedence over the `tags` parameter.
-          example: "(client_team:networks OR client_team:platform) AND server_service:hucklebuck"
-          in: query
-          name: query
-          schema:
-            type: string
         - description: The number of connections to be returned. The maximum value is 7500. The default is 100.
           in: query
           name: limit
@@ -138823,12 +138862,6 @@ paths:
         - description: Comma-separated list of tags to filter DNS traffic by.
           in: query
           name: tags
-          schema:
-            type: string
-        - description: Free-form search query using AND/OR/NOT operators, wildcards, and parentheses. When provided, takes precedence over the `tags` parameter.
-          example: "(client_team:networks OR client_team:platform) AND server_service:hucklebuck"
-          in: query
-          name: query
           schema:
             type: string
         - description: The number of aggregated DNS entries to be returned. The maximum value is 7500. The default is 100.
@@ -145805,6 +145838,74 @@ paths:
       tags:
         - Reference Tables
       x-menu-order: 8
+  /api/v2/reference-tables/tables/{id}/rows/list:
+    get:
+      description: List all rows in a reference table using cursor-based pagination. Pass the `page[continuation_token]` from the previous response to fetch the next page on the same consistent snapshot. Returns 400 for tables with more than 10,000,000 rows.
+      operationId: ListReferenceTableRows
+      parameters:
+        - description: Unique identifier of the reference table to list rows from.
+          example: "00000000-0000-0000-0000-000000000000"
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - description: Number of rows to return per page. Defaults to 100, maximum is 1000.
+          example: 100
+          in: query
+          name: page[limit]
+          required: false
+          schema:
+            default: 100
+            format: int64
+            maximum: 1000
+            minimum: 1
+            type: integer
+        - description: Opaque cursor from the previous response's next link. Pass this to retrieve the next page on the same consistent snapshot.
+          example: "eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ=="
+          in: query
+          name: page[continuation_token]
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          values:
+                            category: tor
+                            intention: suspicious
+                            ip_address: 102.130.113.9
+                        id: 102.130.113.9
+                        type: row
+                    links:
+                      first: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Blimit%5D=100"
+                      next: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Bcontinuation_token%5D=eyJzaWQiOjY5NzA0ODkwNDE4ODA3MTAzOTgsInBrIjoiMTAyLjEzMC4xMjcuMTE3In0%3D&page%5Blimit%5D=100"
+                      self: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Bcontinuation_token%5D=eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ%3D%3D&page%5Blimit%5D=100"
+              schema:
+                $ref: "#/components/schemas/ListRowsResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ: []
+      summary: List rows
+      tags:
+        - Reference Tables
+      x-menu-order: 11
   /api/v2/reference-tables/uploads:
     post:
       description: Create a reference table upload for bulk data ingestion
