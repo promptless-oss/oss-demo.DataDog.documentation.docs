@@ -1096,6 +1096,13 @@ components:
       required: true
       schema:
         type: string
+    OpsgenieAccountIDPathParameter:
+      description: The UUID of the Opsgenie account.
+      in: path
+      name: account_id
+      required: true
+      schema:
+        type: string
     OpsgenieServiceIDPathParameter:
       description: The UUID of the service.
       in: path
@@ -62860,6 +62867,129 @@ components:
           description: Binary `OpenAPI` spec file
           format: binary
           type: string
+      type: object
+    OpsgenieAccountCreateAttributes:
+      description: The Opsgenie account attributes for a create request.
+      properties:
+        api_key:
+          description: The Opsgenie API key for your Opsgenie account.
+          example: "00000000-0000-0000-0000-000000000000"
+          minLength: 1
+          type: string
+        region:
+          $ref: "#/components/schemas/OpsgenieServiceRegionType"
+      required:
+        - api_key
+        - region
+      type: object
+    OpsgenieAccountCreateData:
+      description: Opsgenie account data for a create request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/OpsgenieAccountCreateAttributes"
+        type:
+          $ref: "#/components/schemas/OpsgenieAccountType"
+      required:
+        - type
+        - attributes
+      type: object
+    OpsgenieAccountCreateRequest:
+      description: Create request for an Opsgenie account.
+      properties:
+        data:
+          $ref: "#/components/schemas/OpsgenieAccountCreateData"
+      required:
+        - data
+      type: object
+    OpsgenieAccountResponse:
+      description: Response containing an Opsgenie account.
+      properties:
+        data:
+          $ref: "#/components/schemas/OpsgenieAccountResponseData"
+      required:
+        - data
+      type: object
+    OpsgenieAccountResponseAttributes:
+      description: The attributes from an Opsgenie account response.
+      properties:
+        region:
+          $ref: "#/components/schemas/OpsgenieServiceRegionType"
+      type: object
+    OpsgenieAccountResponseData:
+      description: Opsgenie account data from a response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/OpsgenieAccountResponseAttributes"
+        id:
+          description: The ID of the Opsgenie account.
+          example: "596da4af-0563-4097-90ff-07230c3f9db3"
+          maxLength: 100
+          minLength: 1
+          type: string
+        type:
+          $ref: "#/components/schemas/OpsgenieAccountType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    OpsgenieAccountType:
+      default: opsgenie-account
+      description: Opsgenie account resource type.
+      enum:
+        - opsgenie-account
+      example: opsgenie-account
+      type: string
+      x-enum-varnames:
+        - OPSGENIE_ACCOUNT
+    OpsgenieAccountUpdateAttributes:
+      description: The Opsgenie account attributes for an update request.
+      properties:
+        api_key:
+          description: The Opsgenie API key for your Opsgenie account.
+          example: "00000000-0000-0000-0000-000000000000"
+          minLength: 1
+          type: string
+        region:
+          $ref: "#/components/schemas/OpsgenieServiceRegionType"
+      type: object
+    OpsgenieAccountUpdateData:
+      description: Opsgenie account data for an update request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/OpsgenieAccountUpdateAttributes"
+        id:
+          description: The ID of the Opsgenie account.
+          example: "596da4af-0563-4097-90ff-07230c3f9db3"
+          maxLength: 100
+          minLength: 1
+          type: string
+        type:
+          $ref: "#/components/schemas/OpsgenieAccountType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    OpsgenieAccountUpdateRequest:
+      description: Update request for an Opsgenie account.
+      properties:
+        data:
+          $ref: "#/components/schemas/OpsgenieAccountUpdateData"
+      required:
+        - data
+      type: object
+    OpsgenieAccountsResponse:
+      description: Response with a list of Opsgenie accounts.
+      properties:
+        data:
+          description: An array of Opsgenie accounts.
+          example: [{"attributes": {"region": "us"}, "id": "596da4af-0563-4097-90ff-07230c3f9db3", "type": "opsgenie-account"}, {"attributes": {"region": "eu"}, "id": "0d2937f1-b561-44fa-914a-99910f848014", "type": "opsgenie-account"}]
+          items:
+            $ref: "#/components/schemas/OpsgenieAccountResponseData"
+          type: array
+      required:
+        - data
       type: object
     OpsgenieServiceCreateAttributes:
       description: The Opsgenie service attributes for a create request.
@@ -127028,6 +127158,165 @@ paths:
       tags:
         - OCI Integration
       x-menu-order: 6
+  /api/v2/integration/opsgenie/accounts:
+    get:
+      description: Get a list of all Opsgenie accounts from the Datadog Opsgenie integration.
+      operationId: ListOpsgenieAccounts
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          region: us
+                        id: 00000000-0000-0000-0000-000000000001
+                        type: opsgenie-account
+              schema:
+                $ref: "#/components/schemas/OpsgenieAccountsResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get all Opsgenie accounts
+      tags:
+        - Opsgenie Integration
+      x-menu-order: 6
+      "x-permission":
+        operator: OR
+        permissions:
+          - integrations_read
+    post:
+      description: Create a new Opsgenie account in the Datadog Opsgenie integration.
+      operationId: CreateOpsgenieAccount
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      api_key: 00000000-0000-0000-0000-000000000000
+                      region: us
+                    type: opsgenie-account
+            schema:
+              $ref: "#/components/schemas/OpsgenieAccountCreateRequest"
+        description: Opsgenie account payload.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        region: us
+                      id: 00000000-0000-0000-0000-000000000002
+                      type: opsgenie-account
+              schema:
+                $ref: "#/components/schemas/OpsgenieAccountResponse"
+          description: CREATED
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Create a new Opsgenie account
+      tags:
+        - Opsgenie Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 7
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+  /api/v2/integration/opsgenie/accounts/{account_id}:
+    delete:
+      description: Delete a single Opsgenie account from the Datadog Opsgenie integration.
+      operationId: DeleteOpsgenieAccount
+      parameters:
+        - $ref: "#/components/parameters/OpsgenieAccountIDPathParameter"
+      responses:
+        "204":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Delete an Opsgenie account
+      tags:
+        - Opsgenie Integration
+      x-menu-order: 9
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+    patch:
+      description: Update a single Opsgenie account in the Datadog Opsgenie integration.
+      operationId: UpdateOpsgenieAccount
+      parameters:
+        - $ref: "#/components/parameters/OpsgenieAccountIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      api_key: 00000000-0000-0000-0000-000000000000
+                      region: us
+                    id: 596da4af-0563-4097-90ff-07230c3f9db3
+                    type: opsgenie-account
+            schema:
+              $ref: "#/components/schemas/OpsgenieAccountUpdateRequest"
+        description: Opsgenie account payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        region: us
+                      id: 00000000-0000-0000-0000-000000000003
+                      type: opsgenie-account
+              schema:
+                $ref: "#/components/schemas/OpsgenieAccountResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntityResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update an Opsgenie account
+      tags:
+        - Opsgenie Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 8
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
   /api/v2/integration/opsgenie/services:
     get:
       description: Get a list of all services from the Datadog Opsgenie integration.
