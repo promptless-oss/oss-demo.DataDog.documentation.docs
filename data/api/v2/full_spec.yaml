@@ -77282,73 +77282,90 @@ components:
         - attributes
       type: object
     SecurityEntityRiskScoreAttributes:
-      description: Attributes of an entity risk score
+      description: Attributes of an entity risk score.
       properties:
+        accountIds:
+          description: Cloud account IDs associated with the entity.
+          example: ["222233334444", "3333333555555"]
+          items:
+            description: A cloud account ID.
+            type: string
+          type: array
         configRisks:
           $ref: "#/components/schemas/SecurityEntityConfigRisks"
-        entityID:
-          description: Unique identifier for the entity
-          example: "arn:aws:iam::123456789012:user/john.doe"
-          type: string
         entityMetadata:
           $ref: "#/components/schemas/SecurityEntityMetadata"
         entityName:
-          description: Human-readable name of the entity
+          description: Human-readable name of the entity.
           example: "john.doe"
           type: string
         entityProviders:
-          description: Cloud providers associated with the entity
-          example: ["aws"]
+          description: Cloud providers associated with the entity.
+          example: ["AWS"]
           items:
             description: A cloud provider name.
             type: string
           type: array
         entityRoles:
-          description: Roles associated with the entity
-          example: ["Admin", "Developer"]
+          description: Roles associated with the entity.
+          example: []
           items:
             description: A role assigned to the entity.
             type: string
           type: array
+        entitySubTypes:
+          description: Sub-types associated with the entity.
+          example: ["Root"]
+          items:
+            description: An entity sub-type label.
+            type: string
+          type: array
         entityType:
-          description: Type of the entity (e.g., aws_iam_user, aws_ec2_instance)
+          description: Type of the entity (for example, aws_iam_user, aws_ec2_instance).
           example: "aws_iam_user"
           type: string
+        entityTypes:
+          description: All types associated with the entity.
+          example: ["Root", "User Name"]
+          items:
+            description: An entity type label.
+            type: string
+          type: array
         firstDetected:
-          description: Timestamp when the entity was first detected (Unix milliseconds)
-          example: 1704067200000
+          description: Timestamp when the entity was first detected (Unix milliseconds).
+          example: 1778876604661
           format: int64
           type: integer
         lastActivityTitle:
-          description: Title of the most recent signal detected for this entity
+          description: Title of the most recent signal detected for this entity.
           example: "Suspicious API call detected"
           type: string
         lastDetected:
-          description: Timestamp when the entity was last detected (Unix milliseconds)
-          example: 1705276800000
+          description: Timestamp when the entity was last detected (Unix milliseconds).
+          example: 1780064607093
           format: int64
           type: integer
         riskScore:
-          description: Current risk score for the entity
+          description: Current risk score for the entity.
           example: 85
           format: int64
           type: integer
         riskScoreEvolution:
-          description: Change in risk score compared to previous period
+          description: Change in risk score compared to previous period.
           example: 12
           format: int64
           type: integer
         severity:
           $ref: "#/components/schemas/SecurityEntityRiskScoreAttributesSeverity"
         signalsDetected:
-          description: Number of security signals detected for this entity
+          description: Number of security signals detected for this entity.
           example: 15
           format: int64
           type: integer
       required:
-        - entityID
-        - entityType
         - entityProviders
+        - entitySubTypes
+        - accountIds
         - riskScore
         - riskScoreEvolution
         - severity
@@ -77375,11 +77392,19 @@ components:
         - MEDIUM
         - LOW
         - INFO
+    SecurityEntityRiskScoreResponse:
+      description: Response containing a single entity risk score
+      properties:
+        data:
+          $ref: "#/components/schemas/SecurityEntityRiskScore"
+      required:
+        - data
+      type: object
     SecurityEntityRiskScoreType:
-      description: Resource type
+      description: Resource type.
       enum:
-        - security_entity_risk_score
-      example: security_entity_risk_score
+        - SecurityEntityRiskScore
+      example: SecurityEntityRiskScore
       type: string
       x-enum-varnames:
         - SECURITY_ENTITY_RISK_SCORE
@@ -155830,6 +155855,8 @@ paths:
                   value:
                     data:
                       - attributes:
+                          accountIds:
+                            - "123456789012"
                           configRisks:
                             hasIdentityRisk: false
                             hasMisconfiguration: true
@@ -155837,21 +155864,25 @@ paths:
                             isPrivileged: false
                             isProduction: true
                             isPubliclyAccessible: true
-                          entityID: "arn:aws:iam::123456789012:user/test-user"
                           entityMetadata:
                             environments:
                               - production
-                            mitreTactics: []
-                            mitreTechniques: []
+                            mitreTactics:
+                              - ta0006-credential-access
+                            mitreTechniques:
+                              - t1078-valid-accounts
                             services:
                               - api-gateway
                             sources:
                               - cloudtrail
                           entityName: test-user
                           entityProviders:
-                            - aws
+                            - AWS
                           entityRoles: []
-                          entityType: aws_iam_user
+                          entitySubTypes:
+                            - "IAM User"
+                          entityTypes:
+                            - "IAMUser"
                           firstDetected: 1704067200000
                           lastActivityTitle: "Suspicious API call detected"
                           lastDetected: 1705276800000
@@ -155860,10 +155891,12 @@ paths:
                           severity: critical
                           signalsDetected: 15
                         id: "arn:aws:iam::123456789012:user/test-user"
-                        type: security_entity_risk_score
+                        type: SecurityEntityRiskScore
                     meta:
-                      page:
-                        total: 1
+                      pageNumber: 1
+                      pageSize: 10
+                      queryId: "abc123def456"
+                      totalRowCount: 1
               schema:
                 $ref: "#/components/schemas/SecurityEntityRiskScoresResponse"
           description: OK
@@ -155891,6 +155924,101 @@ paths:
       tags:
         - Entity Risk Scores
       x-menu-order: 1
+      x-unstable: |-
+        **Note**: This endpoint is in public beta and it's subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security-entities/risk-scores/{entity_id}:
+    get:
+      description: |-
+        Get the risk score for a specific entity by its ID. Returns security risk assessment including risk score, severity, detected signals, misconfigurations, and identity risks.
+      operationId: GetEntityRiskScore
+      parameters:
+        - description: The URL-encoded unique identifier for the entity.
+          in: path
+          name: entity_id
+          required: true
+          schema:
+            example: "arn:aws:iam::123456789012:user/john.doe"
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        accountIds:
+                          - "123456789012"
+                        configRisks:
+                          hasIdentityRisk: false
+                          hasMisconfiguration: true
+                          hasPrivilegedRole: false
+                          isPrivileged: false
+                          isProduction: true
+                          isPubliclyAccessible: true
+                        entityMetadata:
+                          environments:
+                            - production
+                          mitreTactics:
+                            - ta0006-credential-access
+                          mitreTechniques:
+                            - t1078-valid-accounts
+                          services:
+                            - api-gateway
+                          sources:
+                            - cloudtrail
+                        entityName: "test-user"
+                        entityProviders:
+                          - AWS
+                        entityRoles: []
+                        entitySubTypes:
+                          - "IAM User"
+                        entityTypes:
+                          - "IAMUser"
+                        firstDetected: 1704067200000
+                        lastActivityTitle: "Suspicious API call detected"
+                        lastDetected: 1705276800000
+                        riskScore: 85
+                        riskScoreEvolution: 12
+                        severity: critical
+                        signalsDetected: 15
+                      id: "arn:aws:iam::123456789012:user/test-user"
+                      type: SecurityEntityRiskScore
+              schema:
+                $ref: "#/components/schemas/SecurityEntityRiskScoreResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get Entity Risk Score
+      tags:
+        - Entity Risk Scores
+      x-menu-order: 2
       x-unstable: |-
         **Note**: This endpoint is in public beta and it's subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
