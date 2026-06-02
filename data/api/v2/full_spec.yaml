@@ -1713,6 +1713,13 @@ components:
       required: true
       schema:
         type: string
+    StatuspageUrlSettingIDPathParameter:
+      description: The UUID of the Statuspage URL setting.
+      in: path
+      name: statuspage_url_setting_id
+      required: true
+      schema:
+        type: string
     TagKey:
       description: The Cloud Cost Management tag key. Tag keys can contain forward slashes (for example, `kubernetes/instance`).
       in: path
@@ -85986,6 +85993,235 @@ components:
       type: string
       x-enum-varnames:
         - USERS
+    StatuspageAccountCreateAttributes:
+      description: The Statuspage account attributes for a create request.
+      properties:
+        api_key:
+          description: The Statuspage API key for your Statuspage account.
+          example: "00000000-0000-0000-0000-000000000000"
+          minLength: 1
+          type: string
+      required:
+        - api_key
+      type: object
+    StatuspageAccountCreateData:
+      description: Statuspage account data for a create request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/StatuspageAccountCreateAttributes"
+        type:
+          $ref: "#/components/schemas/StatuspageAccountType"
+      required:
+        - type
+        - attributes
+      type: object
+    StatuspageAccountCreateRequest:
+      description: Create request for a Statuspage account.
+      properties:
+        data:
+          $ref: "#/components/schemas/StatuspageAccountCreateData"
+      required:
+        - data
+      type: object
+    StatuspageAccountResponse:
+      description: Response containing a Statuspage account.
+      properties:
+        data:
+          $ref: "#/components/schemas/StatuspageAccountResponseData"
+      required:
+        - data
+      type: object
+    StatuspageAccountResponseAttributes:
+      description: The attributes from a Statuspage account response.
+      properties:
+        api_key:
+          description: The Statuspage API key for your Statuspage account. The value is always returned masked.
+          example: "*****"
+          type: string
+      type: object
+    StatuspageAccountResponseData:
+      description: Statuspage account data from a response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/StatuspageAccountResponseAttributes"
+        type:
+          $ref: "#/components/schemas/StatuspageAccountType"
+      required:
+        - type
+        - attributes
+      type: object
+    StatuspageAccountType:
+      default: statuspage-account
+      description: Statuspage account resource type.
+      enum:
+        - statuspage-account
+      example: statuspage-account
+      type: string
+      x-enum-varnames:
+        - STATUSPAGE_ACCOUNT
+    StatuspageAccountUpdateAttributes:
+      description: The Statuspage account attributes for an update request.
+      properties:
+        api_key:
+          description: The Statuspage API key for your Statuspage account.
+          example: "00000000-0000-0000-0000-000000000000"
+          minLength: 1
+          type: string
+      type: object
+    StatuspageAccountUpdateData:
+      description: Statuspage account data for an update request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/StatuspageAccountUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/StatuspageAccountType"
+      required:
+        - type
+        - attributes
+      type: object
+    StatuspageAccountUpdateRequest:
+      description: Update request for a Statuspage account.
+      properties:
+        data:
+          $ref: "#/components/schemas/StatuspageAccountUpdateData"
+      required:
+        - data
+      type: object
+    StatuspageUrlSettingCreateAttributes:
+      description: The Statuspage URL setting attributes for a create request.
+      properties:
+        custom_tags:
+          description: Comma-separated list of custom tags to apply to events generated from this Statuspage URL.
+          example: "team:collaboration-integrations,env:prod"
+          minLength: 1
+          type: string
+        url:
+          description: The Statuspage URL to monitor. Must be a `status.io` or `statuspage.com` URL.
+          example: "https://example.statuspage.io"
+          minLength: 1
+          type: string
+      required:
+        - url
+        - custom_tags
+      type: object
+    StatuspageUrlSettingCreateData:
+      description: Statuspage URL setting data for a create request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/StatuspageUrlSettingCreateAttributes"
+        type:
+          $ref: "#/components/schemas/StatuspageUrlSettingType"
+      required:
+        - type
+        - attributes
+      type: object
+    StatuspageUrlSettingCreateRequest:
+      description: Create request for a Statuspage URL setting.
+      properties:
+        data:
+          $ref: "#/components/schemas/StatuspageUrlSettingCreateData"
+      required:
+        - data
+      type: object
+    StatuspageUrlSettingResponse:
+      description: Response containing a Statuspage URL setting.
+      properties:
+        data:
+          $ref: "#/components/schemas/StatuspageUrlSettingResponseData"
+      required:
+        - data
+      type: object
+    StatuspageUrlSettingResponseAttributes:
+      description: The attributes from a Statuspage URL setting response.
+      properties:
+        custom_tags:
+          description: Comma-separated list of custom tags applied to events generated from this Statuspage URL.
+          example: "team:collaboration-integrations,env:prod"
+          type: string
+        url:
+          description: The Statuspage URL being monitored.
+          example: "https://example.statuspage.io"
+          type: string
+      type: object
+    StatuspageUrlSettingResponseData:
+      description: Statuspage URL setting data from a response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/StatuspageUrlSettingResponseAttributes"
+        id:
+          description: The ID of the Statuspage URL setting.
+          example: "596da4af-0563-4097-90ff-07230c3f9db3"
+          maxLength: 100
+          minLength: 1
+          type: string
+        type:
+          $ref: "#/components/schemas/StatuspageUrlSettingType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    StatuspageUrlSettingType:
+      default: statuspage-url-setting
+      description: Statuspage URL setting resource type.
+      enum:
+        - statuspage-url-setting
+      example: statuspage-url-setting
+      type: string
+      x-enum-varnames:
+        - STATUSPAGE_URL_SETTING
+    StatuspageUrlSettingUpdateAttributes:
+      description: The Statuspage URL setting attributes for an update request.
+      properties:
+        custom_tags:
+          description: Comma-separated list of custom tags to apply to events generated from this Statuspage URL.
+          example: "team:collaboration-integrations,env:prod"
+          minLength: 1
+          type: string
+        url:
+          description: The Statuspage URL to monitor.
+          example: "https://example.statuspage.io"
+          minLength: 1
+          type: string
+      type: object
+    StatuspageUrlSettingUpdateData:
+      description: Statuspage URL setting data for an update request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/StatuspageUrlSettingUpdateAttributes"
+        id:
+          description: The ID of the Statuspage URL setting.
+          example: "596da4af-0563-4097-90ff-07230c3f9db3"
+          maxLength: 100
+          minLength: 1
+          type: string
+        type:
+          $ref: "#/components/schemas/StatuspageUrlSettingType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    StatuspageUrlSettingUpdateRequest:
+      description: Update request for a Statuspage URL setting.
+      properties:
+        data:
+          $ref: "#/components/schemas/StatuspageUrlSettingUpdateData"
+      required:
+        - data
+      type: object
+    StatuspageUrlSettingsResponse:
+      description: Response with a list of Statuspage URL settings.
+      properties:
+        data:
+          description: An array of Statuspage URL settings.
+          example: [{"attributes": {"custom_tags": "team:collaboration-integrations", "url": "https://example.statuspage.io"}, "id": "596da4af-0563-4097-90ff-07230c3f9db3", "type": "statuspage-url-setting"}]
+          items:
+            $ref: "#/components/schemas/StatuspageUrlSettingResponseData"
+          type: array
+      required:
+        - data
+      type: object
     Step:
       description: A Step is a sub-component of a workflow. Each Step performs an action.
       properties:
@@ -127943,6 +128179,324 @@ paths:
       tags:
         - ServiceNow Integration
       x-menu-order: 8
+  /api/v2/integration/statuspage/account:
+    delete:
+      description: Delete the Statuspage account configured for your organization.
+      operationId: DeleteStatuspageAccount
+      responses:
+        "204":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Delete the Statuspage account
+      tags:
+        - Statuspage Integration
+      x-menu-order: 4
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+    get:
+      description: Get the Statuspage account configured for your organization.
+      operationId: GetStatuspageAccount
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        api_key: "*****"
+                      type: statuspage-account
+              schema:
+                $ref: "#/components/schemas/StatuspageAccountResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get the Statuspage account
+      tags:
+        - Statuspage Integration
+      x-menu-order: 1
+      "x-permission":
+        operator: OR
+        permissions:
+          - integrations_read
+    patch:
+      description: Update the Statuspage account configured for your organization.
+      operationId: UpdateStatuspageAccount
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      api_key: 00000000-0000-0000-0000-000000000000
+                    type: statuspage-account
+            schema:
+              $ref: "#/components/schemas/StatuspageAccountUpdateRequest"
+        description: Statuspage account payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        api_key: "*****"
+                      type: statuspage-account
+              schema:
+                $ref: "#/components/schemas/StatuspageAccountResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update the Statuspage account
+      tags:
+        - Statuspage Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 3
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+    post:
+      description: |-
+        Create a Statuspage account for your organization. Only one Statuspage
+        account can be configured per organization.
+      operationId: CreateStatuspageAccount
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      api_key: 00000000-0000-0000-0000-000000000000
+                    type: statuspage-account
+            schema:
+              $ref: "#/components/schemas/StatuspageAccountCreateRequest"
+        description: Statuspage account payload.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        api_key: "*****"
+                      type: statuspage-account
+              schema:
+                $ref: "#/components/schemas/StatuspageAccountResponse"
+          description: CREATED
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Create the Statuspage account
+      tags:
+        - Statuspage Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 2
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+  /api/v2/integration/statuspage/url_settings:
+    get:
+      description: Get all Statuspage URL settings configured for your organization.
+      operationId: ListStatuspageUrlSettings
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          custom_tags: "team:collaboration-integrations"
+                          url: "https://example.statuspage.io"
+                        id: 00000000-0000-0000-0000-000000000001
+                        type: statuspage-url-setting
+              schema:
+                $ref: "#/components/schemas/StatuspageUrlSettingsResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get all Statuspage URL settings
+      tags:
+        - Statuspage Integration
+      x-menu-order: 5
+      "x-permission":
+        operator: OR
+        permissions:
+          - integrations_read
+    post:
+      description: Create a Statuspage URL setting for your organization.
+      operationId: CreateStatuspageUrlSetting
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      custom_tags: "team:collaboration-integrations"
+                      url: "https://example.statuspage.io"
+                    type: statuspage-url-setting
+            schema:
+              $ref: "#/components/schemas/StatuspageUrlSettingCreateRequest"
+        description: Statuspage URL setting payload.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        custom_tags: "team:collaboration-integrations"
+                        url: "https://example.statuspage.io"
+                      id: 00000000-0000-0000-0000-000000000002
+                      type: statuspage-url-setting
+              schema:
+                $ref: "#/components/schemas/StatuspageUrlSettingResponse"
+          description: CREATED
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Create a Statuspage URL setting
+      tags:
+        - Statuspage Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 6
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+  /api/v2/integration/statuspage/url_settings/{statuspage_url_setting_id}:
+    delete:
+      description: Delete a single Statuspage URL setting from your organization.
+      operationId: DeleteStatuspageUrlSetting
+      parameters:
+        - $ref: "#/components/parameters/StatuspageUrlSettingIDPathParameter"
+      responses:
+        "204":
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Delete a Statuspage URL setting
+      tags:
+        - Statuspage Integration
+      x-menu-order: 8
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+    patch:
+      description: Update a single Statuspage URL setting in your organization.
+      operationId: UpdateStatuspageUrlSetting
+      parameters:
+        - $ref: "#/components/parameters/StatuspageUrlSettingIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      custom_tags: "team:collaboration-integrations"
+                      url: "https://example.statuspage.io"
+                    id: 596da4af-0563-4097-90ff-07230c3f9db3
+                    type: statuspage-url-setting
+            schema:
+              $ref: "#/components/schemas/StatuspageUrlSettingUpdateRequest"
+        description: Statuspage URL setting payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        custom_tags: "team:collaboration-integrations"
+                        url: "https://example.statuspage.io"
+                      id: 00000000-0000-0000-0000-000000000003
+                      type: statuspage-url-setting
+              schema:
+                $ref: "#/components/schemas/StatuspageUrlSettingResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update a Statuspage URL setting
+      tags:
+        - Statuspage Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 7
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
   /api/v2/integrations:
     get:
       operationId: ListIntegrations
@@ -175048,6 +175602,12 @@ tags:
     name: Static Analysis
   - description: Manage your status pages and communicate service disruptions to stakeholders via Datadog's API. See the [Status Pages documentation](https://docs.datadoghq.com/incident_response/status_pages/) for more information.
     name: Status Pages
+  - description: |-
+      Configure your [Datadog Statuspage integration](https://docs.datadoghq.com/integrations/statuspage/)
+      directly through the Datadog API.
+    externalDocs:
+      url: https://docs.datadoghq.com/api/latest/statuspage-integration
+    name: Statuspage Integration
   - description: |-
       Enable Storage Management for S3 buckets, GCS buckets, and Azure containers. Each configuration registers the destination that holds inventory reports for the storage being monitored.
     name: Storage Management
