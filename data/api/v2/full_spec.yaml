@@ -27205,7 +27205,7 @@ components:
         - attributes
       type: object
     DashboardUsageAttributes:
-      description: Usage statistics for a dashboard.
+      description: Usage statistics for a dashboard. The `viewer` field and all view-count fields (`total_views`, `viewed_at`, `total_views_by_type`) are populated only when Real User Monitoring (RUM) is active for the org.
       properties:
         author:
           $ref: "#/components/schemas/DashboardUsageUser"
@@ -27244,7 +27244,7 @@ components:
           example: My production overview
           type: string
         total_views:
-          description: The total number of times the dashboard has been viewed.
+          description: Total view count for the dashboard. Counts only views captured by Real User Monitoring (RUM); `0` in orgs without RUM.
           example: 42
           format: int64
           type: integer
@@ -27253,11 +27253,11 @@ components:
             description: View count for that view type.
             format: int64
             type: integer
-          description: View counts keyed by view type. Possible keys are `in_app`, `embed`, `public`, `shared`, `api`, and `unknown`.
+          description: View counts keyed by view type (`in_app`, `embed`, `public`, `shared`, `api`, `unknown`). Counts only views captured by Real User Monitoring (RUM); empty in orgs without RUM.
           nullable: true
           type: object
         viewed_at:
-          description: When the dashboard was most recently viewed.
+          description: When the dashboard was most recently viewed. Populated only when Real User Monitoring (RUM) is active for the org; `null` in orgs without RUM.
           example: "2026-05-01T14:22:10.000Z"
           format: date-time
           nullable: true
@@ -118844,7 +118844,7 @@ paths:
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/dashboards/usage:
     get:
-      description: Get paginated usage statistics for every dashboard in the caller's organization. Use `page[limit]` and `page[offset]` to walk the result set.
+      description: Get paginated usage statistics for every dashboard in the caller's organization. Use `page[limit]` and `page[offset]` to walk the result set. Use `filter[edited_before]` or `filter[viewed_before]` to narrow results by recency. View-count fields depend on Real User Monitoring (RUM) and are `null` or `0` in orgs without RUM.
       operationId: ListDashboardsUsage
       parameters:
         - description: Maximum number of dashboards to return per page. Server-side maximum is 500; values above 500 return a 400 Bad Request.
@@ -118864,6 +118864,20 @@ paths:
             format: int64
             minimum: 0
             type: integer
+        - description: Return only dashboards whose last edit (`edited_at`) is strictly before this ISO 8601 timestamp (`edited_at < value`; boundary matches are excluded). Must include a timezone offset (for example, `Z` or `+00:00`); naive timestamps return HTTP 400.
+          in: query
+          name: filter[edited_before]
+          required: false
+          schema:
+            example: "2025-04-26T00:00:00Z"
+            type: string
+        - description: Return only dashboards whose most recent view (`viewed_at`) is strictly before this ISO 8601 timestamp, including dashboards that have never been viewed. Must include a timezone offset; naive timestamps return HTTP 400. Orgs without Real User Monitoring (RUM) will see all dashboards returned by this filter.
+          in: query
+          name: filter[viewed_before]
+          required: false
+          schema:
+            example: "2025-04-26T00:00:00Z"
+            type: string
       responses:
         "200":
           content:
@@ -118946,7 +118960,7 @@ paths:
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/dashboards/{dashboard_id}/usage:
     get:
-      description: Get usage statistics for a single dashboard. The response includes view counts, the most recent view and edit times, widget counts, and the dashboard quality score.
+      description: Get usage statistics for a single dashboard. The response includes view counts, the most recent view and edit times, widget counts, and the dashboard quality score. View-count fields depend on Real User Monitoring (RUM) and are `null` or `0` in orgs without RUM.
       operationId: GetDashboardUsage
       parameters:
         - description: The ID of the dashboard.
