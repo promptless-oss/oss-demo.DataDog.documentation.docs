@@ -1770,6 +1770,21 @@ components:
       required: true
       schema:
         type: string
+    WebhooksAuthMethodIDPathParameter:
+      description: The UUID of the auth method.
+      in: path
+      name: auth_method_id
+      required: true
+      schema:
+        type: string
+    WebhooksAuthMethodInclude:
+      description: Comma-separated list of relationships to include in the response.
+      explode: true
+      in: query
+      name: include
+      required: false
+      schema:
+        $ref: "#/components/schemas/WebhooksAuthMethodProtocol"
     WorkflowId:
       description: The ID of the workflow.
       in: path
@@ -97410,6 +97425,277 @@ components:
       type: string
       x-enum-varnames:
         - RUM_REPLAY_WATCHER
+    WebhooksAuthMethodAttributes:
+      description: Attributes of a webhooks auth method.
+      properties:
+        protocol:
+          $ref: "#/components/schemas/WebhooksAuthMethodProtocol"
+      type: object
+    WebhooksAuthMethodProtocol:
+      description: Authentication protocol used by the auth method.
+      enum:
+        - oauth2-client-credentials
+      example: oauth2-client-credentials
+      type: string
+      x-enum-varnames:
+        - OAUTH2_CLIENT_CREDENTIALS
+    WebhooksAuthMethodRelationships:
+      description: Relationships of a webhooks auth method to its protocol-specific resource.
+      properties:
+        oauth2-client-credentials:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsRelationship"
+      type: object
+    WebhooksAuthMethodResponseData:
+      description: Webhooks auth method data from a response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/WebhooksAuthMethodAttributes"
+        id:
+          description: The ID of the auth method.
+          example: "596da4af-0563-4097-90ff-07230c3f9db3"
+          type: string
+        relationships:
+          $ref: "#/components/schemas/WebhooksAuthMethodRelationships"
+        type:
+          $ref: "#/components/schemas/WebhooksAuthMethodType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    WebhooksAuthMethodType:
+      default: webhooks-auth-method
+      description: Webhooks auth method resource type.
+      enum:
+        - webhooks-auth-method
+      example: webhooks-auth-method
+      type: string
+      x-enum-varnames:
+        - WEBHOOKS_AUTH_METHOD
+    WebhooksAuthMethodsResponse:
+      description: Response containing a list of webhooks auth methods.
+      properties:
+        data:
+          description: An array of webhooks auth methods.
+          items:
+            $ref: "#/components/schemas/WebhooksAuthMethodResponseData"
+          type: array
+        included:
+          description: Resources related to the auth methods, included when requested via the `include` query parameter.
+          items:
+            $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsResponseData"
+          type: array
+      required:
+        - data
+      type: object
+    WebhooksOAuth2ClientCredentialsCreateAttributes:
+      description: OAuth2 client credentials attributes for a create request.
+      properties:
+        access_token_url:
+          description: URL of the OAuth2 access token endpoint.
+          example: "https://example.com/oauth/token"
+          maxLength: 2048
+          minLength: 1
+          type: string
+        audience:
+          description: The intended audience for the OAuth2 access token.
+          example: "https://api.example.com"
+          maxLength: 2048
+          minLength: 1
+          nullable: true
+          type: string
+        client_id:
+          description: The OAuth2 client ID issued by the authorization server.
+          example: "my-client-id"
+          maxLength: 2048
+          minLength: 1
+          type: string
+        client_secret:
+          description: |-
+            The OAuth2 client secret issued by the authorization server.
+            Write-only; never returned by the API.
+          example: "my-client-secret"
+          maxLength: 2048
+          minLength: 1
+          type: string
+        name:
+          description: Human-readable name for this auth method. Must be unique within your organization.
+          example: "my-oauth2-auth"
+          maxLength: 100
+          minLength: 1
+          type: string
+        scope:
+          description: Space-separated list of OAuth2 scopes to request.
+          example: "read:webhooks write:webhooks"
+          maxLength: 2048
+          minLength: 1
+          nullable: true
+          type: string
+      required:
+        - name
+        - access_token_url
+        - client_id
+        - client_secret
+      type: object
+    WebhooksOAuth2ClientCredentialsCreateData:
+      description: OAuth2 client credentials data for a create request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsCreateAttributes"
+        type:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsType"
+      required:
+        - type
+        - attributes
+      type: object
+    WebhooksOAuth2ClientCredentialsCreateRequest:
+      description: Create request for an OAuth2 client credentials auth method.
+      properties:
+        data:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsCreateData"
+      required:
+        - data
+      type: object
+    WebhooksOAuth2ClientCredentialsRelationship:
+      description: Relationship pointing to the OAuth2 client credentials resource for this auth method.
+      properties:
+        data:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsRelationshipData"
+      type: object
+    WebhooksOAuth2ClientCredentialsRelationshipData:
+      description: Relationship data referencing an OAuth2 client credentials resource.
+      properties:
+        id:
+          description: The ID of the OAuth2 client credentials resource.
+          example: "596da4af-0563-4097-90ff-07230c3f9db3"
+          type: string
+        type:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsType"
+      type: object
+    WebhooksOAuth2ClientCredentialsResponse:
+      description: Response containing an OAuth2 client credentials auth method.
+      properties:
+        data:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsResponseData"
+      required:
+        - data
+      type: object
+    WebhooksOAuth2ClientCredentialsResponseAttributes:
+      description: OAuth2 client credentials attributes returned by the API. The `client_secret` is never echoed.
+      properties:
+        access_token_url:
+          description: URL of the OAuth2 access token endpoint.
+          example: "https://example.com/oauth/token"
+          type: string
+        audience:
+          description: The intended audience for the OAuth2 access token.
+          example: "https://api.example.com"
+          nullable: true
+          type: string
+        client_id:
+          description: The OAuth2 client ID issued by the authorization server.
+          example: "my-client-id"
+          type: string
+        name:
+          description: Human-readable name for this auth method.
+          example: "my-oauth2-auth"
+          type: string
+        protocol:
+          $ref: "#/components/schemas/WebhooksAuthMethodProtocol"
+        scope:
+          description: Space-separated list of OAuth2 scopes to request.
+          example: "read:webhooks write:webhooks"
+          nullable: true
+          type: string
+      type: object
+    WebhooksOAuth2ClientCredentialsResponseData:
+      description: OAuth2 client credentials data from a response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsResponseAttributes"
+        id:
+          description: The ID of the OAuth2 client credentials auth method.
+          example: "596da4af-0563-4097-90ff-07230c3f9db3"
+          type: string
+        type:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    WebhooksOAuth2ClientCredentialsType:
+      default: webhooks-auth-method-oauth2-client-credentials
+      description: OAuth2 client credentials resource type.
+      enum:
+        - webhooks-auth-method-oauth2-client-credentials
+      example: webhooks-auth-method-oauth2-client-credentials
+      type: string
+      x-enum-varnames:
+        - WEBHOOKS_AUTH_METHOD_OAUTH2_CLIENT_CREDENTIALS
+    WebhooksOAuth2ClientCredentialsUpdateAttributes:
+      description: OAuth2 client credentials attributes for an update request.
+      properties:
+        access_token_url:
+          description: URL of the OAuth2 access token endpoint.
+          example: "https://example.com/oauth/token"
+          maxLength: 2048
+          minLength: 1
+          type: string
+        audience:
+          description: The intended audience for the OAuth2 access token.
+          example: "https://api.example.com"
+          maxLength: 2048
+          minLength: 1
+          nullable: true
+          type: string
+        client_id:
+          description: The OAuth2 client ID issued by the authorization server.
+          example: "my-client-id"
+          maxLength: 2048
+          minLength: 1
+          type: string
+        client_secret:
+          description: |-
+            The OAuth2 client secret issued by the authorization server.
+            Write-only; never returned by the API.
+          example: "my-client-secret"
+          maxLength: 2048
+          minLength: 1
+          type: string
+        name:
+          description: Human-readable name for this auth method.
+          example: "my-oauth2-auth"
+          maxLength: 100
+          minLength: 1
+          type: string
+        scope:
+          description: Space-separated list of OAuth2 scopes to request.
+          example: "read:webhooks write:webhooks"
+          maxLength: 2048
+          minLength: 1
+          nullable: true
+          type: string
+      type: object
+    WebhooksOAuth2ClientCredentialsUpdateData:
+      description: OAuth2 client credentials data for an update request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsType"
+      required:
+        - type
+        - attributes
+      type: object
+    WebhooksOAuth2ClientCredentialsUpdateRequest:
+      description: Update request for an OAuth2 client credentials auth method.
+      properties:
+        data:
+          $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsUpdateData"
+      required:
+        - data
+      type: object
     Weekday:
       description: A day of the week.
       enum:
@@ -128497,6 +128783,228 @@ paths:
         operator: OR
         permissions:
           - manage_integrations
+  /api/v2/integration/webhooks/configuration/auth-method:
+    get:
+      description: |-
+        Get a list of all auth methods configured for the Webhooks integration in
+        your organization.
+      operationId: GetAllAuthMethods
+      parameters:
+        - $ref: "#/components/parameters/WebhooksAuthMethodInclude"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          protocol: oauth2-client-credentials
+                        id: 00000000-0000-0000-0000-000000000001
+                        relationships:
+                          oauth2-client-credentials:
+                            data:
+                              id: 00000000-0000-0000-0000-000000000001
+                              type: webhooks-auth-method-oauth2-client-credentials
+                        type: webhooks-auth-method
+              schema:
+                $ref: "#/components/schemas/WebhooksAuthMethodsResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get all auth methods
+      tags:
+        - Webhooks Integration
+      x-menu-order: 1
+      "x-permission":
+        operator: OR
+        permissions:
+          - integrations_read
+  /api/v2/integration/webhooks/configuration/auth-method/oauth2-client-credentials:
+    post:
+      description: |-
+        Create a new OAuth2 client credentials auth method for the Webhooks
+        integration. The `client_secret` is stored securely and never returned.
+      operationId: CreateOAuth2ClientCredentials
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      access_token_url: https://example.com/oauth/token
+                      audience: https://api.example.com
+                      client_id: my-client-id
+                      client_secret: my-client-secret
+                      name: my-oauth2-auth
+                      scope: read:webhooks write:webhooks
+                    type: webhooks-auth-method-oauth2-client-credentials
+            schema:
+              $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsCreateRequest"
+        description: OAuth2 client credentials payload.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        access_token_url: https://example.com/oauth/token
+                        audience: https://api.example.com
+                        client_id: my-client-id
+                        name: my-oauth2-auth
+                        protocol: oauth2-client-credentials
+                        scope: read:webhooks write:webhooks
+                      id: 00000000-0000-0000-0000-000000000002
+                      type: webhooks-auth-method-oauth2-client-credentials
+              schema:
+                $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsResponse"
+          description: CREATED
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Create an OAuth2 client credentials auth method
+      tags:
+        - Webhooks Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 2
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+  /api/v2/integration/webhooks/configuration/auth-method/oauth2-client-credentials/{auth_method_id}:
+    delete:
+      description: Delete an OAuth2 client credentials auth method by ID.
+      operationId: DeleteOAuth2ClientCredentials
+      parameters:
+        - $ref: "#/components/parameters/WebhooksAuthMethodIDPathParameter"
+      responses:
+        "204":
+          description: OK
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Delete an OAuth2 client credentials auth method
+      tags:
+        - Webhooks Integration
+      x-menu-order: 5
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
+    get:
+      description: Get a single OAuth2 client credentials auth method by ID.
+      operationId: GetOAuth2ClientCredentials
+      parameters:
+        - $ref: "#/components/parameters/WebhooksAuthMethodIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        access_token_url: https://example.com/oauth/token
+                        audience: https://api.example.com
+                        client_id: my-client-id
+                        name: my-oauth2-auth
+                        protocol: oauth2-client-credentials
+                        scope: read:webhooks write:webhooks
+                      id: 00000000-0000-0000-0000-000000000003
+                      type: webhooks-auth-method-oauth2-client-credentials
+              schema:
+                $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get an OAuth2 client credentials auth method
+      tags:
+        - Webhooks Integration
+      x-menu-order: 3
+      "x-permission":
+        operator: OR
+        permissions:
+          - integrations_read
+    patch:
+      description: Update an existing OAuth2 client credentials auth method.
+      operationId: UpdateOAuth2ClientCredentials
+      parameters:
+        - $ref: "#/components/parameters/WebhooksAuthMethodIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: my-oauth2-auth-renamed
+                    type: webhooks-auth-method-oauth2-client-credentials
+            schema:
+              $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsUpdateRequest"
+        description: OAuth2 client credentials payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        access_token_url: https://example.com/oauth/token
+                        audience: https://api.example.com
+                        client_id: my-client-id
+                        name: my-oauth2-auth-renamed
+                        protocol: oauth2-client-credentials
+                        scope: read:webhooks write:webhooks
+                      id: 00000000-0000-0000-0000-000000000004
+                      type: webhooks-auth-method-oauth2-client-credentials
+              schema:
+                $ref: "#/components/schemas/WebhooksOAuth2ClientCredentialsResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update an OAuth2 client credentials auth method
+      tags:
+        - Webhooks Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 4
+      "x-permission":
+        operator: OR
+        permissions:
+          - manage_integrations
   /api/v2/integrations:
     get:
       operationId: ListIntegrations
@@ -139645,6 +140153,12 @@ paths:
           name: tags
           schema:
             type: string
+        - description: Free-form search query using AND/OR/NOT operators, wildcards, and parentheses. When provided, takes precedence over the `tags` parameter.
+          example: "(client_team:networks OR client_team:platform) AND server_service:hucklebuck"
+          in: query
+          name: query
+          schema:
+            type: string
         - description: The number of connections to be returned. The maximum value is 7500. The default is 100.
           in: query
           name: limit
@@ -139705,6 +140219,12 @@ paths:
         - description: Comma-separated list of tags to filter DNS traffic by.
           in: query
           name: tags
+          schema:
+            type: string
+        - description: Free-form search query using AND/OR/NOT operators, wildcards, and parentheses. When provided, takes precedence over the `tags` parameter.
+          example: "(client_team:networks OR client_team:platform) AND server_service:hucklebuck"
+          in: query
+          name: query
           schema:
             type: string
         - description: The number of aggregated DNS entries to be returned. The maximum value is 7500. The default is 100.
@@ -175644,6 +176164,12 @@ tags:
     externalDocs:
       url: https://docs.datadoghq.com/account_management/users
     name: Users
+  - description: |-
+      Configure your [Datadog Webhooks integration](https://docs.datadoghq.com/integrations/webhooks/)
+      directly through the Datadog API.
+    externalDocs:
+      url: https://docs.datadoghq.com/api/latest/webhooks-integration
+    name: Webhooks Integration
   - description: |-
       Create, read, update, and delete saved widgets. Widgets are reusable
       visualization components stored independently from any dashboard or notebook,
