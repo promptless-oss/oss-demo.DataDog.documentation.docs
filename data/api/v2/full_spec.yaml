@@ -1544,6 +1544,20 @@ components:
       required: true
       schema:
         type: string
+    RumHardcodedRetentionFilterApplicationIDParameter:
+      description: RUM application ID.
+      in: path
+      name: app_id
+      required: true
+      schema:
+        type: string
+    RumHardcodedRetentionFilterIDParameter:
+      description: Hardcoded retention filter ID.
+      in: path
+      name: rf_id
+      required: true
+      schema:
+        type: string
     RumMetricIDParameter:
       description: The name of the RUM-based metric.
       in: path
@@ -73848,6 +73862,223 @@ components:
           maximum: 100
           minimum: 0
           type: number
+      type: object
+    RumHardcodedCrossProductSampling:
+      description: Cross-product retention settings for a hardcoded retention filter.
+      properties:
+        session_replay_enabled:
+          description: Indicates whether Session Replay cross-product retention is active.
+          example: true
+          type: boolean
+        session_replay_sample_rate:
+          description: Percentage (0–100) of retained sessions with an ingested replay whose replay data is kept.
+          example: 50.0
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        trace_enabled:
+          description: Indicates whether Trace cross-product retention is active.
+          example: true
+          type: boolean
+        trace_sample_rate:
+          description: Percentage (0–100) of retained sessions with ingested traces whose traces are indexed.
+          example: 25.0
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+      type: object
+    RumHardcodedCrossProductSamplingEditability:
+      description: Flags indicating which `cross_product_sampling` fields can be updated. Read-only.
+      properties:
+        session_replay_sample_rate:
+          description: |-
+            If `true`, `cross_product_sampling.session_replay_sample_rate` can be updated on this filter.
+          example: true
+          type: boolean
+        trace_sample_rate:
+          description: If `true`, `cross_product_sampling.trace_sample_rate` can be updated on this filter.
+          example: false
+          type: boolean
+      type: object
+    RumHardcodedCrossProductSamplingUpdate:
+      description: |-
+        Partial update for cross-product retention of a hardcoded retention filter.
+        Only fields whose matching flag in `cross_product_sampling_editability` is `true` can be updated.
+      properties:
+        session_replay_enabled:
+          description: Controls whether Session Replay cross-product retention is active. Omit to leave unchanged.
+          example: true
+          type: boolean
+        session_replay_sample_rate:
+          description: |-
+            Percentage (0–100) of retained sessions with an ingested replay whose replay data is kept.
+            Omit to leave unchanged.
+          example: 50.0
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+        trace_enabled:
+          description: Controls whether Trace cross-product retention is active. Omit to leave unchanged.
+          example: true
+          type: boolean
+        trace_sample_rate:
+          description: |-
+            Percentage (0–100) of retained sessions with ingested traces whose traces are indexed.
+            Omit to leave unchanged.
+          example: 25.0
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+      type: object
+    RumHardcodedRetentionFilterAttributes:
+      description: The attributes of a hardcoded retention filter.
+      properties:
+        cross_product_sampling:
+          $ref: "#/components/schemas/RumHardcodedCrossProductSampling"
+        cross_product_sampling_editability:
+          $ref: "#/components/schemas/RumHardcodedCrossProductSamplingEditability"
+        enabled:
+          description: Indicates whether the hardcoded retention filter is active. Read-only.
+          example: true
+          type: boolean
+        event_type:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterEventType"
+        name:
+          description: The name of the hardcoded retention filter. Read-only.
+          example: Replay sessions
+          type: string
+        query:
+          description: The query string for the hardcoded retention filter. Read-only.
+          example: "@session.has_replay:true"
+          type: string
+        sample_rate:
+          description: The retention sample rate (0–100) for the hardcoded filter. Read-only.
+          example: 100.0
+          format: double
+          maximum: 100
+          minimum: 0
+          type: number
+      type: object
+    RumHardcodedRetentionFilterData:
+      description: A hardcoded retention filter.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterAttributes"
+        id:
+          description: The ID of the hardcoded retention filter.
+          example: forced_replay_sessions
+          type: string
+        meta:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterMeta"
+        type:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterType"
+      type: object
+    RumHardcodedRetentionFilterEventType:
+      description: The type of RUM events the hardcoded filter applies to. Read-only.
+      enum:
+        - session
+        - view
+        - action
+        - error
+        - resource
+        - long_task
+        - vital
+      example: session
+      type: string
+      x-enum-varnames:
+        - SESSION
+        - VIEW
+        - ACTION
+        - ERROR
+        - RESOURCE
+        - LONG_TASK
+        - VITAL
+    RumHardcodedRetentionFilterMeta:
+      description: Metadata about the hardcoded retention filter.
+      properties:
+        source:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterMetaSource"
+        updated_at:
+          description: Unix epoch (in milliseconds) of the last update.
+          example: 1735689600000
+          format: int64
+          type: integer
+        updated_by_handle:
+          description: Handle of the user who last updated the filter.
+          example: jane.doe@example.com
+          type: string
+      type: object
+    RumHardcodedRetentionFilterMetaSource:
+      description: The source of the last update to a hardcoded retention filter.
+      enum:
+        - default
+        - ui
+        - terraform
+      example: ui
+      type: string
+      x-enum-varnames:
+        - DEFAULT
+        - UI
+        - TERRAFORM
+    RumHardcodedRetentionFilterResponse:
+      description: A hardcoded retention filter response body.
+      properties:
+        data:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterData"
+      type: object
+    RumHardcodedRetentionFilterType:
+      default: hardcoded_retention_filters
+      description: The resource type. The value must be `hardcoded_retention_filters`.
+      enum:
+        - hardcoded_retention_filters
+      example: hardcoded_retention_filters
+      type: string
+      x-enum-varnames:
+        - HARDCODED_RETENTION_FILTERS
+    RumHardcodedRetentionFilterUpdateAttributes:
+      description: |-
+        The attributes of a hardcoded retention filter that can be updated.
+        Only fields whose matching flag in `cross_product_sampling_editability` is `true` can be modified.
+      properties:
+        cross_product_sampling:
+          $ref: "#/components/schemas/RumHardcodedCrossProductSamplingUpdate"
+      type: object
+    RumHardcodedRetentionFilterUpdateData:
+      description: The hardcoded retention filter properties to update.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterUpdateAttributes"
+        id:
+          description: The ID of the hardcoded retention filter. Must match the `rf_id` path parameter.
+          example: forced_replay_sessions
+          type: string
+        type:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    RumHardcodedRetentionFilterUpdateRequest:
+      description: The hardcoded retention filter body to update.
+      properties:
+        data:
+          $ref: "#/components/schemas/RumHardcodedRetentionFilterUpdateData"
+      required:
+        - data
+      type: object
+    RumHardcodedRetentionFiltersResponse:
+      description: All hardcoded retention filters for a RUM application.
+      properties:
+        data:
+          description: A list of hardcoded retention filters.
+          items:
+            $ref: "#/components/schemas/RumHardcodedRetentionFilterData"
+          type: array
       type: object
     RumMetricCompute:
       description: The compute rule to compute the RUM-based metric.
@@ -151971,6 +152202,170 @@ paths:
         operator: OR
         permissions:
           - rum_apps_write
+  /api/v2/rum/applications/{app_id}/hardcoded_retention_filters:
+    get:
+      description: Get the list of hardcoded retention filters for a RUM application.
+      operationId: ListHardcodedRetentionFilters
+      parameters:
+        - $ref: "#/components/parameters/RumHardcodedRetentionFilterApplicationIDParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          cross_product_sampling:
+                            session_replay_enabled: true
+                            session_replay_sample_rate: 50.0
+                            trace_enabled: true
+                            trace_sample_rate: 25.0
+                          cross_product_sampling_editability:
+                            session_replay_sample_rate: true
+                            trace_sample_rate: false
+                          enabled: true
+                          event_type: session
+                          name: Replay sessions
+                          query: "@session.has_replay:true"
+                          sample_rate: 100.0
+                        id: forced_replay_sessions
+                        meta:
+                          source: ui
+                          updated_at: 1735689600000
+                          updated_by_handle: jane.doe@example.com
+                        type: hardcoded_retention_filters
+              schema:
+                $ref: "#/components/schemas/RumHardcodedRetentionFiltersResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get all hardcoded retention filters
+      tags:
+        - RUM Retention Filters Hardcoded
+      x-menu-order: 1
+  /api/v2/rum/applications/{app_id}/hardcoded_retention_filters/{rf_id}:
+    get:
+      description: Get a single hardcoded retention filter for a RUM application.
+      operationId: GetHardcodedRetentionFilter
+      parameters:
+        - $ref: "#/components/parameters/RumHardcodedRetentionFilterApplicationIDParameter"
+        - $ref: "#/components/parameters/RumHardcodedRetentionFilterIDParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        cross_product_sampling:
+                          session_replay_enabled: true
+                          session_replay_sample_rate: 50.0
+                          trace_enabled: true
+                          trace_sample_rate: 25.0
+                        cross_product_sampling_editability:
+                          session_replay_sample_rate: true
+                          trace_sample_rate: false
+                        enabled: true
+                        event_type: session
+                        name: Replay sessions
+                        query: "@session.has_replay:true"
+                        sample_rate: 100.0
+                      id: forced_replay_sessions
+                      meta:
+                        source: ui
+                        updated_at: 1735689600000
+                        updated_by_handle: jane.doe@example.com
+                      type: hardcoded_retention_filters
+              schema:
+                $ref: "#/components/schemas/RumHardcodedRetentionFilterResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get a hardcoded retention filter
+      tags:
+        - RUM Retention Filters Hardcoded
+      x-menu-order: 2
+    patch:
+      description: |-
+        Update the cross-product sample rates of a hardcoded retention filter for a RUM application.
+        Only fields whose matching flag in `cross_product_sampling_editability` is `true` can be updated.
+        Any other field is read-only and cannot be sent in the payload.
+        Returns the updated hardcoded retention filter when the request is successful.
+      operationId: UpdateHardcodedRetentionFilter
+      parameters:
+        - $ref: "#/components/parameters/RumHardcodedRetentionFilterApplicationIDParameter"
+        - $ref: "#/components/parameters/RumHardcodedRetentionFilterIDParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      cross_product_sampling:
+                        session_replay_enabled: true
+                        session_replay_sample_rate: 50.0
+                    id: forced_replay_sessions
+                    type: hardcoded_retention_filters
+            schema:
+              $ref: "#/components/schemas/RumHardcodedRetentionFilterUpdateRequest"
+        description: New cross-product sample rates for the hardcoded retention filter.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        cross_product_sampling:
+                          session_replay_enabled: true
+                          session_replay_sample_rate: 50.0
+                          trace_enabled: true
+                          trace_sample_rate: 25.0
+                        cross_product_sampling_editability:
+                          session_replay_sample_rate: true
+                          trace_sample_rate: false
+                        enabled: true
+                        event_type: session
+                        name: Replay sessions
+                        query: "@session.has_replay:true"
+                        sample_rate: 100.0
+                      id: forced_replay_sessions
+                      meta:
+                        source: ui
+                        updated_at: 1735689600000
+                        updated_by_handle: jane.doe@example.com
+                      type: hardcoded_retention_filters
+              schema:
+                $ref: "#/components/schemas/RumHardcodedRetentionFilterResponse"
+          description: Updated
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update a hardcoded retention filter
+      tags:
+        - RUM Retention Filters Hardcoded
+      x-codegen-request-body-name: body
+      x-menu-order: 3
   /api/v2/rum/applications/{app_id}/relationships/retention_filters:
     patch:
       description: |-
@@ -178810,6 +179205,9 @@ tags:
   - description: |-
       Get insights into the performance of your Real User Monitoring (RUM) applications over HTTP. See the [RUM & Session Replay page](https://docs.datadoghq.com/real_user_monitoring/) for more information
     name: RUM Insights
+  - description: |-
+      Manage hardcoded retention filters through [Manage Applications](https://app.datadoghq.com/rum/list) in RUM.
+    name: RUM Retention Filters Hardcoded
   - description: View and manage Reference Tables in your organization.
     name: Reference Tables
   - description: |-
