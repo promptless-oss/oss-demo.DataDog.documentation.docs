@@ -1545,7 +1545,7 @@ components:
       schema:
         type: string
     RumMetricIDParameter:
-      description: The name of the rum-based metric.
+      description: The name of the RUM-based metric.
       in: path
       name: metric_id
       required: true
@@ -73850,7 +73850,7 @@ components:
           type: number
       type: object
     RumMetricCompute:
-      description: The compute rule to compute the rum-based metric.
+      description: The compute rule to compute the RUM-based metric.
       properties:
         aggregation_type:
           $ref: "#/components/schemas/RumMetricComputeAggregationType"
@@ -73858,7 +73858,7 @@ components:
           $ref: "#/components/schemas/RumMetricComputeIncludePercentiles"
         path:
           description: |-
-            The path to the value the rum-based metric will aggregate on.
+            The path to the value the RUM-based metric will aggregate on.
             Only present when `aggregation_type` is `distribution`.
           example: "@duration"
           type: string
@@ -73878,7 +73878,7 @@ components:
       example: true
       type: boolean
     RumMetricCreateAttributes:
-      description: The object describing the Datadog rum-based metric to create.
+      description: The object describing the Datadog RUM-based metric to create.
       properties:
         compute:
           $ref: "#/components/schemas/RumMetricCompute"
@@ -73898,7 +73898,7 @@ components:
         - compute
       type: object
     RumMetricCreateData:
-      description: The new rum-based metric properties.
+      description: The new RUM-based metric properties.
       properties:
         attributes:
           $ref: "#/components/schemas/RumMetricCreateAttributes"
@@ -73912,7 +73912,7 @@ components:
         - attributes
       type: object
     RumMetricCreateRequest:
-      description: The new rum-based metric body.
+      description: The new RUM-based metric body.
       properties:
         data:
           $ref: "#/components/schemas/RumMetricCreateData"
@@ -73926,7 +73926,7 @@ components:
       type: string
       x-enum-varnames: ["SESSION", "VIEW", "ACTION", "ERROR", "RESOURCE", "LONG_TASK", "VITAL"]
     RumMetricFilter:
-      description: The rum-based metric filter. Events matching this filter will be aggregated in this metric.
+      description: The RUM-based metric filter. Events matching this filter will be aggregated in this metric.
       properties:
         query:
           default: "*"
@@ -73940,7 +73940,7 @@ components:
       description: A group by rule.
       properties:
         path:
-          description: The path to the value the rum-based metric will be aggregated over.
+          description: The path to the value the RUM-based metric will be aggregated over.
           example: "@browser.name"
           type: string
         tag_name:
@@ -73951,17 +73951,17 @@ components:
         - path
       type: object
     RumMetricID:
-      description: The name of the rum-based metric.
+      description: The name of the RUM-based metric.
       example: "rum.sessions.webui.count"
       type: string
     RumMetricResponse:
-      description: The rum-based metric object.
+      description: The RUM-based metric object.
       properties:
         data:
           $ref: "#/components/schemas/RumMetricResponseData"
       type: object
     RumMetricResponseAttributes:
-      description: The object describing a Datadog rum-based metric.
+      description: The object describing a Datadog RUM-based metric.
       properties:
         compute:
           $ref: "#/components/schemas/RumMetricResponseCompute"
@@ -73978,7 +73978,7 @@ components:
           $ref: "#/components/schemas/RumMetricResponseUniqueness"
       type: object
     RumMetricResponseCompute:
-      description: The compute rule to compute the rum-based metric.
+      description: The compute rule to compute the RUM-based metric.
       properties:
         aggregation_type:
           $ref: "#/components/schemas/RumMetricComputeAggregationType"
@@ -73986,13 +73986,13 @@ components:
           $ref: "#/components/schemas/RumMetricComputeIncludePercentiles"
         path:
           description: |-
-            The path to the value the rum-based metric will aggregate on.
+            The path to the value the RUM-based metric will aggregate on.
             Only present when `aggregation_type` is `distribution`.
           example: "@duration"
           type: string
       type: object
     RumMetricResponseData:
-      description: The rum-based metric properties.
+      description: The RUM-based metric properties.
       properties:
         attributes:
           $ref: "#/components/schemas/RumMetricResponseAttributes"
@@ -74002,7 +74002,7 @@ components:
           $ref: "#/components/schemas/RumMetricType"
       type: object
     RumMetricResponseFilter:
-      description: The rum-based metric filter. RUM events matching this filter will be aggregated in this metric.
+      description: The RUM-based metric filter. RUM events matching this filter will be aggregated in this metric.
       properties:
         query:
           description: The search query - following the RUM search syntax.
@@ -74013,7 +74013,7 @@ components:
       description: A group by rule.
       properties:
         path:
-          description: The path to the value the rum-based metric will be aggregated over.
+          description: The path to the value the RUM-based metric will be aggregated over.
           example: "@http.status_code"
           type: string
         tag_name:
@@ -74050,7 +74050,7 @@ components:
       type: string
       x-enum-varnames: ["WHEN_MATCH", "WHEN_END"]
     RumMetricUpdateAttributes:
-      description: The rum-based metric properties that will be updated.
+      description: The RUM-based metric properties that will be updated.
       properties:
         compute:
           $ref: "#/components/schemas/RumMetricUpdateCompute"
@@ -74063,13 +74063,13 @@ components:
           type: array
       type: object
     RumMetricUpdateCompute:
-      description: The compute rule to compute the rum-based metric.
+      description: The compute rule to compute the RUM-based metric.
       properties:
         include_percentiles:
           $ref: "#/components/schemas/RumMetricComputeIncludePercentiles"
       type: object
     RumMetricUpdateData:
-      description: The new rum-based metric properties.
+      description: The new RUM-based metric properties.
       properties:
         attributes:
           $ref: "#/components/schemas/RumMetricUpdateAttributes"
@@ -74082,7 +74082,7 @@ components:
         - attributes
       type: object
     RumMetricUpdateRequest:
-      description: The new rum-based metric body.
+      description: The new RUM-based metric body.
       properties:
         data:
           $ref: "#/components/schemas/RumMetricUpdateData"
@@ -74090,10 +74090,10 @@ components:
         - data
       type: object
     RumMetricsResponse:
-      description: All the available rum-based metric objects.
+      description: All the available RUM-based metric objects.
       properties:
         data:
-          description: A list of rum-based metric objects.
+          description: A list of RUM-based metric objects.
           items:
             $ref: "#/components/schemas/RumMetricResponseData"
           type: array
@@ -152530,7 +152530,7 @@ paths:
           - rum_apps_write
   /api/v2/rum/config/metrics:
     get:
-      description: Get the list of configured rum-based metrics with their definitions.
+      description: Get the list of configured RUM-based metrics with their definitions.
       operationId: ListRumMetrics
       responses:
         "200":
@@ -152562,14 +152562,14 @@ paths:
           $ref: "#/components/responses/NotAuthorizedResponse"
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Get all rum-based metrics
+      summary: Get all RUM-based metrics
       tags:
         - Rum Metrics
       x-menu-order: 1
     post:
       description: |-
         Create a metric based on your organization's RUM data.
-        Returns the rum-based metric object from the request body when the request is successful.
+        Returns the RUM-based metric object from the request body when the request is successful.
       operationId: CreateRumMetric
       requestBody:
         content:
@@ -152595,7 +152595,7 @@ paths:
                     type: rum_metrics
             schema:
               $ref: "#/components/schemas/RumMetricCreateRequest"
-        description: The definition of the new rum-based metric.
+        description: The definition of the new RUM-based metric.
         required: true
       responses:
         "201":
@@ -152631,14 +152631,14 @@ paths:
           $ref: "#/components/responses/ConflictResponse"
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Create a rum-based metric
+      summary: Create a RUM-based metric
       tags:
         - Rum Metrics
       x-codegen-request-body-name: body
       x-menu-order: 2
   /api/v2/rum/config/metrics/{metric_id}:
     delete:
-      description: Delete a specific rum-based metric from your organization.
+      description: Delete a specific RUM-based metric from your organization.
       operationId: DeleteRumMetric
       parameters:
         - $ref: "#/components/parameters/RumMetricIDParameter"
@@ -152651,12 +152651,12 @@ paths:
           $ref: "#/components/responses/NotFoundResponse"
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Delete a rum-based metric
+      summary: Delete a RUM-based metric
       tags:
         - Rum Metrics
       x-menu-order: 5
     get:
-      description: Get a specific rum-based metric from your organization.
+      description: Get a specific RUM-based metric from your organization.
       operationId: GetRumMetric
       parameters:
         - $ref: "#/components/parameters/RumMetricIDParameter"
@@ -152692,14 +152692,14 @@ paths:
           $ref: "#/components/responses/NotFoundResponse"
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Get a rum-based metric
+      summary: Get a RUM-based metric
       tags:
         - Rum Metrics
       x-menu-order: 3
     patch:
       description: |-
-        Update a specific rum-based metric from your organization.
-        Returns the rum-based metric object from the request body when the request is successful.
+        Update a specific RUM-based metric from your organization.
+        Returns the RUM-based metric object from the request body when the request is successful.
       operationId: UpdateRumMetric
       parameters:
         - $ref: "#/components/parameters/RumMetricIDParameter"
@@ -152722,7 +152722,7 @@ paths:
                     type: rum_metrics
             schema:
               $ref: "#/components/schemas/RumMetricUpdateRequest"
-        description: New definition of the rum-based metric.
+        description: New definition of the RUM-based metric.
         required: true
       responses:
         "200":
@@ -152760,7 +152760,7 @@ paths:
           $ref: "#/components/responses/ConflictResponse"
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Update a rum-based metric
+      summary: Update a RUM-based metric
       tags:
         - Rum Metrics
       x-codegen-request-body-name: body
@@ -153246,7 +153246,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: List rum replay playlists
+      summary: List RUM replay playlists
       tags:
         - Rum Replay Playlists
       x-menu-order: 2
@@ -153291,7 +153291,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Create rum replay playlist
+      summary: Create RUM replay playlist
       tags:
         - Rum Replay Playlists
       x-menu-order: 1
@@ -153316,7 +153316,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Delete rum replay playlist
+      summary: Delete RUM replay playlist
       tags:
         - Rum Replay Playlists
       x-menu-order: 7
@@ -153352,7 +153352,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Get rum replay playlist
+      summary: Get RUM replay playlist
       tags:
         - Rum Replay Playlists
       x-menu-order: 5
@@ -153405,7 +153405,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Update rum replay playlist
+      summary: Update RUM replay playlist
       tags:
         - Rum Replay Playlists
       x-menu-order: 6
@@ -153442,7 +153442,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Bulk remove rum replay playlist sessions
+      summary: Bulk remove RUM replay playlist sessions
       tags:
         - Rum Replay Playlists
       x-menu-order: 4
@@ -153490,7 +153490,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: List rum replay playlist sessions
+      summary: List RUM replay playlist sessions
       tags:
         - Rum Replay Playlists
       x-menu-order: 3
@@ -153522,7 +153522,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Remove rum replay session from playlist
+      summary: Remove RUM replay session from playlist
       tags:
         - Rum Replay Playlists
       x-menu-order: 9
@@ -153593,7 +153593,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Add rum replay session to playlist
+      summary: Add RUM replay session to playlist
       tags:
         - Rum Replay Playlists
       x-menu-order: 8
@@ -153701,7 +153701,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: List rum replay session watchers
+      summary: List RUM replay session watchers
       tags:
         - Rum Replay Viewership
       x-menu-order: 4
@@ -153726,7 +153726,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Delete rum replay session watch
+      summary: Delete RUM replay session watch
       tags:
         - Rum Replay Viewership
       x-menu-order: 3
@@ -153779,7 +153779,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: Create rum replay session watch
+      summary: Create RUM replay session watch
       tags:
         - Rum Replay Viewership
       x-menu-order: 2
@@ -153853,7 +153853,7 @@ paths:
         - apiKeyAuth: []
           appKeyAuth: []
         - AuthZ: []
-      summary: List rum replay viewership history sessions
+      summary: List RUM replay viewership history sessions
       tags:
         - Rum Replay Viewership
       x-menu-order: 1
@@ -178833,7 +178833,7 @@ tags:
   - description: Auto-generated tag Rum Audience Management
     name: Rum Audience Management
   - description: |-
-      Manage configuration of [rum-based metrics](https://app.datadoghq.com/rum/generate-metrics) for your organization.
+      Manage configuration of [RUM-based metrics](https://app.datadoghq.com/rum/generate-metrics) for your organization.
     externalDocs:
       description: Find out more at
       url: https://docs.datadoghq.com/real_user_monitoring/platform/generate_metrics/
