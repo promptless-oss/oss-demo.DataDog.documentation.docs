@@ -50686,6 +50686,72 @@ components:
       required:
         - name
       type: object
+    LicensesListResponse:
+      description: The top-level response object returned by the licenses list endpoint, containing the array of supported SPDX licenses.
+      properties:
+        data:
+          $ref: "#/components/schemas/LicensesListResponseData"
+      required:
+        - data
+      type: object
+    LicensesListResponseData:
+      description: The data object in a licenses list response, containing the list of SPDX licenses.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LicensesListResponseDataAttributes"
+        id:
+          description: The unique identifier for this licenses list response.
+          example: 0190a3d4-1234-7000-8000-000000000000
+          type: string
+        type:
+          $ref: "#/components/schemas/LicensesListResponseDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LicensesListResponseDataAttributes:
+      description: The attributes of the licenses list response, containing the array of SPDX licenses.
+      properties:
+        licenses:
+          $ref: "#/components/schemas/LicensesListResponseDataAttributesLicenses"
+      required:
+        - licenses
+      type: object
+    LicensesListResponseDataAttributesLicenses:
+      description: The list of SPDX licenses returned by the API.
+      items:
+        $ref: "#/components/schemas/LicensesListResponseDataAttributesLicensesItems"
+      type: array
+    LicensesListResponseDataAttributesLicensesItems:
+      description: An SPDX license entry returned by the licenses list endpoint.
+      properties:
+        display_name:
+          description: The human-readable name of the license.
+          example: MIT License
+          type: string
+        identifier:
+          description: The SPDX identifier of the license.
+          example: MIT
+          type: string
+        short_name:
+          description: The short name of the license, typically matching the SPDX identifier.
+          example: MIT
+          type: string
+      required:
+        - display_name
+        - identifier
+        - short_name
+      type: object
+    LicensesListResponseDataType:
+      default: licenserequest
+      description: The type identifier for license list responses.
+      enum:
+        - licenserequest
+      example: licenserequest
+      type: string
+      x-enum-varnames:
+        - LICENSEREQUEST
     Links:
       description: The JSON:API links related to pagination.
       properties:
@@ -53846,6 +53912,144 @@ components:
       type: string
       x-enum-varnames:
         - MANAGED_ORGS
+    McpScanRequest:
+      description: The top-level request object for submitting an MCP SCA dependency scan.
+      properties:
+        data:
+          $ref: "#/components/schemas/McpScanRequestData"
+      required:
+        - data
+      type: object
+    McpScanRequestData:
+      description: The data object in an MCP SCA scan request, containing the scan attributes and request type.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/McpScanRequestDataAttributes"
+        id:
+          description: An optional identifier for this scan request.
+          type: string
+        type:
+          $ref: "#/components/schemas/McpScanRequestDataType"
+      required:
+        - type
+        - attributes
+      type: object
+    McpScanRequestDataAttributes:
+      description: The attributes of an MCP SCA scan request, describing the libraries to scan and their context.
+      properties:
+        commit_hash:
+          description: The commit hash of the source code being scanned.
+          example: 0e9fc8de83eaabecd722e1cd0ed44fb489fe15fc
+          type: string
+        libraries:
+          $ref: "#/components/schemas/McpScanRequestDataAttributesLibraries"
+        resource_name:
+          description: The name of the resource (typically the repository or project name) being scanned.
+          example: my-org/my-repo
+          type: string
+      required:
+        - resource_name
+        - commit_hash
+        - libraries
+      type: object
+    McpScanRequestDataAttributesLibraries:
+      description: The list of libraries to scan for vulnerabilities.
+      items:
+        $ref: "#/components/schemas/McpScanRequestDataAttributesLibrariesItems"
+      type: array
+    McpScanRequestDataAttributesLibrariesItems:
+      description: A library declaration to include in the dependency scan.
+      properties:
+        exclusions:
+          $ref: "#/components/schemas/McpScanRequestDataAttributesLibrariesItemsExclusions"
+        is_dev:
+          description: Whether this library is a development-only dependency.
+          example: false
+          type: boolean
+        is_direct:
+          description: Whether this library is a direct (rather than transitive) dependency.
+          example: true
+          type: boolean
+        package_manager:
+          description: The package manager that produced this library entry (for example, `npm`, `pip`, `nuget`).
+          example: nuget
+          type: string
+        purl:
+          description: The Package URL (PURL) uniquely identifying the library and its version.
+          example: pkg:nuget/Newtonsoft.Json@13.0.1
+          type: string
+        target_frameworks:
+          $ref: "#/components/schemas/McpScanRequestDataAttributesLibrariesItemsTargetFrameworks"
+      required:
+        - purl
+        - is_dev
+        - is_direct
+        - package_manager
+      type: object
+    McpScanRequestDataAttributesLibrariesItemsExclusions:
+      description: The list of dependency PURLs to exclude when resolving transitive dependencies for this library.
+      items:
+        description: A dependency PURL to exclude.
+        type: string
+      type: array
+    McpScanRequestDataAttributesLibrariesItemsTargetFrameworks:
+      description: The list of target framework identifiers associated with the library.
+      items:
+        description: A target framework identifier (for example, `net8.0`).
+        type: string
+      type: array
+    McpScanRequestDataType:
+      default: mcpscanrequest
+      description: The type identifier for MCP SCA scan requests.
+      enum:
+        - mcpscanrequest
+      example: mcpscanrequest
+      type: string
+      x-enum-varnames:
+        - MCPSCANREQUEST
+    McpScanRequestResponse:
+      description: The top-level response object returned when an MCP SCA dependency scan request has been accepted.
+      properties:
+        data:
+          $ref: "#/components/schemas/McpScanRequestResponseData"
+      required:
+        - data
+      type: object
+    McpScanRequestResponseData:
+      description: The data object returned when a scan request has been accepted.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/McpScanRequestResponseDataAttributes"
+        id:
+          description: The job identifier assigned to the scan.
+          example: 0190a3d4-1234-7000-8000-000000000000
+          type: string
+        type:
+          $ref: "#/components/schemas/McpScanRequestResponseDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    McpScanRequestResponseDataAttributes:
+      description: The attributes returned when a scan request has been accepted, containing the job identifier used to poll for results.
+      properties:
+        job_id:
+          description: The job identifier assigned to the scan, used to retrieve the scan result.
+          example: 0190a3d4-1234-7000-8000-000000000000
+          type: string
+      required:
+        - job_id
+      type: object
+    McpScanRequestResponseDataType:
+      default: mcpscanrequestresponse
+      description: The type identifier for MCP SCA scan request responses.
+      enum:
+        - mcpscanrequestresponse
+      example: mcpscanrequestresponse
+      type: string
+      x-enum-varnames:
+        - MCPSCANREQUESTRESPONSE
     MemberTeam:
       description: A member team
       properties:
@@ -76162,6 +76366,13 @@ components:
         type:
           $ref: "#/components/schemas/ScalarFormulaResponseType"
       type: object
+    ScanResultResponse:
+      description: |-
+        The raw scan result document produced by the SCA processor.
+        The contents reflect the vulnerabilities and metadata produced for the libraries
+        submitted in the original scan request.
+      oneOf:
+        - $ref: "#/components/schemas/AnyValueObject"
     ScannedAssetMetadata:
       description: The metadata of a scanned asset.
       properties:
@@ -167340,6 +167551,141 @@ paths:
         - Static Analysis
       x-menu-order: 12
       x-unstable: "**Note**: This endpoint may be subject to changes."
+  /api/v2/static-analysis-sca/dependencies/scan:
+    post:
+      operationId: CreateSCAScan
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      commit_hash: 0e9fc8de83eaabecd722e1cd0ed44fb489fe15fc
+                      libraries:
+                        - exclusions: []
+                          is_dev: false
+                          is_direct: true
+                          package_manager: nuget
+                          purl: pkg:nuget/Newtonsoft.Json@13.0.1
+                          target_frameworks:
+                            - net8.0
+                      resource_name: my-org/my-repo
+                    type: mcpscanrequest
+            schema:
+              $ref: "#/components/schemas/McpScanRequest"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        job_id: 0190a3d4-1234-7000-8000-000000000000
+                      id: 0190a3d4-1234-7000-8000-000000000000
+                      type: mcpscanrequestresponse
+              schema:
+                $ref: "#/components/schemas/McpScanRequestResponse"
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Submit libraries for vulnerability scanning
+      tags:
+        - Static Analysis
+      x-menu-order: 31
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis-sca/dependencies/scan/{job_id}:
+    get:
+      operationId: GetSCAScan
+      parameters:
+        - description: The job identifier returned when the scan was submitted.
+          in: path
+          name: job_id
+          required: true
+          schema:
+            example: 0190a3d4-1234-7000-8000-000000000000
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    vulnerabilities: []
+              schema:
+                $ref: "#/components/schemas/ScanResultResponse"
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - code_analysis_read
+      summary: Retrieve a dependency scan result
+      tags:
+        - Static Analysis
+      x-menu-order: 32
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/static-analysis-sca/licenses/list:
+    get:
+      operationId: ListSCALicenses
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        licenses:
+                          - display_name: MIT License
+                            identifier: MIT
+                            short_name: MIT
+                      id: 0190a3d4-1234-7000-8000-000000000000
+                      type: licenserequest
+              schema:
+                $ref: "#/components/schemas/LicensesListResponse"
+          description: OK
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get the list of SPDX licenses
+      tags:
+        - Static Analysis
+      x-menu-order: 30
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/static-analysis-sca/vulnerabilities/resolve-vulnerable-symbols:
     post:
       operationId: CreateSCAResolveVulnerableSymbols
