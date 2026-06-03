@@ -52353,10 +52353,24 @@ components:
             If it is set to "false", the tags will be deleted when the logs are sent to the archive.
           example: false
           type: boolean
+        lookup_attributes:
+          description: An array of attributes to use as lookup keys for the archive.
+          example: ["trace_id", "user_id"]
+          items:
+            description: A lookup attribute name.
+            type: string
+          type: array
         name:
           description: The archive name.
           example: Nginx Archive
           type: string
+        partitioning_attributes:
+          description: An array of attributes to use as partition keys for the archive. The attribute used most frequently for querying should be first.
+          example: ["service", "status"]
+          items:
+            description: A partition attribute name.
+            type: string
+          type: array
         query:
           description: The archive query/filter. Logs matching this query are included in the archive.
           example: source:nginx
@@ -52412,10 +52426,24 @@ components:
             If it is set to "false", the tags will be deleted when the logs are sent to the archive.
           example: false
           type: boolean
+        lookup_attributes:
+          description: An array of attributes to use as lookup keys for the archive.
+          example: ["trace_id", "user_id"]
+          items:
+            description: A lookup attribute name.
+            type: string
+          type: array
         name:
           description: The archive name.
           example: Nginx Archive
           type: string
+        partitioning_attributes:
+          description: An array of attributes to use as partition keys for the archive. The attribute used most frequently for querying should be first.
+          example: ["service", "status"]
+          items:
+            description: A partition attribute name.
+            type: string
+          type: array
         query:
           description: The archive query/filter. Logs matching this query are included in the archive.
           example: source:nginx
