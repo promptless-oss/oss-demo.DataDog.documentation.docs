@@ -87950,6 +87950,89 @@ components:
       required:
         - data
       type: object
+    StegadographyGetWidgetsRequest:
+      description: Multipart form data containing the PNG image to scan for watermarks.
+      properties:
+        image:
+          description: PNG image file to scan for embedded watermarks.
+          example: "screenshot.png"
+          format: binary
+          type: string
+      required:
+        - image
+      type: object
+    StegadographyGetWidgetsResponse:
+      description: Response containing watermarked widgets recovered from an image.
+      properties:
+        data:
+          $ref: "#/components/schemas/StegadographyWidgetItems"
+      required:
+        - data
+      type: object
+    StegadographyWidget:
+      description: A single watermarked widget resource recovered from an image.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/StegadographyWidgetAttributes"
+        id:
+          description: Composite identifier formed from the organization ID and watermark, separated by a colon.
+          example: "abc123:0123456789abcdef"
+          type: string
+        type:
+          $ref: "#/components/schemas/StegadographyWidgetType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    StegadographyWidgetAttributes:
+      description: Attributes of a watermarked widget recovered from an image.
+      properties:
+        locationx:
+          description: Horizontal pixel coordinate where the watermark was found in the image.
+          example: 100
+          format: int64
+          type: integer
+        locationy:
+          description: Vertical pixel coordinate where the watermark was found in the image.
+          example: 200
+          format: int64
+          type: integer
+        rawData:
+          description: JSON-encoded string representing the widget state.
+          example: '{"widgetType":"timeseries","requests":[]}'
+          type: string
+        watermark:
+          description: Hex-encoded watermark string identifying the widget.
+          example: "0123456789abcdef"
+          type: string
+      required:
+        - rawData
+        - watermark
+        - locationx
+        - locationy
+      type: object
+    StegadographyWidgetItems:
+      description: List of watermarked widget resources recovered from an image.
+      example:
+        - attributes:
+            locationx: 100
+            locationy: 200
+            rawData: '{"widgetType":"timeseries","requests":[]}'
+            watermark: "0123456789abcdef"
+          id: "abc123:0123456789abcdef"
+          type: widget
+      items:
+        $ref: "#/components/schemas/StegadographyWidget"
+      type: array
+    StegadographyWidgetType:
+      description: Stegadography widget resource type.
+      enum:
+        - widget
+      example: widget
+      type: string
+      x-enum-varnames:
+        - WIDGET
     Step:
       description: A Step is a sub-component of a workflow. Each Step performs an action.
       properties:
@@ -170570,6 +170653,76 @@ paths:
           - status_pages_settings_write
           - status_pages_public_page_publish
           - status_pages_internal_page_publish
+  /api/v2/stegadography/get-widgets:
+    post:
+      description: |-
+        Extracts watermarks from a PNG image and returns the cached widget data
+        associated with each watermark found. The image must be uploaded as a
+        `multipart/form-data` request with the file in the `image` field.
+        Only widgets belonging to the authenticated organization are returned.
+      operationId: GetStegadographyWidgets
+      requestBody:
+        content:
+          multipart/form-data:
+            examples:
+              default:
+                value:
+                  image: "screenshot.png"
+            schema:
+              $ref: "#/components/schemas/StegadographyGetWidgetsRequest"
+        description: PNG image to extract watermarks from.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          locationx: 100
+                          locationy: 200
+                          rawData: '{"widgetType":"timeseries","requests":[]}'
+                          watermark: "0123456789abcdef"
+                        id: "abc123:0123456789abcdef"
+                        type: widget
+              schema:
+                $ref: "#/components/schemas/StegadographyGetWidgetsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "415":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unsupported Media Type
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get widgets from an image
+      tags:
+        - Stegadography
+      x-menu-order: 1
   /api/v2/synthetics/api-multistep/subtests/{public_id}:
     get:
       description: |-
@@ -178734,6 +178887,8 @@ tags:
     externalDocs:
       url: https://docs.datadoghq.com/api/latest/statuspage-integration
     name: Statuspage Integration
+  - description: Extract watermarks embedded in dashboard screenshots to retrieve cached widget state.
+    name: Stegadography
   - description: |-
       Enable Storage Management for S3 buckets, GCS buckets, and Azure containers. Each configuration registers the destination that holds inventory reports for the storage being monitored.
     name: Storage Management
