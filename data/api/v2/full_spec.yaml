@@ -98189,6 +98189,67 @@ components:
             $ref: "#/components/schemas/UsageDataObject"
           type: array
       type: object
+    UsageSummaryAvailableFieldsAttributes:
+      description: |-
+        The lists of field names returned by `GET /api/v1/usage/summary` at each
+        of its three response levels. Each list contains every key the data endpoint
+        emits—both typed fields declared in the OpenAPI spec and untyped keys
+        exposed through `additionalProperties`.
+      properties:
+        date_fields:
+          description: |-
+            Sorted list of every key returned inside each `UsageSummaryDate`
+            entry of `usage[]` (typed fields and `additionalProperties` keys
+            combined).
+          items:
+            type: string
+          type: array
+        date_org_fields:
+          description: |-
+            Sorted list of every key returned inside each `UsageSummaryDateOrg`
+            entry of `usage[].orgs[]` (typed fields and `additionalProperties`
+            keys combined).
+          items:
+            type: string
+          type: array
+        response_fields:
+          description: |-
+            Sorted list of every key returned as a direct property of
+            `UsageSummaryResponse` (typed fields and `additionalProperties`
+            keys combined).
+          items:
+            type: string
+          type: array
+      type: object
+    UsageSummaryAvailableFieldsBody:
+      description: Available-fields data.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/UsageSummaryAvailableFieldsAttributes"
+        id:
+          description: The identifier for the discovery scope. Always `"all"`.
+          example: all
+          type: string
+        type:
+          $ref: "#/components/schemas/UsageSummaryAvailableFieldsType"
+      type: object
+    UsageSummaryAvailableFieldsResponse:
+      description: |-
+        Response listing every field name returned by `GET /api/v1/usage/summary`
+        at each of its three response levels. Includes both typed fields and untyped
+        `additionalProperties` keys.
+      properties:
+        data:
+          $ref: "#/components/schemas/UsageSummaryAvailableFieldsBody"
+      type: object
+    UsageSummaryAvailableFieldsType:
+      default: usage_summary_available_fields
+      description: Type of available-fields data.
+      enum:
+        - usage_summary_available_fields
+      type: string
+      x-enum-varnames:
+        - USAGE_SUMMARY_AVAILABLE_FIELDS
     UsageTimeSeriesObject:
       description: Usage timeseries data.
       properties:
@@ -177345,6 +177406,68 @@ paths:
         permissions:
           - usage_read
           - billing_read
+  /api/v2/usage/summary/available_fields:
+    get:
+      description: |-
+        List the field names returned by `GET /api/v1/usage/summary` at each of its
+        three response levels. Each list contains every key the data endpoint
+        emits—both typed fields declared in the OpenAPI spec and untyped keys
+        exposed through `additionalProperties` (the latter used for billing
+        dimensions and usage types added after the v1 schema freeze).
+
+        This endpoint is only accessible for [parent-level organizations](https://docs.datadoghq.com/account_management/multi_organization/).
+      operationId: GetUsageSummaryAvailableFields
+      responses:
+        "200":
+          content:
+            application/json;datetime-format=rfc3339:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        date_fields:
+                          - agent_host_top99p
+                          - aws_host_top99p
+                          - ccm_anthropic_spend_last
+                        date_org_fields:
+                          - agent_host_top99p
+                          - aws_host_top99p
+                          - ccm_anthropic_spend_last
+                        response_fields:
+                          - agent_host_top99p_sum
+                          - aws_host_top99p_sum
+                          - ccm_anthropic_spend_last_sum
+                      id: all
+                      type: usage_summary_available_fields
+              schema:
+                $ref: "#/components/schemas/UsageSummaryAvailableFieldsResponse"
+          description: OK.
+        "403":
+          content:
+            application/json;datetime-format=rfc3339:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden - User is not authorized.
+        "429":
+          content:
+            application/json;datetime-format=rfc3339:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Too many requests.
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - usage_read
+      summary: Get available fields for usage summary
+      tags:
+        - Usage Metering
+      x-menu-order: 13
+      "x-permission":
+        operator: OR
+        permissions:
+          - usage_read
   /api/v2/usage/usage-attribution-types:
     get:
       description: |-
