@@ -58612,6 +58612,59 @@ components:
         - id
         - type
       type: object
+    OAuth2WellKnownSitesAttributes:
+      description: Attributes containing the list of public OAuth2 sites.
+      properties:
+        sites:
+          description: Array of public OAuth2 site URLs for the environment.
+          example:
+            - datadoghq.com
+            - datadoghq.eu
+            - us5.datadoghq.com
+            - us3.datadoghq.com
+            - ap1.datadoghq.com
+            - ap2.datadoghq.com
+          items:
+            description: Public OAuth2 site URL.
+            example: app.datadoghq.com
+            type: string
+          type: array
+      required:
+        - sites
+      type: object
+    OAuth2WellKnownSitesData:
+      description: Data object containing OAuth2 well-known sites information.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/OAuth2WellKnownSitesAttributes"
+        id:
+          description: Environment identifier.
+          example: prod
+          type: string
+        type:
+          $ref: "#/components/schemas/OAuth2WellKnownSitesEnvType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    OAuth2WellKnownSitesEnvType:
+      default: env
+      description: JSON:API resource type for OAuth2 well-known sites environment.
+      enum:
+        - env
+      example: env
+      type: string
+      x-enum-varnames:
+        - ENV
+    OAuth2WellKnownSitesResponse:
+      description: Response payload containing the list of public OAuth2 sites for discovery.
+      properties:
+        data:
+          $ref: "#/components/schemas/OAuth2WellKnownSitesData"
+      required:
+        - data
+      type: object
     OAuthClientRegistrationError:
       description: Error payload returned by OAuth2 dynamic client registration as defined by RFC 7591.
       properties:
@@ -144016,6 +144069,41 @@ paths:
       tags:
         - Cloud Network Monitoring
       x-menu-order: 2
+  /api/v2/oauth2/.well-known/sites:
+    get:
+      description: Retrieve the list of public OAuth2 sites available for the current environment. This endpoint is used for OAuth2 discovery and returns sites where users can authenticate.
+      operationId: GetOAuth2WellKnownSites
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        sites:
+                          - datadoghq.com
+                          - datadoghq.eu
+                          - us5.datadoghq.com
+                          - us3.datadoghq.com
+                          - ap1.datadoghq.com
+                          - ap2.datadoghq.com
+                      id: prod
+                      type: env
+              schema:
+                $ref: "#/components/schemas/OAuth2WellKnownSitesResponse"
+          description: OK
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security: []
+      summary: Get OAuth2 well-known sites
+      tags:
+        - OAuth2 Client Public
+      x-menu-order: 5
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/oauth2/clients/{client_uuid}/scopes_restriction:
     delete:
       description: Delete the scopes restriction configured for the OAuth2 client.
