@@ -44418,6 +44418,8 @@ components:
           description: Key of the case.
           example: "ET-123"
           type: string
+        linear_issue:
+          $ref: "#/components/schemas/IssueCaseLinearIssue"
         modified_at:
           description: Timestamp of when the case was last modified.
           example: "2025-01-01T00:00:00Z"
@@ -44455,6 +44457,10 @@ components:
     IssueCaseJiraIssue:
       description: Jira issue of the case.
       properties:
+        error_message:
+          description: Error message set when the Jira issue creation fails.
+          example: ""
+          type: string
         result:
           $ref: "#/components/schemas/IssueCaseJiraIssueResult"
         status:
@@ -44465,6 +44471,10 @@ components:
     IssueCaseJiraIssueResult:
       description: Contains the identifiers and URL for a successfully created Jira issue.
       properties:
+        account_id:
+          description: Jira account identifier.
+          example: "abcd1234-5678-90ab-cdef-1234567890ab"
+          type: string
         issue_id:
           description: Jira issue identifier.
           example: "1904866"
@@ -44477,9 +44487,51 @@ components:
           description: Jira issue URL.
           example: "https://your-jira-instance.atlassian.net/browse/ET-123"
           type: string
+        project_id:
+          description: Jira project identifier.
+          example: "10001"
+          type: string
         project_key:
           description: Jira project key.
           example: "ET"
+          type: string
+      type: object
+    IssueCaseLinearIssue:
+      description: Linear issue of the case.
+      properties:
+        error_message:
+          description: Error message set when the Linear issue creation fails.
+          example: ""
+          type: string
+        result:
+          $ref: "#/components/schemas/IssueCaseLinearIssueResult"
+        status:
+          description: Creation status of the Linear issue.
+          example: "COMPLETED"
+          type: string
+      type: object
+    IssueCaseLinearIssueResult:
+      description: Contains the identifiers and URL for a successfully created Linear issue.
+      properties:
+        account_id:
+          description: Linear account identifier.
+          example: "abcd1234-5678-90ab-cdef-1234567890ab"
+          type: string
+        issue_id:
+          description: Linear issue identifier.
+          example: "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+          type: string
+        issue_key:
+          description: Linear issue key.
+          example: "ENG-123"
+          type: string
+        issue_url:
+          description: Linear issue URL.
+          example: "https://linear.app/your-workspace/issue/ENG-123"
+          type: string
+        team_id:
+          description: Linear team identifier.
+          example: "f1e2d3c4-5678-90ab-cdef-1234567890ab"
           type: string
       type: object
     IssueCaseReference:
