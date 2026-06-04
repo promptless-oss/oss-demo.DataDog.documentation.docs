@@ -30161,6 +30161,76 @@ components:
         - type
         - attributes
       type: object
+    ELFSourcemapAttributes:
+      description: Attributes of an ELF symbol file.
+      properties:
+        arch:
+          description: The target CPU architecture.
+          example: arm64
+          type: string
+        created_at:
+          description: The timestamp when the symbol file was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        file_hash:
+          description: The SHA256 hash of the ELF file.
+          example: abc123def456
+          type: string
+        file_name:
+          description: The ELF file name.
+          example: libmyapp.so
+          type: string
+        gnu_build_id:
+          description: The GNU build ID (UUID format).
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
+        go_build_id:
+          description: The Go build ID (UUID format).
+          example: 550e8400-e29b-41d4-a716-446655440001
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: elf
+          type: string
+        origin:
+          description: The origin of the ELF file.
+          example: debian
+          type: string
+        origin_version:
+          description: The version of the origin package.
+          example: 1.0.0
+          type: string
+        size:
+          description: The size of the ELF file in bytes.
+          example: 16384
+          format: int64
+          type: integer
+        symbol_source:
+          description: The source of the debug symbols.
+          example: debuginfo
+          type: string
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    ELFSourcemapData:
+      description: ELF symbol file data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ELFSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "6"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     ELFSymbolFileEvent:
       description: Metadata for an ELF symbol file upload, sent as a JSON-encoded `event` field.
       properties:
@@ -36446,6 +36516,60 @@ components:
           format: int64
           type: integer
       type: object
+    FlutterSourcemapAttributes:
+      description: Attributes of a Flutter symbol file.
+      properties:
+        arch:
+          description: The target CPU architecture.
+          example: arm64
+          type: string
+        created_at:
+          description: The timestamp when the symbol file was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: flutter
+          type: string
+        service:
+          description: The service name associated with the symbol file.
+          example: my-flutter-app
+          type: string
+        size:
+          description: The size of the symbol file in bytes.
+          example: 8192
+          format: int64
+          type: integer
+        variant:
+          description: The build variant.
+          example: release
+          type: string
+        version:
+          description: The version of the service associated with the symbol file.
+          example: 1.0.0
+          type: string
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    FlutterSourcemapData:
+      description: Flutter symbol file data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/FlutterSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "12"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     FlutterSymbolFileEvent:
       description: Metadata for a Flutter symbol file upload, sent as a JSON-encoded `event` field.
       properties:
@@ -40008,6 +40132,90 @@ components:
       type: string
       x-enum-varnames:
         - IL2CPP_MAPPING_FILE
+    IL2CPPSourcemapAttributes:
+      description: Attributes of an IL2CPP mapping file.
+      properties:
+        build_id:
+          description: The build identifier (UUID format).
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
+        created_at:
+          description: The timestamp when the mapping file was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: il2cpp
+          type: string
+        size:
+          description: The size of the mapping file in bytes.
+          example: 4096
+          format: int64
+          type: integer
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    IL2CPPSourcemapData:
+      description: IL2CPP mapping file data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/IL2CPPSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "8"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    IOSSourcemapAttributes:
+      description: Attributes of an iOS dSYM source map.
+      properties:
+        created_at:
+          description: The timestamp when the source map was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: ios
+          type: string
+        size:
+          description: The size of the dSYM file in bytes.
+          example: 4096
+          format: int64
+          type: integer
+        uuids:
+          description: The UUID(s) associated with the dSYM file.
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    IOSSourcemapData:
+      description: iOS dSYM source map data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/IOSSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "11"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     IOSSymbolsEvent:
       description: Metadata for an iOS dSYM file upload, sent as a JSON-encoded `event` field.
       properties:
@@ -45100,6 +45308,80 @@ components:
       type: string
       x-enum-varnames:
         - JS_SOURCEMAP
+    JSSourcemapAttributes:
+      description: Attributes of a JavaScript source map.
+      properties:
+        absolute_path:
+          description: The absolute path to the minified JavaScript file.
+          example: /js/bundle.min.js
+          type: string
+        blob_storage_sourcemap_path:
+          description: The path to the source map in blob storage.
+          example: org123/1.0.0/bundle.min.js.map
+          type: string
+        build_id:
+          description: The build identifier.
+          example: abc123
+          type: string
+        created_at:
+          description: The timestamp when the source map was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        domain:
+          description: The domain associated with the source map.
+          example: example.com
+          type: string
+        file_name:
+          description: The file name of the minified JavaScript file.
+          example: bundle.min.js
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: js
+          type: string
+        service:
+          description: The service name associated with the source map.
+          example: my-web-service
+          type: string
+        size:
+          description: The size of the source map file in bytes.
+          example: 1024
+          format: int64
+          type: integer
+        variant:
+          description: The source map variant.
+          example: release
+          type: string
+        version:
+          description: The version of the service associated with the source map.
+          example: 1.0.0
+          type: string
+        version_code:
+          description: The version code.
+          example: "100"
+          type: string
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    JSSourcemapData:
+      description: JavaScript source map data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/JSSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "5"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     JVMMappingFileEvent:
       description: Metadata for a ProGuard or R8 mapping file upload, sent as a JSON-encoded `event` field.
       properties:
@@ -45161,6 +45443,64 @@ components:
       type: string
       x-enum-varnames:
         - JVM_MAPPING_FILE
+    JVMSourcemapAttributes:
+      description: Attributes of a JVM mapping file.
+      properties:
+        build_id:
+          description: The build identifier (UUID format).
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
+        created_at:
+          description: The timestamp when the mapping file was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: jvm
+          type: string
+        service:
+          description: The service name associated with the mapping file.
+          example: my-android-app
+          type: string
+        size:
+          description: The size of the mapping file in bytes.
+          example: 512
+          format: int64
+          type: integer
+        variant:
+          description: The build variant (e.g., `release`, `debug`).
+          example: release
+          type: string
+        version:
+          description: The version of the service associated with the mapping file.
+          example: 1.0.0
+          type: string
+        version_code:
+          description: The version code.
+          example: "100"
+          type: string
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    JVMSourcemapData:
+      description: JVM (ProGuard/R8) mapping file data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/JVMSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "9"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     JiraAccountAttributes:
       description: Attributes of a Jira account
       properties:
@@ -52277,6 +52617,16 @@ components:
         meta:
           $ref: "#/components/schemas/ServiceAccessTokenResponseMeta"
       type: object
+    ListSourcemapsResponse:
+      description: Response containing a paginated list of source maps.
+      properties:
+        data:
+          $ref: "#/components/schemas/SourcemapsData"
+        meta:
+          $ref: "#/components/schemas/SourcemapsListMeta"
+      required:
+        - data
+      type: object
     ListTagsResponse:
       description: List tags response.
       properties:
@@ -57680,6 +58030,56 @@ components:
       required:
         - type
         - id
+      type: object
+    NDKSourcemapAttributes:
+      description: Attributes of an Android NDK symbol file.
+      properties:
+        arch:
+          description: The target CPU architecture.
+          example: arm64-v8a
+          type: string
+        build_id:
+          description: The build identifier (UUID format).
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
+        created_at:
+          description: The timestamp when the symbol file was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        file_name:
+          description: The NDK library file name.
+          example: libmyapp.so
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: ndk
+          type: string
+        size:
+          description: The size of the symbol file in bytes.
+          example: 32768
+          format: int64
+          type: integer
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    NDKSourcemapData:
+      description: Android NDK symbol file data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/NDKSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "7"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
       type: object
     NDKSymbolFileEvent:
       description: Metadata for an Android NDK symbol file upload, sent as a JSON-encoded `event` field.
@@ -70891,6 +71291,72 @@ components:
       type: string
       x-enum-varnames:
         - REACT_NATIVE_SOURCEMAP
+    ReactNativeSourcemapAttributes:
+      description: Attributes of a React Native source map.
+      properties:
+        build_number:
+          description: The build number.
+          example: "100"
+          type: string
+        bundle_name:
+          description: The bundle name.
+          example: com.example.app
+          type: string
+        bundle_version:
+          description: The bundle version.
+          example: "1.0"
+          type: string
+        created_at:
+          description: The timestamp when the source map was created.
+          example: "2024-01-01T00:00:00Z"
+          format: date-time
+          type: string
+        debug_id:
+          description: The debug identifier (UUID format).
+          example: 550e8400-e29b-41d4-a716-446655440000
+          type: string
+        mapkind:
+          description: The type of source map.
+          example: react
+          type: string
+        platform:
+          description: The platform the source map was built for (e.g., `ios`, `android`).
+          example: ios
+          type: string
+        service:
+          description: The service name associated with the source map.
+          example: my-react-native-app
+          type: string
+        size:
+          description: The size of the source map file in bytes.
+          example: 2048
+          format: int64
+          type: integer
+        version:
+          description: The version of the service associated with the source map.
+          example: 1.0.0
+          type: string
+      required:
+        - mapkind
+        - size
+        - created_at
+      type: object
+    ReactNativeSourcemapData:
+      description: React Native source map data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ReactNativeSourcemapAttributes"
+        id:
+          description: The unique identifier of the source map.
+          example: "10"
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     ReadinessGate:
       description: Used to merge multiple branches into a single branch.
       properties:
@@ -85425,6 +85891,104 @@ components:
       required:
         - data
       type: object
+    ServiceRepositoryInfoDataType:
+      description: The resource type for service repository info objects.
+      enum:
+        - service_repository_info
+      example: service_repository_info
+      type: string
+      x-enum-varnames:
+        - SERVICE_REPOSITORY_INFO
+    ServiceRepositoryInfoRequest:
+      description: Request body for retrieving service repository information.
+      properties:
+        data:
+          $ref: "#/components/schemas/ServiceRepositoryInfoRequestData"
+      required:
+        - data
+      type: object
+    ServiceRepositoryInfoRequestAttributes:
+      description: Attributes for the service repository info request.
+      properties:
+        service:
+          description: The name of the service.
+          example: my-web-service
+          type: string
+        version:
+          description: The version of the service.
+          example: 1.0.0
+          type: string
+      required:
+        - service
+        - version
+      type: object
+    ServiceRepositoryInfoRequestData:
+      description: Data object for the service repository info request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ServiceRepositoryInfoRequestAttributes"
+        type:
+          $ref: "#/components/schemas/ServiceRepositoryInfoDataType"
+      required:
+        - type
+        - attributes
+      type: object
+    ServiceRepositoryInfoResponse:
+      description: Response containing service repository information.
+      properties:
+        data:
+          $ref: "#/components/schemas/ServiceRepositoryInfoResponseData"
+      required:
+        - data
+      type: object
+    ServiceRepositoryInfoResponseAttributes:
+      description: Attributes of the service repository information.
+      properties:
+        commit_sha:
+          description: The SHA of the commit associated with the service version.
+          example: abc123def456789
+          type: string
+        repository_url:
+          description: The URL of the source code repository.
+          example: https://github.com/my-org/my-repo
+          type: string
+        status:
+          $ref: "#/components/schemas/ServiceRepositoryInfoStatus"
+      required:
+        - status
+      type: object
+    ServiceRepositoryInfoResponseData:
+      description: Data object for the service repository info response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ServiceRepositoryInfoResponseAttributes"
+        id:
+          description: The identifier composed of the service name and version.
+          example: my-web-service:1.0.0
+          type: string
+        type:
+          $ref: "#/components/schemas/ServiceRepositoryInfoDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    ServiceRepositoryInfoStatus:
+      description: The status of the service repository info lookup.
+      enum:
+        - success
+        - not_found
+        - no_repository
+        - internal_error
+        - unknown
+      example: success
+      type: string
+      x-enum-varnames:
+        - SUCCESS
+        - NOT_FOUND
+        - NO_REPOSITORY
+        - INTERNAL_ERROR
+        - UNKNOWN
     SessionIdArray:
       description: A collection of session identifiers used for bulk add or remove operations on a playlist.
       properties:
@@ -86473,6 +87037,179 @@ components:
       type: string
       x-enum-varnames:
         - SOURCEMAP_UPLOAD
+    SourcemapDataType:
+      description: The resource type for source map objects.
+      enum:
+        - sourcemaps
+      example: sourcemaps
+      type: string
+      x-enum-varnames:
+        - SOURCEMAPS
+    SourcemapFileAttributes:
+      description: Attributes of a JavaScript source map file.
+      properties:
+        file:
+          description: The name of the minified JavaScript file.
+          example: bundle.js
+          type: string
+        mappings:
+          description: |-
+            The Base64 VLQ encoded string that maps positions in the minified
+            file to positions in the original source files.
+          example: AAAA,OAAO,CAAC,GAAG
+          type: string
+        minifiedLineLengths:
+          description: List of character counts for each line in the minified file.
+          example:
+            - 50
+            - 30
+          items:
+            type: integer
+          type: array
+        names:
+          description: List of symbol names referenced in the mappings.
+          example:
+            - console
+            - log
+          items: {}
+          type: array
+        sourceRoot:
+          description: The root path prepended to source file paths.
+          example: /
+          type: string
+        sources:
+          description: List of original source file paths.
+          example:
+            - src/index.js
+            - src/utils.js
+          items:
+            type: string
+          type: array
+        sourcesContent:
+          description: List of original source file contents corresponding to the paths in `sources`.
+          example:
+            - "console.log('index');"
+            - "export function util() {}"
+          items:
+            type: string
+          type: array
+        version:
+          description: The version of the source map format (typically 3).
+          example: 3
+          format: int64
+          type: integer
+      required:
+        - file
+        - version
+        - sourceRoot
+        - sources
+        - sourcesContent
+        - names
+        - mappings
+        - minifiedLineLengths
+      type: object
+    SourcemapFileData:
+      description: JavaScript source map file data object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SourcemapFileAttributes"
+        id:
+          description: The unique identifier of the source map file, typically the path to the file.
+          example: path/to/sourcemap.js.map
+          type: string
+        type:
+          $ref: "#/components/schemas/SourcemapFileDataType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    SourcemapFileDataType:
+      description: The resource type for source map file objects.
+      enum:
+        - sourcemap_files
+      example: sourcemap_files
+      type: string
+      x-enum-varnames:
+        - SOURCEMAP_FILES
+    SourcemapFileResponse:
+      description: Response containing a JavaScript source map file.
+      properties:
+        data:
+          $ref: "#/components/schemas/SourcemapFileData"
+      required:
+        - data
+      type: object
+    SourcemapItem:
+      description: A source map data object representing one of the supported map kinds.
+      oneOf:
+        - $ref: "#/components/schemas/JSSourcemapData"
+        - $ref: "#/components/schemas/ReactNativeSourcemapData"
+        - $ref: "#/components/schemas/IOSSourcemapData"
+        - $ref: "#/components/schemas/JVMSourcemapData"
+        - $ref: "#/components/schemas/FlutterSourcemapData"
+        - $ref: "#/components/schemas/ELFSourcemapData"
+        - $ref: "#/components/schemas/NDKSourcemapData"
+        - $ref: "#/components/schemas/IL2CPPSourcemapData"
+    SourcemapMapKind:
+      description: The type of source map.
+      enum:
+        - js
+        - jvm
+        - ios
+        - react
+        - flutter
+        - elf
+        - ndk
+        - il2cpp
+      example: js
+      type: string
+      x-enum-varnames:
+        - JS
+        - JVM
+        - IOS
+        - REACT
+        - FLUTTER
+        - ELF
+        - NDK
+        - IL2CPP
+    SourcemapsData:
+      description: List of source map data objects.
+      items:
+        $ref: "#/components/schemas/SourcemapItem"
+      type: array
+    SourcemapsListMeta:
+      description: Pagination metadata for the source maps list response.
+      properties:
+        page:
+          $ref: "#/components/schemas/SourcemapsListMetaPage"
+      required:
+        - page
+      type: object
+    SourcemapsListMetaPage:
+      description: Page information for the source maps list response.
+      properties:
+        has_more_results:
+          description: Whether there are more results available beyond the current page.
+          example: false
+          type: boolean
+        total_filtered_count:
+          description: Total number of source maps matching the filter criteria.
+          example: 100
+          format: int64
+          type: integer
+      required:
+        - total_filtered_count
+        - has_more_results
+      type: object
+    SourcemapsResponse:
+      description: Response containing a list of affected source maps.
+      properties:
+        data:
+          $ref: "#/components/schemas/SourcemapsData"
+      required:
+        - data
+      type: object
     Span:
       description: Object description of a spans after being processed and stored by Datadog.
       properties:
@@ -167267,6 +168004,844 @@ paths:
           - slos_read
       x-unstable: |-
         **Note**: This endpoint is in public beta and it's subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/sourcemaps:
+    delete:
+      description: |-
+        Deletes source maps matching the specified filter criteria. Supports
+        dry-run mode to preview which source maps would be deleted without
+        performing the actual deletion.
+      operationId: DeleteSourcemaps
+      parameters:
+        - description: |-
+            The type of source map. Valid values are `js`, `jvm`, `ios`,
+            `react`, `flutter`, `elf`, `ndk`, `il2cpp`.
+          in: query
+          name: mapkind
+          required: true
+          schema:
+            $ref: "#/components/schemas/SourcemapMapKind"
+        - description: |-
+            When set to `true`, returns the source maps that would be deleted
+            without performing the actual deletion. When set to `false`,
+            performs the deletion.
+          in: query
+          name: dry_run
+          required: true
+          schema:
+            example: true
+            type: boolean
+        - description: |-
+            Filter by service names (multiple values allowed). Required for
+            `js`, `jvm`, `react`, and `flutter` map kinds.
+          explode: true
+          in: query
+          name: filter[service]
+          schema:
+            example:
+              - my-web-service
+            items:
+              type: string
+            type: array
+          style: form
+        - description: |-
+            Filter by version values (multiple values allowed, maximum 10).
+            Required for `js`, `jvm`, `react`, and `flutter` map kinds.
+          explode: true
+          in: query
+          name: filter[version]
+          schema:
+            example:
+              - 1.0.0
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by variant values (multiple values allowed). Supported for `jvm`.
+          explode: true
+          in: query
+          name: filter[variant]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by source map ID values (multiple values allowed). Supported for all map kinds.
+          explode: true
+          in: query
+          name: filter[id]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by build ID values (multiple values allowed). Supported for `jvm`, `ndk`, and `il2cpp`.
+          explode: true
+          in: query
+          name: filter[build_id]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by UUID values (multiple values allowed). Supported for `ios`.
+          explode: true
+          in: query
+          name: filter[uuid]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by platform values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[platform]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by build number values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[build_number]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by bundle name values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[bundle_name]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: |-
+            Filter by architecture values (multiple values allowed). Supported
+            for `flutter`, `elf`, and `ndk`.
+          explode: true
+          in: query
+          name: filter[arch]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by symbol source values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[symbol_source]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by origin values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[origin]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by origin version values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[origin_version]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by filename (single value). Supported for `js`, `elf`, and `ndk`.
+          in: query
+          name: filter[filename]
+          schema:
+            type: string
+        - description: Filter by debug ID (single value). Supported for `react`.
+          in: query
+          name: filter[debug_id]
+          schema:
+            type: string
+        - description: Filter by GNU build ID (single value). Supported for `elf`.
+          in: query
+          name: filter[gnu_build_id]
+          schema:
+            type: string
+        - description: Filter by Go build ID (single value). Supported for `elf`.
+          in: query
+          name: filter[go_build_id]
+          schema:
+            type: string
+        - description: Filter by file hash (single value). Supported for `elf`.
+          in: query
+          name: filter[file_hash]
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          absolute_path: /js/bundle.min.js
+                          created_at: "2024-01-01T00:00:00Z"
+                          mapkind: js
+                          service: my-web-service
+                          size: 1024
+                          version: 1.0.0
+                        id: "5"
+                        type: sourcemaps
+              schema:
+                $ref: "#/components/schemas/SourcemapsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Delete source maps
+      tags:
+        - RUM
+      x-menu-order: 11
+      x-permission:
+        operator: OR
+        permissions:
+          - rum_delete_data
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    get:
+      description: |-
+        Retrieves the content of a specific JavaScript source map file by its
+        filename, service name, and version.
+      operationId: GetSourcemaps
+      parameters:
+        - description: The path to the source map file.
+          in: query
+          name: filename
+          required: true
+          schema:
+            example: js/bundle.min.js.map
+            type: string
+        - description: The service name associated with the source map.
+          in: query
+          name: service
+          required: true
+          schema:
+            example: my-web-service
+            type: string
+        - description: The version of the service associated with the source map.
+          in: query
+          name: version
+          required: true
+          schema:
+            example: 1.0.0
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        file: bundle.js
+                        mappings: AAAA,OAAO,CAAC,GAAG
+                        minifiedLineLengths:
+                          - 50
+                          - 30
+                        names:
+                          - console
+                          - log
+                        sourceRoot: /
+                        sources:
+                          - src/index.js
+                          - src/utils.js
+                        sourcesContent:
+                          - "console.log('index');"
+                          - "export function util() {}"
+                        version: 3
+                      id: path/to/sourcemap.js.map
+                      type: sourcemap_files
+              schema:
+                $ref: "#/components/schemas/SourcemapFileResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Get a JavaScript source map
+      tags:
+        - RUM
+      x-menu-order: 10
+      x-permission:
+        operator: OR
+        permissions:
+          - rum_apps_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/sourcemaps/list:
+    get:
+      description: Retrieves a paginated list of source maps matching the specified filter criteria.
+      operationId: ListSourcemaps
+      parameters:
+        - description: The type of source map. Defaults to `js`.
+          in: query
+          name: mapkind
+          schema:
+            $ref: "#/components/schemas/SourcemapMapKind"
+        - description: The number of results to return per page. Must be at least 1.
+          in: query
+          name: page[size]
+          schema:
+            default: 20
+            example: 20
+            type: integer
+        - description: The page number to retrieve, starting from 1.
+          in: query
+          name: page[number]
+          schema:
+            default: 1
+            example: 1
+            type: integer
+        - description: |-
+            Filter by service names (multiple values allowed). Required for
+            `js`, `jvm`, `react`, and `flutter` map kinds.
+          explode: true
+          in: query
+          name: filter[service]
+          schema:
+            example:
+              - my-web-service
+            items:
+              type: string
+            type: array
+          style: form
+        - description: |-
+            Filter by version values (multiple values allowed). Required for
+            `js`, `jvm`, `react`, and `flutter` map kinds.
+          explode: true
+          in: query
+          name: filter[version]
+          schema:
+            example:
+              - 1.0.0
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by variant values (multiple values allowed). Supported for `jvm`.
+          explode: true
+          in: query
+          name: filter[variant]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by source map ID values (multiple values allowed). Supported for all map kinds.
+          explode: true
+          in: query
+          name: filter[id]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by build ID values (multiple values allowed). Supported for `jvm`, `ndk`, and `il2cpp`.
+          explode: true
+          in: query
+          name: filter[build_id]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by UUID values (multiple values allowed). Supported for `ios`.
+          explode: true
+          in: query
+          name: filter[uuid]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by platform values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[platform]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by build number values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[build_number]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by bundle name values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[bundle_name]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: |-
+            Filter by architecture values (multiple values allowed). Supported
+            for `flutter`, `elf`, and `ndk`.
+          explode: true
+          in: query
+          name: filter[arch]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by symbol source values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[symbol_source]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by origin values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[origin]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by origin version values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[origin_version]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by filename (single value). Supported for `js`, `elf`, and `ndk`.
+          in: query
+          name: filter[filename]
+          schema:
+            type: string
+        - description: Filter by debug ID (single value). Supported for `react`.
+          in: query
+          name: filter[debug_id]
+          schema:
+            type: string
+        - description: Filter by GNU build ID (single value). Supported for `elf`.
+          in: query
+          name: filter[gnu_build_id]
+          schema:
+            type: string
+        - description: Filter by Go build ID (single value). Supported for `elf`.
+          in: query
+          name: filter[go_build_id]
+          schema:
+            type: string
+        - description: Filter by file hash (single value). Supported for `elf`.
+          in: query
+          name: filter[file_hash]
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          absolute_path: /js/bundle.min.js
+                          created_at: "2024-01-01T00:00:00Z"
+                          mapkind: js
+                          service: my-web-service
+                          size: 1024
+                          version: 1.0.0
+                        id: "5"
+                        type: sourcemaps
+                    meta:
+                      page:
+                        has_more_results: false
+                        total_filtered_count: 1
+              schema:
+                $ref: "#/components/schemas/ListSourcemapsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Request Entity Too Large
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: List source maps
+      tags:
+        - RUM
+      x-menu-order: 12
+      x-permission:
+        operator: OR
+        permissions:
+          - rum_apps_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/sourcemaps/restore:
+    patch:
+      description: |-
+        Restores previously deleted source maps matching the specified filter
+        criteria. Supports dry-run mode to preview which source maps would be
+        restored without performing the actual restoration.
+      operationId: RestoreSourcemaps
+      parameters:
+        - description: |-
+            The type of source map. Valid values are `js`, `jvm`, `ios`,
+            `react`, `flutter`, `elf`, `ndk`, `il2cpp`.
+          in: query
+          name: mapkind
+          required: true
+          schema:
+            $ref: "#/components/schemas/SourcemapMapKind"
+        - description: |-
+            When set to `true`, returns the source maps that would be restored
+            without performing the actual restoration. When set to `false`,
+            performs the restoration.
+          in: query
+          name: dry_run
+          required: true
+          schema:
+            example: true
+            type: boolean
+        - description: |-
+            Filter by service names (multiple values allowed). Required for
+            `js`, `jvm`, `react`, and `flutter` map kinds.
+          explode: true
+          in: query
+          name: filter[service]
+          schema:
+            example:
+              - my-web-service
+            items:
+              type: string
+            type: array
+          style: form
+        - description: |-
+            Filter by version values (multiple values allowed, maximum 10).
+            Required for `js`, `jvm`, `react`, and `flutter` map kinds.
+          explode: true
+          in: query
+          name: filter[version]
+          schema:
+            example:
+              - 1.0.0
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by variant values (multiple values allowed). Supported for `jvm`.
+          explode: true
+          in: query
+          name: filter[variant]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by source map ID values (multiple values allowed). Supported for all map kinds.
+          explode: true
+          in: query
+          name: filter[id]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by build ID values (multiple values allowed). Supported for `jvm`, `ndk`, and `il2cpp`.
+          explode: true
+          in: query
+          name: filter[build_id]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by UUID values (multiple values allowed). Supported for `ios`.
+          explode: true
+          in: query
+          name: filter[uuid]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by platform values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[platform]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by build number values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[build_number]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by bundle name values (multiple values allowed). Supported for `react`.
+          explode: true
+          in: query
+          name: filter[bundle_name]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: |-
+            Filter by architecture values (multiple values allowed). Supported
+            for `flutter`, `elf`, and `ndk`.
+          explode: true
+          in: query
+          name: filter[arch]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by symbol source values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[symbol_source]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by origin values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[origin]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by origin version values (multiple values allowed). Supported for `elf`.
+          explode: true
+          in: query
+          name: filter[origin_version]
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Filter by filename (single value). Supported for `js`, `elf`, and `ndk`.
+          in: query
+          name: filter[filename]
+          schema:
+            type: string
+        - description: Filter by debug ID (single value). Supported for `react`.
+          in: query
+          name: filter[debug_id]
+          schema:
+            type: string
+        - description: Filter by GNU build ID (single value). Supported for `elf`.
+          in: query
+          name: filter[gnu_build_id]
+          schema:
+            type: string
+        - description: Filter by Go build ID (single value). Supported for `elf`.
+          in: query
+          name: filter[go_build_id]
+          schema:
+            type: string
+        - description: Filter by file hash (single value). Supported for `elf`.
+          in: query
+          name: filter[file_hash]
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          absolute_path: /js/bundle.min.js
+                          created_at: "2024-01-01T00:00:00Z"
+                          mapkind: js
+                          service: my-web-service
+                          size: 1024
+                          version: 1.0.0
+                        id: "5"
+                        type: sourcemaps
+              schema:
+                $ref: "#/components/schemas/SourcemapsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Restore source maps
+      tags:
+        - RUM
+      x-menu-order: 13
+      x-permission:
+        operator: OR
+        permissions:
+          - rum_delete_data
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/sourcemaps/service_repository_info:
+    post:
+      description: Returns the repository URL and commit SHA associated with a given service and version.
+      operationId: GetServiceRepositoryInfo
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      service: my-web-service
+                      version: 1.0.0
+                    type: service_repository_info
+            schema:
+              $ref: "#/components/schemas/ServiceRepositoryInfoRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        commit_sha: abc123def456789
+                        repository_url: https://github.com/my-org/my-repo
+                        status: success
+                      id: my-web-service:1.0.0
+                      type: service_repository_info
+              schema:
+                $ref: "#/components/schemas/ServiceRepositoryInfoResponse"
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      summary: Get service repository information
+      tags:
+        - RUM
+      x-codegen-request-body-name: body
+      x-menu-order: 14
+      x-permission:
+        operator: OR
+        permissions:
+          - rum_apps_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/spa/recommendations/{service}:
     get:
