@@ -48072,18 +48072,34 @@ components:
           description: Name of the experiment.
           example: "My Experiment v1"
           type: string
+        parent_experiment_id:
+          description: Identifier of the parent (baseline) experiment this experiment is run against.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
         project_id:
           description: Identifier of the project this experiment belongs to.
           example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
           type: string
+        run_count:
+          description: Number of runs configured for this experiment.
+          format: int32
+          maximum: 2147483647
+          type: integer
       required:
         - project_id
-        - dataset_id
         - name
       type: object
     LLMObsExperimentDataAttributesResponse:
       description: Attributes of an LLM Observability experiment.
       properties:
+        aggregate_data:
+          additionalProperties: {}
+          description: >-
+            Pre-computed aggregate metrics for this experiment run, including eval score distributions, token costs, and error rates.
+          nullable: true
+          type: object
+        author:
+          $ref: "#/components/schemas/LLMObsExperimentUser"
         config:
           additionalProperties: {}
           description: Configuration parameters for the experiment.
@@ -48098,10 +48114,33 @@ components:
           description: Identifier of the dataset used in this experiment.
           example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
           type: string
+        dataset_name:
+          description: |-
+            Name of the dataset used in this experiment.
+            Only present when `include[dataset_names]` is `true`.
+          nullable: true
+          type: string
+        dataset_version:
+          description: Version of the dataset used in this experiment.
+          format: int64
+          type: integer
+        deleted_at:
+          description: Timestamp when the experiment was soft-deleted, if applicable.
+          format: date-time
+          nullable: true
+          type: string
         description:
           description: Description of the experiment.
           example: ""
           nullable: true
+          type: string
+        error:
+          description: Error message describing why the experiment failed, if applicable.
+          nullable: true
+          type: string
+        experiment:
+          description: Logical name of the experiment, shared across all runs of the same pipeline.
+          example: "my-pipeline"
           type: string
         metadata:
           additionalProperties: {}
@@ -48112,10 +48151,22 @@ components:
           description: Name of the experiment.
           example: "My Experiment v1"
           type: string
+        parent_experiment_id:
+          description: Identifier of the parent (baseline) experiment this experiment was run against, if any.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          nullable: true
+          type: string
         project_id:
           description: Identifier of the project this experiment belongs to.
           example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
           type: string
+        run_count:
+          description: Expected number of runs for this experiment.
+          format: int32
+          maximum: 2147483647
+          type: integer
+        status:
+          $ref: "#/components/schemas/LLMObsExperimentStatus"
         updated_at:
           description: Timestamp when the experiment was last updated.
           example: "2024-01-15T10:30:00Z"
@@ -48470,6 +48521,22 @@ components:
         - duration
         - status
       type: object
+    LLMObsExperimentSpanDataResponse:
+      description: JSON:API data item wrapping a single experiment span with evaluations.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsExperimentSpanWithEvals"
+        id:
+          description: Unique identifier of the span.
+          example: "00000000-0000-0000-0000-000000000001"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsExperimentSpanType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
     LLMObsExperimentSpanError:
       description: Error details for an experiment span.
       properties:
@@ -48510,6 +48577,14 @@ components:
       x-enum-varnames:
         - OK
         - ERROR
+    LLMObsExperimentSpanType:
+      description: Resource type for a span item in an experiment spans response.
+      enum:
+        - experiments
+      example: experiments
+      type: string
+      x-enum-varnames:
+        - EXPERIMENTS_SPAN
     LLMObsExperimentSpanWithEvals:
       description: An experiment span enriched with its associated evaluation metrics.
       properties:
@@ -48567,6 +48642,32 @@ components:
           example: "abc123def456"
           type: string
       type: object
+    LLMObsExperimentSpansResponse:
+      description: >-
+        Response for listing experiment spans (v1). Returns only spans with their evaluation metrics. No summary metrics or pagination are included. Deprecated in favor of `ListLLMObsExperimentEventsV3`.
+      properties:
+        data:
+          description: List of experiment spans with their evaluation metrics.
+          items:
+            $ref: "#/components/schemas/LLMObsExperimentSpanDataResponse"
+          type: array
+      required:
+        - data
+      type: object
+    LLMObsExperimentStatus:
+      description: Execution status of an LLM Observability experiment.
+      enum:
+        - running
+        - completed
+        - failed
+        - interrupted
+      example: completed
+      type: string
+      x-enum-varnames:
+        - RUNNING
+        - COMPLETED
+        - FAILED
+        - INTERRUPTED
     LLMObsExperimentType:
       description: Resource type of an LLM Observability experiment.
       enum:
@@ -48578,12 +48679,25 @@ components:
     LLMObsExperimentUpdateDataAttributesRequest:
       description: Attributes for updating an LLM Observability experiment.
       properties:
+        dataset_id:
+          description: Updated identifier of the dataset used in this experiment.
+          example: "9f64e5c7-dc5a-45c8-a17c-1b85f0bec97d"
+          type: string
         description:
           description: Updated description of the experiment.
           type: string
+        error:
+          description: Error message describing why the experiment failed, if applicable.
+          type: string
+        metadata:
+          additionalProperties: {}
+          description: Updated arbitrary metadata associated with the experiment.
+          type: object
         name:
           description: Updated name of the experiment.
           type: string
+        status:
+          $ref: "#/components/schemas/LLMObsExperimentStatus"
       type: object
     LLMObsExperimentUpdateDataRequest:
       description: Data object for updating an LLM Observability experiment.
@@ -48603,6 +48717,30 @@ components:
           $ref: "#/components/schemas/LLMObsExperimentUpdateDataRequest"
       required:
         - data
+      type: object
+    LLMObsExperimentUser:
+      description: User data for the author of an experiment. Only present when `include[user_data]` is `true`.
+      properties:
+        email:
+          description: Email address of the user.
+          example: "jane.doe@example.com"
+          type: string
+        handle:
+          description: Username or handle associated with the user's Datadog account.
+          example: "jane.doe@example.com"
+          type: string
+        icon:
+          description: URL of the user's icon.
+          example: "https://example.com/icon.png"
+          type: string
+        id:
+          description: Unique identifier of the user.
+          example: "00000000-0000-0000-0000-000000000010"
+          type: string
+        name:
+          description: Display name of the user.
+          example: "Jane Doe"
+          type: string
       type: object
     LLMObsExperimentationAnalyticsAggregate:
       description: Analytics aggregation parameters.
@@ -134340,16 +134478,59 @@ paths:
           name: filter[id]
           schema:
             type: string
-        - description: Use the Pagination cursor to retrieve the next page of results.
+        - description: Filter experiments by their exact run name.
+          in: query
+          name: filter[name]
+          schema:
+            type: string
+        - description: >-
+            Filter by logical experiment name. This is the `name` field set when creating an experiment through `POST /experiments`. Returns all experiment runs that share the same name, enabling cross-commit and cross-branch comparisons.
+          in: query
+          name: filter[experiment]
+          schema:
+            type: string
+        - description: |-
+            Filter by JSONB metadata containment. Provide a JSON object string where
+            experiments whose metadata contains all specified key-value pairs are returned.
+            For example: `{"commit":"abc123","branch":"main"}`.
+          in: query
+          name: filter[metadata]
+          schema:
+            type: string
+        - description: >-
+            Filter experiments by the ID of their parent (baseline) experiment. Returns all experiments that were run against the given baseline. Can be specified multiple times.
+          in: query
+          name: filter[parent_experiment_id]
+          schema:
+            type: string
+        - description: When `true`, return only soft-deleted experiments. Defaults to `false`.
+          in: query
+          name: filter[is_deleted]
+          schema:
+            type: boolean
+        - description: When `true`, enrich each experiment with its author's user data in the `author` field.
+          in: query
+          name: include[user_data]
+          schema:
+            type: boolean
+        - description: When `true`, enrich each experiment with its dataset name in the `dataset_name` field.
+          in: query
+          name: include[dataset_names]
+          schema:
+            type: boolean
+        - description: Use the pagination cursor returned in `meta.after` to retrieve the next page of results.
           in: query
           name: page[cursor]
           schema:
             type: string
-        - description: Maximum number of results to return per page.
+        - description: |-
+            Maximum number of results to return per page. Values above 5000 are clamped
+            to 5000. Defaults to 5000.
           in: query
           name: page[limit]
           schema:
             format: int64
+            maximum: 5000
             type: integer
       responses:
         "200":
@@ -134624,6 +134805,77 @@ paths:
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/llm-obs/v1/experiments/{experiment_id}/events:
+    get:
+      deprecated: true
+      description: >-
+        Retrieve spans with their evaluation metrics for a given experiment. Returns spans only, with no summary metrics and no pagination. Deprecated in favor of `ListLLMObsExperimentEventsV3`.
+      operationId: ListLLMObsExperimentEventsV1
+      parameters:
+        - $ref: "#/components/parameters/LLMObsExperimentIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          duration: 1500000000.0
+                          eval_metrics: []
+                          name: llm_call
+                          span_id: span-7a1b2c3d
+                          start_ns: 1705314600000000000
+                          status: ok
+                          tags: []
+                          trace_id: abc123def456
+                        id: 00000000-0000-0000-0000-000000000001
+                        type: experiments
+              schema:
+                $ref: "#/components/schemas/LLMObsExperimentSpansResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List LLM Observability experiment spans (v1)
+      tags:
+        - LLM Observability
+      x-menu-order: 50
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
     post:
       description: Push spans and metrics for an LLM Observability experiment.
       operationId: CreateLLMObsExperimentEvents
@@ -136732,6 +136984,81 @@ paths:
       tags:
         - LLM Observability
       x-menu-order: 44
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v2/experiments/{experiment_id}/events:
+    get:
+      deprecated: true
+      description: >-
+        Retrieve spans and experiment-level summary metrics for a given experiment. Returns the full events payload without pagination. Deprecated: use `ListLLMObsExperimentEventsV3` instead.
+      operationId: ListLLMObsExperimentEventsV2
+      parameters:
+        - $ref: "#/components/parameters/LLMObsExperimentIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        spans:
+                          - duration: 1500000000.0
+                            eval_metrics: []
+                            id: 00000000-0000-0000-0000-000000000002
+                            name: llm_call
+                            span_id: span-7a1b2c3d
+                            start_ns: 1705314600000000000
+                            status: ok
+                            tags: []
+                            trace_id: abc123def456
+                        summary_metrics: []
+                      id: 00000000-0000-0000-0000-000000000001
+                      type: experiment_events
+              schema:
+                $ref: "#/components/schemas/LLMObsExperimentEventsV2Response"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List LLM Observability experiment events (v2)
+      tags:
+        - LLM Observability
+      x-menu-order: 51
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
