@@ -65403,7 +65403,8 @@ components:
     OrgConfigGetResponse:
       description: A response with a single Org Config.
       properties:
-        data: {$ref: "#/components/schemas/OrgConfigRead"}
+        data:
+          $ref: "#/components/schemas/OrgConfigRead"
       required: [data]
       type: object
     OrgConfigListResponse:
@@ -65411,19 +65412,22 @@ components:
       properties:
         data:
           description: An array of Org Configs.
-          items: {$ref: "#/components/schemas/OrgConfigRead"}
+          items:
+            $ref: "#/components/schemas/OrgConfigRead"
           type: array
       required: [data]
       type: object
     OrgConfigRead:
       description: A single Org Config.
       properties:
-        attributes: {$ref: "#/components/schemas/OrgConfigReadAttributes"}
+        attributes:
+          $ref: "#/components/schemas/OrgConfigReadAttributes"
         id:
           description: A unique identifier for an Org Config.
           example: abcd1234
           type: string
-        type: {$ref: "#/components/schemas/OrgConfigType"}
+        type:
+          $ref: "#/components/schemas/OrgConfigType"
       required: [id, type, attributes]
       type: object
     OrgConfigReadAttributes:
@@ -65460,8 +65464,10 @@ components:
     OrgConfigWrite:
       description: An Org Config write operation.
       properties:
-        attributes: {$ref: "#/components/schemas/OrgConfigWriteAttributes"}
-        type: {$ref: "#/components/schemas/OrgConfigType"}
+        attributes:
+          $ref: "#/components/schemas/OrgConfigWriteAttributes"
+        type:
+          $ref: "#/components/schemas/OrgConfigType"
       required: [type, attributes]
       type: object
     OrgConfigWriteAttributes:
@@ -65474,7 +65480,8 @@ components:
     OrgConfigWriteRequest:
       description: A request to update an Org Config.
       properties:
-        data: {$ref: "#/components/schemas/OrgConfigWrite"}
+        data:
+          $ref: "#/components/schemas/OrgConfigWrite"
       required: [data]
       type: object
     OrgConnection:
@@ -103661,7 +103668,7 @@ paths:
         operator: OR
         permissions:
           - apps_datastore_manage
-  "/api/v2/actions-datastores/{datastore_id}":
+  /api/v2/actions-datastores/{datastore_id}:
     delete:
       description: Deletes a datastore by its unique identifier.
       operationId: DeleteDatastore
@@ -103808,7 +103815,7 @@ paths:
         operator: OR
         permissions:
           - apps_datastore_manage
-  "/api/v2/actions-datastores/{datastore_id}/items":
+  /api/v2/actions-datastores/{datastore_id}/items:
     delete:
       description: Deletes an item from a datastore by its key.
       operationId: DeleteDatastoreItem
@@ -104023,7 +104030,7 @@ paths:
         operator: OR
         permissions:
           - apps_datastore_write
-  "/api/v2/actions-datastores/{datastore_id}/items/bulk":
+  /api/v2/actions-datastores/{datastore_id}/items/bulk:
     delete:
       description: >-
         Deletes multiple items from a datastore by their keys in a single operation.
@@ -107102,7 +107109,7 @@ paths:
           - apps_write
           - connections_resolve
           - workflows_run
-  "/api/v2/app-builder/apps/{app_id}":
+  /api/v2/app-builder/apps/{app_id}:
     delete:
       description: Delete a single app. This API requires a [registered application key](https://docs.datadoghq.com/api/latest/action-connection/#register-a-new-app-key). Alternatively, you can configure these permissions [in the UI](https://docs.datadoghq.com/account_management/api-app-keys/#actions-api-access).
       operationId: DeleteApp
@@ -107307,7 +107314,7 @@ paths:
           - apps_write
           - connections_resolve
           - workflows_run
-  "/api/v2/app-builder/apps/{app_id}/deployment":
+  /api/v2/app-builder/apps/{app_id}/deployment:
     delete:
       description: Unpublish an app, removing the live version of the app. Unpublishing creates a new instance of a `deployment` object on the app, with a nil `app_version_id` (`00000000-0000-0000-0000-000000000000`). The app can still be updated and published again in the future. This API requires a [registered application key](https://docs.datadoghq.com/api/latest/action-connection/#register-a-new-app-key). Alternatively, you can configure these permissions [in the UI](https://docs.datadoghq.com/account_management/api-app-keys/#actions-api-access).
       operationId: UnpublishApp
@@ -107418,7 +107425,7 @@ paths:
         operator: OR
         permissions:
           - apps_write
-  "/api/v2/app-builder/apps/{app_id}/favorite":
+  /api/v2/app-builder/apps/{app_id}/favorite:
     patch:
       description: Add or remove an app from the current user's favorites. Favorited apps can be filtered for using the `filter[favorite]` query parameter on the [List Apps](https://docs.datadoghq.com/api/latest/app-builder/#list-apps) endpoint.
       operationId: UpdateAppFavorite
@@ -107475,7 +107482,7 @@ paths:
         operator: OR
         permissions:
           - apps_run
-  "/api/v2/app-builder/apps/{app_id}/protection-level":
+  /api/v2/app-builder/apps/{app_id}/protection-level:
     patch:
       description: Update the publication protection level of an app. When set to `approval_required`, future publishes must go through an approval workflow before going live.
       operationId: UpdateProtectionLevel
@@ -107550,7 +107557,7 @@ paths:
         operator: OR
         permissions:
           - apps_write
-  "/api/v2/app-builder/apps/{app_id}/publish-request":
+  /api/v2/app-builder/apps/{app_id}/publish-request:
     post:
       description: Create a publish request to ask for approval to publish an app whose protection level is `approval_required`. Publishing happens automatically once the request is approved by a user with the appropriate permissions.
       operationId: CreatePublishRequest
@@ -107624,7 +107631,7 @@ paths:
         operator: OR
         permissions:
           - apps_write
-  "/api/v2/app-builder/apps/{app_id}/revert":
+  /api/v2/app-builder/apps/{app_id}/revert:
     post:
       description: Revert an app to a previous version. The version to revert to is selected through the `version` query parameter. The reverted version becomes the new latest version of the app.
       operationId: RevertApp
@@ -107693,7 +107700,7 @@ paths:
         operator: OR
         permissions:
           - apps_write
-  "/api/v2/app-builder/apps/{app_id}/self-service":
+  /api/v2/app-builder/apps/{app_id}/self-service:
     patch:
       description: Enable or disable self-service for an app. Self-service apps can be discovered and run by users in your organization without explicit access being granted.
       operationId: UpdateAppSelfService
@@ -107750,7 +107757,7 @@ paths:
         operator: OR
         permissions:
           - apps_write
-  "/api/v2/app-builder/apps/{app_id}/tags":
+  /api/v2/app-builder/apps/{app_id}/tags:
     patch:
       description: Replace the tags on an app. The provided list overwrites the existing tags entirely; tags not present in the request body are removed.
       operationId: UpdateAppTags
@@ -107809,7 +107816,7 @@ paths:
         operator: OR
         permissions:
           - apps_write
-  "/api/v2/app-builder/apps/{app_id}/version-name":
+  /api/v2/app-builder/apps/{app_id}/version-name:
     patch:
       description: Assign a human-readable name to a specific version of an app. The version is selected through the `version` query parameter.
       operationId: UpdateAppVersionName
@@ -107873,7 +107880,7 @@ paths:
         operator: OR
         permissions:
           - apps_write
-  "/api/v2/app-builder/apps/{app_id}/versions":
+  /api/v2/app-builder/apps/{app_id}/versions:
     get:
       description: List the versions of an app. This endpoint is paginated.
       operationId: ListAppVersions
@@ -107954,7 +107961,7 @@ paths:
         permissions:
           - apps_run
           - connections_read
-  "/api/v2/app-builder/blueprint/{blueprint_id}":
+  /api/v2/app-builder/blueprint/{blueprint_id}:
     get:
       description: Retrieve an app blueprint by its ID.
       operationId: GetBlueprint
@@ -108069,7 +108076,7 @@ paths:
           - apps_write
           - connections_read
           - connections_write
-  "/api/v2/app-builder/blueprints/integration-id/{integration_id}":
+  /api/v2/app-builder/blueprints/integration-id/{integration_id}:
     get:
       description: List app blueprints associated with a specific integration ID.
       operationId: GetBlueprintsByIntegrationId
@@ -108121,7 +108128,7 @@ paths:
           - apps_write
           - connections_read
           - connections_write
-  "/api/v2/app-builder/blueprints/slugs/{slugs}":
+  /api/v2/app-builder/blueprints/slugs/{slugs}:
     get:
       description: Retrieve app blueprints by their slugs.
       operationId: GetBlueprintsBySlugs
@@ -146374,12 +146381,17 @@ paths:
                           value_type: bool
                         id: abcd1234
                         type: org_configs
-              schema: {$ref: "#/components/schemas/OrgConfigListResponse"}
+              schema:
+                $ref: "#/components/schemas/OrgConfigListResponse"
           description: OK
-        "400": {$ref: "#/components/responses/BadRequestResponse"}
-        "401": {$ref: "#/components/responses/UnauthorizedResponse"}
-        "403": {$ref: "#/components/responses/ForbiddenResponse"}
-        "429": {$ref: "#/components/responses/TooManyRequestsResponse"}
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
       summary: List Org Configs
       tags: [Organizations]
       x-menu-order: 1
@@ -146390,7 +146402,8 @@ paths:
     get:
       description: Return the name, description, and value of a specific Org Config.
       operationId: GetOrgConfig
-      parameters: [$ref: "#/components/parameters/OrgConfigName"]
+      parameters:
+        - $ref: "#/components/parameters/OrgConfigName"
       responses:
         "200":
           content:
@@ -146406,13 +146419,19 @@ paths:
                         value_type: bool
                       id: abcd1234
                       type: org_configs
-              schema: {$ref: "#/components/schemas/OrgConfigGetResponse"}
+              schema:
+                $ref: "#/components/schemas/OrgConfigGetResponse"
           description: OK
-        "400": {$ref: "#/components/responses/BadRequestResponse"}
-        "401": {$ref: "#/components/responses/UnauthorizedResponse"}
-        "403": {$ref: "#/components/responses/ForbiddenResponse"}
-        "404": {$ref: "#/components/responses/NotFoundResponse"}
-        "429": {$ref: "#/components/responses/TooManyRequestsResponse"}
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Get a specific Org Config value
       tags: [Organizations]
       x-menu-order: 2
@@ -146422,7 +146441,8 @@ paths:
     patch:
       description: Update the value of a specific Org Config.
       operationId: UpdateOrgConfig
-      parameters: [$ref: "#/components/parameters/OrgConfigName"]
+      parameters:
+        - $ref: "#/components/parameters/OrgConfigName"
       requestBody:
         content:
           application/json:
@@ -146433,7 +146453,8 @@ paths:
                     attributes:
                       value: UTC
                     type: org_configs
-            schema: {$ref: "#/components/schemas/OrgConfigWriteRequest"}
+            schema:
+              $ref: "#/components/schemas/OrgConfigWriteRequest"
         required: true
       responses:
         "200":
@@ -146450,13 +146471,19 @@ paths:
                         value_type: bool
                       id: abcd1234
                       type: org_configs
-              schema: {$ref: "#/components/schemas/OrgConfigGetResponse"}
+              schema:
+                $ref: "#/components/schemas/OrgConfigGetResponse"
           description: OK
-        "400": {$ref: "#/components/responses/BadRequestResponse"}
-        "401": {$ref: "#/components/responses/UnauthorizedResponse"}
-        "403": {$ref: "#/components/responses/ForbiddenResponse"}
-        "404": {$ref: "#/components/responses/NotFoundResponse"}
-        "429": {$ref: "#/components/responses/TooManyRequestsResponse"}
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
       summary: Update a specific Org Config
       tags: [Organizations]
       x-menu-order: 3
@@ -179058,13 +179085,15 @@ paths:
             format: date-time
             type: string
         - description: |-
-            Comma separated list of product families to retrieve. Available families are `all`, `analyzed_logs`,
-            `application_security`, `audit_trail`, `bits_ai`, `serverless`, `ci_app`, `cloud_cost_management`, `cloud_siem`,
-            `csm_container_enterprise`, `csm_host_enterprise`, `cspm`, `custom_events`, `cws`, `dbm`, `error_tracking`,
-            `fargate`, `infra_hosts`, `incident_management`, `indexed_logs`, `indexed_spans`, `ingested_spans`, `iot`,
-            `lambda_traced_invocations`, `llm_observability`, `logs`, `network_flows`, `network_hosts`, `network_monitoring`,
-            `observability_pipelines`, `online_archive`, `profiling`, `product_analytics`, `rum`, `rum_browser_sessions`,
-            `rum_mobile_sessions`, `sds`, `snmp`, `software_delivery`, `synthetics_api`, `synthetics_browser`,
+            Comma separated list of product families to retrieve. Available families are `all`, `ai`, `analyzed_logs`,
+            `application_performance_monitoring`, `application_security`, `audit_trail`, `bits_ai`, `serverless`, `ci_app`,
+            `cloud_cost_management`, `cloud_siem`, `csm_container_enterprise`, `csm_host_enterprise`, `csm_host_pro`, `cspm`,
+            `custom_events`, `cws`, `data_observability`, `dbm`, `digital_experience_management`, `error_tracking`,
+            `fargate`, `infra_hosts`, `incident_management`, `indexed_logs`, `indexed_spans`, `infrastructure_monitoring`,
+            `ingested_spans`, `iot`, `lambda_traced_invocations`, `llm_observability`, `log_management`, `logs`,
+            `network_flows`, `network_hosts`, `network_monitoring`, `observability_pipelines`, `online_archive`,
+            `platform_capabilities`, `product_analytics`, `profiling`, `rum`, `rum_browser_sessions`, `rum_mobile_sessions`,
+            `sds`, `security`, `snmp`, `software_delivery`, `synthetics_api`, `synthetics_browser`,
             `synthetics_mobile`, `synthetics_parallel_testing`, `timeseries`, `vuln_management` and `workflow_executions`.
             The following product family has been **deprecated**: `audit_logs`.
           in: query
