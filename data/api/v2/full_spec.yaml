@@ -46450,7 +46450,7 @@ components:
         attributes:
           $ref: "#/components/schemas/LLMObsAnnotatedInteractionsDataAttributesResponse"
         id:
-          description: The queue ID.
+          description: The annotation queue ID.
           example: "00000000-0000-0000-0000-000000000001"
           type: string
         type:
@@ -46476,6 +46476,35 @@ components:
       type: string
       x-enum-varnames:
         - ANNOTATED_INTERACTIONS
+    LLMObsAnnotationAssessment:
+      description: Assessment result for a label value.
+      enum:
+        - pass
+        - fail
+      example: "pass"
+      type: string
+      x-enum-varnames:
+        - PASS
+        - FAIL
+    LLMObsAnnotationError:
+      description: A partial error for a single annotation that could not be processed.
+      properties:
+        annotation_id:
+          description: ID of the annotation that failed, if applicable.
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        error:
+          description: Error message.
+          example: "interaction not found"
+          type: string
+        interaction_id:
+          description: ID of the interaction that failed.
+          example: "00000000-0000-0000-0000-000000000001"
+          type: string
+      required:
+        - interaction_id
+        - error
+      type: object
     LLMObsAnnotationItem:
       description: A single annotation on an interaction.
       properties:
@@ -46498,9 +46527,10 @@ components:
           type: string
         label_values:
           additionalProperties: {}
-          description: The label values for this annotation.
+          description: Label values for this annotation.
           example:
-            quality: "good"
+            - label_schema_id: "abc-123"
+              value: "good"
           type: object
         modified_at:
           description: Timestamp when the annotation was last modified.
@@ -46520,6 +46550,122 @@ components:
         - modified_by
         - modified_at
       type: object
+    LLMObsAnnotationItemResponse:
+      description: A single annotation on an interaction, as returned by the API.
+      properties:
+        created_at:
+          description: Timestamp when the annotation was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        created_by:
+          description: Identifier of the user who created the annotation.
+          example: "00000000-0000-0000-0000-000000000002"
+          type: string
+        id:
+          description: Unique identifier of the annotation.
+          example: "annotation-789"
+          type: string
+        interaction_id:
+          description: Identifier of the interaction this annotation belongs to.
+          example: "interaction-456"
+          type: string
+        label_values:
+          description: |-
+            Label values for this annotation. Each entry references a label schema by ID
+            and provides the corresponding value.
+          example:
+            - label_schema_id: "abc-123"
+              value: "good"
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotationLabelValueResponse"
+          type: array
+        modified_at:
+          description: Timestamp when the annotation was last modified.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        modified_by:
+          description: Identifier of the user who last modified the annotation.
+          example: "00000000-0000-0000-0000-000000000002"
+          type: string
+      required:
+        - id
+        - interaction_id
+        - label_values
+        - created_by
+        - created_at
+        - modified_by
+        - modified_at
+      type: object
+    LLMObsAnnotationLabelValue:
+      description: |-
+        A single label value entry in an annotation.
+        The `value` type must match the label schema type:
+        - `score`: a number within the schema `min`/`max` range (integer if `is_integer` is `true`).
+        - `categorical`: a string that is one of the schema `values`.
+        - `boolean`: `true` or `false`.
+        - `text`: any non-empty string.
+      properties:
+        assessment:
+          $ref: "#/components/schemas/LLMObsAnnotationAssessment"
+        label_schema_id:
+          description: ID of the label schema this value corresponds to.
+          example: "abc-123"
+          type: string
+        reasoning:
+          description: Free text reasoning for this label value.
+          example: "The response was accurate and well-structured."
+          type: string
+        value:
+          $ref: "#/components/schemas/LLMObsAnnotationLabelValueValue"
+      required:
+        - label_schema_id
+        - value
+      type: object
+    LLMObsAnnotationLabelValueResponse:
+      description: |-
+        A single label value entry in an annotation response.
+        In addition to the submitted fields, the server populates `type` and
+        `name_when_saved` to mirror the schema state at the time the annotation
+        was created — these help clients display values correctly when the schema
+        has since changed.
+      properties:
+        assessment:
+          $ref: "#/components/schemas/LLMObsAnnotationAssessment"
+        label_schema_id:
+          description: ID of the label schema this value corresponds to.
+          example: "abc-123"
+          type: string
+        name_when_saved:
+          description: Name of the label schema at the time the annotation was created.
+          example: "quality"
+          type: string
+        reasoning:
+          description: Free text reasoning for this label value.
+          example: "The response was accurate and well-structured."
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsLabelSchemaType"
+        value:
+          $ref: "#/components/schemas/LLMObsAnnotationLabelValueValue"
+      required:
+        - label_schema_id
+        - value
+      type: object
+    LLMObsAnnotationLabelValueStringArray:
+      description: For categorical-type labels allowing multiple selections.
+      items:
+        type: string
+      type: array
+    LLMObsAnnotationLabelValueValue:
+      description: The value for this label. Must comply with the label schema type constraints.
+      example: 0.0
+      oneOf:
+        - $ref: "#/components/schemas/AnyValueNumber"
+        - $ref: "#/components/schemas/AnyValueString"
+        - $ref: "#/components/schemas/LLMObsAnnotationLabelValueStringArray"
+        - $ref: "#/components/schemas/AnyValueBoolean"
     LLMObsAnnotationQueueDataAttributesRequest:
       description: Attributes for creating an LLM Observability annotation queue.
       properties:
@@ -46847,6 +46993,85 @@ components:
       required:
         - label_schemas
       type: object
+    LLMObsAnnotationsDataAttributesRequest:
+      description: Attributes for creating or updating annotations.
+      properties:
+        annotations:
+          description: List of annotations to create or update. Must contain at least one item.
+          items:
+            $ref: "#/components/schemas/LLMObsUpsertAnnotationItem"
+          minItems: 1
+          type: array
+      required:
+        - annotations
+      type: object
+    LLMObsAnnotationsDataAttributesResponse:
+      description: Attributes of the annotations response.
+      properties:
+        annotations:
+          description: Successfully created or updated annotations.
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotationItemResponse"
+          type: array
+        errors:
+          description: Partial errors for annotations that could not be processed.
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotationError"
+          type: array
+      required:
+        - annotations
+      type: object
+    LLMObsAnnotationsDataRequest:
+      description: Data object for creating or updating annotations.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsAnnotationsDataAttributesRequest"
+        type:
+          $ref: "#/components/schemas/LLMObsAnnotationsType"
+      required:
+        - type
+        - attributes
+      type: object
+    LLMObsAnnotationsDataResponse:
+      description: Data object for the annotations response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsAnnotationsDataAttributesResponse"
+        id:
+          description: The annotation queue ID.
+          example: "00000000-0000-0000-0000-000000000001"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsAnnotationsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsAnnotationsRequest:
+      description: Request to create or update annotations on interactions in an annotation queue.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsAnnotationsDataRequest"
+      required:
+        - data
+      type: object
+    LLMObsAnnotationsResponse:
+      description: Response containing the created or updated annotations.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsAnnotationsDataResponse"
+      required:
+        - data
+      type: object
+    LLMObsAnnotationsType:
+      description: Resource type for LLM Observability annotations.
+      enum:
+        - annotations
+      example: annotations
+      type: string
+      x-enum-varnames:
+        - ANNOTATIONS
     LLMObsAnthropicEffort:
       description: The effort level for Anthropic inference.
       enum:
@@ -48287,6 +48512,21 @@ components:
       required:
         - data
       type: object
+    LLMObsDeleteAnnotationError:
+      description: A partial error for a single annotation that could not be deleted.
+      properties:
+        annotation_id:
+          description: ID of the annotation that could not be deleted.
+          example: "00000000-0000-0000-0000-000000000000"
+          type: string
+        error:
+          description: Error message.
+          example: "annotation not found"
+          type: string
+      required:
+        - annotation_id
+        - error
+      type: object
     LLMObsDeleteAnnotationQueueInteractionsDataAttributesRequest:
       description: Attributes for deleting interactions from an annotation queue.
       properties:
@@ -48319,6 +48559,85 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/LLMObsDeleteAnnotationQueueInteractionsDataRequest"
+      required:
+        - data
+      type: object
+    LLMObsDeleteAnnotationsDataAttributesRequest:
+      description: Attributes for deleting annotations.
+      properties:
+        annotation_ids:
+          description: IDs of the annotations to delete. Must contain at least one item.
+          example:
+            - "00000000-0000-0000-0000-000000000000"
+            - "00000000-0000-0000-0000-000000000001"
+          items:
+            type: string
+          minItems: 1
+          type: array
+      required:
+        - annotation_ids
+      type: object
+    LLMObsDeleteAnnotationsDataAttributesResponse:
+      description: Attributes of the annotation deletion response.
+      properties:
+        annotation_ids:
+          description: IDs of the successfully deleted annotations.
+          example:
+            - "00000000-0000-0000-0000-000000000000"
+          items:
+            type: string
+          type: array
+        errors:
+          description: Errors for annotations that could not be deleted.
+          items:
+            $ref: "#/components/schemas/LLMObsDeleteAnnotationError"
+          type: array
+      required:
+        - annotation_ids
+        - errors
+      type: object
+    LLMObsDeleteAnnotationsDataRequest:
+      description: Data object for deleting annotations.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsDeleteAnnotationsDataAttributesRequest"
+        type:
+          $ref: "#/components/schemas/LLMObsAnnotationsType"
+      required:
+        - type
+        - attributes
+      type: object
+    LLMObsDeleteAnnotationsDataResponse:
+      description: Data object for the annotation deletion response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsDeleteAnnotationsDataAttributesResponse"
+        id:
+          description: The annotation queue ID.
+          example: "00000000-0000-0000-0000-000000000001"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsAnnotationsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsDeleteAnnotationsRequest:
+      description: Request to delete annotations from an annotation queue.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsDeleteAnnotationsDataRequest"
+      required:
+        - data
+      type: object
+    LLMObsDeleteAnnotationsResponse:
+      description: |-
+        Response for a batch annotation deletion. Partial errors are listed in the
+        response if any annotations could not be deleted.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsDeleteAnnotationsDataResponse"
       required:
         - data
       type: object
@@ -51030,6 +51349,32 @@ components:
         - TRACE
         - EXPERIMENT_TRACE
         - SESSION
+    LLMObsUpsertAnnotationItem:
+      description: |-
+        A single annotation to create or update. The annotation is matched by
+        `interaction_id` and the requesting user's identity.
+      properties:
+        interaction_id:
+          description: ID of the interaction to annotate.
+          example: "00000000-0000-0000-0000-000000000001"
+          type: string
+        label_values:
+          description: |-
+            Label values for this annotation. Each entry references a label schema by ID
+            and provides the corresponding value validated against the schema type constraints.
+          example:
+            - label_schema_id: "abc-123"
+              value: "good"
+            - label_schema_id: "ef56gh78"
+              value: "positive"
+          items:
+            $ref: "#/components/schemas/LLMObsAnnotationLabelValue"
+          minItems: 1
+          type: array
+      required:
+        - interaction_id
+        - label_values
+      type: object
     LLMObsVertexAIMetadata:
       description: Vertex AI-specific metadata for an integration account or inference request.
       properties:
@@ -134504,7 +134849,9 @@ paths:
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/llm-obs/v1/annotated-interactions:
     get:
-      description: Returns annotated interactions across all annotation queues for the given content IDs. Results include queue metadata (ID and name) for each interaction.
+      description: |-
+        Returns annotated interactions across all annotation queues for the given content IDs.
+        Results include queue metadata (ID and name) for each interaction.
       operationId: GetLLMObsAnnotatedInteractionsByTraceIDs
       parameters:
         - description: One or more content IDs to retrieve annotated interactions for. At least one is required.
@@ -134549,7 +134896,8 @@ paths:
                                 id: annotation-789
                                 interaction_id: interaction-456
                                 label_values:
-                                  quality: good
+                                  - label_schema_id: abc-123
+                                    value: good
                                 modified_at: "0001-01-01T00:00:00Z"
                                 modified_by: "00000000-0000-0000-0000-000000000002"
                             content_id: trace-abc-123
@@ -134613,7 +134961,8 @@ paths:
           name: projectId
           schema:
             type: string
-        - description: Filter annotation queues by queue IDs (comma-separated). Cannot be used together with `projectId`.
+        - description: >-
+            Filter annotation queues by queue IDs (comma-separated). Cannot be used together with `projectId`.
           in: query
           name: queueIds
           schema:
@@ -134804,7 +135153,7 @@ paths:
       summary: Delete an LLM Observability annotation queue
       tags:
         - LLM Observability
-      x-menu-order: 23
+      x-menu-order: 21
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -134883,7 +135232,7 @@ paths:
       summary: Update an LLM Observability annotation queue
       tags:
         - LLM Observability
-      x-menu-order: 22
+      x-menu-order: 20
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -134944,7 +135293,184 @@ paths:
       summary: Get annotated queue interactions
       tags:
         - LLM Observability
-      x-menu-order: 21
+      x-menu-order: 23
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/annotation-queues/{queue_id}/annotations:
+    post:
+      description: |-
+        Create or update annotations on interactions in a queue. Each annotation is matched
+        by `interaction_id` and the requesting user's identity.
+        Results and errors in the response are linked to request items by `interaction_id`.
+        Errors for individual items are returned in the `errors` field without blocking the rest of the batch.
+      operationId: UpsertLLMObsAnnotations
+      parameters:
+        - $ref: "#/components/parameters/LLMObsAnnotationQueueIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      annotations:
+                        - interaction_id: 00000000-0000-0000-0000-000000000001
+                          label_values:
+                            - label_schema_id: abc-123
+                              value: good
+                            - label_schema_id: ef56gh78
+                              value: positive
+                    type: annotations
+            schema:
+              $ref: "#/components/schemas/LLMObsAnnotationsRequest"
+        description: Payload for creating or updating annotations.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        annotations:
+                          - created_at: "2024-01-15T10:30:00Z"
+                            created_by: 00000000-0000-0000-0000-000000000002
+                            id: 00000000-0000-0000-0000-000000000000
+                            interaction_id: 00000000-0000-0000-0000-000000000001
+                            label_values:
+                              - label_schema_id: abc-123
+                                value: good
+                            modified_at: "2024-01-15T10:30:00Z"
+                            modified_by: 00000000-0000-0000-0000-000000000002
+                      id: 00000000-0000-0000-0000-000000000001
+                      type: annotations
+              schema:
+                $ref: "#/components/schemas/LLMObsAnnotationsResponse"
+          description: OK — annotations created or updated. Per-item errors are listed in `errors`.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found — the queue does not exist.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Create or update annotations
+      tags:
+        - LLM Observability
+      x-menu-order: 28
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/annotation-queues/{queue_id}/annotations/delete:
+    post:
+      description: Delete one or more annotations from an annotation queue.
+      operationId: DeleteLLMObsAnnotations
+      parameters:
+        - $ref: "#/components/parameters/LLMObsAnnotationQueueIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      annotation_ids:
+                        - 00000000-0000-0000-0000-000000000000
+                    type: annotations
+            schema:
+              $ref: "#/components/schemas/LLMObsDeleteAnnotationsRequest"
+        description: Delete annotations payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        annotation_ids:
+                          - 00000000-0000-0000-0000-000000000000
+                        errors: []
+                      id: 00000000-0000-0000-0000-000000000001
+                      type: annotations
+                partial_failure:
+                  summary: Some annotation IDs were not found
+                  value:
+                    data:
+                      attributes:
+                        annotation_ids:
+                          - 00000000-0000-0000-0000-000000000000
+                        errors:
+                          - annotation_id: 00000000-0000-0000-0000-000000000001
+                            error: annotation not found
+                      id: 00000000-0000-0000-0000-000000000001
+                      type: annotations
+              schema:
+                $ref: "#/components/schemas/LLMObsDeleteAnnotationsResponse"
+          description: >-
+            OK — annotations deleted. Errors for annotations that could not be deleted are listed in `errors`.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found — the queue does not exist.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Delete annotations
+      tags:
+        - LLM Observability
+      x-menu-order: 29
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -135064,7 +135590,7 @@ paths:
       summary: Add annotation queue interactions
       tags:
         - LLM Observability
-      x-menu-order: 20
+      x-menu-order: 22
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -135196,7 +135722,7 @@ paths:
       summary: Get annotation queue label schema
       tags:
         - LLM Observability
-      x-menu-order: 28
+      x-menu-order: 52
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
@@ -135342,7 +135868,7 @@ paths:
       summary: Update annotation queue label schema
       tags:
         - LLM Observability
-      x-menu-order: 29
+      x-menu-order: 53
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
