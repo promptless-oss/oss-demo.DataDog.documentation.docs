@@ -2686,6 +2686,158 @@ components:
       type: string
       x-enum-varnames:
         - CCM_CONFIG
+    AWSCcmConfigValidationIssue:
+      description: A single validation issue found while validating an AWS Cost and Usage Report (CUR) 2.0 configuration.
+      properties:
+        code:
+          $ref: "#/components/schemas/AWSCcmConfigValidationIssueCode"
+        description:
+          description: Human-readable description of the validation issue.
+          example: 'no CUR 2.0 export named "cost-and-usage-report" found'
+          type: string
+      required:
+        - code
+        - description
+      type: object
+    AWSCcmConfigValidationIssueCode:
+      description: Identifies the specific reason a Cost and Usage Report (CUR) 2.0 configuration failed validation.
+      enum:
+        - ISSUE_CODE_UNSPECIFIED
+        - CREDENTIAL_ERROR
+        - BUCKET_NAME_INVALID_GOVCLOUD
+        - S3_LIST_PERMISSION_MISSING
+        - S3_GET_PERMISSION_MISSING
+        - S3_BUCKET_REGION_MISMATCH
+        - S3_BUCKET_NOT_ACCESSIBLE
+        - EXPORT_LIST_PERMISSION_MISSING
+        - EXPORT_GET_PERMISSION_MISSING
+        - EXPORT_NOT_FOUND
+        - EXPORT_STATUS_UNHEALTHY
+        - TIME_GRANULARITY_INVALID
+        - FILE_FORMAT_INVALID
+        - INCLUDE_RESOURCES_DISABLED
+        - REFRESH_CADENCE_INVALID
+        - OVERWRITE_MODE_INVALID
+        - QUERY_STATEMENT_INVALID
+      example: "EXPORT_NOT_FOUND"
+      type: string
+      x-enum-varnames:
+        - ISSUE_CODE_UNSPECIFIED
+        - CREDENTIAL_ERROR
+        - BUCKET_NAME_INVALID_GOVCLOUD
+        - S3_LIST_PERMISSION_MISSING
+        - S3_GET_PERMISSION_MISSING
+        - S3_BUCKET_REGION_MISMATCH
+        - S3_BUCKET_NOT_ACCESSIBLE
+        - EXPORT_LIST_PERMISSION_MISSING
+        - EXPORT_GET_PERMISSION_MISSING
+        - EXPORT_NOT_FOUND
+        - EXPORT_STATUS_UNHEALTHY
+        - TIME_GRANULARITY_INVALID
+        - FILE_FORMAT_INVALID
+        - INCLUDE_RESOURCES_DISABLED
+        - REFRESH_CADENCE_INVALID
+        - OVERWRITE_MODE_INVALID
+        - QUERY_STATEMENT_INVALID
+    AWSCcmConfigValidationIssues:
+      description: List of validation issues found for the Cost and Usage Report (CUR) 2.0 configuration. Empty when the configuration is valid.
+      items:
+        $ref: "#/components/schemas/AWSCcmConfigValidationIssue"
+      type: array
+    AWSCcmConfigValidationRequest:
+      description: AWS CCM config validation request body.
+      properties:
+        data:
+          $ref: "#/components/schemas/AWSCcmConfigValidationRequestData"
+      required:
+        - data
+      type: object
+    AWSCcmConfigValidationRequestAttributes:
+      description: Attributes for an AWS CCM config validation request.
+      properties:
+        account_id:
+          description: Your AWS Account ID without dashes.
+          example: "123456789012"
+          type: string
+        bucket_name:
+          description: Name of the S3 bucket where the Cost and Usage Report is stored.
+          example: "billing"
+          type: string
+        bucket_region:
+          description: AWS region of the S3 bucket.
+          example: "us-east-1"
+          type: string
+        report_name:
+          description: Name of the Cost and Usage Report.
+          example: "cost-and-usage-report"
+          type: string
+        report_prefix:
+          description: S3 prefix where the Cost and Usage Report is stored.
+          example: "reports"
+          type: string
+      required:
+        - account_id
+        - bucket_name
+        - bucket_region
+        - report_name
+      type: object
+    AWSCcmConfigValidationRequestData:
+      description: AWS CCM config validation request data.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AWSCcmConfigValidationRequestAttributes"
+        type:
+          $ref: "#/components/schemas/AWSCcmConfigValidationType"
+      required:
+        - attributes
+        - type
+      type: object
+    AWSCcmConfigValidationResponse:
+      description: AWS CCM config validation response body.
+      properties:
+        data:
+          $ref: "#/components/schemas/AWSCcmConfigValidationResponseData"
+      required:
+        - data
+      type: object
+    AWSCcmConfigValidationResponseAttributes:
+      description: Attributes for an AWS CCM config validation response.
+      properties:
+        account_id:
+          description: Your AWS Account ID without dashes.
+          example: "123456789012"
+          type: string
+        issues:
+          $ref: "#/components/schemas/AWSCcmConfigValidationIssues"
+      required:
+        - account_id
+        - issues
+      type: object
+    AWSCcmConfigValidationResponseData:
+      description: AWS CCM config validation response data.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/AWSCcmConfigValidationResponseAttributes"
+        id:
+          description: AWS CCM config validation resource identifier.
+          example: "ccm_config_validation"
+          type: string
+        type:
+          $ref: "#/components/schemas/AWSCcmConfigValidationType"
+      required:
+        - attributes
+        - id
+        - type
+      type: object
+    AWSCcmConfigValidationType:
+      default: "ccm_config_validation"
+      description: AWS CCM config validation resource type.
+      enum:
+        - ccm_config_validation
+      example: "ccm_config_validation"
+      type: string
+      x-enum-varnames:
+        - CCM_CONFIG_VALIDATION
     AWSCloudAuthPersonaMappingAttributesResponse:
       description: Attributes for AWS cloud authentication persona mapping response
       properties:
@@ -130163,6 +130315,77 @@ paths:
         operator: OR
         permissions:
           - aws_configuration_read
+  /api/v2/integration/aws/validate_ccm_config:
+    post:
+      description: |-
+        Validate a Cloud Cost Management config for an AWS account using Cost and Usage Report
+        (CUR) 2.0 against Datadog's ingest requirements without persisting it.
+      operationId: ValidateAWSCCMConfig
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      account_id: "123456789012"
+                      bucket_name: billing
+                      bucket_region: us-east-1
+                      report_name: cost-and-usage-report
+                      report_prefix: reports
+                    type: ccm_config_validation
+            schema:
+              $ref: "#/components/schemas/AWSCcmConfigValidationRequest"
+        description: Validate a Cloud Cost Management config for an AWS account integration config.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        account_id: "123456789012"
+                        issues:
+                          - code: EXPORT_NOT_FOUND
+                            description: 'no CUR 2.0 export named "cost-and-usage-report" found'
+                      id: ccm_config_validation
+                      type: ccm_config_validation
+              schema:
+                $ref: "#/components/schemas/AWSCcmConfigValidationResponse"
+          description: AWS CCM Config validation result
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Service Unavailable
+      summary: Validate AWS CCM config
+      tags:
+        - AWS Integration
+      x-codegen-request-body-name: body
+      x-menu-order: 18
+      "x-permission":
+        operator: OR
+        permissions:
+          - cloud_cost_management_read
+          - cloud_cost_management_write
+      x-unstable: |-
+        **Note**: This endpoint is in Preview and may be subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/integration/gcp/accounts:
     get:
       description: List all GCP STS-enabled service accounts configured in your Datadog account.
