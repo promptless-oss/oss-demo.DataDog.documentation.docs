@@ -1579,6 +1579,14 @@ components:
       required: true
       schema:
         type: string
+    SAMLConfigurationUUIDPathParameter:
+      description: The UUID of the SAML configuration.
+      in: path
+      name: saml_config_uuid
+      required: true
+      schema:
+        example: 3653d3c6-0c75-11ea-ad28-fb5701eabc7d
+        type: string
     SalesforceIncidentsOrganizationIDPathParameter:
       description: The Datadog-assigned ID of the connected Salesforce organization.
       in: path
@@ -66827,6 +66835,73 @@ components:
       type: string
       x-enum-varnames:
         - ORGS
+    OrgSAMLPreferencesAttributes:
+      description: Attributes for updating an organization's SAML preferences.
+      properties:
+        default_role_uuids:
+          description: |-
+            The UUID of the default role assigned to just-in-time provisioned users.
+            Exactly one role UUID must be provided.
+          example:
+            - 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+          items:
+            description: The UUID of a role.
+            example: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+            format: uuid
+            type: string
+          maxItems: 1
+          minItems: 1
+          type: array
+        jit_domains:
+          description: |-
+            Email domains for which users are automatically provisioned on first SAML login
+            (just-in-time provisioning).
+          example:
+            - example.com
+          items:
+            description: An email domain for just-in-time user provisioning.
+            example: example.com
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 50
+          type: array
+      required:
+        - jit_domains
+        - default_role_uuids
+      type: object
+    OrgSAMLPreferencesData:
+      description: Data for updating an organization's SAML preferences.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/OrgSAMLPreferencesAttributes"
+        id:
+          description: The identifier of the SAML preferences resource.
+          example: 00000000-0000-0000-0000-000000000000
+          type: string
+        type:
+          $ref: "#/components/schemas/OrgSAMLPreferencesType"
+      required:
+        - type
+        - attributes
+      type: object
+    OrgSAMLPreferencesType:
+      default: saml_preferences
+      description: SAML preferences resource type.
+      enum:
+        - saml_preferences
+      example: saml_preferences
+      type: string
+      x-enum-varnames:
+        - SAML_PREFERENCES
+    OrgSAMLPreferencesUpdateRequest:
+      description: Request to update an organization's SAML preferences.
+      properties:
+        data:
+          $ref: "#/components/schemas/OrgSAMLPreferencesData"
+      required:
+        - data
+      type: object
     Organization:
       description: Organization object.
       properties:
@@ -75691,6 +75766,169 @@ components:
       type: string
       x-enum-varnames:
         - SAML_ASSERTION_ATTRIBUTES
+    SAMLConfiguration:
+      description: A SAML configuration object.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SAMLConfigurationAttributes"
+        id:
+          description: The UUID of the SAML configuration.
+          example: 3653d3c6-0c75-11ea-ad28-fb5701eabc7d
+          type: string
+        relationships:
+          $ref: "#/components/schemas/SAMLConfigurationRelationships"
+        type:
+          $ref: "#/components/schemas/SAMLConfigurationsType"
+      required:
+        - id
+        - type
+      type: object
+    SAMLConfigurationAttributes:
+      description: Attributes of a SAML configuration.
+      properties:
+        assertion_consumer_service:
+          description: The assertion consumer service (ACS) URLs that the identity provider posts SAML responses to.
+          example:
+            - https://app.datadoghq.com/account/saml/assertion
+          items:
+            description: An assertion consumer service URL.
+            example: https://app.datadoghq.com/account/saml/assertion
+            type: string
+          type: array
+        created_at:
+          description: Creation time of the SAML configuration.
+          format: date-time
+          readOnly: true
+          type: string
+        entity_id:
+          description: The service provider entity ID Datadog presents to the identity provider.
+          example: https://app.datadoghq.com/account/saml/metadata.xml?id=00000000-0000-0000-0000-000000000000
+          type: string
+        expires_at:
+          description: Expiration time of the uploaded identity provider metadata.
+          example: "2010-10-26T13:31:15+00:00"
+          format: date-time
+          nullable: true
+          type: string
+        idp_initiated:
+          description: Whether identity-provider-initiated login is enabled for the organization.
+          example: true
+          type: boolean
+        jit_domains:
+          description: |-
+            Email domains for which users are automatically provisioned on first SAML login
+            (just-in-time provisioning).
+          example:
+            - example.com
+          items:
+            description: An email domain for just-in-time user provisioning.
+            example: example.com
+            type: string
+          type: array
+        modified_at:
+          description: Time of the last SAML configuration modification.
+          format: date-time
+          readOnly: true
+          type: string
+        sso_url:
+          description: |-
+            The single sign-on URL users can visit to start a SAML login.
+            Returns `null` when the organization is identity-provider-initiated and has no subdomain.
+          example: https://app.datadoghq.com/account/login/id/00000000-0000-0000-0000-000000000000
+          nullable: true
+          type: string
+      type: object
+    SAMLConfigurationRelationships:
+      description: Relationships of a SAML configuration.
+      properties:
+        default_roles:
+          $ref: "#/components/schemas/RelationshipToRoles"
+      type: object
+    SAMLConfigurationResponse:
+      description: Response containing a single SAML configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/SAMLConfiguration"
+        included:
+          description: Resources related to the SAML configuration, such as the default roles.
+          items:
+            $ref: "#/components/schemas/Role"
+          type: array
+      required:
+        - data
+      type: object
+    SAMLConfigurationUpdateAttributes:
+      description: Attributes for updating a SAML configuration.
+      properties:
+        idp_initiated:
+          description: Whether identity-provider-initiated login is enabled for the organization.
+          example: true
+          type: boolean
+        jit_domains:
+          description: |-
+            Email domains for which users are automatically provisioned on first SAML login
+            (just-in-time provisioning). A default role is required to enable just-in-time provisioning.
+          example:
+            - example.com
+          items:
+            description: An email domain for just-in-time user provisioning.
+            example: example.com
+            maxLength: 255
+            minLength: 1
+            type: string
+          maxItems: 50
+          minItems: 0
+          type: array
+      type: object
+    SAMLConfigurationUpdateData:
+      description: Data for updating a SAML configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/SAMLConfigurationUpdateAttributes"
+        id:
+          description: The UUID of the SAML configuration to update. Must match the UUID in the URL path.
+          example: 3653d3c6-0c75-11ea-ad28-fb5701eabc7d
+          maxLength: 39
+          type: string
+        relationships:
+          $ref: "#/components/schemas/SAMLConfigurationRelationships"
+        type:
+          $ref: "#/components/schemas/SAMLConfigurationsType"
+      required:
+        - id
+        - type
+      type: object
+    SAMLConfigurationUpdateRequest:
+      description: Request to update a SAML configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/SAMLConfigurationUpdateData"
+      required:
+        - data
+      type: object
+    SAMLConfigurationsResponse:
+      description: Response containing a list of SAML configurations.
+      properties:
+        data:
+          description: Array of SAML configurations. An organization has at most one SAML configuration.
+          items:
+            $ref: "#/components/schemas/SAMLConfiguration"
+          type: array
+        included:
+          description: Resources related to the SAML configurations, such as the default roles.
+          items:
+            $ref: "#/components/schemas/Role"
+          type: array
+      type: object
+    SAMLConfigurationsType:
+      default: saml_configurations
+      description: SAML configurations resource type.
+      enum:
+        - saml_configurations
+      example: saml_configurations
+      type: string
+      x-enum-varnames:
+        - SAML_CONFIGURATIONS
     SBOM:
       description: A single SBOM
       properties:
@@ -146620,6 +146858,65 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/org/saml_configurations:
+    patch:
+      description: |-
+        Update the SAML preferences for the current organization.
+
+        Use this endpoint to set the just-in-time (JIT) provisioning domains and the default role
+        assigned to just-in-time provisioned users.
+      operationId: UpdateOrgSamlConfigurations
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      default_role_uuids:
+                        - 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                      jit_domains:
+                        - example.com
+                    type: saml_preferences
+            schema:
+              $ref: "#/components/schemas/OrgSAMLPreferencesUpdateRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update organization SAML preferences
+      tags:
+        - Organizations
+      x-codegen-request-body-name: body
+      x-menu-order: 9
+      "x-permission":
+        operator: OR
+        permissions:
+          - org_management
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/org_configs:
     get:
       description: Returns all Org Configs (name, description, and value).
@@ -155925,6 +156222,58 @@ paths:
       tags:
         - Rum Replay Viewership
       x-menu-order: 1
+  /api/v2/saml_configurations:
+    get:
+      description: Get the list of SAML configurations for the current organization. An organization has at most one SAML configuration.
+      operationId: ListSAMLConfigurations
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          assertion_consumer_service:
+                            - https://app.datadoghq.com/account/saml/assertion
+                          entity_id: https://app.datadoghq.com/account/saml/metadata.xml?id=00000000-0000-0000-0000-000000000000
+                          expires_at: "2010-10-26T13:31:15+00:00"
+                          idp_initiated: true
+                          jit_domains:
+                            - example.com
+                          sso_url: https://app.datadoghq.com/account/login/id/00000000-0000-0000-0000-000000000000
+                        id: 3653d3c6-0c75-11ea-ad28-fb5701eabc7d
+                        relationships:
+                          default_roles:
+                            data:
+                              - id: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                                type: roles
+                        type: saml_configurations
+                    included:
+                      - attributes:
+                          name: Datadog Standard Role
+                        id: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                        type: roles
+              schema:
+                $ref: "#/components/schemas/SAMLConfigurationsResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Authentication Error
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List SAML configurations
+      tags:
+        - Organizations
+      x-menu-order: 6
+      "x-permission":
+        operator: OR
+        permissions:
+          - org_management
   /api/v2/saml_configurations/idp_metadata:
     post:
       description: |-
@@ -155963,6 +156312,164 @@ paths:
         - Organizations
       x-codegen-request-body-name: body
       x-menu-order: 5
+      "x-permission":
+        operator: OR
+        permissions:
+          - org_management
+  /api/v2/saml_configurations/{saml_config_uuid}:
+    get:
+      description: Get a single SAML configuration for the current organization by its UUID.
+      operationId: GetSAMLConfiguration
+      parameters:
+        - $ref: "#/components/parameters/SAMLConfigurationUUIDPathParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        assertion_consumer_service:
+                          - https://app.datadoghq.com/account/saml/assertion
+                        entity_id: https://app.datadoghq.com/account/saml/metadata.xml?id=00000000-0000-0000-0000-000000000000
+                        expires_at: "2010-10-26T13:31:15+00:00"
+                        idp_initiated: true
+                        jit_domains:
+                          - example.com
+                        sso_url: https://app.datadoghq.com/account/login/id/00000000-0000-0000-0000-000000000000
+                      id: 3653d3c6-0c75-11ea-ad28-fb5701eabc7d
+                      relationships:
+                        default_roles:
+                          data:
+                            - id: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                              type: roles
+                      type: saml_configurations
+                    included:
+                      - attributes:
+                          name: Datadog Standard Role
+                        id: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                        type: roles
+              schema:
+                $ref: "#/components/schemas/SAMLConfigurationResponse"
+          description: OK
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Authentication Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get a SAML configuration
+      tags:
+        - Organizations
+      x-menu-order: 7
+      "x-permission":
+        operator: OR
+        permissions:
+          - org_management
+    patch:
+      description: |-
+        Update a single SAML configuration for the current organization.
+
+        Use this endpoint to enable or disable identity-provider-initiated login, set the
+        just-in-time provisioning domains, and set the default role assigned to
+        just-in-time provisioned users. A default role is required to enable just-in-time provisioning.
+      operationId: UpdateSAMLConfiguration
+      parameters:
+        - $ref: "#/components/parameters/SAMLConfigurationUUIDPathParameter"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      idp_initiated: true
+                      jit_domains:
+                        - example.com
+                    id: 3653d3c6-0c75-11ea-ad28-fb5701eabc7d
+                    relationships:
+                      default_roles:
+                        data:
+                          - id: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                            type: roles
+                    type: saml_configurations
+            schema:
+              $ref: "#/components/schemas/SAMLConfigurationUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        assertion_consumer_service:
+                          - https://app.datadoghq.com/account/saml/assertion
+                        entity_id: https://app.datadoghq.com/account/saml/metadata.xml?id=00000000-0000-0000-0000-000000000000
+                        expires_at: "2010-10-26T13:31:15+00:00"
+                        idp_initiated: true
+                        jit_domains:
+                          - example.com
+                        sso_url: https://app.datadoghq.com/account/login/id/00000000-0000-0000-0000-000000000000
+                      id: 3653d3c6-0c75-11ea-ad28-fb5701eabc7d
+                      relationships:
+                        default_roles:
+                          data:
+                            - id: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                              type: roles
+                      type: saml_configurations
+                    included:
+                      - attributes:
+                          name: Datadog Standard Role
+                        id: 8dd1cf3c-0c75-11ea-ad28-fb5701eabc7d
+                        type: roles
+              schema:
+                $ref: "#/components/schemas/SAMLConfigurationResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Authentication Error
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Unprocessable Entity
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update a SAML configuration
+      tags:
+        - Organizations
+      x-codegen-request-body-name: body
+      x-menu-order: 8
       "x-permission":
         operator: OR
         permissions:
