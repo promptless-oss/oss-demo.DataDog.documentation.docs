@@ -161,6 +161,13 @@ components:
       schema:
         example: "2020-11-24T18:46:21+00:00"
         type: string
+    ApplicationKeyFilterOwnedByParameter:
+      description: Filter application keys by owner ID.
+      in: query
+      name: filter[owned_by]
+      required: false
+      schema:
+        type: string
     ApplicationKeyFilterParameter:
       description: Filter application keys by the specified string.
       in: query
@@ -108953,6 +108960,7 @@ paths:
         - $ref: "#/components/parameters/ApplicationKeyFilterParameter"
         - $ref: "#/components/parameters/ApplicationKeyFilterCreatedAtStartParameter"
         - $ref: "#/components/parameters/ApplicationKeyFilterCreatedAtEndParameter"
+        - $ref: "#/components/parameters/ApplicationKeyFilterOwnedByParameter"
         - $ref: "#/components/parameters/ApplicationKeyIncludeParameter"
       responses:
         "200":
