@@ -40065,6 +40065,64 @@ components:
       type: string
       x-enum-varnames:
         - INCIDENTS_GLOBAL_SETTINGS
+    GlobalOrg:
+      description: Organization information for a global organization association.
+      properties:
+        name:
+          description: The name of the organization.
+          example: Example Org
+          type: string
+        public_id:
+          description: The public identifier of the organization.
+          example: abcdef12345
+          nullable: true
+          type: string
+        subdomain:
+          description: The subdomain used to access the organization, if configured.
+          example: example
+          nullable: true
+          type: string
+        uuid:
+          description: The UUID of the organization.
+          example: "13d10a96-6ff2-49be-be7b-4f56ebb13335"
+          format: uuid
+          type: string
+      required:
+        - uuid
+        - name
+      type: object
+    GlobalOrgAttributes:
+      description: Attributes of an organization associated with the authenticated user.
+      properties:
+        org:
+          $ref: "#/components/schemas/GlobalOrg"
+        redirect_url:
+          description: The login URL used to switch into the organization, if available.
+          example: "https://app.datadoghq.com/account/login/password?dd_oid=13d10a96-6ff2-49be-be7b-4f56ebb13335&login_hint=user%40example.com"
+          nullable: true
+          type: string
+        source_region:
+          description: The source region of the organization.
+          example: us1.prod.dog
+          type: string
+        user:
+          $ref: "#/components/schemas/GlobalOrgUser"
+      required:
+        - user
+        - org
+        - source_region
+      type: object
+    GlobalOrgData:
+      description: An organization associated with the authenticated user.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GlobalOrgAttributes"
+        type:
+          $ref: "#/components/schemas/GlobalOrgType"
+      required:
+        - type
+        - attributes
+      type: object
     GlobalOrgIdentifier:
       description: A unique identifier for an organization including its site.
       properties:
@@ -40080,6 +40138,99 @@ components:
       required:
         - org_uuid
         - org_site
+      type: object
+    GlobalOrgType:
+      description: The resource type for global user organizations.
+      enum: [global_user_orgs]
+      example: global_user_orgs
+      type: string
+      x-enum-varnames:
+        - GLOBAL_USER_ORGS
+    GlobalOrgUser:
+      description: User information for a global organization association.
+      properties:
+        handle:
+          description: The handle of the user.
+          example: user@example.com
+          type: string
+        uuid:
+          description: The UUID of the user.
+          example: "cfab5cf9-5472-48ea-a79c-a64045f4f745"
+          format: uuid
+          type: string
+      required:
+        - uuid
+        - handle
+      type: object
+    GlobalOrgsLinks:
+      description: Pagination links.
+      properties:
+        next:
+          description: Link to the next page.
+          example: "https://app.datadoghq.com/api/v2/global_orgs?user_handle=user@example.com&page[limit]=100&page[cursor]=next-page"
+          nullable: true
+          type: string
+        prev:
+          description: Link to the previous page.
+          nullable: true
+          type: string
+        self:
+          description: Link to the current page.
+          example: "https://app.datadoghq.com/api/v2/global_orgs?user_handle=user@example.com&page[limit]=100"
+          type: string
+      type: object
+    GlobalOrgsMeta:
+      description: Response metadata object.
+      properties:
+        page:
+          $ref: "#/components/schemas/GlobalOrgsMetaPage"
+      type: object
+    GlobalOrgsMetaPage:
+      description: Paging attributes.
+      properties:
+        cursor:
+          description: The cursor used to get the current results, if any.
+          example: ""
+          type: string
+        limit:
+          description: Number of results returned.
+          example: 100
+          format: int32
+          maximum: 1000
+          type: integer
+        next_cursor:
+          description: The cursor used to get the next results, if any.
+          example: next-page
+          nullable: true
+          type: string
+        prev_cursor:
+          description: The cursor used to get the previous results, if any.
+          nullable: true
+          type: string
+        type:
+          $ref: "#/components/schemas/GlobalOrgsMetaPageType"
+      type: object
+    GlobalOrgsMetaPageType:
+      description: Type of global orgs pagination.
+      enum: [cursor]
+      example: cursor
+      type: string
+      x-enum-varnames:
+        - CURSOR
+    GlobalOrgsResponse:
+      description: Response containing organizations across regions for the authenticated user.
+      properties:
+        data:
+          description: Organizations across regions for the authenticated user.
+          items:
+            $ref: "#/components/schemas/GlobalOrgData"
+          type: array
+        links:
+          $ref: "#/components/schemas/GlobalOrgsLinks"
+        meta:
+          $ref: "#/components/schemas/GlobalOrgsMeta"
+      required:
+        - data
       type: object
     GlobalVariableData:
       description: Synthetics global variable data. Wrapper around the global variable object.
@@ -130774,6 +130925,95 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/global_orgs:
+    get:
+      description: |-
+        Returns organizations across regions for the authenticated user. The `user_handle` query parameter must match the authenticated user's handle.
+      operationId: ListGlobalOrgs
+      parameters:
+        - description: The handle of the authenticated user.
+          in: query
+          name: user_handle
+          required: true
+          schema:
+            example: user@example.com
+            type: string
+        - description: Maximum number of results returned.
+          in: query
+          name: page[limit]
+          required: false
+          schema:
+            default: 100
+            format: int32
+            maximum: 1000
+            minimum: 1
+            type: integer
+        - description: |-
+            String to query the next page of results.
+            This key is provided with each valid response from the API in `meta.page.next_cursor`.
+          in: query
+          name: page[cursor]
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          org:
+                            name: Example Org
+                            public_id: abcdef12345
+                            subdomain: example
+                            uuid: "13d10a96-6ff2-49be-be7b-4f56ebb13335"
+                          redirect_url: "https://app.datadoghq.com/account/login/password?dd_oid=13d10a96-6ff2-49be-be7b-4f56ebb13335&login_hint=user%40example.com"
+                          source_region: us1.prod.dog
+                          user:
+                            handle: user@example.com
+                            uuid: "cfab5cf9-5472-48ea-a79c-a64045f4f745"
+                        type: global_user_orgs
+                    links:
+                      next: "https://app.datadoghq.com/api/v2/global_orgs?user_handle=user@example.com&page[limit]=100&page[cursor]=next-page"
+                      self: "https://app.datadoghq.com/api/v2/global_orgs?user_handle=user@example.com&page[limit]=100"
+                    meta:
+                      page:
+                        cursor: ""
+                        limit: 100
+                        next_cursor: next-page
+                        type: cursor
+              schema:
+                $ref: "#/components/schemas/GlobalOrgsResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - user_access_read
+      summary: List global orgs
+      tags:
+        - Organizations
+      x-menu-order: 10
+      x-pagination:
+        cursorParam: page[cursor]
+        cursorPath: meta.page.next_cursor
+        limitParam: page[limit]
+        resultsPath: data
+      "x-permission":
+        operator: OR
+        permissions:
+          - user_access_read
   /api/v2/hamr:
     get:
       description: |-
