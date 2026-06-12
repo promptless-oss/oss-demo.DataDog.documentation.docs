@@ -61983,6 +61983,7 @@ components:
         - $ref: "#/components/schemas/ObservabilityPipelineDedupeProcessor"
         - $ref: "#/components/schemas/ObservabilityPipelineEnrichmentTableProcessor"
         - $ref: "#/components/schemas/ObservabilityPipelineGenerateMetricsProcessor"
+        - $ref: "#/components/schemas/ObservabilityPipelineGenerateMetricsV2Processor"
         - $ref: "#/components/schemas/ObservabilityPipelineOcsfMapperProcessor"
         - $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessor"
         - $ref: "#/components/schemas/ObservabilityPipelineParseJSONProcessor"
@@ -63122,6 +63123,50 @@ components:
       type: string
       x-enum-varnames:
         - GENERATE_DATADOG_METRICS
+    ObservabilityPipelineGenerateMetricsV2Processor:
+      description: |-
+        The `generate_metrics` processor creates custom metrics from logs.
+        Metrics can be counters, gauges, or distributions and optionally grouped by log fields.
+        The generated metrics must be routed to a metrics destination using the input `<processor-id>.metrics`.
+
+        **Supported pipeline types:** logs
+      properties:
+        display_name:
+          $ref: "#/components/schemas/ObservabilityPipelineComponentDisplayName"
+        enabled:
+          description: Indicates whether the processor is enabled.
+          example: true
+          type: boolean
+        id:
+          description: The unique identifier for this component. Used to reference this component in other parts of the pipeline.
+          example: generate-metrics-processor
+          type: string
+        include:
+          description: A Datadog search query used to determine which logs this processor targets.
+          example: "service:my-service"
+          type: string
+        metrics:
+          description: Configuration for generating individual metrics.
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineGeneratedMetric"
+          type: array
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineGenerateMetricsV2ProcessorType"
+      required:
+        - id
+        - type
+        - enabled
+      type: object
+      x-pipeline-types: [logs]
+    ObservabilityPipelineGenerateMetricsV2ProcessorType:
+      default: generate_metrics
+      description: The processor type. Always `generate_metrics`.
+      enum:
+        - generate_metrics
+      example: generate_metrics
+      type: string
+      x-enum-varnames:
+        - GENERATE_METRICS
     ObservabilityPipelineGeneratedMetric:
       description: |-
         Defines a log-based custom metric, including its name, type, filter, value computation strategy,
