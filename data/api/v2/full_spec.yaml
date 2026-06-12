@@ -56192,6 +56192,40 @@ components:
       type: string
       x-enum-varnames:
         - MANAGED_ORGS
+    MaxSessionDurationType:
+      description: Data type of a maximum session duration update.
+      enum: [max_session_duration]
+      example: max_session_duration
+      type: string
+      x-enum-varnames:
+        - MAX_SESSION_DURATION
+    MaxSessionDurationUpdateAttributes:
+      description: Attributes for the maximum session duration update request.
+      properties:
+        max_session_duration:
+          description: The maximum session duration, in seconds.
+          example: 604800
+          format: int64
+          minimum: 1
+          type: integer
+      required: [max_session_duration]
+      type: object
+    MaxSessionDurationUpdateData:
+      description: The data object for a maximum session duration update request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/MaxSessionDurationUpdateAttributes"
+        type:
+          $ref: "#/components/schemas/MaxSessionDurationType"
+      required: [type, attributes]
+      type: object
+    MaxSessionDurationUpdateRequest:
+      description: A request to update the maximum session duration for an organization.
+      properties:
+        data:
+          $ref: "#/components/schemas/MaxSessionDurationUpdateData"
+      required: [data]
+      type: object
     McpScanRequest:
       description: The top-level request object for submitting an MCP SCA dependency scan.
       properties:
@@ -144789,6 +144823,48 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/login/org_configs/max_session_duration:
+    put:
+      description: |-
+        Update the maximum session duration for the current organization.
+        The duration is specified in seconds.
+      operationId: UpdateLoginOrgConfigsMaxSessionDuration
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      max_session_duration: 604800
+                    type: max_session_duration
+            schema:
+              $ref: "#/components/schemas/MaxSessionDurationUpdateRequest"
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - org_management
+      summary: Update the maximum session duration
+      tags: [Organizations]
+      x-menu-order: 11
+      "x-permission":
+        operator: OR
+        permissions:
+          - org_management
   /api/v2/logs:
     post:
       description: |-
