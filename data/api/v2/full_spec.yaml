@@ -123564,6 +123564,11 @@ paths:
           name: filter[provider]
           schema:
             type: string
+        - description: Filter results to tag keys that have data for a specific Cloud Cost Management metric (for example, `aws.cost.net.amortized`). When omitted, all tag keys for the requested period are returned.
+          in: query
+          name: filter[metric]
+          schema:
+            type: string
       responses:
         "200":
           content:
