@@ -922,6 +922,58 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/LLMObsIntegrationName"
+    LLMObsPatternsConfigIDPathParameter:
+      description: The ID of the patterns configuration.
+      example: "a7c8d9e0-1234-5678-9abc-def012345678"
+      in: path
+      name: config_id
+      required: true
+      schema:
+        type: string
+    LLMObsPatternsConfigIDQueryParameter:
+      description: The ID of the patterns configuration.
+      example: "a7c8d9e0-1234-5678-9abc-def012345678"
+      in: query
+      name: config_id
+      required: true
+      schema:
+        type: string
+    LLMObsPatternsIncludeMetricsQueryParameter:
+      description: |-
+        When true, enrich each clustered point with span metrics such as status,
+        duration, token counts, estimated cost, and evaluations.
+      in: query
+      name: include_metrics
+      schema:
+        type: boolean
+    LLMObsPatternsPageSizeQueryParameter:
+      description: Maximum number of clustered points to return per page.
+      in: query
+      name: page_size
+      schema:
+        format: int64
+        type: integer
+    LLMObsPatternsPageTokenQueryParameter:
+      description: Pagination token to retrieve the next page of clustered points.
+      in: query
+      name: page_token
+      schema:
+        type: string
+    LLMObsPatternsRunIDQueryParameter:
+      description: The ID of a specific patterns run. Defaults to the most recent completed run.
+      example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+      in: query
+      name: run_id
+      schema:
+        type: string
+    LLMObsPatternsTopicIDQueryParameter:
+      description: The ID of the topic to retrieve clustered points for.
+      example: "5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21"
+      in: query
+      name: topic_id
+      required: true
+      schema:
+        type: string
     LLMObsProjectIDPathParameter:
       description: The ID of the LLM Observability project.
       example: "a33671aa-24fd-4dcd-9b33-a8ec7dde7751"
@@ -52044,6 +52096,1017 @@ components:
         - AUTO
         - CONCISE
         - DETAILED
+    LLMObsPatternsActivityProgress:
+      description: Progress information for a single step of a patterns run.
+      properties:
+        name:
+          description: Name of the step.
+          example: generate_topics
+          type: string
+        started_at:
+          description: Timestamp when the step started. Null if the step has not started.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          nullable: true
+          type: string
+        status:
+          description: Status of the step.
+          example: completed
+          type: string
+      required:
+        - name
+        - status
+      type: object
+    LLMObsPatternsClusteredPoint:
+      description: A single data point grouped into a topic.
+      properties:
+        event_id:
+          description: Identifier of the source event.
+          example: "AAAAAYabc123"
+          type: string
+        id:
+          description: Unique identifier of the clustered point.
+          example: "9b0c1d2e-3f40-5a61-b728-c9d0e1f2a3b4"
+          type: string
+        input:
+          description: Input text of the source span.
+          example: "How do I get a refund?"
+          type: string
+        is_included:
+          description: Whether the point is included in the patterns dataset.
+          example: false
+          type: boolean
+        is_suggested:
+          description: Whether the point is suggested for inclusion in the patterns dataset.
+          example: true
+          type: boolean
+        session_id:
+          description: Identifier of the source session.
+          example: "session-7c3f5a1b"
+          type: string
+        span_id:
+          description: Identifier of the source span.
+          example: "1234567890123456789"
+          type: string
+        topic_id:
+          description: Identifier of the topic the point belongs to.
+          example: "5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21"
+          type: string
+      required:
+        - id
+        - event_id
+        - topic_id
+        - span_id
+        - session_id
+        - input
+        - is_suggested
+        - is_included
+      type: object
+    LLMObsPatternsClusteredPointRef:
+      description: |-
+        A clustered point attached inline to a topic. The metric fields are populated
+        only when the request includes `include_metrics=true`.
+      properties:
+        duration:
+          description: Duration of the source span in nanoseconds. Included only when metrics are requested.
+          example: 1500000
+          format: double
+          type: number
+        estimated_total_cost:
+          description: Estimated total cost of the source span. Included only when metrics are requested.
+          example: 0.0021
+          format: double
+          type: number
+        evaluation:
+          additionalProperties: {}
+          description: |-
+            Evaluation results for the source span keyed by evaluation name. Included
+            only when metrics are requested.
+          type: object
+        input_tokens:
+          description: Number of input tokens of the source span. Included only when metrics are requested.
+          example: 128
+          format: double
+          type: number
+        output_tokens:
+          description: Number of output tokens of the source span. Included only when metrics are requested.
+          example: 64
+          format: double
+          type: number
+        span_id:
+          description: Identifier of the source span.
+          example: "1234567890123456789"
+          type: string
+        status:
+          description: Status of the source span. Included only when metrics are requested.
+          example: ok
+          type: string
+        total_tokens:
+          description: Total number of tokens of the source span. Included only when metrics are requested.
+          example: 192
+          format: double
+          type: number
+      required:
+        - span_id
+      type: object
+    LLMObsPatternsClusteredPointRefsList:
+      description: List of clustered points attached to a topic.
+      items:
+        $ref: "#/components/schemas/LLMObsPatternsClusteredPointRef"
+      type: array
+    LLMObsPatternsClusteredPointsList:
+      description: List of clustered points.
+      items:
+        $ref: "#/components/schemas/LLMObsPatternsClusteredPoint"
+      type: array
+    LLMObsPatternsClusteredPointsResponse:
+      description: Response containing the clustered points of an LLM Observability topic.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsClusteredPointsResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsClusteredPointsResponseAttributes:
+      description: Attributes of an LLM Observability patterns clustered points response.
+      properties:
+        next_page_token:
+          description: Pagination token for the next page of points. Null if there are no more pages.
+          example: "eyJvZmZzZXQiOjUwfQ=="
+          nullable: true
+          type: string
+        points:
+          $ref: "#/components/schemas/LLMObsPatternsClusteredPointsList"
+        topic_id:
+          description: Identifier of the topic the points belong to.
+          example: "5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21"
+          type: string
+      required:
+        - topic_id
+        - next_page_token
+        - points
+      type: object
+    LLMObsPatternsClusteredPointsResponseData:
+      description: Data object of an LLM Observability patterns clustered points response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsClusteredPointsResponseAttributes"
+        id:
+          description: Identifier of the topic the points belong to.
+          example: "5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsClusteredPointsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsClusteredPointsType:
+      description: Resource type of an LLM Observability patterns clustered points response.
+      enum:
+        - clustered_points_response
+      example: clustered_points_response
+      type: string
+      x-enum-varnames:
+        - CLUSTERED_POINTS_RESPONSE
+    LLMObsPatternsConfigAttributes:
+      description: Attributes of an LLM Observability patterns configuration.
+      properties:
+        account_id:
+          description: Integration account ID for a bring-your-own-model configuration.
+          example: "1000000001"
+          nullable: true
+          type: string
+        created_at:
+          description: Timestamp when the configuration was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        evp_query:
+          description: Query that selects the spans the patterns run analyzes.
+          example: "@ml_app:support-bot"
+          type: string
+        hierarchy_depth:
+          description: Depth of the topic hierarchy to generate.
+          example: 2
+          format: int32
+          maximum: 2147483647
+          type: integer
+        integration_provider:
+          description: Integration provider for a bring-your-own-model configuration.
+          example: openai
+          nullable: true
+          type: string
+        model_name:
+          description: Model name for a bring-your-own-model configuration.
+          example: gpt-4o
+          nullable: true
+          type: string
+        name:
+          description: Name of the configuration.
+          example: "Support chatbot topics"
+          type: string
+        num_records:
+          description: Maximum number of records to process for the run.
+          example: 1000
+          format: int32
+          maximum: 2147483647
+          type: integer
+        sampling_ratio:
+          description: Fraction of matching spans to sample for the run.
+          example: 0.1
+          format: double
+          type: number
+        scope:
+          description: Scope of the configuration.
+          example: ""
+          type: string
+        template:
+          description: Template used to guide topic generation.
+          example: ""
+          nullable: true
+          type: string
+        updated_at:
+          description: Timestamp when the configuration was last updated.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+      required:
+        - name
+        - evp_query
+        - sampling_ratio
+        - num_records
+        - hierarchy_depth
+        - scope
+        - created_at
+        - updated_at
+      type: object
+    LLMObsPatternsConfigItem:
+      description: A single LLM Observability patterns configuration in a list response.
+      properties:
+        account_id:
+          description: Integration account ID for a bring-your-own-model configuration.
+          example: "1000000001"
+          nullable: true
+          type: string
+        created_at:
+          description: Timestamp when the configuration was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        evp_query:
+          description: Query that selects the spans the patterns run analyzes.
+          example: "@ml_app:support-bot"
+          type: string
+        hierarchy_depth:
+          description: Depth of the topic hierarchy to generate.
+          example: 2
+          format: int32
+          maximum: 2147483647
+          type: integer
+        id:
+          description: Unique identifier of the configuration.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        integration_provider:
+          description: Integration provider for a bring-your-own-model configuration.
+          example: openai
+          nullable: true
+          type: string
+        model_name:
+          description: Model name for a bring-your-own-model configuration.
+          example: gpt-4o
+          nullable: true
+          type: string
+        name:
+          description: Name of the configuration.
+          example: "Support chatbot topics"
+          type: string
+        num_records:
+          description: Maximum number of records to process for the run.
+          example: 1000
+          format: int32
+          maximum: 2147483647
+          type: integer
+        sampling_ratio:
+          description: Fraction of matching spans to sample for the run.
+          example: 0.1
+          format: double
+          type: number
+        scope:
+          description: Scope of the configuration.
+          example: ""
+          type: string
+        template:
+          description: Template used to guide topic generation.
+          example: ""
+          nullable: true
+          type: string
+        updated_at:
+          description: Timestamp when the configuration was last updated.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+      required:
+        - id
+        - name
+        - evp_query
+        - sampling_ratio
+        - num_records
+        - hierarchy_depth
+        - scope
+        - created_at
+        - updated_at
+      type: object
+    LLMObsPatternsConfigItemsList:
+      description: List of patterns configurations.
+      items:
+        $ref: "#/components/schemas/LLMObsPatternsConfigItem"
+      type: array
+    LLMObsPatternsConfigResponse:
+      description: Response containing a single LLM Observability patterns configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsConfigResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsConfigResponseData:
+      description: Data object of an LLM Observability patterns configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsConfigAttributes"
+        id:
+          description: Unique identifier of the configuration.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsConfigType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsConfigSnapshot:
+      description: Snapshot of the configuration used for a patterns run.
+      properties:
+        account_id:
+          description: Integration account ID used for a bring-your-own-model run.
+          example: "1000000001"
+          type: string
+        evp_query:
+          description: Query that selected the spans for the run.
+          example: "@ml_app:support-bot"
+          type: string
+        hierarchy_depth:
+          description: Depth of the topic hierarchy generated.
+          example: 2
+          format: int32
+          maximum: 2147483647
+          type: integer
+        integration_provider:
+          description: Integration provider used for a bring-your-own-model run.
+          example: openai
+          type: string
+        model_name:
+          description: Model name used for a bring-your-own-model run.
+          example: gpt-4o
+          type: string
+        num_records:
+          description: Maximum number of records processed for the run.
+          example: 1000
+          format: int32
+          maximum: 2147483647
+          type: integer
+        sampling_ratio:
+          description: Fraction of matching spans sampled for the run.
+          example: 0.1
+          format: double
+          type: number
+      type: object
+    LLMObsPatternsConfigType:
+      description: Resource type of an LLM Observability patterns configuration.
+      enum:
+        - topic_discovery_configs
+      example: topic_discovery_configs
+      type: string
+      x-enum-varnames:
+        - TOPIC_DISCOVERY_CONFIGS
+    LLMObsPatternsConfigUpsertRequest:
+      description: Request to create or update an LLM Observability patterns configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsConfigUpsertRequestData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsConfigUpsertRequestAttributes:
+      description: Attributes for creating or updating an LLM Observability patterns configuration.
+      properties:
+        account_id:
+          description: Integration account ID for a bring-your-own-model configuration.
+          example: "1000000001"
+          type: string
+        config_id:
+          description: The ID of an existing configuration to update. If omitted, a new configuration is created.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        evp_query:
+          description: Query that selects the spans the patterns run analyzes.
+          example: "@ml_app:support-bot"
+          type: string
+        hierarchy_depth:
+          description: Depth of the topic hierarchy to generate.
+          example: 2
+          format: int32
+          maximum: 2147483647
+          type: integer
+        integration_provider:
+          description: Integration provider for a bring-your-own-model configuration.
+          example: openai
+          type: string
+        model_name:
+          description: Model name for a bring-your-own-model configuration.
+          example: gpt-4o
+          type: string
+        name:
+          description: Name of the configuration.
+          example: "Support chatbot topics"
+          type: string
+        num_records:
+          description: Maximum number of records to process for the run.
+          example: 1000
+          format: int32
+          maximum: 2147483647
+          type: integer
+        sampling_ratio:
+          description: Fraction of matching spans to sample for the run.
+          example: 0.1
+          format: double
+          type: number
+        scope:
+          description: Scope of the configuration.
+          example: ""
+          type: string
+        template:
+          description: Template used to guide topic generation.
+          example: ""
+          type: string
+      required:
+        - name
+        - evp_query
+        - sampling_ratio
+        - num_records
+        - hierarchy_depth
+      type: object
+    LLMObsPatternsConfigUpsertRequestData:
+      description: Data object for creating or updating an LLM Observability patterns configuration.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsConfigUpsertRequestAttributes"
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsConfigType"
+      required:
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsConfigsListType:
+      description: Resource type of a list of LLM Observability patterns configurations.
+      enum:
+        - list_topic_discovery_configs_response
+      example: list_topic_discovery_configs_response
+      type: string
+      x-enum-varnames:
+        - LIST_TOPIC_DISCOVERY_CONFIGS_RESPONSE
+    LLMObsPatternsConfigsResponse:
+      description: Response containing a list of LLM Observability patterns configurations.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsConfigsResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsConfigsResponseAttributes:
+      description: Attributes of a list of LLM Observability patterns configurations.
+      properties:
+        configs:
+          $ref: "#/components/schemas/LLMObsPatternsConfigItemsList"
+      required:
+        - configs
+      type: object
+    LLMObsPatternsConfigsResponseData:
+      description: Data object of a list of LLM Observability patterns configurations.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsConfigsResponseAttributes"
+        id:
+          description: Identifier of the list response.
+          example: "1000000001"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsConfigsListType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsProgressList:
+      description: List of step-by-step progress entries for a patterns run.
+      items:
+        $ref: "#/components/schemas/LLMObsPatternsActivityProgress"
+      type: array
+    LLMObsPatternsRequestType:
+      description: Resource type for triggering an LLM Observability patterns run.
+      enum:
+        - topic_discovery
+      example: topic_discovery
+      type: string
+      x-enum-varnames:
+        - TOPIC_DISCOVERY
+    LLMObsPatternsRunStatusResponse:
+      description: Response containing the status of an LLM Observability patterns run.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsRunStatusResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsRunStatusResponseAttributes:
+      description: Attributes of an LLM Observability patterns run status.
+      properties:
+        created_at:
+          description: Timestamp when the run was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        progress:
+          $ref: "#/components/schemas/LLMObsPatternsProgressList"
+        status:
+          description: Overall status of the run.
+          example: running
+          type: string
+        step:
+          description: The current step of the run.
+          example: generate_topics
+          type: string
+      required:
+        - created_at
+        - status
+        - step
+        - progress
+      type: object
+    LLMObsPatternsRunStatusResponseData:
+      description: Data object of an LLM Observability patterns run status response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsRunStatusResponseAttributes"
+        id:
+          description: The ID of the patterns run.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsRunStatusType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsRunStatusType:
+      description: Resource type of an LLM Observability patterns run status.
+      enum:
+        - topic_discovery_run_status
+      example: topic_discovery_run_status
+      type: string
+      x-enum-varnames:
+        - TOPIC_DISCOVERY_RUN_STATUS
+    LLMObsPatternsRunSummary:
+      description: Summary of an LLM Observability patterns run.
+      properties:
+        completed_at:
+          description: Timestamp when the run completed. Null if the run has not completed.
+          example: "2024-01-15T10:45:00Z"
+          format: date-time
+          nullable: true
+          type: string
+        config_snapshot:
+          $ref: "#/components/schemas/LLMObsPatternsConfigSnapshot"
+        created_at:
+          description: Timestamp when the run was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        id:
+          description: Unique identifier of the run.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        status:
+          description: Status of the run.
+          example: completed
+          type: string
+      required:
+        - id
+        - status
+        - created_at
+      type: object
+    LLMObsPatternsRunsList:
+      description: List of patterns runs.
+      items:
+        $ref: "#/components/schemas/LLMObsPatternsRunSummary"
+      type: array
+    LLMObsPatternsRunsListType:
+      description: Resource type of a list of LLM Observability patterns runs.
+      enum:
+        - list_topic_discovery_runs_response
+      example: list_topic_discovery_runs_response
+      type: string
+      x-enum-varnames:
+        - LIST_TOPIC_DISCOVERY_RUNS_RESPONSE
+    LLMObsPatternsRunsResponse:
+      description: Response containing the completed runs of an LLM Observability patterns configuration.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsRunsResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsRunsResponseAttributes:
+      description: Attributes of an LLM Observability patterns runs response.
+      properties:
+        runs:
+          $ref: "#/components/schemas/LLMObsPatternsRunsList"
+      required:
+        - runs
+      type: object
+    LLMObsPatternsRunsResponseData:
+      description: Data object of an LLM Observability patterns runs response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsRunsResponseAttributes"
+        id:
+          description: Identifier of the configuration the runs belong to.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsRunsListType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsTopic:
+      description: A topic discovered by an LLM Observability patterns run.
+      properties:
+        created_at:
+          description: Timestamp when the topic was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        description:
+          description: Description of the topic.
+          example: "Questions about invoices, charges, and refunds."
+          type: string
+        first_seen_at:
+          description: Timestamp when the topic was first seen.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        hierarchy_level:
+          description: Level of the topic in the hierarchy. Level 0 is a leaf topic.
+          example: 0
+          format: int64
+          type: integer
+        id:
+          description: Unique identifier of the topic.
+          example: "5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21"
+          type: string
+        is_validated:
+          description: Whether the topic has been validated.
+          example: true
+          type: boolean
+        name:
+          description: Name of the topic.
+          example: "Billing questions"
+          type: string
+        parent_topic_id:
+          description: Identifier of the parent topic. Empty for top-level topics.
+          example: ""
+          type: string
+        point_count:
+          description: Number of data points assigned to the topic.
+          example: 125
+          format: int64
+          type: integer
+        run_id:
+          description: Identifier of the run that produced the topic.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+      required:
+        - id
+        - run_id
+        - parent_topic_id
+        - hierarchy_level
+        - name
+        - description
+        - is_validated
+        - created_at
+        - point_count
+        - first_seen_at
+      type: object
+    LLMObsPatternsTopicWithClusteredPoints:
+      description: |-
+        A topic discovered by an LLM Observability patterns run, including the
+        clustered points attached to leaf topics.
+      properties:
+        cluster_points:
+          $ref: "#/components/schemas/LLMObsPatternsClusteredPointRefsList"
+        created_at:
+          description: Timestamp when the topic was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        description:
+          description: Description of the topic.
+          example: "Questions about invoices, charges, and refunds."
+          type: string
+        first_seen_at:
+          description: Timestamp when the topic was first seen.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        hierarchy_level:
+          description: Level of the topic in the hierarchy. Level 0 is a leaf topic.
+          example: 0
+          format: int64
+          type: integer
+        id:
+          description: Unique identifier of the topic.
+          example: "5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21"
+          type: string
+        is_validated:
+          description: Whether the topic has been validated.
+          example: true
+          type: boolean
+        name:
+          description: Name of the topic.
+          example: "Billing questions"
+          type: string
+        parent_topic_id:
+          description: Identifier of the parent topic. Empty for top-level topics.
+          example: ""
+          type: string
+        point_count:
+          description: Number of data points assigned to the topic.
+          example: 125
+          format: int64
+          type: integer
+        run_id:
+          description: Identifier of the run that produced the topic.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+      required:
+        - id
+        - run_id
+        - parent_topic_id
+        - hierarchy_level
+        - name
+        - description
+        - is_validated
+        - created_at
+        - point_count
+        - first_seen_at
+      type: object
+    LLMObsPatternsTopicsList:
+      description: List of discovered topics.
+      items:
+        $ref: "#/components/schemas/LLMObsPatternsTopic"
+      type: array
+    LLMObsPatternsTopicsResponse:
+      description: Response containing the topics discovered by an LLM Observability patterns run.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsTopicsResponseAttributes:
+      description: Attributes of an LLM Observability patterns topics response.
+      properties:
+        completed_at:
+          description: Timestamp when the run completed. Null if the run has not completed.
+          example: "2024-01-15T10:45:00Z"
+          format: date-time
+          nullable: true
+          type: string
+        config_id:
+          description: Identifier of the configuration that produced the run.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        config_snapshot:
+          $ref: "#/components/schemas/LLMObsPatternsConfigSnapshot"
+        created_at:
+          description: Timestamp when the run was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        previous_run_id:
+          description: Identifier of the run that completed immediately before this one. Empty if none.
+          example: ""
+          type: string
+        run_id:
+          description: Identifier of the run that produced the topics.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        topics:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsList"
+      required:
+        - run_id
+        - config_id
+        - previous_run_id
+        - created_at
+        - topics
+      type: object
+    LLMObsPatternsTopicsResponseData:
+      description: Data object of an LLM Observability patterns topics response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsResponseAttributes"
+        id:
+          description: Identifier of the run the topics belong to.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsTopicsType:
+      description: Resource type of an LLM Observability patterns topics response.
+      enum:
+        - get_topics_response
+      example: get_topics_response
+      type: string
+      x-enum-varnames:
+        - GET_TOPICS_RESPONSE
+    LLMObsPatternsTopicsWithClusteredPointsList:
+      description: List of discovered topics with their clustered points.
+      items:
+        $ref: "#/components/schemas/LLMObsPatternsTopicWithClusteredPoints"
+      type: array
+    LLMObsPatternsTopicsWithClusteredPointsResponse:
+      description: |-
+        Response containing the topics, and the clustered points of their leaf topics,
+        discovered by an LLM Observability patterns run.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsWithClusteredPointsResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsTopicsWithClusteredPointsResponseAttributes:
+      description: Attributes of an LLM Observability patterns topics-with-clustered-points response.
+      properties:
+        completed_at:
+          description: Timestamp when the run completed. Null if the run has not completed.
+          example: "2024-01-15T10:45:00Z"
+          format: date-time
+          nullable: true
+          type: string
+        config_id:
+          description: Identifier of the configuration that produced the run.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        config_snapshot:
+          $ref: "#/components/schemas/LLMObsPatternsConfigSnapshot"
+        created_at:
+          description: Timestamp when the run was created.
+          example: "2024-01-15T10:30:00Z"
+          format: date-time
+          type: string
+        previous_run_id:
+          description: Identifier of the run that completed immediately before this one. Empty if none.
+          example: ""
+          type: string
+        run_id:
+          description: Identifier of the run that produced the topics.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        topics:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsWithClusteredPointsList"
+      required:
+        - run_id
+        - config_id
+        - previous_run_id
+        - created_at
+        - topics
+      type: object
+    LLMObsPatternsTopicsWithClusteredPointsResponseData:
+      description: Data object of an LLM Observability patterns topics-with-clustered-points response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsWithClusteredPointsResponseAttributes"
+        id:
+          description: Identifier of the run the topics belong to.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsTopicsWithClusteredPointsType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsTopicsWithClusteredPointsType:
+      description: Resource type of an LLM Observability patterns topics-with-clustered-points response.
+      enum:
+        - get_topics_with_cluster_points_response
+      example: get_topics_with_cluster_points_response
+      type: string
+      x-enum-varnames:
+        - GET_TOPICS_WITH_CLUSTER_POINTS_RESPONSE
+    LLMObsPatternsTriggerRequest:
+      description: Request to trigger an LLM Observability patterns run.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsTriggerRequestData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsTriggerRequestAttributes:
+      description: Attributes for triggering an LLM Observability patterns run.
+      properties:
+        config_id:
+          description: The ID of the patterns configuration to run.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+      required:
+        - config_id
+      type: object
+    LLMObsPatternsTriggerRequestData:
+      description: Data object for triggering an LLM Observability patterns run.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsTriggerRequestAttributes"
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsRequestType"
+      required:
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsTriggerResponse:
+      description: Response after triggering an LLM Observability patterns run.
+      properties:
+        data:
+          $ref: "#/components/schemas/LLMObsPatternsTriggerResponseData"
+      required:
+        - data
+      type: object
+    LLMObsPatternsTriggerResponseAttributes:
+      description: Attributes of an LLM Observability patterns trigger response.
+      properties:
+        config_id:
+          description: The ID of the patterns configuration that was run.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        run_id:
+          description: The ID of the patterns run that was started.
+          example: "3fd6b5e0-8910-4b1c-a7d0-5b84de329012"
+          type: string
+        status:
+          description: Status of the patterns run.
+          example: started
+          type: string
+      required:
+        - run_id
+        - config_id
+        - status
+      type: object
+    LLMObsPatternsTriggerResponseData:
+      description: Data object of an LLM Observability patterns trigger response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/LLMObsPatternsTriggerResponseAttributes"
+        id:
+          description: The ID of the patterns configuration that was run.
+          example: "a7c8d9e0-1234-5678-9abc-def012345678"
+          type: string
+        type:
+          $ref: "#/components/schemas/LLMObsPatternsTriggerResponseType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    LLMObsPatternsTriggerResponseType:
+      description: Resource type of an LLM Observability patterns trigger response.
+      enum:
+        - topic_discovery_run
+      example: topic_discovery_run
+      type: string
+      x-enum-varnames:
+        - TOPIC_DISCOVERY_RUN
     LLMObsProjectDataAttributesRequest:
       description: Attributes for creating an LLM Observability project.
       properties:
@@ -143207,6 +144270,742 @@ paths:
       tags:
         - LLM Observability
       x-menu-order: 35
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-clustered-points:
+    get:
+      description: |-
+        List the data points grouped into a topic. For a parent topic, points from all
+        of its leaf topics are returned.
+      operationId: ListLLMObsPatternsClusteredPoints
+      parameters:
+        - $ref: "#/components/parameters/LLMObsPatternsTopicIDQueryParameter"
+        - $ref: "#/components/parameters/LLMObsPatternsPageSizeQueryParameter"
+        - $ref: "#/components/parameters/LLMObsPatternsPageTokenQueryParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        next_page_token: "eyJvZmZzZXQiOjUwfQ=="
+                        points:
+                          - event_id: AAAAAYabc123
+                            id: 9b0c1d2e-3f40-5a61-b728-c9d0e1f2a3b4
+                            input: "How do I get a refund?"
+                            is_included: false
+                            is_suggested: true
+                            session_id: session-7c3f5a1b
+                            span_id: "1234567890123456789"
+                            topic_id: 5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21
+                        topic_id: 5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21
+                      id: 5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21
+                      type: clustered_points_response
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsClusteredPointsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List patterns clustered points
+      tags:
+        - LLM Observability
+      x-menu-order: 60
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-configs:
+    get:
+      description: List all patterns configurations for the organization.
+      operationId: ListLLMObsPatternsConfigs
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        configs:
+                          - created_at: "2024-01-15T10:30:00Z"
+                            evp_query: "@ml_app:support-bot"
+                            hierarchy_depth: 2
+                            id: a7c8d9e0-1234-5678-9abc-def012345678
+                            name: Support chatbot topics
+                            num_records: 1000
+                            sampling_ratio: 0.1
+                            scope: ""
+                            updated_at: "2024-01-15T10:30:00Z"
+                      id: "1000000001"
+                      type: list_topic_discovery_configs_response
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsConfigsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List patterns configurations
+      tags:
+        - LLM Observability
+      x-menu-order: 63
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    put:
+      description: Create a new patterns configuration, or update an existing one when a configuration ID is provided.
+      operationId: UpsertLLMObsPatternsConfig
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      evp_query: "@ml_app:support-bot"
+                      hierarchy_depth: 2
+                      name: Support chatbot topics
+                      num_records: 1000
+                      sampling_ratio: 0.1
+                    type: topic_discovery_configs
+            schema:
+              $ref: "#/components/schemas/LLMObsPatternsConfigUpsertRequest"
+        description: Patterns configuration payload.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-15T10:30:00Z"
+                        evp_query: "@ml_app:support-bot"
+                        hierarchy_depth: 2
+                        name: Support chatbot topics
+                        num_records: 1000
+                        sampling_ratio: 0.1
+                        scope: ""
+                        updated_at: "2024-01-15T10:30:00Z"
+                      id: a7c8d9e0-1234-5678-9abc-def012345678
+                      type: topic_discovery_configs
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsConfigResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Create or update a patterns configuration
+      tags:
+        - LLM Observability
+      x-menu-order: 54
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-configs/latest:
+    get:
+      description: Retrieve the patterns configuration for the organization.
+      operationId: GetLLMObsPatternsConfig
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-15T10:30:00Z"
+                        evp_query: "@ml_app:support-bot"
+                        hierarchy_depth: 2
+                        name: Support chatbot topics
+                        num_records: 1000
+                        sampling_ratio: 0.1
+                        scope: ""
+                        updated_at: "2024-01-15T10:30:00Z"
+                      id: a7c8d9e0-1234-5678-9abc-def012345678
+                      type: topic_discovery_configs
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsConfigResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get a patterns configuration
+      tags:
+        - LLM Observability
+      x-menu-order: 62
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-configs/{config_id}:
+    delete:
+      description: Delete a patterns configuration by its ID.
+      operationId: DeleteLLMObsPatternsConfig
+      parameters:
+        - $ref: "#/components/parameters/LLMObsPatternsConfigIDPathParameter"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Delete a patterns configuration
+      tags:
+        - LLM Observability
+      x-menu-order: 55
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-runs:
+    get:
+      description: List the completed patterns runs for a configuration.
+      operationId: ListLLMObsPatternsRuns
+      parameters:
+        - $ref: "#/components/parameters/LLMObsPatternsConfigIDQueryParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        runs:
+                          - completed_at: "2024-01-15T10:45:00Z"
+                            created_at: "2024-01-15T10:30:00Z"
+                            id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                            status: completed
+                      id: a7c8d9e0-1234-5678-9abc-def012345678
+                      type: list_topic_discovery_runs_response
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsRunsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List patterns runs
+      tags:
+        - LLM Observability
+      x-menu-order: 58
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    post:
+      description: Start a patterns run for a given configuration. The run executes asynchronously.
+      operationId: TriggerLLMObsPatterns
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      config_id: a7c8d9e0-1234-5678-9abc-def012345678
+                    type: topic_discovery
+            schema:
+              $ref: "#/components/schemas/LLMObsPatternsTriggerRequest"
+        description: Trigger patterns payload.
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        config_id: a7c8d9e0-1234-5678-9abc-def012345678
+                        run_id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                        status: started
+                      id: a7c8d9e0-1234-5678-9abc-def012345678
+                      type: topic_discovery_run
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsTriggerResponse"
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Trigger a patterns run
+      tags:
+        - LLM Observability
+      x-menu-order: 56
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-runs/status:
+    get:
+      description: |-
+        Retrieve the status and step-by-step progress of the current or most recent
+        patterns run for a configuration.
+      operationId: GetLLMObsPatternsRunStatus
+      parameters:
+        - $ref: "#/components/parameters/LLMObsPatternsConfigIDQueryParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-15T10:30:00Z"
+                        progress:
+                          - name: query_evp
+                            started_at: "2024-01-15T10:30:05Z"
+                            status: completed
+                          - name: generate_topics
+                            started_at: "2024-01-15T10:32:00Z"
+                            status: running
+                        status: running
+                        step: generate_topics
+                      id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                      type: topic_discovery_run_status
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsRunStatusResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Get patterns run status
+      tags:
+        - LLM Observability
+      x-menu-order: 57
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-topics:
+    get:
+      description: |-
+        List the topics discovered by a patterns run. When no run is specified,
+        the most recent completed run is used.
+      operationId: ListLLMObsPatternsTopics
+      parameters:
+        - $ref: "#/components/parameters/LLMObsPatternsConfigIDQueryParameter"
+        - $ref: "#/components/parameters/LLMObsPatternsRunIDQueryParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        completed_at: "2024-01-15T10:45:00Z"
+                        config_id: a7c8d9e0-1234-5678-9abc-def012345678
+                        created_at: "2024-01-15T10:30:00Z"
+                        previous_run_id: ""
+                        run_id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                        topics:
+                          - created_at: "2024-01-15T10:44:00Z"
+                            description: "Questions about invoices, charges, and refunds."
+                            first_seen_at: "2024-01-15T10:44:00Z"
+                            hierarchy_level: 0
+                            id: 5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21
+                            is_validated: true
+                            name: Billing questions
+                            parent_topic_id: ""
+                            point_count: 125
+                            run_id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                      id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                      type: get_topics_response
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsTopicsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List patterns topics
+      tags:
+        - LLM Observability
+      x-menu-order: 59
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/llm-obs/v1/topic-discovery-topics/with-cluster-points:
+    get:
+      description: |-
+        List the topics discovered by a patterns run, with the clustered points attached
+        inline to each leaf topic. When no run is specified, the most recent completed
+        run is used.
+      operationId: ListLLMObsPatternsTopicsWithClusteredPoints
+      parameters:
+        - $ref: "#/components/parameters/LLMObsPatternsConfigIDQueryParameter"
+        - $ref: "#/components/parameters/LLMObsPatternsRunIDQueryParameter"
+        - $ref: "#/components/parameters/LLMObsPatternsIncludeMetricsQueryParameter"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        completed_at: "2024-01-15T10:45:00Z"
+                        config_id: a7c8d9e0-1234-5678-9abc-def012345678
+                        created_at: "2024-01-15T10:30:00Z"
+                        previous_run_id: ""
+                        run_id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                        topics:
+                          - cluster_points:
+                              - duration: 1500000
+                                estimated_total_cost: 0.0021
+                                evaluation:
+                                  sentiment: positive
+                                input_tokens: 128
+                                output_tokens: 64
+                                span_id: "1234567890123456789"
+                                status: ok
+                                total_tokens: 192
+                            created_at: "2024-01-15T10:44:00Z"
+                            description: "Questions about invoices, charges, and refunds."
+                            first_seen_at: "2024-01-15T10:44:00Z"
+                            hierarchy_level: 0
+                            id: 5c1fae90-2b6d-4e3a-9f12-7a0c4d8e6b21
+                            is_validated: true
+                            name: Billing questions
+                            parent_topic_id: ""
+                            point_count: 125
+                            run_id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                      id: 3fd6b5e0-8910-4b1c-a7d0-5b84de329012
+                      type: get_topics_with_cluster_points_response
+              schema:
+                $ref: "#/components/schemas/LLMObsPatternsTopicsWithClusteredPointsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: List patterns topics with clustered points
+      tags:
+        - LLM Observability
+      x-menu-order: 61
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
