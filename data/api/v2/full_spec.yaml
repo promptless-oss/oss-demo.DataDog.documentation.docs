@@ -1543,20 +1543,6 @@ components:
       required: true
       schema:
         type: string
-    RumHardcodedRetentionFilterApplicationIDParameter:
-      description: RUM application ID.
-      in: path
-      name: app_id
-      required: true
-      schema:
-        type: string
-    RumHardcodedRetentionFilterIDParameter:
-      description: Hardcoded retention filter ID.
-      in: path
-      name: rf_id
-      required: true
-      schema:
-        type: string
     RumMetricIDParameter:
       description: The name of the RUM-based metric.
       in: path
@@ -28523,6 +28509,31 @@ components:
         - bucket_name
         - bucket_region
       type: object
+    DataObservabilityMonitorRunStatus:
+      description: The status of a data observability monitor run.
+      enum:
+        - pending
+        - ok
+        - warn
+        - alert
+        - error
+      example: pending
+      type: string
+      x-enum-varnames:
+        - PENDING
+        - OK
+        - WARN
+        - ALERT
+        - ERROR
+    DataObservabilityMonitorRunType:
+      default: monitor_run
+      description: The JSON:API resource type for a data observability monitor run.
+      enum:
+        - monitor_run
+      example: monitor_run
+      type: string
+      x-enum-varnames:
+        - MONITOR_RUN
     DataRelationshipsTeams:
       description: Associates teams with this schedule in a data structure.
       properties:
@@ -39196,6 +39207,42 @@ components:
           $ref: "#/components/schemas/FullCustomFrameworkData"
       required:
         - data
+      type: object
+    GetDataObservabilityMonitorRunStatusResponse:
+      description: The response for getting the status of a data observability monitor run.
+      properties:
+        data:
+          $ref: "#/components/schemas/GetDataObservabilityMonitorRunStatusResponseData"
+      required:
+        - data
+      type: object
+    GetDataObservabilityMonitorRunStatusResponseAttributes:
+      description: The attributes of a data observability monitor run status response.
+      properties:
+        error_message:
+          description: Error message describing why the monitor run failed. Only present when status is error.
+          example: "run completed but produced no metric data"
+          type: string
+        status:
+          $ref: "#/components/schemas/DataObservabilityMonitorRunStatus"
+      required:
+        - status
+      type: object
+    GetDataObservabilityMonitorRunStatusResponseData:
+      description: The data object for a data observability monitor run status response.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GetDataObservabilityMonitorRunStatusResponseAttributes"
+        id:
+          description: The unique identifier of the monitor run.
+          example: "abc123def456"
+          type: string
+        type:
+          $ref: "#/components/schemas/DataObservabilityMonitorRunType"
+      required:
+        - id
+        - type
+        - attributes
       type: object
     GetDeviceAttributes:
       description: The device attributes
@@ -77967,223 +78014,6 @@ components:
           minimum: 0
           type: number
       type: object
-    RumHardcodedCrossProductSampling:
-      description: Cross-product retention settings for a hardcoded retention filter.
-      properties:
-        session_replay_enabled:
-          description: Indicates whether Session Replay cross-product retention is active.
-          example: true
-          type: boolean
-        session_replay_sample_rate:
-          description: Percentage (0–100) of retained sessions with an ingested replay whose replay data is kept.
-          example: 50.0
-          format: double
-          maximum: 100
-          minimum: 0
-          type: number
-        trace_enabled:
-          description: Indicates whether Trace cross-product retention is active.
-          example: true
-          type: boolean
-        trace_sample_rate:
-          description: Percentage (0–100) of retained sessions with ingested traces whose traces are indexed.
-          example: 25.0
-          format: double
-          maximum: 100
-          minimum: 0
-          type: number
-      type: object
-    RumHardcodedCrossProductSamplingEditability:
-      description: Flags indicating which `cross_product_sampling` fields can be updated. Read-only.
-      properties:
-        session_replay_sample_rate:
-          description: |-
-            If `true`, `cross_product_sampling.session_replay_sample_rate` can be updated on this filter.
-          example: true
-          type: boolean
-        trace_sample_rate:
-          description: If `true`, `cross_product_sampling.trace_sample_rate` can be updated on this filter.
-          example: false
-          type: boolean
-      type: object
-    RumHardcodedCrossProductSamplingUpdate:
-      description: |-
-        Partial update for cross-product retention of a hardcoded retention filter.
-        Only fields whose matching flag in `cross_product_sampling_editability` is `true` can be updated.
-      properties:
-        session_replay_enabled:
-          description: Controls whether Session Replay cross-product retention is active. Omit to leave unchanged.
-          example: true
-          type: boolean
-        session_replay_sample_rate:
-          description: |-
-            Percentage (0–100) of retained sessions with an ingested replay whose replay data is kept.
-            Omit to leave unchanged.
-          example: 50.0
-          format: double
-          maximum: 100
-          minimum: 0
-          type: number
-        trace_enabled:
-          description: Controls whether Trace cross-product retention is active. Omit to leave unchanged.
-          example: true
-          type: boolean
-        trace_sample_rate:
-          description: |-
-            Percentage (0–100) of retained sessions with ingested traces whose traces are indexed.
-            Omit to leave unchanged.
-          example: 25.0
-          format: double
-          maximum: 100
-          minimum: 0
-          type: number
-      type: object
-    RumHardcodedRetentionFilterAttributes:
-      description: The attributes of a hardcoded retention filter.
-      properties:
-        cross_product_sampling:
-          $ref: "#/components/schemas/RumHardcodedCrossProductSampling"
-        cross_product_sampling_editability:
-          $ref: "#/components/schemas/RumHardcodedCrossProductSamplingEditability"
-        enabled:
-          description: Indicates whether the hardcoded retention filter is active. Read-only.
-          example: true
-          type: boolean
-        event_type:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterEventType"
-        name:
-          description: The name of the hardcoded retention filter. Read-only.
-          example: Replay sessions
-          type: string
-        query:
-          description: The query string for the hardcoded retention filter. Read-only.
-          example: "@session.has_replay:true"
-          type: string
-        sample_rate:
-          description: The retention sample rate (0–100) for the hardcoded filter. Read-only.
-          example: 100.0
-          format: double
-          maximum: 100
-          minimum: 0
-          type: number
-      type: object
-    RumHardcodedRetentionFilterData:
-      description: A hardcoded retention filter.
-      properties:
-        attributes:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterAttributes"
-        id:
-          description: The ID of the hardcoded retention filter.
-          example: forced_replay_sessions
-          type: string
-        meta:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterMeta"
-        type:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterType"
-      type: object
-    RumHardcodedRetentionFilterEventType:
-      description: The type of RUM events the hardcoded filter applies to. Read-only.
-      enum:
-        - session
-        - view
-        - action
-        - error
-        - resource
-        - long_task
-        - vital
-      example: session
-      type: string
-      x-enum-varnames:
-        - SESSION
-        - VIEW
-        - ACTION
-        - ERROR
-        - RESOURCE
-        - LONG_TASK
-        - VITAL
-    RumHardcodedRetentionFilterMeta:
-      description: Metadata about the hardcoded retention filter.
-      properties:
-        source:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterMetaSource"
-        updated_at:
-          description: Unix epoch (in milliseconds) of the last update.
-          example: 1735689600000
-          format: int64
-          type: integer
-        updated_by_handle:
-          description: Handle of the user who last updated the filter.
-          example: jane.doe@example.com
-          type: string
-      type: object
-    RumHardcodedRetentionFilterMetaSource:
-      description: The source of the last update to a hardcoded retention filter.
-      enum:
-        - default
-        - ui
-        - terraform
-      example: ui
-      type: string
-      x-enum-varnames:
-        - DEFAULT
-        - UI
-        - TERRAFORM
-    RumHardcodedRetentionFilterResponse:
-      description: A hardcoded retention filter response body.
-      properties:
-        data:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterData"
-      type: object
-    RumHardcodedRetentionFilterType:
-      default: hardcoded_retention_filters
-      description: The resource type. The value must be `hardcoded_retention_filters`.
-      enum:
-        - hardcoded_retention_filters
-      example: hardcoded_retention_filters
-      type: string
-      x-enum-varnames:
-        - HARDCODED_RETENTION_FILTERS
-    RumHardcodedRetentionFilterUpdateAttributes:
-      description: |-
-        The attributes of a hardcoded retention filter that can be updated.
-        Only fields whose matching flag in `cross_product_sampling_editability` is `true` can be modified.
-      properties:
-        cross_product_sampling:
-          $ref: "#/components/schemas/RumHardcodedCrossProductSamplingUpdate"
-      type: object
-    RumHardcodedRetentionFilterUpdateData:
-      description: The hardcoded retention filter properties to update.
-      properties:
-        attributes:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterUpdateAttributes"
-        id:
-          description: The ID of the hardcoded retention filter. Must match the `rf_id` path parameter.
-          example: forced_replay_sessions
-          type: string
-        type:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterType"
-      required:
-        - id
-        - type
-        - attributes
-      type: object
-    RumHardcodedRetentionFilterUpdateRequest:
-      description: The hardcoded retention filter body to update.
-      properties:
-        data:
-          $ref: "#/components/schemas/RumHardcodedRetentionFilterUpdateData"
-      required:
-        - data
-      type: object
-    RumHardcodedRetentionFiltersResponse:
-      description: All hardcoded retention filters for a RUM application.
-      properties:
-        data:
-          description: A list of hardcoded retention filters.
-          items:
-            $ref: "#/components/schemas/RumHardcodedRetentionFilterData"
-          type: array
-      type: object
     RumMetricCompute:
       description: The compute rule to compute the RUM-based metric.
       properties:
@@ -78881,6 +78711,27 @@ components:
           items:
             $ref: "#/components/schemas/RumRetentionFilterData"
           type: array
+      type: object
+    RunDataObservabilityMonitorResponse:
+      description: The response returned when a data observability monitor run is triggered.
+      properties:
+        data:
+          $ref: "#/components/schemas/RunDataObservabilityMonitorResponseData"
+      required:
+        - data
+      type: object
+    RunDataObservabilityMonitorResponseData:
+      description: The data object returned when a data observability monitor run is triggered.
+      properties:
+        id:
+          description: The unique identifier of the monitor run.
+          example: "abc123def456"
+          type: string
+        type:
+          $ref: "#/components/schemas/DataObservabilityMonitorRunType"
+      required:
+        - id
+        - type
       type: object
     RunHistoricalJobRequest:
       description: Run a historical job request.
@@ -126182,6 +126033,107 @@ paths:
       x-unstable: |-
         **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/data-observability/monitors/runs/{run_id}/status:
+    get:
+      description: Retrieves the current status of a data observability monitor run. Poll this endpoint after triggering a run to determine when evaluation is complete.
+      operationId: GetDataObservabilityMonitorRunStatus
+      parameters:
+        - description: The ID of the monitor run to retrieve status for.
+          example: "abc123def456"
+          in: path
+          name: run_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        status: ok
+                      id: "abc123def456"
+                      type: monitor_run
+              schema:
+                $ref: "#/components/schemas/GetDataObservabilityMonitorRunStatusResponse"
+          description: OK
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - data_observability_monitors_write
+            - monitors_write
+      summary: Get data observability monitor run status
+      tags:
+        - Data Observability
+      x-menu-order: 2
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/data-observability/monitors/{monitor_id}/run:
+    post:
+      description: Manually triggers a run for a data observability monitor. Only monitors that are not scheduled (manually-runnable) can be triggered this way.
+      operationId: RunDataObservabilityMonitor
+      parameters:
+        - description: The ID of the data observability monitor to run.
+          example: 12345
+          in: path
+          name: monitor_id
+          required: true
+          schema:
+            format: int64
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      id: "abc123def456"
+                      type: monitor_run
+              schema:
+                $ref: "#/components/schemas/RunDataObservabilityMonitorResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - data_observability_monitors_write
+            - monitors_write
+      summary: Run a data observability monitor
+      tags:
+        - Data Observability
+      x-menu-order: 1
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/datasets:
     get:
       description: Get all datasets that have been configured for an organization.
@@ -161603,170 +161555,6 @@ paths:
         operator: OR
         permissions:
           - rum_apps_write
-  /api/v2/rum/applications/{app_id}/hardcoded_retention_filters:
-    get:
-      description: Get the list of hardcoded retention filters for a RUM application.
-      operationId: ListHardcodedRetentionFilters
-      parameters:
-        - $ref: "#/components/parameters/RumHardcodedRetentionFilterApplicationIDParameter"
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    data:
-                      - attributes:
-                          cross_product_sampling:
-                            session_replay_enabled: true
-                            session_replay_sample_rate: 50.0
-                            trace_enabled: true
-                            trace_sample_rate: 25.0
-                          cross_product_sampling_editability:
-                            session_replay_sample_rate: true
-                            trace_sample_rate: false
-                          enabled: true
-                          event_type: session
-                          name: Replay sessions
-                          query: "@session.has_replay:true"
-                          sample_rate: 100.0
-                        id: forced_replay_sessions
-                        meta:
-                          source: ui
-                          updated_at: 1735689600000
-                          updated_by_handle: jane.doe@example.com
-                        type: hardcoded_retention_filters
-              schema:
-                $ref: "#/components/schemas/RumHardcodedRetentionFiltersResponse"
-          description: OK
-        "403":
-          $ref: "#/components/responses/NotAuthorizedResponse"
-        "429":
-          $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Get all hardcoded retention filters
-      tags:
-        - RUM Retention Filters Hardcoded
-      x-menu-order: 1
-  /api/v2/rum/applications/{app_id}/hardcoded_retention_filters/{rf_id}:
-    get:
-      description: Get a single hardcoded retention filter for a RUM application.
-      operationId: GetHardcodedRetentionFilter
-      parameters:
-        - $ref: "#/components/parameters/RumHardcodedRetentionFilterApplicationIDParameter"
-        - $ref: "#/components/parameters/RumHardcodedRetentionFilterIDParameter"
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    data:
-                      attributes:
-                        cross_product_sampling:
-                          session_replay_enabled: true
-                          session_replay_sample_rate: 50.0
-                          trace_enabled: true
-                          trace_sample_rate: 25.0
-                        cross_product_sampling_editability:
-                          session_replay_sample_rate: true
-                          trace_sample_rate: false
-                        enabled: true
-                        event_type: session
-                        name: Replay sessions
-                        query: "@session.has_replay:true"
-                        sample_rate: 100.0
-                      id: forced_replay_sessions
-                      meta:
-                        source: ui
-                        updated_at: 1735689600000
-                        updated_by_handle: jane.doe@example.com
-                      type: hardcoded_retention_filters
-              schema:
-                $ref: "#/components/schemas/RumHardcodedRetentionFilterResponse"
-          description: OK
-        "403":
-          $ref: "#/components/responses/NotAuthorizedResponse"
-        "404":
-          $ref: "#/components/responses/NotFoundResponse"
-        "429":
-          $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Get a hardcoded retention filter
-      tags:
-        - RUM Retention Filters Hardcoded
-      x-menu-order: 2
-    patch:
-      description: |-
-        Update the cross-product sample rates of a hardcoded retention filter for a RUM application.
-        Only fields whose matching flag in `cross_product_sampling_editability` is `true` can be updated.
-        Any other field is read-only and cannot be sent in the payload.
-        Returns the updated hardcoded retention filter when the request is successful.
-      operationId: UpdateHardcodedRetentionFilter
-      parameters:
-        - $ref: "#/components/parameters/RumHardcodedRetentionFilterApplicationIDParameter"
-        - $ref: "#/components/parameters/RumHardcodedRetentionFilterIDParameter"
-      requestBody:
-        content:
-          application/json:
-            examples:
-              default:
-                value:
-                  data:
-                    attributes:
-                      cross_product_sampling:
-                        session_replay_enabled: true
-                        session_replay_sample_rate: 50.0
-                    id: forced_replay_sessions
-                    type: hardcoded_retention_filters
-            schema:
-              $ref: "#/components/schemas/RumHardcodedRetentionFilterUpdateRequest"
-        description: New cross-product sample rates for the hardcoded retention filter.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    data:
-                      attributes:
-                        cross_product_sampling:
-                          session_replay_enabled: true
-                          session_replay_sample_rate: 50.0
-                          trace_enabled: true
-                          trace_sample_rate: 25.0
-                        cross_product_sampling_editability:
-                          session_replay_sample_rate: true
-                          trace_sample_rate: false
-                        enabled: true
-                        event_type: session
-                        name: Replay sessions
-                        query: "@session.has_replay:true"
-                        sample_rate: 100.0
-                      id: forced_replay_sessions
-                      meta:
-                        source: ui
-                        updated_at: 1735689600000
-                        updated_by_handle: jane.doe@example.com
-                      type: hardcoded_retention_filters
-              schema:
-                $ref: "#/components/schemas/RumHardcodedRetentionFilterResponse"
-          description: Updated
-        "400":
-          $ref: "#/components/responses/BadRequestResponse"
-        "403":
-          $ref: "#/components/responses/NotAuthorizedResponse"
-        "404":
-          $ref: "#/components/responses/NotFoundResponse"
-        "429":
-          $ref: "#/components/responses/TooManyRequestsResponse"
-      summary: Update a hardcoded retention filter
-      tags:
-        - RUM Retention Filters Hardcoded
-      x-codegen-request-body-name: body
-      x-menu-order: 3
   /api/v2/rum/applications/{app_id}/relationships/retention_filters:
     patch:
       description: |-
@@ -189668,6 +189456,8 @@ tags:
       [Dashboards documentation](https://docs.datadoghq.com/dashboards/) for more
       information.
     name: Dashboards
+  - description: Manage and run data observability monitors.
+    name: Data Observability
   - description: |-
       Data Access Controls in Datadog is a feature that allows administrators and access managers to regulate
       access to sensitive data. By defining Restricted Datasets, you can ensure that only specific teams or roles can
@@ -189936,9 +189726,6 @@ tags:
   - description: |-
       Get insights into the performance of your Real User Monitoring (RUM) applications over HTTP. See the [RUM & Session Replay page](https://docs.datadoghq.com/real_user_monitoring/) for more information
     name: RUM Insights
-  - description: |-
-      Manage hardcoded retention filters through [Manage Applications](https://app.datadoghq.com/rum/list) in RUM.
-    name: RUM Retention Filters Hardcoded
   - description: View and manage Reference Tables in your organization.
     name: Reference Tables
   - description: |-
