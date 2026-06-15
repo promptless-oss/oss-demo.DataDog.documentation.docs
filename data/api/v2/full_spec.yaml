@@ -1671,6 +1671,15 @@ components:
       required: true
       schema:
         type: string
+    SecurityMonitoringRuleVersion:
+      description: The historical version number of the rule.
+      in: path
+      name: version
+      required: true
+      schema:
+        example: 1
+        format: int64
+        type: integer
     SecurityMonitoringSuppressionID:
       description: The ID of the suppression rule
       in: path
@@ -172407,6 +172416,61 @@ paths:
         operator: OR
         permissions:
           - security_monitoring_rules_read
+  /api/v2/security_monitoring/rules/{rule_id}/restore/{version}:
+    post:
+      description: |-
+        Restores a custom detection rule to a previously saved historical version.
+        Only custom rules can be restored. Default and partner rules return 400.
+        The restore creates a new version entry; it does not overwrite history.
+      operationId: RestoreSecurityMonitoringRule
+      parameters:
+        - $ref: "#/components/parameters/SecurityMonitoringRuleID"
+        - $ref: "#/components/parameters/SecurityMonitoringRuleVersion"
+      responses:
+        "200":
+          content:
+            "application/json":
+              examples:
+                default:
+                  value:
+                    cases:
+                      - condition: "a > 0"
+                        name: ""
+                        notifications: []
+                        status: info
+                    id: abc-123
+                    isEnabled: true
+                    message: Test rule
+                    name: My security monitoring rule.
+                    tags: []
+                    type: log_detection
+              schema:
+                $ref: "#/components/schemas/SecurityMonitoringRuleResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
+        "409":
+          $ref: "#/components/responses/ConflictResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_rules_write
+      summary: Restore a rule to a historical version
+      tags: ["Security Monitoring"]
+      x-menu-order: 133
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_rules_write
+      x-unstable: |-
+        **Note**: This endpoint is in beta and may be subject to changes.
   /api/v2/security_monitoring/rules/{rule_id}/test:
     post:
       description: |-
