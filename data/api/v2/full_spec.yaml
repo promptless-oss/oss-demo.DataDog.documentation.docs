@@ -55956,6 +55956,35 @@ components:
       required:
         - data
       type: object
+    ListWorkflowsResponse:
+      description: The response object for a listing workflows request.
+      properties:
+        data:
+          description: A list of workflows.
+          items:
+            $ref: "#/components/schemas/WorkflowListItem"
+          type: array
+        meta:
+          $ref: "#/components/schemas/ListWorkflowsResponseMeta"
+      type: object
+    ListWorkflowsResponseMeta:
+      description: Metadata for a List Workflows response.
+      properties:
+        page:
+          $ref: "#/components/schemas/ListWorkflowsResponseMetaPage"
+      type: object
+    ListWorkflowsResponseMetaPage:
+      description: Pagination metadata for a List Workflows response.
+      properties:
+        totalCount:
+          description: The total number of workflows in the organization.
+          format: int64
+          type: integer
+        totalFilteredCount:
+          description: The total number of workflows matching the applied filters.
+          format: int64
+          type: integer
+      type: object
     Log:
       description: Object description of a log after being processed and stored by Datadog.
       properties:
@@ -107649,6 +107678,58 @@ components:
           description: The total count of items.
           format: int64
           type: integer
+      type: object
+    WorkflowListItem:
+      description: A workflow returned by the list workflows endpoint.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/WorkflowListItemAttributes"
+        id:
+          description: The workflow identifier.
+          readOnly: true
+          type: string
+        relationships:
+          $ref: "#/components/schemas/WorkflowDataRelationships"
+        type:
+          $ref: "#/components/schemas/WorkflowDataType"
+      required:
+        - type
+        - attributes
+      type: object
+    WorkflowListItemAttributes:
+      description: Attributes of a workflow returned in a list response.
+      properties:
+        createdAt:
+          description: When the workflow was created.
+          format: date-time
+          readOnly: true
+          type: string
+        description:
+          description: Description of the workflow.
+          type: string
+        name:
+          description: Name of the workflow.
+          example: "My Workflow"
+          type: string
+        published:
+          description: Whether the workflow is published. Unpublished workflows can only be run manually. Automatic triggers such as Schedule do not fire until the workflow is published.
+          type: boolean
+        spec:
+          $ref: "#/components/schemas/Spec"
+          nullable: true
+        tags:
+          description: Tags of the workflow.
+          items:
+            description: A tag string in `key:value` format.
+            type: string
+          type: array
+        updatedAt:
+          description: When the workflow was last updated.
+          format: date-time
+          readOnly: true
+          type: string
+      required:
+        - name
       type: object
     WorkflowTriggerWrapper:
       description: "Schema for a Workflow-based trigger."
@@ -191934,6 +192015,121 @@ paths:
           - manage_log_reports
           - product_analytics_saved_widgets_write
   /api/v2/workflows:
+    get:
+      description: List all workflows in your organization. This API requires a [registered application key](https://docs.datadoghq.com/api/latest/action-connection/#register-a-new-app-key). Alternatively, you can configure these permissions [in the UI](https://docs.datadoghq.com/account_management/api-app-keys/#actions-api-access).
+      operationId: ListWorkflows
+      parameters:
+        - description: The maximum number of workflows to return per page.
+          example: 50
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 50
+            format: int64
+            type: integer
+        - description: The page number to return, starting from 0.
+          example: 0
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 0
+            format: int64
+            type: integer
+        - description: "The sort order for the returned workflows. Provide a comma-separated list of fields, each optionally prefixed with `-` for descending order. Supported fields are `name`, `createdAt`, `updatedAt`, `creatorName`, `ownerName`, and `lastExecutedAt`."
+          example: "-updatedAt"
+          in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+        - description: "A search query used to filter the returned workflows. The query performs a case-insensitive substring match against each workflow's name, creator name, and handle. If the query contains a colon (for example, `team:infra`), the query is treated as a `key:value` tag filter."
+          example: deploy
+          in: query
+          name: filter[query]
+          required: false
+          schema:
+            type: string
+        - description: Filters the returned workflows by one or more trigger types, such as `monitor`, `schedule`, or `githubWebhook`. To specify the multiple types, repeat this parameter.
+          example:
+            - monitor
+          explode: true
+          in: query
+          name: filter[triggerIds]
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+        - description: Whether to include unpublished workflows in the response.
+          in: query
+          name: filter[includeUnpublished]
+          required: false
+          schema:
+            default: false
+            type: boolean
+        - description: Whether to include the full spec of each workflow in the response. When `false` (the default), each workflow's `spec` is returned as `null`.
+          in: query
+          name: filter[includeSpecs]
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          createdAt: "2024-01-01T00:00:00+00:00"
+                          description: A sample workflow.
+                          name: Example Workflow
+                          published: true
+                          spec: {}
+                          tags:
+                            - team:infra
+                          updatedAt: "2024-01-01T00:00:00+00:00"
+                        id: 00000000-0000-0000-0000-000000000002
+                        relationships:
+                          creator:
+                            data:
+                              id: 00000000-0000-0000-0000-000000000009
+                              type: users
+                          owner:
+                            data:
+                              id: 00000000-0000-0000-0000-000000000009
+                              type: users
+                        type: workflows
+                    meta:
+                      page:
+                        totalCount: 1
+                        totalFilteredCount: 1
+              schema:
+                $ref: "#/components/schemas/ListWorkflowsResponse"
+          description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List workflows
+      tags:
+        - Workflow Automation
+      x-menu-order: 1
+      x-pagination:
+        limitParam: limit
+        pageParam: page
+        pageStart: 0
+        resultsPath: data
+      "x-permission":
+        operator: OR
+        permissions:
+          - workflows_read
     post:
       description: Create a new workflow, returning the workflow ID. This API requires a [registered application key](https://docs.datadoghq.com/api/latest/action-connection/#register-a-new-app-key). Alternatively, you can configure these permissions [in the UI](https://docs.datadoghq.com/account_management/api-app-keys/#actions-api-access).
       operationId: CreateWorkflow
@@ -192041,7 +192237,7 @@ paths:
       summary: Create a Workflow
       tags:
         - Workflow Automation
-      x-menu-order: 2
+      x-menu-order: 3
       "x-permission":
         operator: OR
         permissions:
@@ -192076,7 +192272,7 @@ paths:
       summary: Delete an existing Workflow
       tags:
         - Workflow Automation
-      x-menu-order: 4
+      x-menu-order: 5
       "x-permission":
         operator: OR
         permissions:
@@ -192135,7 +192331,7 @@ paths:
       summary: Get an existing Workflow
       tags:
         - Workflow Automation
-      x-menu-order: 1
+      x-menu-order: 2
       "x-permission":
         operator: OR
         permissions:
@@ -192255,7 +192451,7 @@ paths:
       summary: Update an existing Workflow
       tags:
         - Workflow Automation
-      x-menu-order: 3
+      x-menu-order: 4
       "x-permission":
         operator: OR
         permissions:
@@ -192297,7 +192493,7 @@ paths:
       summary: List workflow instances
       tags:
         - Workflow Automation
-      x-menu-order: 5
+      x-menu-order: 6
       "x-permission":
         operator: OR
         permissions:
@@ -192346,7 +192542,7 @@ paths:
       tags:
         - Workflow Automation
       x-codegen-request-body-name: body
-      x-menu-order: 6
+      x-menu-order: 7
       "x-permission":
         operator: OR
         permissions:
@@ -192387,7 +192583,7 @@ paths:
       summary: Get a workflow instance
       tags:
         - Workflow Automation
-      x-menu-order: 7
+      x-menu-order: 8
       "x-permission":
         operator: OR
         permissions:
@@ -192422,7 +192618,7 @@ paths:
       summary: Cancel a workflow instance
       tags:
         - Workflow Automation
-      x-menu-order: 8
+      x-menu-order: 9
       "x-permission":
         operator: OR
         permissions:
