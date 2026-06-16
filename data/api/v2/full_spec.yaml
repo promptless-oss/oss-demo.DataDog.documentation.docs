@@ -29787,6 +29787,25 @@ components:
         data:
           $ref: "#/components/schemas/ListDeploymentRuleResponseData"
       type: object
+    DeploymentGatesEvaluationConfiguration:
+      description: |-
+        Inline rule definitions for a deployment gate evaluation. When provided, rules are evaluated
+        directly from this configuration instead of using the preconfigured gate rules.
+        At least one rule is required.
+      properties:
+        dry_run:
+          description: Gate-level dry run. When enabled, the rules are evaluated normally but the gate always returns `pass`. The real result is visible in the Datadog UI.
+          example: false
+          type: boolean
+        rules:
+          description: The list of rules to evaluate. At least one rule is required.
+          items:
+            $ref: "#/components/schemas/DeploymentGatesEvaluationRule"
+          minItems: 1
+          type: array
+      required:
+        - rules
+      type: object
     DeploymentGatesEvaluationRequest:
       description: Request body for triggering a deployment gate evaluation.
       properties:
@@ -29796,8 +29815,13 @@ components:
         - data
       type: object
     DeploymentGatesEvaluationRequestAttributes:
-      description: Attributes for a deployment gate evaluation request.
+      description: |-
+        Attributes for a deployment gate evaluation request.
+        When `configuration` is provided, rules are evaluated inline from that configuration.
+        When omitted, rules are resolved from the preconfigured gate for the given service and environment.
       properties:
+        configuration:
+          $ref: "#/components/schemas/DeploymentGatesEvaluationConfiguration"
         env:
           description: The environment of the deployment.
           example: "staging"
@@ -29967,6 +29991,60 @@ components:
       type: string
       x-enum-varnames:
         - DEPLOYMENT_GATES_EVALUATION_RESULT_RESPONSE
+    DeploymentGatesEvaluationRule:
+      description: A rule to evaluate as part of a deployment gate evaluation.
+      discriminator:
+        mapping:
+          faulty_deployment_detection: "#/components/schemas/DeploymentGatesFDDRule"
+          monitor: "#/components/schemas/DeploymentGatesMonitorRule"
+        propertyName: type
+      oneOf:
+        - $ref: "#/components/schemas/DeploymentGatesMonitorRule"
+        - $ref: "#/components/schemas/DeploymentGatesFDDRule"
+    DeploymentGatesFDDRule:
+      description: A faulty deployment detection rule to evaluate as part of a deployment gate evaluation.
+      properties:
+        dry_run:
+          description: Rule-level dry run. When enabled, the rule is evaluated normally but it always returns `pass`. The real result is visible in the Datadog UI.
+          example: false
+          type: boolean
+        name:
+          description: Human-readable name for this rule.
+          example: "apm faulty deployment"
+          type: string
+        options:
+          $ref: "#/components/schemas/DeploymentGatesFDDRuleOptions"
+        type:
+          $ref: "#/components/schemas/DeploymentGatesFDDRuleType"
+      required:
+        - type
+        - name
+      type: object
+    DeploymentGatesFDDRuleOptions:
+      description: Options for a `faulty_deployment_detection` rule.
+      properties:
+        duration:
+          description: Evaluation window in seconds. Maximum 7200 (2 hours).
+          example: 900
+          format: int64
+          maximum: 7200
+          type: integer
+        excluded_resources:
+          description: APM resource names to exclude from analysis.
+          example:
+            - "GET /healthcheck"
+          items:
+            type: string
+          type: array
+      type: object
+    DeploymentGatesFDDRuleType:
+      description: The type identifier for a faulty deployment detection rule.
+      enum:
+        - faulty_deployment_detection
+      example: faulty_deployment_detection
+      type: string
+      x-enum-varnames:
+        - FAULTY_DEPLOYMENT_DETECTION
     DeploymentGatesListResponse:
       description: Response containing a paginated list of deployment gates.
       properties:
@@ -30001,6 +30079,49 @@ components:
           minimum: 1
           type: integer
       type: object
+    DeploymentGatesMonitorRule:
+      description: A monitor rule to evaluate as part of a deployment gate evaluation.
+      properties:
+        dry_run:
+          description: Rule-level dry run. When enabled, the rule is evaluated normally but always returns `pass`. The real result is visible in the Datadog UI.
+          example: false
+          type: boolean
+        name:
+          description: Human-readable name for this rule.
+          example: "error rate monitors"
+          type: string
+        options:
+          $ref: "#/components/schemas/DeploymentGatesMonitorRuleOptions"
+        type:
+          $ref: "#/components/schemas/DeploymentGatesMonitorRuleType"
+      required:
+        - type
+        - name
+      type: object
+    DeploymentGatesMonitorRuleOptions:
+      description: Options for a `monitor` rule.
+      properties:
+        duration:
+          description: Evaluation window in seconds. Maximum 7200 (2 hours).
+          example: 300
+          format: int64
+          maximum: 7200
+          type: integer
+        query:
+          description: Monitor search query.
+          example: "service:transaction-backend env:production"
+          type: string
+      required:
+        - query
+      type: object
+    DeploymentGatesMonitorRuleType:
+      description: The type identifier for a monitor rule.
+      enum:
+        - monitor
+      example: monitor
+      type: string
+      x-enum-varnames:
+        - MONITOR
     DeploymentGatesRuleResponse:
       description: The result of a single rule evaluation.
       properties:
@@ -128467,12 +128588,17 @@ paths:
         Triggers an asynchronous deployment gate evaluation for the given service and environment.
         Returns an evaluation ID that can be used to poll for the result via the
         `GET /api/v2/deployments/gates/evaluation/{id}` endpoint.
+
+        When the `configuration` attribute is provided, rules are evaluated inline from that configuration
+        and no pre-configured gate is required. When `configuration` is omitted, rules are resolved from the
+        gate pre-configured for the given service and environment through the Datadog UI, API, or Terraform.
       operationId: TriggerDeploymentGatesEvaluation
       requestBody:
         content:
           application/json:
             examples:
               default:
+                summary: Evaluate a preconfigured gate
                 value:
                   data:
                     attributes:
@@ -128481,6 +128607,31 @@ paths:
                       primary_tag: region:us-east-1
                       service: transaction-backend
                       version: v1.2.3
+                    type: deployment_gates_evaluation_request
+              with-configuration:
+                summary: Evaluate with inline rule configuration
+                value:
+                  data:
+                    attributes:
+                      configuration:
+                        dry_run: false
+                        rules:
+                          - dry_run: false
+                            name: error rate monitors
+                            options:
+                              duration: 300
+                              query: "service:transaction-backend env:production"
+                            type: monitor
+                          - dry_run: false
+                            name: apm faulty deployment
+                            options:
+                              duration: 900
+                              excluded_resources:
+                                - "GET /healthcheck"
+                            type: faulty_deployment_detection
+                      env: production
+                      service: transaction-backend
+                      version: 1.2.3
                     type: deployment_gates_evaluation_request
             schema:
               $ref: "#/components/schemas/DeploymentGatesEvaluationRequest"
