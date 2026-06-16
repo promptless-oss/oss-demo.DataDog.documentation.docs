@@ -215,6 +215,16 @@ components:
       required: true
       schema:
         type: string
+    ApplicationSecurityServiceNameParam:
+      description: |-
+        The name of the service to retrieve Application Security details for.
+        Returns all matching services across environments.
+      example: web-store
+      in: path
+      name: service_filter
+      required: true
+      schema:
+        type: string
     ApplicationSecurityWafCustomRuleIDParam:
       description: The ID of the custom rule.
       example: 3b5-v82-ns6
@@ -8294,6 +8304,303 @@ components:
           $ref: "#/components/schemas/ApplicationSecurityPolicyUpdateData"
       required:
         - data
+      type: object
+    ApplicationSecurityServiceAttributes:
+      description: Application Security details describing a service in a given environment.
+      properties:
+        agent_versions:
+          description: The Datadog Agent versions reporting for the service.
+          example:
+            - 7.50.0
+          items:
+            description: A Datadog Agent version reporting for the service.
+            example: 7.50.0
+            type: string
+          type: array
+        app_type:
+          description: The application type of the service, such as `web` or `serverless`.
+          example: web
+          type: string
+        asm_threat_compatible:
+          description: Whether the service is compatible with Application Security Management (Threats).
+          example: true
+          type: boolean
+        backend_waf_event_count:
+          description: The number of backend WAF events detected for the service.
+          example: 10
+          format: int64
+          type: integer
+        business_logic:
+          description: The enabled business logic detection rules for the service.
+          example:
+            - users.login.success
+          items:
+            description: A business logic detection rule enabled for the service.
+            example: users.login.success
+            type: string
+          type: array
+        color:
+          deprecated: true
+          description: "Deprecated: a display color associated with the service in the UI."
+          example: ""
+          type: string
+        env:
+          description: The environment the service runs in.
+          example: prod
+          type: string
+        event_count:
+          description: The number of Application Security events detected for the service.
+          example: 42
+          format: int64
+          type: integer
+        event_trend:
+          deprecated: true
+          description: "Deprecated: the trend of Application Security events over time."
+          example:
+            - 0
+          items:
+            description: A point in the Application Security events trend.
+            example: 0
+            format: int64
+            type: integer
+          type: array
+        has_appsec_enabled:
+          description: Whether Application Security Management (Threats) is enabled for the service.
+          example: true
+          type: boolean
+        hits:
+          deprecated: true
+          description: "Deprecated: the number of hits for the service."
+          example: 0
+          format: int64
+          type: integer
+        iast_product_activation:
+          description: Whether Interactive Application Security Testing (IAST) is enabled for the service.
+          example: false
+          type: boolean
+        iast_product_compatibility:
+          description: The Interactive Application Security Testing (IAST) compatibility status of the service.
+          example: compatible
+          type: string
+        iast_product_compatibility_reasons:
+          description: The reasons explaining the Interactive Application Security Testing (IAST) compatibility status.
+          example:
+            - service_not_compatible
+          items:
+            description: A reason explaining the Interactive Application Security Testing (IAST) compatibility status.
+            example: service_not_compatible
+            type: string
+          type: array
+        languages:
+          description: The programming languages detected for the service.
+          example:
+            - go
+          items:
+            description: A programming language detected for the service.
+            example: go
+            type: string
+          type: array
+        last_ingested_spans:
+          description: The Unix timestamp, in seconds, of the last ingested span for the service.
+          example: 1610000000
+          format: int64
+          type: integer
+        rc_capabilities:
+          description: The Remote Configuration capabilities reported by the service.
+          example:
+            - ASM_DD_RULES
+          items:
+            description: A Remote Configuration capability reported by the service.
+            example: ASM_DD_RULES
+            type: string
+          type: array
+        recommended_business_logic:
+          description: The recommended business logic detection rules for the service.
+          example:
+            - users.login.success
+          items:
+            description: A recommended business logic detection rule for the service.
+            example: users.login.success
+            type: string
+          type: array
+        risk_product_activation:
+          description: Whether Software Composition Analysis (SCA) is enabled for the service.
+          example: false
+          type: boolean
+        risk_product_compatibility:
+          description: The Software Composition Analysis (SCA) compatibility status of the service.
+          example: compatible
+          type: string
+        risk_product_compatibility_reasons:
+          description: The reasons explaining the Software Composition Analysis (SCA) compatibility status.
+          example:
+            - service_not_compatible
+          items:
+            description: A reason explaining the Software Composition Analysis (SCA) compatibility status.
+            example: service_not_compatible
+            type: string
+          type: array
+        rules_version:
+          description: The WAF rules versions applied to the service.
+          example:
+            - 1.13.0
+          items:
+            description: A WAF rules version applied to the service.
+            example: 1.13.0
+            type: string
+          type: array
+        service:
+          description: The name of the service.
+          example: web-store
+          type: string
+        signal_count:
+          deprecated: true
+          description: "Deprecated: the number of security signals for the service."
+          example: 0
+          format: int64
+          type: integer
+        signal_trend:
+          deprecated: true
+          description: "Deprecated: the trend of security signals over time."
+          example:
+            - 0
+          items:
+            description: A point in the security signals trend.
+            example: 0
+            format: int64
+            type: integer
+          type: array
+        source:
+          description: The data sources that contributed information about the service.
+          example:
+            - services-activity
+          items:
+            description: A data source that contributed information about the service.
+            example: services-activity
+            type: string
+          type: array
+        teams:
+          description: The teams that own the service.
+          example:
+            - security-team
+          items:
+            description: A team that owns the service.
+            example: security-team
+            type: string
+          type: array
+        tracer_versions:
+          description: The Datadog tracing library versions reporting for the service.
+          example:
+            - 1.60.0
+          items:
+            description: A Datadog tracing library version reporting for the service.
+            example: 1.60.0
+            type: string
+          type: array
+        vm-activation:
+          description: The Vulnerability Management activation status of the service.
+          example: enabled
+          type: string
+        vuln_critical_count:
+          deprecated: true
+          description: "Deprecated: the number of critical-severity vulnerabilities for the service."
+          example: 0
+          format: int64
+          type: integer
+        vuln_high_count:
+          deprecated: true
+          description: "Deprecated: the number of high-severity vulnerabilities for the service."
+          example: 0
+          format: int64
+          type: integer
+        without_filter_services:
+          description: The total number of services available without applying the service filter.
+          example: 0
+          format: int64
+          type: integer
+      required:
+        - service
+        - env
+        - app_type
+        - has_appsec_enabled
+        - asm_threat_compatible
+        - languages
+        - teams
+        - event_count
+        - backend_waf_event_count
+        - risk_product_activation
+        - risk_product_compatibility
+        - risk_product_compatibility_reasons
+        - iast_product_activation
+        - iast_product_compatibility
+        - iast_product_compatibility_reasons
+        - vm-activation
+        - agent_versions
+        - tracer_versions
+        - rules_version
+        - rc_capabilities
+        - source
+        - last_ingested_spans
+        - business_logic
+        - recommended_business_logic
+        - without_filter_services
+        - color
+        - event_trend
+        - signal_trend
+        - signal_count
+        - hits
+        - vuln_high_count
+        - vuln_critical_count
+      type: object
+    ApplicationSecurityServiceResource:
+      description: A JSON:API resource describing a service and its Application Security details.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/ApplicationSecurityServiceAttributes"
+        id:
+          description: The unique identifier of the service, formatted as `<service>_<environment>`.
+          example: web-store_prod
+          type: string
+        type:
+          $ref: "#/components/schemas/ApplicationSecurityServiceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    ApplicationSecurityServiceType:
+      default: service_env
+      description: The type of the resource. The value should always be `service_env`.
+      enum:
+        - service_env
+      example: service_env
+      type: string
+      x-enum-varnames:
+        - SERVICE_ENV
+    ApplicationSecurityServicesMetadata:
+      description: Metadata returned alongside the list of services.
+      properties:
+        num_services_with_appsec:
+          description: The number of services with Application Security Management (Threats) enabled.
+          example: 1
+          format: int64
+          type: integer
+      required:
+        - num_services_with_appsec
+      type: object
+    ApplicationSecurityServicesResponse:
+      description: Response object containing the list of services matching the requested name.
+      properties:
+        data:
+          description: The list of services matching the requested name.
+          items:
+            $ref: "#/components/schemas/ApplicationSecurityServiceResource"
+          type: array
+        meta:
+          $ref: "#/components/schemas/ApplicationSecurityServicesMetadata"
+      required:
+        - data
+        - meta
       type: object
     ApplicationSecurityWafCustomRuleAction:
       description: The definition of `ApplicationSecurityWafCustomRuleAction` object.
@@ -168559,6 +168866,88 @@ paths:
       x-menu-order: 2
       x-unstable: |-
         **Note**: This endpoint is in public beta and it's subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/security/asm/services/{service_filter}:
+    get:
+      description: |-
+        Retrieve Application Security details for services matching the given name.
+        Returns Application Security activation, compatibility, and product enablement
+        information for each matching `(service, environment)` pair, along with a count
+        of services that have Application Security Management (Threats) enabled.
+      operationId: GetAsmServiceByName
+      parameters:
+        - $ref: "#/components/parameters/ApplicationSecurityServiceNameParam"
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          agent_versions:
+                            - 7.50.0
+                          app_type: web
+                          asm_threat_compatible: true
+                          backend_waf_event_count: 10
+                          business_logic: []
+                          color: ""
+                          env: prod
+                          event_count: 42
+                          event_trend: []
+                          has_appsec_enabled: true
+                          hits: 0
+                          iast_product_activation: false
+                          iast_product_compatibility: compatible
+                          iast_product_compatibility_reasons: []
+                          languages:
+                            - go
+                          last_ingested_spans: 1610000000
+                          rc_capabilities:
+                            - ASM_DD_RULES
+                          recommended_business_logic: []
+                          risk_product_activation: false
+                          risk_product_compatibility: compatible
+                          risk_product_compatibility_reasons: []
+                          rules_version:
+                            - 1.13.0
+                          service: web-store
+                          signal_count: 0
+                          signal_trend: []
+                          source:
+                            - services-activity
+                          teams:
+                            - security-team
+                          tracer_versions:
+                            - 1.60.0
+                          vm-activation: enabled
+                          vuln_critical_count: 0
+                          vuln_high_count: 0
+                          without_filter_services: 0
+                        id: web-store_prod
+                        type: service_env
+                    meta:
+                      num_services_with_appsec: 1
+              schema:
+                $ref: "#/components/schemas/ApplicationSecurityServicesResponse"
+          description: OK
+        "403":
+          $ref: "#/components/responses/NotAuthorizedResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get Application Security details for a service
+      tags:
+        - "Application Security"
+      x-menu-order: 16
+      "x-permission":
+        operator: OR
+        permissions:
+          - apm_service_catalog_read
+          - appsec_protect_read
+          - apm_read
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security/cloud_workload/policy/download:
     get:
