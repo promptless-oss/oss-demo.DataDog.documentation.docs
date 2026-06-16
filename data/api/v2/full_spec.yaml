@@ -13076,99 +13076,6 @@ components:
       type: string
       x-enum-varnames:
         - ITEMS
-    BulkMuteFindingsRequest:
-      description: The new bulk mute finding request.
-      properties:
-        data:
-          $ref: "#/components/schemas/BulkMuteFindingsRequestData"
-      required:
-        - data
-      type: object
-    BulkMuteFindingsRequestAttributes:
-      additionalProperties: false
-      description: The mute properties to be updated.
-      properties:
-        mute:
-          $ref: "#/components/schemas/BulkMuteFindingsRequestProperties"
-      required:
-        - mute
-      type: object
-    BulkMuteFindingsRequestData:
-      description: Data object containing the new bulk mute properties of the finding.
-      properties:
-        attributes:
-          $ref: "#/components/schemas/BulkMuteFindingsRequestAttributes"
-        id:
-          description: UUID to identify the request
-          example: dbe5f567-192b-4404-b908-29b70e1c9f76
-          type: string
-        meta:
-          $ref: "#/components/schemas/BulkMuteFindingsRequestMeta"
-        type:
-          $ref: "#/components/schemas/FindingType"
-      required:
-        - id
-        - type
-        - attributes
-        - meta
-      type: object
-    BulkMuteFindingsRequestMeta:
-      description: Meta object containing the findings to be updated.
-      properties:
-        findings:
-          description: Array of findings.
-          items:
-            $ref: "#/components/schemas/BulkMuteFindingsRequestMetaFindings"
-          type: array
-      type: object
-    BulkMuteFindingsRequestMetaFindings:
-      description: Finding object containing the finding information.
-      properties:
-        finding_id:
-          $ref: "#/components/schemas/FindingID"
-      type: object
-    BulkMuteFindingsRequestProperties:
-      additionalProperties: false
-      description: Object containing the new mute properties of the findings.
-      properties:
-        description:
-          description: Additional information about the reason why those findings are muted or unmuted. This field has a maximum limit of 280 characters.
-          type: string
-        expiration_date:
-          description: |-
-            The expiration date of the mute or unmute action (Unix ms). It must be set to a value greater than the current timestamp.
-            If this field is not provided, the finding will be muted or unmuted indefinitely, which is equivalent to setting the expiration date to 9999999999999.
-          example: 1778721573794
-          format: int64
-          type: integer
-        muted:
-          description: Whether those findings should be muted or unmuted.
-          example: true
-          type: boolean
-        reason:
-          $ref: "#/components/schemas/FindingMuteReason"
-      required:
-        - muted
-        - reason
-      type: object
-    BulkMuteFindingsResponse:
-      description: The expected response schema.
-      properties:
-        data:
-          $ref: "#/components/schemas/BulkMuteFindingsResponseData"
-      required:
-        - data
-      type: object
-    BulkMuteFindingsResponseData:
-      description: Data object containing the ID of the request that was updated.
-      properties:
-        id:
-          description: UUID used to identify the request
-          example: 93bfeb70-af47-424d-908a-948d3f08e37f
-          type: string
-        type:
-          $ref: "#/components/schemas/FindingType"
-      type: object
     BulkPutAppsDatastoreItemsRequest:
       description: Request to insert multiple items into a datastore in a single operation.
       properties:
@@ -158600,85 +158507,6 @@ paths:
         Use the [search security findings endpoint](https://docs.datadoghq.com/api/latest/security-monitoring/#search-security-findings),
         which is based on the [new security findings schema](https://docs.datadoghq.com/security/guide/findings-schema/), to search security findings.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
-    patch:
-      description: |-
-        Mute or unmute findings.
-      operationId: MuteFindings
-      requestBody:
-        content:
-          application/json:
-            examples:
-              default:
-                value:
-                  data:
-                    attributes:
-                      mute:
-                        expiration_date: 1778721573794
-                        muted: true
-                        reason: ACCEPTED_RISK
-                    id: dbe5f567-192b-4404-b908-29b70e1c9f76
-                    meta:
-                      findings:
-                        - finding_id: ZGVmLTAwcC1pZXJ-aS0wZjhjNjMyZDNmMzRlZTgzNw==
-                    type: finding
-            schema:
-              $ref: "#/components/schemas/BulkMuteFindingsRequest"
-        description: |-
-          ### Attributes
-
-          All findings are updated with the same attributes. The request body must include at least two attributes: `muted` and `reason`.
-          The allowed reasons depend on whether the finding is being muted or unmuted:
-            - To mute a finding: `PENDING_FIX`, `FALSE_POSITIVE`, `ACCEPTED_RISK`, `OTHER`.
-            - To unmute a finding : `NO_PENDING_FIX`, `HUMAN_ERROR`, `NO_LONGER_ACCEPTED_RISK`, `OTHER`.
-
-          ### Meta
-
-          The request body must include a list of the finding IDs to be updated.
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    data:
-                      id: abc-123
-                      type: finding
-              schema:
-                $ref: "#/components/schemas/BulkMuteFindingsResponse"
-          description: OK
-        "400":
-          $ref: "#/components/responses/FindingsBadRequestResponse"
-        "403":
-          $ref: "#/components/responses/FindingsForbiddenResponse"
-        "404":
-          $ref: "#/components/responses/FindingsNotFoundResponse"
-        "422":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JSONAPIErrorResponse"
-          description: "Invalid Request: The server understands the request syntax but cannot process it due to invalid data."
-        "429":
-          $ref: "#/components/responses/FindingsTooManyRequestsResponse"
-      security:
-        - apiKeyAuth: []
-          appKeyAuth: []
-        - AuthZ: []
-      summary: Mute or unmute a batch of findings
-      tags:
-        - "Security Monitoring"
-      x-codegen-request-body-name: body
-      x-menu-order: 2
-      "x-permission":
-        operator: OR
-        permissions:
-          - security_monitoring_findings_write
-          - appsec_vm_write
-      x-unstable: |-
-        **Note**: This endpoint is in public beta.
-        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/posture_management/findings/{finding_id}:
     get:
       description: Returns a single finding with message and resource configuration.
@@ -168758,7 +168586,7 @@ paths:
       tags:
         - "Security Monitoring"
       x-codegen-request-body-name: body
-      x-menu-order: 128
+      x-menu-order: 2
       "x-permission":
         operator: OR
         permissions:
@@ -169304,7 +169132,7 @@ paths:
       tags:
         - "Security Monitoring"
       x-codegen-request-body-name: body
-      x-menu-order: 130
+      x-menu-order: 129
       "x-permission":
         operator: OR
         permissions:
@@ -169378,7 +169206,7 @@ paths:
       tags:
         - "Security Monitoring"
       x-codegen-request-body-name: body
-      x-menu-order: 129
+      x-menu-order: 128
       "x-permission":
         operator: OR
         permissions:
@@ -171998,7 +171826,7 @@ paths:
       tags:
         - Security Monitoring
       x-codegen-request-body-name: body
-      x-menu-order: 131
+      x-menu-order: 130
       "x-permission":
         operator: OR
         permissions:
@@ -173799,7 +173627,7 @@ paths:
             - siem_entities_read
       summary: Get a single entity context
       tags: ["Security Monitoring"]
-      x-menu-order: 132
+      x-menu-order: 131
       x-permission:
         operator: OR
         permissions:
@@ -174671,7 +174499,7 @@ paths:
             - security_monitoring_rules_write
       summary: Restore a rule to a historical version
       tags: ["Security Monitoring"]
-      x-menu-order: 133
+      x-menu-order: 132
       "x-permission":
         operator: OR
         permissions:
