@@ -41199,6 +41199,390 @@ components:
         - id
         - type
       type: object
+    GovernanceBestPracticeDefinition:
+      description: |-
+        The best practice associated with an insight. Populated with the first active best practice
+        matched to the insight; `null` when no best practice is attached.
+      properties:
+        category:
+          description: |-
+            The value driver the best practice is grouped under, such as `access_governance`,
+            `security`, `compliance`, or `operational_hygiene`.
+          example: "access_governance"
+          type: string
+        deep_link:
+          description: A relative link to the configuration page where the best practice can be acted upon.
+          example: "/organization-settings/users?status=inactive"
+          type: string
+        description:
+          description: The full rationale and guidance for the best practice.
+          example: "Review and deactivate users who have not logged in within the last 90 days."
+          type: string
+        detection_type:
+          description: An optional association to a control's detection type. `null` when not associated with a control.
+          example:
+          nullable: true
+          type: string
+        id:
+          description: The unique identifier of the best practice.
+          example: "bp_monitor_inactive_users"
+          type: string
+        impact:
+          description: The expected impact of following the best practice.
+          example: "Reduces unauthorized access risk."
+          type: string
+        impact_hint:
+          description: |-
+            A priority hint for ordering best practices by expected impact. Lower values indicate
+            higher priority.
+          example: 1
+          format: int64
+          type: integer
+        permissions:
+          description: The permissions required for the user to act on the best practice.
+          example:
+            - "user_access_manage"
+          items:
+            description: A permission required to act on the best practice.
+            type: string
+          type: array
+        status:
+          description: Whether the best practice is currently `active` or `deprecated`.
+          example: "active"
+          type: string
+        summary:
+          description: A one-line explanation of why this best practice matters.
+          example: "Inactive users with access increase your security surface area."
+          type: string
+        title:
+          description: A short, human-readable name for the best practice.
+          example: "Monitor inactive users"
+          type: string
+        trigger_condition:
+          description: |-
+            The condition that surfaces the best practice. For an `insight` trigger, the insight
+            slug; for a `static` trigger, a descriptive condition key.
+          example: "active_users"
+          type: string
+        trigger_type:
+          description: |-
+            How the best practice is surfaced. `insight` ties it to an insight; `static` surfaces it
+            unless its condition is met.
+          example: "insight"
+          type: string
+      required:
+        - id
+        - title
+        - summary
+        - description
+        - category
+        - impact
+        - trigger_type
+        - trigger_condition
+        - deep_link
+        - permissions
+        - impact_hint
+        - status
+      type: object
+    GovernanceInsightAttributes:
+      description: The attributes of a governance insight.
+      properties:
+        audit_query:
+          $ref: "#/components/schemas/GovernanceInsightAuditQuery"
+          nullable: true
+        best_practice:
+          $ref: "#/components/schemas/GovernanceBestPracticeDefinition"
+          nullable: true
+        deep_link:
+          description: A relative link to the product surface where the insight can be acted upon.
+          example: ""
+          type: string
+        description:
+          description: A human-readable description of what the insight measures.
+          example: "Number of users who have used the Dashboard in the last 30 days"
+          type: string
+        display_name:
+          description: Human-readable name of the insight.
+          example: "Active Dashboards"
+          type: string
+        event_query:
+          $ref: "#/components/schemas/GovernanceInsightEventQuery"
+          nullable: true
+        metric_query:
+          $ref: "#/components/schemas/GovernanceInsightMetricQuery"
+          nullable: true
+        old_value:
+          description: |-
+            The value of the insight over the previous comparison window. `null` when values were
+            not requested or could not be computed.
+          example: 3274
+          format: double
+          nullable: true
+          type: number
+        percentage_query:
+          $ref: "#/components/schemas/GovernanceInsightPercentageQuery"
+          nullable: true
+        product:
+          description: The product the insight belongs to.
+          example: "Usage"
+          type: string
+        query_config:
+          $ref: "#/components/schemas/GovernanceInsightQueryConfig"
+          nullable: true
+        sort_order:
+          description: The relative order in which the insight should be displayed.
+          example: 1
+          format: int64
+          type: integer
+        state:
+          description: |-
+            The state of the insight. A `critical` insight receives extra UI treatment to draw
+            attention to it.
+          example: "critical"
+          type: string
+        sub_product:
+          description: The sub-product the insight belongs to, if any.
+          example: "Indexes"
+          type: string
+        time_range:
+          description: The time range the insight value is computed over, if applicable.
+          example: "month"
+          type: string
+        unit_name:
+          description: The unit that the insight's value is measured in.
+          example: "active dashboards"
+          type: string
+        usage_query:
+          $ref: "#/components/schemas/GovernanceInsightUsageQuery"
+          nullable: true
+        value:
+          description: The current value of the insight. `null` when values were not requested or could not be computed.
+          example: 3601
+          format: double
+          nullable: true
+          type: number
+      required:
+        - display_name
+        - product
+        - best_practice
+        - sub_product
+        - unit_name
+        - description
+        - time_range
+        - state
+        - deep_link
+        - value
+        - old_value
+        - metric_query
+        - event_query
+        - usage_query
+        - audit_query
+        - percentage_query
+      type: object
+    GovernanceInsightAuditCompute:
+      description: The aggregation applied to an audit log query.
+      properties:
+        aggregation:
+          description: The aggregation function to apply.
+          example: "cardinality"
+          type: string
+        interval:
+          description: The aggregation time window, in milliseconds.
+          example: 86400000
+          format: int64
+          type: integer
+        metric:
+          description: The metric or attribute to aggregate.
+          example: "@usr.id"
+          type: string
+        rollup:
+          description: An optional secondary aggregation applied to the audit query result.
+          example: ""
+          type: string
+      required:
+        - aggregation
+        - metric
+        - interval
+      type: object
+    GovernanceInsightAuditQuery:
+      description: An audit log query used to compute an insight value.
+      properties:
+        compute:
+          $ref: "#/components/schemas/GovernanceInsightAuditCompute"
+        indexes:
+          description: The audit log indexes the query runs against.
+          example:
+            - "main"
+          items:
+            description: An audit log index name.
+            type: string
+          type: array
+        query:
+          description: The audit log search query string.
+          example: "@evt.name:Dashboard"
+          type: string
+        source:
+          description: The data source the query runs against.
+          example: "audit"
+          type: string
+      required:
+        - source
+        - query
+        - indexes
+        - compute
+      type: object
+    GovernanceInsightData:
+      description: A governance insight resource.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GovernanceInsightAttributes"
+        id:
+          description: The unique identifier of the insight.
+          example: "498ee21f-8037-48b8-a961-a488692902f4"
+          type: string
+        type:
+          $ref: "#/components/schemas/GovernanceInsightResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    GovernanceInsightEventCompute:
+      description: The aggregation applied to an event query.
+      properties:
+        aggregation:
+          description: The aggregation function to apply.
+          example: "count"
+          type: string
+        interval:
+          description: The aggregation time window, in milliseconds.
+          example: 86400000
+          format: int64
+          type: integer
+      required:
+        - aggregation
+        - interval
+      type: object
+    GovernanceInsightEventQuery:
+      description: An event query used to compute an insight value.
+      properties:
+        compute:
+          $ref: "#/components/schemas/GovernanceInsightEventCompute"
+          nullable: true
+        indexes:
+          description: The event indexes the query runs against.
+          example:
+            - "main"
+          items:
+            description: An event index name.
+            type: string
+          type: array
+        query:
+          description: The event search query string.
+          example: "source:cloudtrail"
+          type: string
+      required:
+        - query
+        - indexes
+      type: object
+    GovernanceInsightMetricQuery:
+      description: A metric query used to compute an insight value.
+      properties:
+        query:
+          description: The query string.
+          example: "avg:system.cpu.user{*}"
+          type: string
+        reducer:
+          description: How the query result series is reduced to a single value.
+          example: "avg"
+          type: string
+        source:
+          description: The data source the query runs against.
+          example: "metrics"
+          type: string
+      required:
+        - source
+        - query
+        - reducer
+      type: object
+    GovernanceInsightPercentageQuery:
+      description: A percentage query that computes an insight value as a ratio of two metric queries.
+      properties:
+        denominator_query:
+          $ref: "#/components/schemas/GovernanceInsightMetricQuery"
+        numerator_query:
+          $ref: "#/components/schemas/GovernanceInsightMetricQuery"
+      required:
+        - numerator_query
+        - denominator_query
+      type: object
+    GovernanceInsightQueryConfig:
+      description: Query execution context that allows the frontend to execute insight queries directly.
+      properties:
+        chart_type:
+          description: The chart type the frontend should use to render the insight.
+          example: "line"
+          type: string
+        comparison_shift:
+          description: The window used for the previous value comparison, for example `week` or `month`.
+          example: "month"
+          type: string
+        default_value:
+          description: The default value to display when no data is available.
+          example: 0
+          format: int64
+          type: integer
+        directionality:
+          description: |-
+            Whether an increase in the value is good, bad, or neutral. One of `neutral`,
+            `increase_better`, or `decrease_better`.
+          example: "neutral"
+          type: string
+        effective_time_window_days:
+          description: The number of days the insight value is computed over.
+          example: 30
+          format: int64
+          type: integer
+      required:
+        - effective_time_window_days
+        - comparison_shift
+      type: object
+    GovernanceInsightResourceType:
+      description: JSON:API resource type for a governance insight.
+      enum:
+        - insight
+      example: "insight"
+      type: string
+      x-enum-varnames:
+        - INSIGHT
+    GovernanceInsightUsageQuery:
+      description: A usage query used to compute an insight value.
+      properties:
+        query:
+          description: The usage query string.
+          example: "logs_indexed_events"
+          type: string
+        reducer:
+          description: How the query result series is reduced to a single value.
+          example: "sum"
+          type: string
+      required:
+        - query
+        - reducer
+      type: object
+    GovernanceInsightsDataArray:
+      description: An array of governance insight resources.
+      items:
+        $ref: "#/components/schemas/GovernanceInsightData"
+      type: array
+    GovernanceInsightsResponse:
+      description: A list of governance insights.
+      properties:
+        data:
+          $ref: "#/components/schemas/GovernanceInsightsDataArray"
+      required:
+        - data
+      type: object
     GreyNoiseAPIKey:
       description: The definition of the `GreyNoiseAPIKey` object.
       properties:
@@ -133097,6 +133481,136 @@ paths:
         operator: OR
         permissions:
           - user_access_read
+  /api/v2/governance/insights:
+    get:
+      description: |-
+        Retrieve the list of governance insights available to the organization. By default, only
+        insight metadata is returned; pass `withValues=true` to also compute and include each
+        insight's current and previous values. Insights can be filtered by product.
+      operationId: ListGovernanceInsights
+      parameters:
+        - description: |-
+            Whether to compute and include the current and previous value of each insight.
+            Defaults to `false`, in which case only insight metadata is returned.
+          example: true
+          in: query
+          name: withValues
+          required: false
+          schema:
+            type: boolean
+        - description: |-
+            The UUID of the organization to compute insights for. Defaults to the organization of
+            the authenticated user. Used to retrieve insights for a child organization from a
+            parent organization.
+          example: "11111111-2222-3333-4444-555555555555"
+          in: query
+          name: orgUuid
+          required: false
+          schema:
+            type: string
+        - description: |-
+            Restrict the results to insights belonging to the given products. May be repeated to
+            filter by multiple products. Matching is case-insensitive.
+          example:
+            - "Usage"
+            - "Logs Settings"
+          in: query
+          name: filter[product]
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          audit_query:
+                          best_practice:
+                          deep_link: ""
+                          description: ""
+                          display_name: "Active Dashboards"
+                          event_query:
+                          metric_query:
+                          old_value: 3274
+                          percentage_query:
+                          product: "Usage"
+                          state: ""
+                          sub_product: ""
+                          time_range: ""
+                          unit_name: "active dashboards"
+                          usage_query:
+                          value: 3601
+                        id: "498ee21f-8037-48b8-a961-a488692902f4"
+                        type: "insight"
+                      - attributes:
+                          audit_query:
+                          best_practice:
+                            category: "access_governance"
+                            deep_link: "/organization-settings/users?status=inactive"
+                            description: "Review and deactivate users who have not logged in within the last 90 days."
+                            detection_type:
+                            id: "bp_monitor_inactive_users"
+                            impact: "Reduces unauthorized access risk."
+                            impact_hint: 1
+                            permissions:
+                              - "user_access_manage"
+                            status: "active"
+                            summary: "Inactive users with access increase your security surface area."
+                            title: "Monitor inactive users"
+                            trigger_condition: "active_users"
+                            trigger_type: "insight"
+                          deep_link: ""
+                          description: "Number of users who have used the Dashboard in the last 30 days"
+                          display_name: "Active Users"
+                          event_query:
+                          metric_query:
+                          old_value: 1173
+                          percentage_query:
+                          product: "Usage"
+                          state: ""
+                          sub_product: ""
+                          time_range: "month"
+                          unit_name: "active users"
+                          usage_query:
+                          value: 1291
+                        id: "a3248d1b-5578-4345-a34e-fe9657300f22"
+                        type: "insight"
+              schema:
+                $ref: "#/components/schemas/GovernanceInsightsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List governance insights
+      tags:
+        - Governance Insights
+      x-menu-order: 1
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/hamr:
     get:
       description: |-
@@ -193181,6 +193695,12 @@ tags:
       description: For more information about the Datadog Google Chat integration, see the integration page.
       url: https://docs.datadoghq.com/integrations/google-hangouts-chat/
     name: Google Chat Integration
+  - description: |-
+      Governance Insights surface key usage, configuration, and best-practice signals for an
+      organization within the Governance Console. Each insight reports a current value (and,
+      optionally, a previous value for comparison) along with the query used to compute it, so
+      that the Console can render trends and highlight areas that need attention.
+    name: Governance Insights
   - description: |-
       Configure High Availability Multi-Region (HAMR) connections between Datadog organizations.
       HAMR provides disaster recovery capabilities by maintaining synchronized data between primary
