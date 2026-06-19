@@ -104121,12 +104121,24 @@ components:
           description: Whether Auto Test Retries are enabled for this service.
           example: false
           type: boolean
+        auto_test_retries_enabled_is_overridden:
+          description: Whether the Auto Test Retries setting is overridden at the service level.
+          example: false
+          type: boolean
         code_coverage_enabled:
           description: Whether Code Coverage is enabled for this service.
           example: false
           type: boolean
+        code_coverage_enabled_is_overridden:
+          description: Whether the Code Coverage setting is overridden at the service level.
+          example: false
+          type: boolean
         early_flake_detection_enabled:
           description: Whether Early Flake Detection is enabled for this service.
+          example: false
+          type: boolean
+        early_flake_detection_enabled_is_overridden:
+          description: Whether the Early Flake Detection setting is overridden at the service level.
           example: false
           type: boolean
         env:
@@ -104137,9 +104149,13 @@ components:
           description: Whether Failed Test Replay is enabled for this service.
           example: false
           type: boolean
+        failed_test_replay_enabled_is_overridden:
+          description: Whether the Failed Test Replay setting is overridden at the service level.
+          example: false
+          type: boolean
         pr_comments_enabled:
-          description: Whether PR Comments are enabled for this service.
-          example: true
+          description: Whether PR Comments are enabled. This value reflects the repository-level setting and cannot be overridden at the service level.
+          example: false
           type: boolean
         repository_id:
           description: The repository identifier.
@@ -104151,7 +104167,11 @@ components:
           type: string
         test_impact_analysis_enabled:
           description: Whether Test Impact Analysis is enabled for this service.
-          example: false
+          example: true
+          type: boolean
+        test_impact_analysis_enabled_is_overridden:
+          description: Whether the Test Impact Analysis setting is overridden at the service level.
+          example: true
           type: boolean
       type: object
     TestOptimizationServiceSettingsData:
@@ -104161,7 +104181,7 @@ components:
           $ref: "#/components/schemas/TestOptimizationServiceSettingsAttributes"
         id:
           description: Unique identifier for the service settings.
-          example: github.com/datadog/shopist::shopist::prod
+          example: 9b8a7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d
           type: string
         type:
           $ref: "#/components/schemas/TestOptimizationServiceSettingsType"
@@ -104204,17 +104224,30 @@ components:
       description: |-
         Attributes for updating Test Optimization service settings.
         All non-required fields are optional; only provided fields will be updated.
+        Setting a field to `null` is a no-op. To reset a setting to inherit from the repository level, use the corresponding `<setting>_inherit` field.
       properties:
         auto_test_retries_enabled:
-          description: Whether Auto Test Retries are enabled for this service.
+          description: Whether Auto Test Retries are enabled for this service. Setting to `null` is a no-op; use `auto_test_retries_enabled_inherit` to reset to repository-level inheritance.
+          example: false
+          type: boolean
+        auto_test_retries_enabled_inherit:
+          description: When `true`, resets the Auto Test Retries setting to inherit from the repository level.
           example: false
           type: boolean
         code_coverage_enabled:
-          description: Whether Code Coverage is enabled for this service.
+          description: Whether Code Coverage is enabled for this service. Setting to `null` is a no-op; use `code_coverage_enabled_inherit` to reset to repository-level inheritance.
+          example: false
+          type: boolean
+        code_coverage_enabled_inherit:
+          description: When `true`, resets the Code Coverage setting to inherit from the repository level.
           example: false
           type: boolean
         early_flake_detection_enabled:
-          description: Whether Early Flake Detection is enabled for this service.
+          description: Whether Early Flake Detection is enabled for this service. Setting to `null` is a no-op; use `early_flake_detection_enabled_inherit` to reset to repository-level inheritance.
+          example: false
+          type: boolean
+        early_flake_detection_enabled_inherit:
+          description: When `true`, resets the Early Flake Detection setting to inherit from the repository level.
           example: false
           type: boolean
         env:
@@ -104222,12 +104255,16 @@ components:
           example: prod
           type: string
         failed_test_replay_enabled:
-          description: Whether Failed Test Replay is enabled for this service.
+          description: Whether Failed Test Replay is enabled for this service. Setting to `null` is a no-op; use `failed_test_replay_enabled_inherit` to reset to repository-level inheritance.
+          example: false
+          type: boolean
+        failed_test_replay_enabled_inherit:
+          description: When `true`, resets the Failed Test Replay setting to inherit from the repository level.
           example: false
           type: boolean
         pr_comments_enabled:
-          description: Whether PR Comments are enabled for this service.
-          example: true
+          description: This field is ignored. PR Comments cannot be overridden at the service level.
+          example: false
           type: boolean
         repository_id:
           description: The repository identifier.
@@ -104240,8 +104277,12 @@ components:
           minLength: 1
           type: string
         test_impact_analysis_enabled:
-          description: Whether Test Impact Analysis is enabled for this service.
-          example: false
+          description: Whether Test Impact Analysis is enabled for this service. Setting to `null` is a no-op; use `test_impact_analysis_enabled_inherit` to reset to repository-level inheritance.
+          example: true
+          type: boolean
+        test_impact_analysis_enabled_inherit:
+          description: When `true`, resets the Test Impact Analysis setting to inherit from the repository level.
+          example: true
           type: boolean
       required:
         - repository_id
@@ -122400,7 +122441,9 @@ paths:
     patch:
       description: |-
         Partially update Test Optimization settings for a specific service identified by repository, service name, and environment.
-        Only provided fields are updated; null or omitted fields are left unchanged.
+        Only provided fields are updated; setting a field to `null` is a no-op.
+        To reset a setting to inherit from the repository level, use the corresponding `<setting>_inherit` field.
+        The `pr_comments_enabled` field is ignored as it cannot be overridden at the service level.
       operationId: UpdateTestOptimizationServiceSettings
       requestBody:
         content:
@@ -122410,15 +122453,10 @@ paths:
                 value:
                   data:
                     attributes:
-                      auto_test_retries_enabled: false
-                      code_coverage_enabled: false
-                      early_flake_detection_enabled: false
                       env: prod
-                      failed_test_replay_enabled: false
-                      pr_comments_enabled: true
                       repository_id: github.com/datadog/test-service
                       service_name: test-service
-                      test_impact_analysis_enabled: false
+                      test_impact_analysis_enabled_inherit: true
                     type: test_optimization_update_service_settings_request
             schema:
               $ref: "#/components/schemas/TestOptimizationUpdateServiceSettingsRequest"
@@ -122433,15 +122471,20 @@ paths:
                     data:
                       attributes:
                         auto_test_retries_enabled: false
+                        auto_test_retries_enabled_is_overridden: false
                         code_coverage_enabled: false
+                        code_coverage_enabled_is_overridden: false
                         early_flake_detection_enabled: false
+                        early_flake_detection_enabled_is_overridden: false
                         env: prod
                         failed_test_replay_enabled: false
-                        pr_comments_enabled: true
+                        failed_test_replay_enabled_is_overridden: false
+                        pr_comments_enabled: false
                         repository_id: github.com/datadog/test-service
                         service_name: test-service
-                        test_impact_analysis_enabled: false
-                      id: github.com/datadog/test-service::test-service::prod
+                        test_impact_analysis_enabled: true
+                        test_impact_analysis_enabled_is_overridden: true
+                      id: 9b8a7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d
                       type: test_optimization_service_settings
               schema:
                 $ref: "#/components/schemas/TestOptimizationServiceSettingsResponse"
@@ -122496,15 +122539,20 @@ paths:
                     data:
                       attributes:
                         auto_test_retries_enabled: false
+                        auto_test_retries_enabled_is_overridden: false
                         code_coverage_enabled: false
+                        code_coverage_enabled_is_overridden: false
                         early_flake_detection_enabled: false
+                        early_flake_detection_enabled_is_overridden: false
                         env: prod
                         failed_test_replay_enabled: false
-                        pr_comments_enabled: true
+                        failed_test_replay_enabled_is_overridden: false
+                        pr_comments_enabled: false
                         repository_id: github.com/datadog/test-service
                         service_name: test-service
-                        test_impact_analysis_enabled: false
-                      id: github.com/datadog/test-service::test-service::prod
+                        test_impact_analysis_enabled: true
+                        test_impact_analysis_enabled_is_overridden: true
+                      id: 9b8a7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d
                       type: test_optimization_service_settings
               schema:
                 $ref: "#/components/schemas/TestOptimizationServiceSettingsResponse"
