@@ -22821,7 +22821,6 @@ components:
         status:
           $ref: "#/components/schemas/CreateMaintenanceRequestDataAttributesUpdatesItemsStatus"
       required:
-        - components_affected
         - description
         - started_at
         - status
@@ -23701,7 +23700,6 @@ components:
           example: "API Maintenance"
           type: string
       required:
-        - components_affected
         - title
         - completed_date
         - completed_description
@@ -24384,6 +24382,9 @@ components:
           description: Base64-encoded image data included in email notifications sent to status page subscribers.
           example: data:image/png;base64,pQSLAw0KGgoAAAANSUhEUgAAAQ4AASJKFF
           type: string
+        enabled:
+          description: Whether the status page is enabled.
+          type: boolean
         favicon:
           description: Base64-encoded image data displayed in the browser tab.
           example: data:image/png;base64,kWMRNw0KGgoAAAANSUhEUgAAAEAAAABACA
@@ -24392,6 +24393,12 @@ components:
           description: The name of the status page.
           example: Status Page US1
           type: string
+        slack_app_icon:
+          description: The Slack app icon URL for the status page.
+          type: string
+        slack_subscriptions_enabled:
+          description: Whether Slack subscriptions are enabled for the status page.
+          type: boolean
         subscriptions_enabled:
           description: Whether users can subscribe to the status page.
           example: true
@@ -29535,6 +29542,12 @@ components:
           format: date-time
           readOnly: true
           type: string
+        deleted_at:
+          description: The date and time the resource was deleted.
+          type: string
+        deleted_by_user_uuid:
+          description: UUID of the user who deleted the resource.
+          type: string
         description:
           description: Description of the update.
           type: string
@@ -29658,6 +29671,162 @@ components:
       description: An included resource related to a degradation or maintenance.
       oneOf:
         - $ref: "#/components/schemas/StatusPagesUser"
+        - $ref: "#/components/schemas/StatusPageAsIncluded"
+    DegradationUpdate:
+      description: Response object for a degradation update.
+      properties:
+        data:
+          $ref: "#/components/schemas/DegradationUpdateData"
+        included:
+          description: Resources related to the degradation update.
+          items:
+            $ref: "#/components/schemas/DegradationUpdateIncluded"
+          type: array
+      type: object
+    DegradationUpdateData:
+      description: The data object for a degradation update.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/DegradationUpdateDataAttributes"
+        id:
+          description: The ID of the degradation update.
+          type: string
+        relationships:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationships"
+        type:
+          $ref: "#/components/schemas/PatchDegradationUpdateRequestDataType"
+      required:
+        - type
+      type: object
+    DegradationUpdateDataAttributes:
+      description: Attributes of a degradation update resource.
+      properties:
+        components_affected:
+          description: Components affected by this update.
+          items:
+            $ref: "#/components/schemas/DegradationUpdateDataAttributesComponentsAffectedItems"
+          type: array
+        created_at:
+          description: The date and time the update was created.
+          format: date-time
+          type: string
+        deleted_at:
+          description: The date and time the update was soft-deleted.
+          format: date-time
+          type: string
+        description:
+          description: The message body of the update.
+          type: string
+        modified_at:
+          description: The date and time the update was last modified.
+          format: date-time
+          type: string
+        started_at:
+          description: The date and time the update started.
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/CreateDegradationRequestDataAttributesStatus"
+      type: object
+    DegradationUpdateDataAttributesComponentsAffectedItems:
+      description: A component affected by a degradation update.
+      properties:
+        id:
+          description: The ID of the affected component.
+          example: ""
+          type: string
+        name:
+          description: The name of the affected component.
+          readOnly: true
+          type: string
+        status:
+          $ref: "#/components/schemas/StatusPagesComponentDataAttributesStatus"
+      required:
+        - id
+        - status
+      type: object
+    DegradationUpdateDataRelationships:
+      description: Relationships of a degradation update resource.
+      properties:
+        created_by_user:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsUser"
+        degradation:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsDegradation"
+        deleted_by_user:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsUser"
+        last_modified_by_user:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsUser"
+        status_page:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsStatusPage"
+      type: object
+    DegradationUpdateDataRelationshipsDegradation:
+      description: The degradation relationship of a degradation update.
+      properties:
+        data:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsDegradationData"
+      required:
+        - data
+      type: object
+    DegradationUpdateDataRelationshipsDegradationData:
+      description: The degradation linked to a degradation update.
+      properties:
+        id:
+          description: The ID of the degradation.
+          example: ""
+          type: string
+        type:
+          $ref: "#/components/schemas/PatchDegradationRequestDataType"
+      required:
+        - type
+        - id
+      type: object
+    DegradationUpdateDataRelationshipsStatusPage:
+      description: The status page relationship of a degradation update.
+      properties:
+        data:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsStatusPageData"
+      required:
+        - data
+      type: object
+    DegradationUpdateDataRelationshipsStatusPageData:
+      description: The status page linked to a degradation update.
+      properties:
+        id:
+          description: The ID of the status page.
+          example: ""
+          type: string
+        type:
+          $ref: "#/components/schemas/StatusPageDataType"
+      required:
+        - type
+        - id
+      type: object
+    DegradationUpdateDataRelationshipsUser:
+      description: A user relationship of a degradation update.
+      properties:
+        data:
+          $ref: "#/components/schemas/DegradationUpdateDataRelationshipsUserData"
+      required:
+        - data
+      type: object
+    DegradationUpdateDataRelationshipsUserData:
+      description: A Datadog user linked to a degradation update.
+      properties:
+        id:
+          description: The ID of the user.
+          example: ""
+          type: string
+        type:
+          $ref: "#/components/schemas/StatusPagesUserType"
+      required:
+        - type
+        - id
+      type: object
+    DegradationUpdateIncluded:
+      description: Resources included in a degradation update response.
+      oneOf:
+        - $ref: "#/components/schemas/StatusPagesUser"
+        - $ref: "#/components/schemas/Degradation"
         - $ref: "#/components/schemas/StatusPageAsIncluded"
     DeleteAppResponse:
       description: The response object after an app is successfully deleted.
@@ -72802,6 +72971,61 @@ components:
       type: string
       x-enum-varnames:
         - DEGRADATIONS
+    PatchDegradationUpdateRequest:
+      description: Request object for editing a degradation update.
+      example:
+        data:
+          attributes:
+            description: We've identified the source of the latency increase and are deploying a fix.
+            status: identified
+          id: 00000000-0000-0000-0000-000000000000
+          type: degradation_updates
+      properties:
+        data:
+          $ref: "#/components/schemas/PatchDegradationUpdateRequestData"
+      type: object
+    PatchDegradationUpdateRequestData:
+      description: The data object for editing a degradation update.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/PatchDegradationUpdateRequestDataAttributes"
+        id:
+          description: The ID of the degradation update to edit.
+          type: string
+        type:
+          $ref: "#/components/schemas/PatchDegradationUpdateRequestDataType"
+      required:
+        - type
+      type: object
+    PatchDegradationUpdateRequestDataAttributes:
+      description: Attributes for editing a degradation update.
+      properties:
+        description:
+          description: The message body of the update.
+          type: string
+        status:
+          $ref: "#/components/schemas/PatchDegradationUpdateRequestDataAttributesStatus"
+      type: object
+    PatchDegradationUpdateRequestDataAttributesStatus:
+      description: The status of the degradation update.
+      enum:
+        - investigating
+        - identified
+        - monitoring
+      type: string
+      x-enum-varnames:
+        - INVESTIGATING
+        - IDENTIFIED
+        - MONITORING
+    PatchDegradationUpdateRequestDataType:
+      default: degradation_updates
+      description: Degradation updates resource type.
+      enum:
+        - degradation_updates
+      example: degradation_updates
+      type: string
+      x-enum-varnames:
+        - DEGRADATION_UPDATES
     PatchIncidentNotificationTemplateRequest:
       description: Update request for a notification template.
       properties:
@@ -73016,6 +73240,12 @@ components:
           description: The name of the status page.
           example: Status Page US1
           type: string
+        slack_app_icon:
+          description: The Slack app icon URL for the status page.
+          type: string
+        slack_subscriptions_enabled:
+          description: Whether Slack subscriptions are enabled for the status page.
+          type: boolean
         subscriptions_enabled:
           description: Whether users can subscribe to the status page.
           example: true
@@ -95089,6 +95319,12 @@ components:
         page_url:
           description: The url that the status page is accessible at.
           type: string
+        slack_app_icon:
+          description: The Slack app icon URL for the status page.
+          type: string
+        slack_subscriptions_enabled:
+          description: Whether Slack subscriptions are enabled for the status page.
+          type: boolean
         subscriptions_enabled:
           description: Whether users can subscribe to the status page.
           type: boolean
@@ -95257,6 +95493,12 @@ components:
         page_url:
           description: The url that the status page is accessible at.
           type: string
+        slack_app_icon:
+          description: The Slack app icon URL for the status page.
+          type: string
+        slack_subscriptions_enabled:
+          description: Whether Slack subscriptions are enabled for the status page.
+          type: boolean
         subscriptions_enabled:
           description: Whether users can subscribe to the status page.
           type: boolean
@@ -186251,7 +186493,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: List status pages
       tags:
         - Status Pages
@@ -186332,7 +186575,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_write
       summary: Create status page
       tags:
         - Status Pages
@@ -186406,7 +186650,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: List degradations
       tags:
         - Status Pages
@@ -186481,7 +186726,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: List maintenances
       tags:
         - Status Pages
@@ -186511,7 +186757,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_write
       summary: Delete status page
       tags:
         - Status Pages
@@ -186563,7 +186810,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: Get status page
       tags:
         - Status Pages
@@ -186643,7 +186891,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_write
       summary: Update status page
       tags:
         - Status Pages
@@ -186693,7 +186942,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: List components
       tags:
         - Status Pages
@@ -186760,7 +187010,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_write
       summary: Create component
       tags:
         - Status Pages
@@ -186798,7 +187049,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_write
       summary: Delete component
       tags:
         - Status Pages
@@ -186855,7 +187107,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: Get component
       tags:
         - Status Pages
@@ -186927,7 +187180,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_write
       summary: Update component
       tags:
         - Status Pages
@@ -187006,7 +187260,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_incident_write
       summary: Create degradation
       tags:
         - Status Pages
@@ -187086,7 +187341,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_incident_write
       summary: Create backfilled degradation
       tags:
         - Status Pages
@@ -187124,7 +187380,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_incident_write
       summary: Delete degradation
       tags:
         - Status Pages
@@ -187186,7 +187443,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: Get degradation
       tags:
         - Status Pages
@@ -187273,7 +187531,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_incident_write
       summary: Update degradation
       tags:
         - Status Pages
@@ -187282,6 +187541,118 @@ paths:
         operator: AND
         permissions:
           - status_pages_incident_write
+  /api/v2/statuspages/{page_id}/degradations/{degradation_id}/updates/{update_id}:
+    delete:
+      description: Soft-deletes a degradation update.
+      operationId: SoftDeleteDegradationUpdate
+      parameters:
+        - description: The ID of the degradation.
+          in: path
+          name: degradation_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: The ID of the status page.
+          in: path
+          name: page_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: The ID of the degradation update.
+          in: path
+          name: update_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - status_pages_incident_write
+      summary: Soft delete degradation update
+      tags:
+        - Status Pages
+      x-menu-order: 24
+    patch:
+      description: Edits a specific degradation update.
+      operationId: EditDegradationUpdate
+      parameters:
+        - description: The ID of the degradation.
+          in: path
+          name: degradation_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: "Comma-separated list of resources to include. Supported values: created_by_user, last_modified_by_user, degradation, status_page."
+          in: query
+          name: include
+          schema:
+            type: string
+        - description: The ID of the status page.
+          in: path
+          name: page_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+        - description: The ID of the degradation update.
+          in: path
+          name: update_id
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      description: We've identified the source of the latency increase and are deploying a fix.
+                      status: identified
+                    id: 00000000-0000-0000-0000-000000000000
+                    type: degradation_updates
+            schema:
+              $ref: "#/components/schemas/PatchDegradationUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        description: We've identified the source of the latency increase and are deploying a fix.
+                        status: identified
+                      id: 00000000-0000-0000-0000-000000000000
+                      type: degradation_updates
+              schema:
+                $ref: "#/components/schemas/DegradationUpdate"
+          description: OK
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - status_pages_incident_write
+      summary: Edit degradation update
+      tags:
+        - Status Pages
+      x-menu-order: 25
   /api/v2/statuspages/{page_id}/maintenances:
     post:
       description: Schedules a new maintenance.
@@ -187353,7 +187724,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_incident_write
       summary: Schedule maintenance
       tags:
         - Status Pages
@@ -187432,7 +187804,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_incident_write
       summary: Create backfilled maintenance
       tags:
         - Status Pages
@@ -187492,7 +187865,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_settings_read
       summary: Get maintenance
       tags:
         - Status Pages
@@ -187575,7 +187949,8 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_incident_write
       summary: Update maintenance
       tags:
         - Status Pages
@@ -187604,7 +187979,10 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_internal_page_publish
+            - status_pages_public_page_publish
+            - status_pages_settings_write
       summary: Publish status page
       tags:
         - Status Pages
@@ -187635,7 +188013,10 @@ paths:
       security:
         - apiKeyAuth: []
           appKeyAuth: []
-        - AuthZ: []
+        - AuthZ:
+            - status_pages_internal_page_publish
+            - status_pages_public_page_publish
+            - status_pages_settings_write
       summary: Unpublish status page
       tags:
         - Status Pages
