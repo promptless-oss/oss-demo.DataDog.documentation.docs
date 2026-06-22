@@ -13086,12 +13086,17 @@ components:
           minLength: 1
           type: string
         repository_id:
-          description: The repository identifier.
+          deprecated: true
+          description: "Deprecated: use `repository_url` instead. The repository URL."
           example: github.com/datadog/shopist
           minLength: 1
           type: string
+        repository_url:
+          description: The repository URL. Accepts a full URL with or without a scheme (for example, `https://github.com/org/repo` or `github.com/org/repo`).
+          example: https://github.com/datadog/shopist
+          minLength: 1
+          type: string
       required:
-        - repository_id
         - branch
       type: object
     BranchCoverageSummaryRequestData:
@@ -19045,12 +19050,17 @@ components:
           pattern: "^[a-fA-F0-9]{40}$"
           type: string
         repository_id:
-          description: The repository identifier.
+          deprecated: true
+          description: "Deprecated: use `repository_url` instead. The repository URL."
           example: github.com/datadog/shopist
           minLength: 1
           type: string
+        repository_url:
+          description: The repository URL. Accepts a full URL with or without a scheme (for example, `https://github.com/org/repo` or `github.com/org/repo`).
+          example: https://github.com/datadog/shopist
+          minLength: 1
+          type: string
       required:
-        - repository_id
         - commit_sha
       type: object
     CommitCoverageSummaryRequestData:
@@ -123435,7 +123445,7 @@ paths:
                   data:
                     attributes:
                       branch: prod
-                      repository_id: github.com/datadog/test-service
+                      repository_url: https://github.com/datadog/test-service
                     type: ci_app_coverage_branch_summary_request
             schema:
               $ref: "#/components/schemas/BranchCoverageSummaryRequest"
@@ -123506,7 +123516,7 @@ paths:
                   data:
                     attributes:
                       commit_sha: 66adc9350f2cc9b250b69abddab733dd55e1a588
-                      repository_id: github.com/datadog/test-service
+                      repository_url: https://github.com/datadog/test-service
                     type: ci_app_coverage_commit_summary_request
             schema:
               $ref: "#/components/schemas/CommitCoverageSummaryRequest"
