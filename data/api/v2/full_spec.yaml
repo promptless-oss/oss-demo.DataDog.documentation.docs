@@ -1952,6 +1952,15 @@ components:
         example: "550e8400-e29b-41d4-a716-446655440000"
         format: uuid
         type: string
+    variant_id:
+      description: The ID of the variant.
+      in: path
+      name: variant_id
+      required: true
+      schema:
+        example: "550e8400-e29b-41d4-a716-446655440002"
+        format: uuid
+        type: string
   requestBodies: {}
   responses:
     BadRequestResponse:
@@ -106837,6 +106846,18 @@ components:
       required:
         - data
       type: object
+    UpdateVariantRequest:
+      description: Request to update an existing variant's name and value.
+      properties:
+        name:
+          description: The display name of the variant.
+          example: "Variant ABC123 Updated"
+          type: string
+        value:
+          description: The value of the variant as a string.
+          example: "new_value"
+          type: string
+      type: object
     UpdateWorkflowRequest:
       description: A request object for updating an existing workflow.
       example:
@@ -134152,6 +134173,220 @@ paths:
         permissions:
           - feature_flag_config_write
           - feature_flag_environment_config_read
+  /api/v2/feature-flags/{feature_flag_id}/variants:
+    post:
+      description: |-
+        Adds a single new variant to an existing feature flag. This endpoint is
+        additive-only: it never modifies existing variants. A request whose `key`
+        already exists on the flag is rejected with `409 Conflict`; a `value`
+        whose type does not match the flag's `value_type` is rejected with `400`.
+        The server generates the variant UUID and returns it in the response body;
+        callers (for example, the flag-migration tool) need this UUID to reference
+        the new variant in subsequent allocation syncs.
+      operationId: CreateVariantForFeatureFlag
+      parameters:
+        - $ref: "#/components/parameters/feature_flag_id"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      key: dark
+                      name: Dark Theme
+                      value: dark
+                    type: variants
+            schema:
+              $ref: "#/components/schemas/CreateVariant"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        key: dark
+                        name: Dark Theme
+                        updated_at: "2024-01-01T00:00:00+00:00"
+                        value: dark
+                      id: "550e8400-e29b-41d4-a716-446655440002"
+                      type: variants
+              schema:
+                $ref: "#/components/schemas/Variant"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Conflict - A variant with this key already exists on the flag.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Add a variant to a feature flag
+      tags:
+        - Feature Flags
+      x-menu-order: 22
+      x-permission:
+        operator: AND
+        permissions:
+          - feature_flag_config_write
+  /api/v2/feature-flags/{feature_flag_id}/variants/{variant_id}:
+    delete:
+      description: |-
+        Deletes a variant from a feature flag.
+
+        When backend approvals are enabled and the flag requires approval, this endpoint creates and returns a `FlagSuggestion` with `201 Created` instead of deleting the variant immediately. If a pending suggestion already exists for this flag's variant property, the endpoint returns `409 Conflict`.
+      operationId: DeleteVariantFromFeatureFlag
+      parameters:
+        - $ref: "#/components/parameters/feature_flag_id"
+        - $ref: "#/components/parameters/variant_id"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Conflict - A pending suggestion already exists for this property.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Delete a variant
+      tags:
+        - Feature Flags
+      x-menu-order: 20
+      x-permission:
+        operator: AND
+        permissions:
+          - feature_flag_config_write
+    put:
+      description: |-
+        Updates the name and value of an existing variant on a feature flag.
+
+        When backend approvals are enabled and the flag requires approval, this endpoint creates and returns a `FlagSuggestion` with `201 Created` instead of applying the change immediately. Use the returned suggestion `id` to approve or reject the change. If a pending suggestion already exists for this flag's variant property, the endpoint returns `409 Conflict`.
+      operationId: UpdateVariantForFeatureFlag
+      parameters:
+        - $ref: "#/components/parameters/feature_flag_id"
+        - $ref: "#/components/parameters/variant_id"
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      name: Dark Theme Updated
+                      value: dark_v2
+                    id: "550e8400-e29b-41d4-a716-446655440002"
+                    type: variants
+            schema:
+              $ref: "#/components/schemas/UpdateVariantRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        created_at: "2024-01-01T00:00:00+00:00"
+                        key: dark
+                        name: Dark Theme Updated
+                        updated_at: "2024-06-01T00:00:00+00:00"
+                        value: dark_v2
+                      id: "550e8400-e29b-41d4-a716-446655440002"
+                      type: variants
+              schema:
+                $ref: "#/components/schemas/Variant"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Conflict - A pending suggestion already exists for this property.
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+      summary: Update a variant
+      tags:
+        - Feature Flags
+      x-menu-order: 21
+      x-permission:
+        operator: AND
+        permissions:
+          - feature_flag_config_write
   /api/v2/forms:
     get:
       description: Get all forms for the authenticated user's organization.
