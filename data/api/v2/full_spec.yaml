@@ -35282,6 +35282,12 @@ components:
           $ref: "#/components/schemas/ExternalUserMeta"
         name:
           $ref: "#/components/schemas/ExternalUserNameType"
+        roles:
+          description: Datadog roles assigned to the user. Provide the role UUID in `value` when provisioning or updating roles through SCIM.
+          items:
+            $ref: "#/components/schemas/ExternalUserRole"
+          maxItems: 50
+          type: array
         schemas:
           description: User JSON Schemas.
           example:
@@ -35477,10 +35483,12 @@ components:
           $ref: "#/components/schemas/ExternalUserPatchRequestOperationsItemsOp"
         path:
           description: An attribute path describing the target of the operation.
-          example: title
+          example: roles
           type: string
         value:
-          description: New value to use for the patch operation.
+          description: New value to use for the patch operation. When `path` is `roles`, use an array of role objects with each role UUID in `value`.
+          example:
+            - value: 00000000-0000-0000-0000-000000000001
       type: object
     ExternalUserPatchRequestOperationsItemsOp:
       description: The operation to be performed.
@@ -35491,6 +35499,21 @@ components:
       x-enum-varnames:
         - ADD
         - REPLACE
+    ExternalUserRole:
+      description: Datadog role assigned to a SCIM user.
+      properties:
+        display:
+          description: Human-readable Datadog role name returned in responses.
+          example: Datadog Read Only Role
+          readOnly: true
+          type: string
+        value:
+          description: Datadog role UUID.
+          example: 00000000-0000-0000-0000-000000000001
+          type: string
+      required:
+        - value
+      type: object
     FacetInfoRequest:
       description: Request body for retrieving facet value information for a specified attribute with optional filtering.
       example:
@@ -56396,6 +56419,9 @@ components:
               resourceType: User
             name:
               formatted: John Doe
+            roles:
+              - display: Datadog Read Only Role
+                value: 00000000-0000-0000-0000-000000000001
             schemas:
               - urn:ietf:params:scim:schemas:core:2.0:User
             title: Mr.
@@ -56413,6 +56439,9 @@ components:
               resourceType: User
             name:
               formatted: Jane Doe
+            roles:
+              - display: Datadog Standard Role
+                value: 00000000-0000-0000-0000-000000000002
             schemas:
               - urn:ietf:params:scim:schemas:core:2.0:User
             title: Mrs.
@@ -56473,6 +56502,12 @@ components:
           $ref: "#/components/schemas/ExternalUserMeta"
         name:
           $ref: "#/components/schemas/ExternalUserNameType"
+        roles:
+          description: Datadog roles assigned to the user. Provide the role UUID in `value` when provisioning or updating roles through SCIM.
+          items:
+            $ref: "#/components/schemas/ExternalUserRole"
+          maxItems: 50
+          type: array
         schemas:
           description: User JSON Schemas.
           example:
@@ -170225,6 +170260,29 @@ paths:
                         returned: default
                         type: boolean
                         uniqueness: none
+                      - description: Datadog roles assigned to the user.
+                        multiValued: true
+                        mutability: readWrite
+                        name: roles
+                        required: false
+                        returned: default
+                        subAttributes:
+                          - description: Datadog role UUID.
+                            mutability: readWrite
+                            name: value
+                            required: true
+                            returned: default
+                            type: string
+                            uniqueness: none
+                          - description: Human-readable Datadog role name.
+                            mutability: readOnly
+                            name: display
+                            required: false
+                            returned: default
+                            type: string
+                            uniqueness: none
+                        type: complex
+                        uniqueness: none
                     description: User Schema
                     id: urn:ietf:params:scim:schemas:core:2.0:User
                     meta:
@@ -170254,6 +170312,7 @@ paths:
         List users in the organization.
         Results are paginated by `startIndex` and `count` parameters.
         Results can be narrowed down by the `filter` parameter.
+        Responses include the Datadog roles assigned to each user in the `roles` attribute.
       operationId: ListSCIMUsers
       parameters:
         - description: |-
@@ -170300,6 +170359,9 @@ paths:
                         id: 00000000-0000-0000-0000-000000000001
                         name:
                           formatted: Example Name
+                        roles:
+                          - display: Datadog Read Only Role
+                            value: 00000000-0000-0000-0000-000000000001
                         schemas:
                           - urn:ietf:params:scim:schemas:core:2.0:User
                         userName: test@example.com
@@ -170328,6 +170390,7 @@ paths:
     post:
       description: |-
         Create a new user.
+        To assign Datadog roles to the user, include a `roles` array containing role UUIDs in the `value` field.
       operationId: CreateSCIMUser
       requestBody:
         content:
@@ -170342,6 +170405,8 @@ paths:
                       value: john.doe@datadoghq.com
                   name:
                     formatted: John Doe
+                  roles:
+                    - value: 00000000-0000-0000-0000-000000000001
                   schemas:
                     - urn:ietf:params:scim:schemas:core:2.0:User
                   title: Mr.
@@ -170355,6 +170420,8 @@ paths:
                       value: john.doe@datadoghq.com
                   name:
                     formatted: John Doe
+                  roles:
+                    - value: 00000000-0000-0000-0000-000000000001
                   schemas:
                     - urn:ietf:params:scim:schemas:core:2.0:User
                   title: Mr.
@@ -170377,6 +170444,9 @@ paths:
                     id: 00000000-0000-0000-0000-000000000001
                     name:
                       formatted: Example Name
+                    roles:
+                      - display: Datadog Read Only Role
+                        value: 00000000-0000-0000-0000-000000000001
                     schemas:
                       - urn:ietf:params:scim:schemas:core:2.0:User
                     userName: test@example.com
@@ -170431,6 +170501,7 @@ paths:
     get:
       description: |-
         Get a single user using the `user_uuid`.
+        The response includes the Datadog roles assigned to the user in the `roles` attribute.
       operationId: GetSCIMUser
       parameters:
         - description: None
@@ -170454,6 +170525,9 @@ paths:
                     id: 00000000-0000-0000-0000-000000000001
                     name:
                       formatted: Example Name
+                    roles:
+                      - display: Datadog Read Only Role
+                        value: 00000000-0000-0000-0000-000000000001
                     schemas:
                       - urn:ietf:params:scim:schemas:core:2.0:User
                     userName: test@example.com
@@ -170477,6 +170551,7 @@ paths:
     patch:
       description: |-
         Patch the user with the given `user_uuid`.
+        To update Datadog roles, send an operation with `path` set to `roles` and `value` set to an array of role objects containing role UUIDs.
       operationId: PatchSCIMUser
       parameters:
         - description: None
@@ -170496,6 +170571,10 @@ paths:
                       path: title
                       value: CEO
                     - op: replace
+                      path: roles
+                      value:
+                        - value: 00000000-0000-0000-0000-000000000001
+                    - op: replace
                       value:
                         name:
                           formatted: John Doe
@@ -170507,6 +170586,10 @@ paths:
                     - op: replace
                       path: title
                       value: CEO
+                    - op: replace
+                      path: roles
+                      value:
+                        - value: 00000000-0000-0000-0000-000000000001
                     - op: replace
                       value:
                         name:
@@ -170531,6 +170614,9 @@ paths:
                     id: 00000000-0000-0000-0000-000000000001
                     name:
                       formatted: Example Name
+                    roles:
+                      - display: Datadog Read Only Role
+                        value: 00000000-0000-0000-0000-000000000001
                     schemas:
                       - urn:ietf:params:scim:schemas:core:2.0:User
                     userName: test@example.com
@@ -170558,6 +170644,7 @@ paths:
     put:
       description: |-
         Update the user with the given `user_uuid`.
+        To update Datadog roles, include a `roles` array containing role UUIDs in the `value` field.
       operationId: UpdateSCIMUser
       parameters:
         - description: None
@@ -170580,6 +170667,8 @@ paths:
                   id: e43536e9-33fe-43f8-90b8-d3e39a7dd6ad
                   name:
                     formatted: John Doe
+                  roles:
+                    - value: 00000000-0000-0000-0000-000000000001
                   schemas:
                     - urn:ietf:params:scim:schemas:core:2.0:User
                   title: Mr.
@@ -170594,6 +170683,8 @@ paths:
                   id: e43536e9-33fe-43f8-90b8-d3e39a7dd6ad
                   name:
                     formatted: John Doe
+                  roles:
+                    - value: 00000000-0000-0000-0000-000000000001
                   schemas:
                     - urn:ietf:params:scim:schemas:core:2.0:User
                   title: Mr.
@@ -170616,6 +170707,9 @@ paths:
                     id: 00000000-0000-0000-0000-000000000001
                     name:
                       formatted: Example Name
+                    roles:
+                      - display: Datadog Read Only Role
+                        value: 00000000-0000-0000-0000-000000000001
                     schemas:
                       - urn:ietf:params:scim:schemas:core:2.0:User
                     userName: test@example.com
