@@ -64924,6 +64924,7 @@ components:
         - $ref: "#/components/schemas/ObservabilityPipelineSplunkTcpSource"
         - $ref: "#/components/schemas/ObservabilityPipelineSumoLogicSource"
         - $ref: "#/components/schemas/ObservabilityPipelineSyslogNgSource"
+        - $ref: "#/components/schemas/ObservabilityPipelineWebsocketSource"
         - $ref: "#/components/schemas/ObservabilityPipelineOpentelemetrySource"
     ObservabilityPipelineCrowdStrikeNextGenSiemDestination:
       description: |-
@@ -69580,6 +69581,128 @@ components:
       required:
         - crt_file
       type: object
+    ObservabilityPipelineWebsocketSource:
+      description: |-
+        The `websocket` source ingests logs from a WebSocket server using the `ws://` or `wss://` protocol.
+
+        **Supported pipeline types:** logs.
+      properties:
+        auth_strategy:
+          $ref: "#/components/schemas/ObservabilityPipelineWebsocketSourceAuthStrategy"
+        custom_key:
+          description: Name of the environment variable or secret that holds the custom authorization header value. Used when `auth_strategy` is `custom`.
+          example: WS_AUTH_CUSTOM_HEADER
+          type: string
+        decoding:
+          $ref: "#/components/schemas/ObservabilityPipelineDecoding"
+        id:
+          description: The unique identifier for this component.
+          example: websocket-source
+          type: string
+        password_key:
+          description: Name of the environment variable or secret that holds the password. Used when `auth_strategy` is `basic`.
+          example: WS_AUTH_PASSWORD
+          type: string
+        tls:
+          $ref: "#/components/schemas/ObservabilityPipelineWebsocketSourceTls"
+        token_key:
+          description: Name of the environment variable or secret that holds the bearer token. Used when `auth_strategy` is `bearer`.
+          example: WS_BEARER_TOKEN
+          type: string
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineWebsocketSourceType"
+        uri_key:
+          description: Name of the environment variable or secret that holds the WebSocket server URI (`ws://` or `wss://`).
+          example: WS_URI
+          type: string
+        username_key:
+          description: Name of the environment variable or secret that holds the username. Used when `auth_strategy` is `basic`.
+          example: WS_AUTH_USERNAME
+          type: string
+      required:
+        - id
+        - type
+        - decoding
+        - auth_strategy
+      type: object
+      x-pipeline-types: [logs]
+    ObservabilityPipelineWebsocketSourceAuthStrategy:
+      description: Authentication strategy for the WebSocket source connection.
+      enum:
+        - none
+        - basic
+        - bearer
+        - custom
+      example: bearer
+      type: string
+      x-enum-varnames:
+        - NONE
+        - BASIC
+        - BEARER
+        - CUSTOM
+    ObservabilityPipelineWebsocketSourceTls:
+      description: TLS configuration for the WebSocket source. Use `enabled` for standard `wss://` connections, or `with_client_cert` to present a client certificate for mutual TLS.
+      oneOf:
+        - $ref: "#/components/schemas/ObservabilityPipelineWebsocketSourceTlsEnabled"
+        - $ref: "#/components/schemas/ObservabilityPipelineWebsocketSourceTlsWithClientCert"
+    ObservabilityPipelineWebsocketSourceTlsEnabled:
+      description: TLS configuration that enables encryption without a client certificate. Use this for standard `wss://` connections that do not require mutual TLS.
+      properties:
+        mode:
+          $ref: "#/components/schemas/ObservabilityPipelineWebsocketSourceTlsEnabledMode"
+      required:
+        - mode
+      type: object
+    ObservabilityPipelineWebsocketSourceTlsEnabledMode:
+      description: TLS mode. Must be `enabled`.
+      enum:
+        - enabled
+      example: enabled
+      type: string
+      x-enum-varnames:
+        - ENABLED
+    ObservabilityPipelineWebsocketSourceTlsWithClientCert:
+      description: TLS configuration that enables encryption and presents a client certificate for mutual TLS authentication.
+      properties:
+        ca_file:
+          description: Path to the Certificate Authority (CA) file used to validate the remote server's TLS certificate.
+          example: /path/to/ca.crt
+          type: string
+        crt_file:
+          description: Path to the TLS client certificate file used to identify this source to the remote server.
+          example: /path/to/client.crt
+          type: string
+        key_file:
+          description: Path to the private key file associated with the client certificate.
+          example: /path/to/client.key
+          type: string
+        key_pass_key:
+          description: Name of the environment variable or secret that holds the passphrase for the private key file.
+          example: WS_TLS_KEY_PASSPHRASE
+          type: string
+        mode:
+          $ref: "#/components/schemas/ObservabilityPipelineWebsocketSourceTlsWithClientCertMode"
+      required:
+        - mode
+        - crt_file
+      type: object
+    ObservabilityPipelineWebsocketSourceTlsWithClientCertMode:
+      description: TLS mode. Must be `with_client_cert`.
+      enum:
+        - with_client_cert
+      example: with_client_cert
+      type: string
+      x-enum-varnames:
+        - WITH_CLIENT_CERT
+    ObservabilityPipelineWebsocketSourceType:
+      default: websocket
+      description: The source type. The value should always be `websocket`.
+      enum:
+        - websocket
+      example: websocket
+      type: string
+      x-enum-varnames:
+        - WEBSOCKET
     OktaAPIToken:
       description: The definition of the `OktaAPIToken` object.
       properties:
