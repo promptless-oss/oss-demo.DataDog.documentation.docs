@@ -89982,10 +89982,14 @@ components:
       enum:
         - suppressions
         - critical_assets
+        - security_filters
+        - rules
       type: string
       x-enum-varnames:
         - SUPPRESSIONS
         - CRITICAL_ASSETS
+        - SECURITY_FILTERS
+        - RULES
     SecurityMonitoringThirdPartyRootQuery:
       description: A query to be combined with the third party case query.
       properties:
@@ -180465,8 +180469,9 @@ paths:
       description: |-
         Export multiple security monitoring resources to Terraform, packaged as a zip archive.
         The `resource_type` path parameter specifies the type of resources to export
-        and must be one of `suppressions` or `critical_assets`.
+        and must be one of `suppressions`, `critical_assets`, `security_filters`, or `rules`.
         A maximum of 1000 resources can be exported in a single request.
+        For `rules`, partner rules cannot be exported and return a 400 error.
       operationId: BulkExportSecurityMonitoringTerraformResources
       parameters:
         - $ref: "#/components/parameters/SecurityMonitoringTerraformResourceType"
@@ -180511,6 +180516,8 @@ paths:
             - security_monitoring_suppressions_read
         - AuthZ:
             - security_monitoring_rules_read
+        - AuthZ:
+            - security_monitoring_filters_read
       summary: Export security monitoring resources to Terraform
       tags:
         - Security Monitoring
@@ -180521,13 +180528,14 @@ paths:
         permissions:
           - security_monitoring_suppressions_read
           - security_monitoring_rules_read
+          - security_monitoring_filters_read
       x-unstable: "**Note**: This endpoint is in Preview. If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/)."
   /api/v2/security_monitoring/terraform/{resource_type}/convert:
     post:
       description: |-
         Convert a security monitoring resource that doesn't (yet) exist from JSON to Terraform.
         The `resource_type` path parameter specifies the type of resource to convert
-        and must be one of `suppressions` or `critical_assets`.
+        and must be one of `suppressions`, `critical_assets`, `security_filters`, or `rules`.
       operationId: ConvertSecurityMonitoringTerraformResource
       parameters:
         - $ref: "#/components/parameters/SecurityMonitoringTerraformResourceType"
@@ -180580,6 +180588,8 @@ paths:
             - security_monitoring_suppressions_read
         - AuthZ:
             - security_monitoring_rules_read
+        - AuthZ:
+            - security_monitoring_filters_read
       summary: Convert security monitoring resource to Terraform
       tags:
         - Security Monitoring
@@ -180590,13 +180600,15 @@ paths:
         permissions:
           - security_monitoring_suppressions_read
           - security_monitoring_rules_read
+          - security_monitoring_filters_read
       x-unstable: "**Note**: This endpoint is in Preview. If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/)."
   /api/v2/security_monitoring/terraform/{resource_type}/{resource_id}:
     get:
       description: |-
         Export a security monitoring resource to a Terraform configuration.
         The `resource_type` path parameter specifies the type of resource to export
-        and must be one of `suppressions` or `critical_assets`.
+        and must be one of `suppressions`, `critical_assets`, `security_filters`, or `rules`.
+        For `rules`, partner rules cannot be exported and return a 400 error.
       operationId: ExportSecurityMonitoringTerraformResource
       parameters:
         - $ref: "#/components/parameters/SecurityMonitoringTerraformResourceType"
@@ -180631,6 +180643,8 @@ paths:
             - security_monitoring_suppressions_read
         - AuthZ:
             - security_monitoring_rules_read
+        - AuthZ:
+            - security_monitoring_filters_read
       summary: Export security monitoring resource to Terraform
       tags:
         - Security Monitoring
@@ -180640,6 +180654,7 @@ paths:
         permissions:
           - security_monitoring_suppressions_read
           - security_monitoring_rules_read
+          - security_monitoring_filters_read
       x-unstable: "**Note**: This endpoint is in Preview. If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/)."
   /api/v2/sensitive-data-scanner/config:
     get:
