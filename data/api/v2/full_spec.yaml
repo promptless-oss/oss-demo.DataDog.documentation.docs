@@ -64516,6 +64516,199 @@ components:
       x-enum-varnames:
         - BLOCK
         - DROP_NEWEST
+    ObservabilityPipelineClickhouseDestination:
+      description: |-
+        The `clickhouse` destination sends log events to a ClickHouse database table over HTTP.
+
+        **Supported pipeline types:** logs.
+      properties:
+        auth:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationAuth"
+        batch:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationBatch"
+        batch_encoding:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationBatchEncoding"
+        compression:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationCompression"
+        database:
+          description: Optional ClickHouse database name. If omitted, the user's default database on the ClickHouse server is used.
+          example: my_database
+          type: string
+        date_time_best_effort:
+          description: When `true`, enables flexible DateTime parsing on the ClickHouse server side.
+          example: false
+          type: boolean
+        endpoint_url_key:
+          description: |-
+            Name of the environment variable or secret that contains the ClickHouse HTTP endpoint URL.
+            Defaults to `DESTINATION_CLICKHOUSE_ENDPOINT_URL` (prefixed with `DD_OP_` at runtime).
+          example: CLICKHOUSE_ENDPOINT_URL
+          type: string
+        format:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationFormat"
+        id:
+          description: The unique identifier for this component.
+          example: clickhouse-destination
+          type: string
+        inputs:
+          description: A list of component IDs whose output is used as the `input` for this component.
+          example: ["filter-processor"]
+          items:
+            description: The ID of a component whose output is used as input for this destination.
+            type: string
+          type: array
+        skip_unknown_fields:
+          description: |-
+            When `true`, fields not present in the target table schema are dropped instead of causing insert errors.
+            When unset, the ClickHouse server's own `input_format_skip_unknown_fields` setting applies.
+          example: true
+          nullable: true
+          type: boolean
+        table:
+          description: Target ClickHouse table name. Events are inserted into this table.
+          example: application_logs
+          type: string
+        tls:
+          $ref: "#/components/schemas/ObservabilityPipelineTls"
+        type:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationType"
+      required:
+        - id
+        - type
+        - inputs
+        - table
+      type: object
+      x-pipeline-types: [logs]
+    ObservabilityPipelineClickhouseDestinationAuth:
+      description: |-
+        HTTP Basic Authentication credentials for the ClickHouse destination.
+        When `strategy` is `basic`, provide `username_key` and `password_key` that reference environment variables or secrets containing the credentials.
+      properties:
+        password_key:
+          description: Name of the environment variable or secret that contains the ClickHouse password.
+          example: CLICKHOUSE_PASSWORD
+          type: string
+        strategy:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationAuthStrategy"
+        username_key:
+          description: Name of the environment variable or secret that contains the ClickHouse username.
+          example: CLICKHOUSE_USERNAME
+          type: string
+      required:
+        - strategy
+      type: object
+    ObservabilityPipelineClickhouseDestinationAuthStrategy:
+      description: The authentication strategy for ClickHouse HTTP requests. Only `basic` is supported.
+      enum:
+        - basic
+      example: basic
+      type: string
+      x-enum-varnames:
+        - BASIC
+    ObservabilityPipelineClickhouseDestinationBatch:
+      description: Batching configuration for ClickHouse inserts.
+      properties:
+        max_events:
+          description: Maximum number of events per batch before it is flushed.
+          example: 1000
+          format: int64
+          minimum: 1
+          type: integer
+        timeout_secs:
+          description: Maximum number of seconds to wait before flushing a partial batch.
+          example: 1
+          format: int64
+          maximum: 65535
+          minimum: 1
+          type: integer
+      type: object
+    ObservabilityPipelineClickhouseDestinationBatchEncoding:
+      description: |-
+        Batch encoding configuration for the ClickHouse destination.
+        Required when `format` is `arrow_stream`. The `codec` field must be set to `arrow_stream`.
+      properties:
+        allow_nullable_fields:
+          description: |-
+            When `true`, null values are allowed for non-nullable fields in the ClickHouse schema.
+            When `false` (default), missing values for non-nullable columns cause encoding errors.
+          example: false
+          type: boolean
+        codec:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationBatchEncodingCodec"
+      required:
+        - codec
+      type: object
+    ObservabilityPipelineClickhouseDestinationBatchEncodingCodec:
+      description: The codec used for batch encoding. Only `arrow_stream` is supported.
+      enum:
+        - arrow_stream
+      example: arrow_stream
+      type: string
+      x-enum-varnames:
+        - ARROW_STREAM
+    ObservabilityPipelineClickhouseDestinationCompression:
+      description: |-
+        Compression setting for outbound HTTP requests to ClickHouse.
+        Can be specified as a shorthand string (`"gzip"` or `"none"`) or as an object
+        with an `algorithm` field and an optional `level` (gzip only, 1–9).
+      oneOf:
+        - $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationCompressionAlgorithm"
+        - $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationCompressionObject"
+    ObservabilityPipelineClickhouseDestinationCompressionAlgorithm:
+      description: The compression algorithm applied to outbound HTTP requests.
+      enum:
+        - gzip
+        - none
+      example: gzip
+      type: string
+      x-enum-varnames:
+        - GZIP
+        - NONE
+    ObservabilityPipelineClickhouseDestinationCompressionObject:
+      description: |-
+        Structured compression configuration for the ClickHouse destination.
+        Use `algorithm` to specify the compression type and `level` (optional, gzip only) to control compression strength.
+      properties:
+        algorithm:
+          $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationCompressionAlgorithm"
+        level:
+          description: Compression level (1–9). Only applicable when `algorithm` is `gzip`.
+          example: 6
+          format: int64
+          maximum: 9
+          minimum: 1
+          type: integer
+      required:
+        - algorithm
+      type: object
+    ObservabilityPipelineClickhouseDestinationFormat:
+      description: |-
+        Insert format for events sent to ClickHouse.
+        - `json_each_row`: Maps event fields to columns by name (ClickHouse `JSONEachRow`).
+        - `json_as_object`: Inserts each event into a single `Object('json')` / `JSON` column (ClickHouse `JSONAsObject`).
+        - `json_as_string`: Inserts each event into a single `String`-typed column as raw JSON (ClickHouse `JSONAsString`).
+        - `arrow_stream`: Batches events using Apache Arrow IPC streaming format. Requires `batch_encoding`.
+      enum:
+        - json_each_row
+        - json_as_object
+        - json_as_string
+        - arrow_stream
+      example: json_each_row
+      type: string
+      x-enum-varnames:
+        - JSON_EACH_ROW
+        - JSON_AS_OBJECT
+        - JSON_AS_STRING
+        - ARROW_STREAM
+    ObservabilityPipelineClickhouseDestinationType:
+      default: clickhouse
+      description: The destination type. The value must be `clickhouse`.
+      enum:
+        - clickhouse
+      example: clickhouse
+      type: string
+      x-enum-varnames:
+        - CLICKHOUSE
     ObservabilityPipelineCloudPremDestination:
       description: |-
         The `cloud_prem` destination sends logs to Datadog CloudPrem.
@@ -64615,6 +64808,7 @@ components:
         - $ref: "#/components/schemas/ObservabilityPipelineAmazonS3GenericDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineAmazonSecurityLakeDestination"
         - $ref: "#/components/schemas/AzureStorageDestination"
+        - $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineCloudPremDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineCrowdStrikeNextGenSiemDestination"
         - $ref: "#/components/schemas/ObservabilityPipelineDatadogLogsDestination"
