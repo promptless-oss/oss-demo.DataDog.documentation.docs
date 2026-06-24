@@ -42034,6 +42034,404 @@ components:
         - impact_hint
         - status
       type: object
+    GovernanceControlAttributes:
+      description: The attributes of a governance control.
+      properties:
+        active_detections_count:
+          description: The number of active detections for the control.
+          example: 12
+          format: int64
+          type: integer
+        category:
+          description: The value driver the control is grouped under, such as `security` or `cost`.
+          example: "security"
+          type: string
+        created_at:
+          description: The time the control configuration was created.
+          example: "2024-01-15T09:30:00Z"
+          format: date-time
+          type: string
+        created_by:
+          description: The UUID of the user who created the control configuration.
+          example: "11111111-2222-3333-4444-555555555555"
+          type: string
+        description:
+          description: A human-readable description of what the control detects.
+          example: "Identifies API keys that have not been used within your specified time threshold, helping reduce security risks from dormant credentials."
+          type: string
+        detection_frequency:
+          description: How often detections are evaluated for the control.
+          example: "daily"
+          type: string
+        detection_parameters:
+          $ref: "#/components/schemas/GovernanceControlParametersMap"
+          nullable: true
+        detection_type:
+          description: The detection type that uniquely identifies the control.
+          example: "unused_api_keys"
+          type: string
+        feature_flags:
+          description: The feature flags that gate the control.
+          example: []
+          items:
+            description: A feature flag that gates the control.
+            type: string
+          type: array
+        insights:
+          description: The insight slugs associated with the control.
+          example: []
+          items:
+            description: An insight slug associated with the control.
+            type: string
+          type: array
+        last_detection_at:
+          description: The time of the most recent detection for the control. `null` when there are no detections.
+          example: "2024-03-01T12:00:00Z"
+          format: date-time
+          nullable: true
+          type: string
+        mitigated_detections_count:
+          description: The number of mitigated detections for the control.
+          example: 3
+          format: int64
+          type: integer
+        mitigation_parameters:
+          $ref: "#/components/schemas/GovernanceControlParametersMap"
+          nullable: true
+        mitigation_type:
+          description: The configured mitigation type for the control. Empty when not configured.
+          example: "revoke_api_key"
+          type: string
+        mitigations:
+          $ref: "#/components/schemas/GovernanceControlMitigationDefinitionArray"
+        name:
+          description: Human-readable name of the control.
+          example: "Unused API Keys"
+          type: string
+        next_steps:
+          description: Guidance on the next steps to remediate detections for the control.
+          example: "Review and revoke API keys that are no longer in use to maintain a secure authentication posture."
+          type: string
+        notification_frequency:
+          description: The configured notification frequency for the control. Empty when not configured.
+          example: ""
+          type: string
+        notification_parameters:
+          $ref: "#/components/schemas/GovernanceControlParametersMap"
+          nullable: true
+        notification_type:
+          description: The configured notification type for the control. Empty when not configured.
+          example: ""
+          type: string
+        priority:
+          description: The priority of the control, such as `High`.
+          example: "High"
+          type: string
+        product:
+          description: The product the control belongs to.
+          example: "api_keys"
+          type: string
+        release_status:
+          description: The release status of the control, such as `prod` or `beta`.
+          example: "prod"
+          type: string
+        resource_type:
+          description: The type of resource the control evaluates.
+          example: "api_key"
+          type: string
+        resource_type_display_name:
+          description: The human-readable name of the resource type.
+          example: "API Key"
+          type: string
+        supported_detection_parameters:
+          $ref: "#/components/schemas/GovernanceControlParameterDefinitionArray"
+        supported_notification_parameters:
+          $ref: "#/components/schemas/GovernanceControlParameterDefinitionArray"
+        task:
+          description: A short description of the remediation task for the control.
+          example: "Review and revoke unused API keys."
+          type: string
+        type:
+          description: The control type, such as `Proactive` or `Detection`.
+          example: "Proactive"
+          type: string
+        usage_concern:
+          description: The usage concern the control addresses, such as `Security` or `Cost Optimization`.
+          example: "Security"
+          type: string
+      required:
+        - name
+        - description
+        - detection_type
+        - supported_detection_parameters
+        - supported_notification_parameters
+        - resource_type
+        - resource_type_display_name
+        - product
+        - category
+        - insights
+        - mitigations
+        - task
+        - next_steps
+        - release_status
+        - feature_flags
+        - type
+        - priority
+        - usage_concern
+        - detection_parameters
+        - detection_frequency
+        - notification_type
+        - notification_parameters
+        - notification_frequency
+        - mitigation_type
+        - mitigation_parameters
+        - created_at
+        - created_by
+        - active_detections_count
+        - mitigated_detections_count
+        - last_detection_at
+      type: object
+    GovernanceControlData:
+      description: A governance control resource.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GovernanceControlAttributes"
+        id:
+          description: The unique identifier of the control.
+          example: "0d4e6f8a-1b2c-3d4e-5f6a-7b8c9d0e1f2a"
+          type: string
+        type:
+          $ref: "#/components/schemas/GovernanceControlResourceType"
+      required:
+        - id
+        - type
+        - attributes
+      type: object
+    GovernanceControlMitigationDefinition:
+      description: The definition of a mitigation available for a control.
+      properties:
+        action_verb:
+          description: The verb describing the mitigation action, such as `revoke` or `delete`.
+          example: "revoke"
+          type: string
+        description:
+          description: A human-readable description of the mitigation.
+          example: "Automatically identifies and revokes inactive API keys to improve security and reduce potential attack surface."
+          type: string
+        execution_modes:
+          description: The execution modes the mitigation supports, such as `manual` or `automatic`.
+          example:
+            - "manual"
+            - "automatic"
+          items:
+            description: An execution mode the mitigation supports.
+            type: string
+          type: array
+        feature_flags:
+          description: The feature flags that gate the mitigation.
+          example: []
+          items:
+            description: A feature flag that gates the mitigation.
+            type: string
+          type: array
+        id:
+          description: The unique identifier of the mitigation.
+          example: "revoke_api_key"
+          type: string
+        manual_mitigation_warning:
+          description: A warning shown to the user before applying the mitigation manually.
+          example: "These API keys will be revoked immediately upon confirmation. To revoke future API keys, you must go through this flow again."
+          type: string
+        permissions:
+          description: The permissions required to apply the mitigation.
+          example:
+            - "api_keys_write"
+            - "api_keys_delete"
+          items:
+            description: A permission required to apply the mitigation.
+            type: string
+          type: array
+        requires_ai:
+          description: Whether the mitigation requires AI to be enabled.
+          example: false
+          type: boolean
+        supported_parameters:
+          $ref: "#/components/schemas/GovernanceControlParameterDefinitionArray"
+        title:
+          description: A short, human-readable name for the mitigation.
+          example: "Revoke Unused API Keys"
+          type: string
+      required:
+        - id
+        - title
+        - description
+        - action_verb
+        - supported_parameters
+        - permissions
+        - manual_mitigation_warning
+        - feature_flags
+        - requires_ai
+      type: object
+    GovernanceControlMitigationDefinitionArray:
+      description: The mitigations available for a control.
+      items:
+        $ref: "#/components/schemas/GovernanceControlMitigationDefinition"
+      type: array
+    GovernanceControlParameterDefinition:
+      description: The definition of a configurable parameter on a control or mitigation.
+      properties:
+        default_value:
+          description: The default value of the parameter. The JSON type depends on the parameter's `type`.
+          example: 30
+        description:
+          description: A human-readable description of the parameter.
+          example: "Number of days of inactivity before an API key is considered unused."
+          type: string
+        display_name:
+          description: The human-readable name of the parameter.
+          example: "Unused API Key Threshold"
+          type: string
+        hidden:
+          description: Whether the parameter is hidden from the UI.
+          example: false
+          type: boolean
+        name:
+          description: The machine-readable name of the parameter.
+          example: "api_key_threshold"
+          type: string
+        required:
+          description: Whether the parameter must be provided.
+          example: false
+          type: boolean
+        supported_values:
+          $ref: "#/components/schemas/GovernanceControlSupportedValueArray"
+        type:
+          description: The type of the parameter, such as `integer`, `string`, `boolean`, `enum`, or `pattern_list`.
+          example: "integer"
+          type: string
+      required:
+        - name
+        - display_name
+        - description
+        - type
+        - required
+        - hidden
+        - supported_values
+        - default_value
+      type: object
+    GovernanceControlParameterDefinitionArray:
+      description: An array of parameter definitions.
+      items:
+        $ref: "#/components/schemas/GovernanceControlParameterDefinition"
+      type: array
+    GovernanceControlParametersMap:
+      additionalProperties: {}
+      description: A free-form map of parameter names to their configured values.
+      type: object
+    GovernanceControlResourceType:
+      description: JSON:API resource type for a governance control.
+      enum:
+        - governance_control
+      example: "governance_control"
+      type: string
+      x-enum-varnames:
+        - GOVERNANCE_CONTROL
+    GovernanceControlResponse:
+      description: A single governance control.
+      properties:
+        data:
+          $ref: "#/components/schemas/GovernanceControlData"
+      required:
+        - data
+      type: object
+    GovernanceControlSupportedValue:
+      description: A supported value for an enumerated parameter.
+      properties:
+        label:
+          description: The human-readable label for the value.
+          example: "30 days"
+          type: string
+        value:
+          description: The machine-readable value.
+          example: "thirty"
+          type: string
+      required:
+        - value
+        - label
+      type: object
+    GovernanceControlSupportedValueArray:
+      description: The supported values for an enumerated parameter.
+      items:
+        $ref: "#/components/schemas/GovernanceControlSupportedValue"
+      type: array
+    GovernanceControlUpdateAttributes:
+      description: The attributes of a governance control that can be updated. Only the attributes present in the request are modified.
+      properties:
+        detection_frequency:
+          description: How often detections should be evaluated for the control.
+          example: "daily"
+          type: string
+        detection_parameters:
+          $ref: "#/components/schemas/GovernanceControlParametersMap"
+          nullable: true
+        mitigation_parameters:
+          $ref: "#/components/schemas/GovernanceControlParametersMap"
+          nullable: true
+        mitigation_type:
+          description: The mitigation type to configure for the control.
+          example: "revoke_api_key"
+          type: string
+        name:
+          description: A new human-readable name for the control.
+          example: "Unused API Keys"
+          type: string
+        notification_frequency:
+          description: The notification frequency to configure for the control.
+          example: "daily"
+          type: string
+        notification_parameters:
+          $ref: "#/components/schemas/GovernanceControlParametersMap"
+          nullable: true
+        notification_type:
+          description: The notification type to configure for the control.
+          example: "slack"
+          type: string
+      type: object
+    GovernanceControlUpdateData:
+      description: The data of a governance control update request.
+      properties:
+        attributes:
+          $ref: "#/components/schemas/GovernanceControlUpdateAttributes"
+        id:
+          description: The unique identifier of the control.
+          example: "0d4e6f8a-1b2c-3d4e-5f6a-7b8c9d0e1f2a"
+          type: string
+        type:
+          $ref: "#/components/schemas/GovernanceControlResourceType"
+      required:
+        - type
+      type: object
+    GovernanceControlUpdateRequest:
+      description: A request to update a governance control.
+      properties:
+        data:
+          $ref: "#/components/schemas/GovernanceControlUpdateData"
+      required:
+        - data
+      type: object
+    GovernanceControlsDataArray:
+      description: An array of governance control resources.
+      items:
+        $ref: "#/components/schemas/GovernanceControlData"
+      type: array
+    GovernanceControlsResponse:
+      description: A list of governance controls.
+      properties:
+        data:
+          $ref: "#/components/schemas/GovernanceControlsDataArray"
+      required:
+        - data
+      type: object
     GovernanceInsightAttributes:
       description: The attributes of a governance insight.
       properties:
@@ -135973,6 +136371,322 @@ paths:
         operator: OR
         permissions:
           - user_access_read
+  /api/v2/governance/control:
+    get:
+      description: |-
+        Retrieve the list of governance controls configured for the organization. Each control pairs a
+        detection definition with the organization's current detection, notification, and mitigation
+        configuration, along with counts of active and mitigated detections.
+      operationId: ListGovernanceControls
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      - attributes:
+                          active_detections_count: 12
+                          category: "security"
+                          created_at: "2024-01-15T09:30:00Z"
+                          created_by: "11111111-2222-3333-4444-555555555555"
+                          description: "Identifies API keys that have not been used within your specified time threshold, helping reduce security risks from dormant credentials."
+                          detection_frequency: "daily"
+                          detection_parameters:
+                            api_key_threshold: 30
+                          detection_type: "unused_api_keys"
+                          feature_flags: []
+                          insights: []
+                          last_detection_at: "2024-03-01T12:00:00Z"
+                          mitigated_detections_count: 3
+                          mitigation_parameters: {}
+                          mitigation_type: ""
+                          mitigations:
+                            - action_verb: "revoke"
+                              description: "Automatically identifies and revokes inactive API keys to improve security and reduce potential attack surface."
+                              execution_modes:
+                                - "manual"
+                                - "automatic"
+                              feature_flags: []
+                              id: "revoke_api_key"
+                              manual_mitigation_warning: "These API keys will be revoked immediately upon confirmation. To revoke future API keys, you must go through this flow again."
+                              permissions:
+                                - "api_keys_write"
+                                - "api_keys_delete"
+                              requires_ai: false
+                              supported_parameters: []
+                              title: "Revoke Unused API Keys"
+                          name: "Unused API Keys"
+                          next_steps: "Review and revoke API keys that are no longer in use to maintain a secure authentication posture."
+                          notification_frequency: ""
+                          notification_parameters: {}
+                          notification_type: ""
+                          priority: "High"
+                          product: "api_keys"
+                          release_status: "prod"
+                          resource_type: "api_key"
+                          resource_type_display_name: "API Key"
+                          supported_detection_parameters:
+                            - default_value: 30
+                              description: "Number of days of inactivity before an API key is considered unused."
+                              display_name: "Unused API Key Threshold"
+                              hidden: false
+                              name: "api_key_threshold"
+                              required: false
+                              supported_values: []
+                              type: "integer"
+                          supported_notification_parameters:
+                            - default_value: false
+                              description: "Enables the Governance Console to automatically assign ownership of detections based off of tagging and other internal heuristics."
+                              display_name: "Automatic Ownership Assignment"
+                              hidden: false
+                              name: "governance_auto_assignment"
+                              required: false
+                              supported_values: []
+                              type: "boolean"
+                          task: "Review and revoke unused API keys."
+                          type: "Proactive"
+                          usage_concern: "Security"
+                        id: "0d4e6f8a-1b2c-3d4e-5f6a-7b8c9d0e1f2a"
+                        type: "governance_control"
+              schema:
+                $ref: "#/components/schemas/GovernanceControlsResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: List governance controls
+      tags:
+        - Governance Controls
+      x-menu-order: 2
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+  /api/v2/governance/control/{detection_type}:
+    get:
+      description: |-
+        Retrieve a single governance control by its detection type, including the organization's current
+        detection, notification, and mitigation configuration and detection counts.
+      operationId: GetGovernanceControl
+      parameters:
+        - description: The detection type that identifies the control, for example `unused_api_keys`.
+          example: "unused_api_keys"
+          in: path
+          name: detection_type
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        active_detections_count: 12
+                        category: "security"
+                        created_at: "2024-01-15T09:30:00Z"
+                        created_by: "11111111-2222-3333-4444-555555555555"
+                        description: "Identifies API keys that have not been used within your specified time threshold, helping reduce security risks from dormant credentials."
+                        detection_frequency: "daily"
+                        detection_parameters:
+                          api_key_threshold: 30
+                        detection_type: "unused_api_keys"
+                        feature_flags: []
+                        insights: []
+                        last_detection_at: "2024-03-01T12:00:00Z"
+                        mitigated_detections_count: 3
+                        mitigation_parameters: {}
+                        mitigation_type: "revoke_api_key"
+                        mitigations: []
+                        name: "Unused API Keys"
+                        next_steps: "Review and revoke API keys that are no longer in use to maintain a secure authentication posture."
+                        notification_frequency: ""
+                        notification_parameters: {}
+                        notification_type: ""
+                        priority: "High"
+                        product: "api_keys"
+                        release_status: "prod"
+                        resource_type: "api_key"
+                        resource_type_display_name: "API Key"
+                        supported_detection_parameters:
+                          - default_value: 30
+                            description: "Number of days of inactivity before an API key is considered unused."
+                            display_name: "Unused API Key Threshold"
+                            hidden: false
+                            name: "api_key_threshold"
+                            required: false
+                            supported_values: []
+                            type: "integer"
+                        supported_notification_parameters: []
+                        task: "Review and revoke unused API keys."
+                        type: "Proactive"
+                        usage_concern: "Security"
+                      id: "0d4e6f8a-1b2c-3d4e-5f6a-7b8c9d0e1f2a"
+                      type: "governance_control"
+              schema:
+                $ref: "#/components/schemas/GovernanceControlResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Get a governance control
+      tags:
+        - Governance Controls
+      x-menu-order: 3
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
+    patch:
+      description: |-
+        Update the detection, notification, and mitigation configuration of a governance control. Only
+        the attributes present in the request are modified. Changing the mitigation type or its
+        parameters may require additional permissions.
+      operationId: UpdateGovernanceControl
+      parameters:
+        - description: The detection type that identifies the control, for example `unused_api_keys`.
+          example: "unused_api_keys"
+          in: path
+          name: detection_type
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  data:
+                    attributes:
+                      detection_parameters:
+                        api_key_threshold: 60
+                      mitigation_type: "revoke_api_key"
+                    type: "governance_control"
+            schema:
+              $ref: "#/components/schemas/GovernanceControlUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    data:
+                      attributes:
+                        active_detections_count: 12
+                        category: "security"
+                        created_at: "2024-01-15T09:30:00Z"
+                        created_by: "11111111-2222-3333-4444-555555555555"
+                        description: "Identifies API keys that have not been used within your specified time threshold, helping reduce security risks from dormant credentials."
+                        detection_frequency: "daily"
+                        detection_parameters:
+                          api_key_threshold: 60
+                        detection_type: "unused_api_keys"
+                        feature_flags: []
+                        insights: []
+                        last_detection_at: "2024-03-01T12:00:00Z"
+                        mitigated_detections_count: 3
+                        mitigation_parameters: {}
+                        mitigation_type: "revoke_api_key"
+                        mitigations: []
+                        name: "Unused API Keys"
+                        next_steps: "Review and revoke API keys that are no longer in use to maintain a secure authentication posture."
+                        notification_frequency: ""
+                        notification_parameters: {}
+                        notification_type: ""
+                        priority: "High"
+                        product: "api_keys"
+                        release_status: "prod"
+                        resource_type: "api_key"
+                        resource_type_display_name: "API Key"
+                        supported_detection_parameters: []
+                        supported_notification_parameters: []
+                        task: "Review and revoke unused API keys."
+                        type: "Proactive"
+                        usage_concern: "Security"
+                      id: "0d4e6f8a-1b2c-3d4e-5f6a-7b8c9d0e1f2a"
+                      type: "governance_control"
+              schema:
+                $ref: "#/components/schemas/GovernanceControlResponse"
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JSONAPIErrorResponse"
+          description: Not Found
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+      summary: Update a governance control
+      tags:
+        - Governance Controls
+      x-menu-order: 4
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/governance/insights:
     get:
       description: |-
@@ -197869,6 +198583,12 @@ tags:
       description: For more information about the Datadog Google Chat integration, see the integration page.
       url: https://docs.datadoghq.com/integrations/google-hangouts-chat/
     name: Google Chat Integration
+  - description: |-
+      Governance Controls pair a detection definition with an organization's detection, notification,
+      and mitigation configuration within the Governance Console. Each control reports how a class of
+      governance issue (such as unused API keys or unqueried metrics) is detected and remediated, along
+      with counts of active and mitigated detections.
+    name: Governance Controls
   - description: |-
       Governance Insights surface key usage, configuration, and best-practice signals for an
       organization within the Governance Console. Each insight reports a current value (and,
