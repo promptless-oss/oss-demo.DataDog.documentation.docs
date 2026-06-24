@@ -13171,6 +13171,20 @@ components:
     BudgetAttributes:
       description: The attributes of a budget.
       properties:
+        costs:
+          $ref: "#/components/schemas/BudgetAttributesCosts"
+          description: Aggregated cost data for the budget. Present only when `actual=true` or `forecast=true` is requested.
+        costs_period_end:
+          description: The end of the period used to compute cost data, in milliseconds since epoch.
+          format: int64
+          type: integer
+        costs_period_start:
+          description: The start of the period used to compute cost data, in milliseconds since epoch.
+          format: int64
+          type: integer
+        costs_unit:
+          $ref: "#/components/schemas/BudgetAttributesCostsUnit"
+          description: The unit used for all cost values in the response.
         created_at:
           description: The timestamp when the budget was created.
           example: 1738258683590
@@ -13221,6 +13235,53 @@ components:
         updated_by:
           description: The id of the user that created the budget.
           example: 00000000-0a0a-0a0a-aaa0-00000000000a
+          type: string
+      type: object
+    BudgetAttributesCosts:
+      description: Aggregated cost data for the budget over the requested period.
+      properties:
+        actual:
+          description: The total actual cost. Present only when `actual=true` is requested.
+          format: double
+          nullable: true
+          type: number
+        amount:
+          description: The total budgeted amount over the requested period.
+          format: double
+          nullable: true
+          type: number
+        forecast:
+          description: The total forecast cost, with any custom forecast overrides applied. Present only when `forecast=true` is requested.
+          format: double
+          nullable: true
+          type: number
+        ootb_forecast:
+          description: The out-of-the-box ML forecast before custom overrides. Present only when `forecast=true` is requested.
+          format: double
+          nullable: true
+          type: number
+      type: object
+    BudgetAttributesCostsUnit:
+      description: The unit used for all cost values in the response.
+      properties:
+        family:
+          description: The unit family (for example, `currency`).
+          type: string
+        id:
+          description: The unique identifier for the unit.
+          type: string
+        name:
+          description: The full name of the unit.
+          type: string
+        plural:
+          description: The plural form of the unit name.
+          type: string
+        scale_factor:
+          description: The scale factor applied to raw cost values.
+          format: double
+          type: number
+        short_name:
+          description: The abbreviated unit name.
           type: string
       type: object
     BudgetValidationRequest:
@@ -13388,6 +13449,9 @@ components:
           description: The budgeted amount for this entry.
           format: double
           type: number
+        costs:
+          $ref: "#/components/schemas/BudgetWithEntriesDataAttributesEntriesItemsCosts"
+          description: Cost data for this entry. Present only when `actual=true` or `forecast=true` is requested.
         month:
           description: The month this budget entry applies to, in YYYYMM format.
           format: int64
@@ -13397,6 +13461,36 @@ components:
           items:
             $ref: "#/components/schemas/BudgetWithEntriesDataAttributesEntriesItemsTagFiltersItems"
           type: array
+      type: object
+    BudgetWithEntriesDataAttributesEntriesItemsCosts:
+      description: Cost data for a single budget entry.
+      properties:
+        actual:
+          description: The actual cost for this entry. Present only when `actual=true` is requested.
+          format: double
+          nullable: true
+          type: number
+        amount:
+          description: The budgeted amount for this entry.
+          format: double
+          nullable: true
+          type: number
+        custom_forecast:
+          description: |-
+            The custom forecast override for this entry. `null` when `forecast=true` is requested but no custom forecast has been set for this entry's month. A numeric value, including `0`, indicates an explicit custom forecast override. Omitted when `forecast=false` or the feature is not available for the organization.
+          format: double
+          nullable: true
+          type: number
+        forecast:
+          description: The final forecast for this entry, with any custom forecast override applied. Present only when `forecast=true` is requested.
+          format: double
+          nullable: true
+          type: number
+        ootb_forecast:
+          description: The out-of-the-box ML forecast for this entry, before custom overrides. Present only when `forecast=true` is requested.
+          format: double
+          nullable: true
+          type: number
       type: object
     BudgetWithEntriesDataAttributesEntriesItemsTagFiltersItems:
       description: A tag filter used to scope a budget entry to specific resource tags.
@@ -125831,10 +125925,36 @@ paths:
         - Cloud Cost Management
       x-menu-order: 38
     get:
-      description: Get a budget
+      description: Get a budget by ID. Pass `actual=true` or `forecast=true` to include cost data in the response. Use `start` and `end` (millisecond epochs, both required) to set the cost window. When `forecast=true`, each entry also includes `ootb_forecast` (the ML forecast before overrides) and `custom_forecast` (`null` if no override is set, a number if one is).
       operationId: GetBudget
       parameters:
         - $ref: "#/components/parameters/BudgetID"
+        - description: When `true`, includes actual cost data in the response.
+          in: query
+          name: actual
+          required: false
+          schema:
+            type: boolean
+        - description: When `true`, includes forecast cost data in the response, including `ootb_forecast` and `custom_forecast` per entry.
+          in: query
+          name: forecast
+          required: false
+          schema:
+            type: boolean
+        - description: Start of the cost window in milliseconds since epoch. Must be used together with `end`.
+          in: query
+          name: start
+          required: false
+          schema:
+            format: int64
+            type: integer
+        - description: End of the cost window in milliseconds since epoch. Must be used together with `start`.
+          in: query
+          name: end
+          required: false
+          schema:
+            format: int64
+            type: integer
       responses:
         "200":
           content:
@@ -125844,11 +125964,31 @@ paths:
                   value:
                     data:
                       attributes:
+                        costs:
+                          actual: 850.25
+                          amount: 1000.0
+                          forecast: 1100.5
+                          ootb_forecast: 1100.5
+                        costs_period_end: 1740873600000
+                        costs_period_start: 1738281600000
+                        costs_unit:
+                          family: currency
+                          id: "1"
+                          name: dollar
+                          plural: dollars
+                          scale_factor: 1.0
+                          short_name: $
                         created_at: 1738258683590
                         created_by: 00000000-0a0a-0a0a-aaa0-00000000000a
                         end_month: 202502
                         entries:
                           - amount: 500
+                            costs:
+                              actual: 425.5
+                              amount: 500.0
+                              custom_forecast:
+                              forecast: 550.25
+                              ootb_forecast: 550.25
                             month: 202501
                             tag_filters:
                               - tag_key: service
@@ -125865,6 +126005,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/BudgetWithEntries"
           description: OK
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "404":
+          $ref: "#/components/responses/NotFoundResponse"
         "429":
           $ref: "#/components/responses/TooManyRequestsResponse"
       security:
