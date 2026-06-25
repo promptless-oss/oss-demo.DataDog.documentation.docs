@@ -65205,6 +65205,8 @@ components:
           $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationBatch"
         batch_encoding:
           $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationBatchEncoding"
+        buffer:
+          $ref: "#/components/schemas/ObservabilityPipelineBufferOptions"
         compression:
           $ref: "#/components/schemas/ObservabilityPipelineClickhouseDestinationCompression"
         database:
