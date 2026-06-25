@@ -59557,13 +59557,15 @@ components:
         - token
       type: object
     Metric:
-      description: Object for a single metric tag configuration.
+      description: Object for a single metric.
       example:
         id: metric.foo.bar
         type: metrics
       properties:
         id:
           $ref: "#/components/schemas/MetricName"
+        relationships:
+          $ref: "#/components/schemas/MetricRelationships"
         type:
           $ref: "#/components/schemas/MetricType"
       type: object
@@ -60100,12 +60102,12 @@ components:
       description: Object containing the definition of a metric's ingested and indexed volume.
       properties:
         indexed_volume:
-          description: Indexed volume for the given metric.
+          description: Estimated average hourly number of indexed time series for the given metric over the last hour. For organizations on Metric Name Pricing, this represents the estimated sum of indexed data points over the last hour.
           example: 10
           format: int64
           type: integer
         ingested_volume:
-          description: Ingested volume for the given metric.
+          description: Estimated average hourly number of ingested time series for the given metric over the last hour. This value is `0` for metrics not configured with Metrics Without Limits. For organizations on Metric Name Pricing, this represents the estimated sum of ingested data points over the last hour.
           example: 20
           format: int64
           type: integer
@@ -60281,6 +60283,12 @@ components:
           description: The numeric value format should be a 64bit float gauge-type value.
           format: double
           type: number
+      type: object
+    MetricRelationships:
+      description: Relationships for a metric.
+      properties:
+        metric_volumes:
+          $ref: "#/components/schemas/MetricVolumesRelationship"
       type: object
     MetricResource:
       description: Metric resource.
@@ -60474,6 +60482,8 @@ components:
           $ref: "#/components/schemas/MetricTagConfigurationAttributes"
         id:
           $ref: "#/components/schemas/MetricName"
+        relationships:
+          $ref: "#/components/schemas/MetricRelationships"
         type:
           $ref: "#/components/schemas/MetricTagConfigurationType"
       type: object
@@ -60686,6 +60696,20 @@ components:
       oneOf:
         - $ref: "#/components/schemas/MetricDistinctVolume"
         - $ref: "#/components/schemas/MetricIngestedIndexedVolume"
+    MetricVolumesRelationship:
+      description: Relationship to a metric volume included in the response.
+      properties:
+        data:
+          $ref: "#/components/schemas/MetricVolumesRelationshipData"
+      type: object
+    MetricVolumesRelationshipData:
+      description: Relationship data for a metric volume.
+      properties:
+        id:
+          $ref: "#/components/schemas/MetricName"
+        type:
+          $ref: "#/components/schemas/MetricIngestedIndexedVolumeType"
+      type: object
     MetricVolumesResponse:
       description: Response object which includes a single metric's volume.
       properties:
@@ -60730,6 +60754,11 @@ components:
           description: Array of metrics and metric tag configurations.
           items:
             $ref: "#/components/schemas/MetricsAndMetricTagConfigurations"
+          type: array
+        included:
+          description: Array of metric volume resources included when requested with `include=metric_volumes`.
+          items:
+            $ref: "#/components/schemas/MetricIngestedIndexedVolume"
           type: array
         links:
           $ref: "#/components/schemas/MetricsListResponseLinks"
@@ -154025,10 +154054,17 @@ paths:
         Query parameters use bracket notation (for example, `filter[tags]`, `filter[queried][window][seconds]`). Pass them as standard URL query strings, URL-encoding the brackets if your client does not handle them. For example: `GET /api/v2/metrics?filter[tags]=env:prod&window[seconds]=86400&page[size]=500`.
       operationId: ListTagConfigurations
       parameters:
-        - description: Only return custom metrics that have been configured with Metrics Without Limits.
+        - description: Only return custom metrics that have been configured (`true`) or not configured (`false`) with Metrics Without Limits.
           example: true
           in: query
           name: filter[configured]
+          required: false
+          schema:
+            type: boolean
+        - description: Only return metrics that are eligible (`true`) or ineligible (`false`) for configuration with Metrics Without Limits.
+          example: true
+          in: query
+          name: filter[is_configurable]
           required: false
           schema:
             type: boolean
@@ -154089,6 +154125,20 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: Include related resources in the response. Set to `metric_volumes` to include indexed and ingested volume counts for each metric.
+          example: metric_volumes
+          in: query
+          name: include
+          required: false
+          schema:
+            type: string
+        - description: "Sort results by metric volume. Prefix a key with `-` for descending order. Supported keys: `metric_volumes.indexed_volume`, `metric_volumes.ingested_volume`, `metric_volumes.indexed_volume_delta`, `metric_volumes.ingested_volume_delta`. Requires a paginated request (`page[size]` or `page[cursor]`)."
+          example: "-metric_volumes.indexed_volume"
+          in: query
+          name: sort
+          required: false
+          schema:
+            type: string
         - description: |-
             Only return metrics that have been actively reporting in the specified window. The default value is 3600 seconds (1 hour), the maximum value is 2,592,000 seconds (30 days), and the minimum value is 1 second.
           example: 3600
@@ -154130,6 +154180,34 @@ paths:
                     meta:
                       pagination:
                         next_cursor:
+                with_metric_volumes:
+                  value:
+                    data:
+                      - id: user.custom.cpu.usage
+                        relationships:
+                          metric_volumes:
+                            data:
+                              id: user.custom.cpu.usage
+                              type: metric_volumes
+                        type: metrics
+                      - id: user.custom.mem.usage
+                        relationships:
+                          metric_volumes:
+                            data:
+                              id: user.custom.mem.usage
+                              type: metric_volumes
+                        type: metrics
+                    included:
+                      - attributes:
+                          indexed_volume: 1000
+                          ingested_volume: 456
+                        id: user.custom.cpu.usage
+                        type: metric_volumes
+                      - attributes:
+                          indexed_volume: 250
+                          ingested_volume: 1011
+                        id: user.custom.mem.usage
+                        type: metric_volumes
               schema:
                 $ref: "#/components/schemas/MetricsAndMetricTagConfigurationsResponse"
           description: Success
