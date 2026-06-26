@@ -28046,6 +28046,249 @@ components:
       type: string
       x-enum-varnames:
         - CUSTOMER_ORG_DISABLE
+    CycloneDXBom:
+      description: A CycloneDX 1.5 Bill of Materials (BOM) document containing vulnerability data.
+      properties:
+        bomFormat:
+          description: The BOM format identifier. Must be `CycloneDX`.
+          example: CycloneDX
+          type: string
+        components:
+          description: The list of scanned software components. Cannot be empty.
+          items:
+            $ref: "#/components/schemas/CycloneDXComponent"
+          type: array
+        metadata:
+          $ref: "#/components/schemas/CycloneDXMetadata"
+        specVersion:
+          description: The CycloneDX specification version. Must be `1.5`.
+          example: "1.5"
+          type: string
+        version:
+          description: The version number of the BOM document.
+          example: 1
+          format: int64
+          type: integer
+        vulnerabilities:
+          description: The list of detected vulnerabilities. Cannot be empty.
+          items:
+            $ref: "#/components/schemas/CycloneDXVulnerability"
+          type: array
+      required:
+        - bomFormat
+        - specVersion
+        - metadata
+        - components
+        - vulnerabilities
+      type: object
+    CycloneDXComponent:
+      description: A software component identified during scanning.
+      properties:
+        bom-ref:
+          description: A unique reference identifier used to link vulnerabilities to this component.
+          example: a3390fca-c315-41ae-ae05-af5e7859cdee
+          type: string
+        name:
+          description: The name of the component.
+          example: lodash
+          type: string
+        purl:
+          description: The Package URL (PURL) of the component. Required when `type` is `library`.
+          example: "pkg:npm/lodash@4.17.21"
+          type: string
+        type:
+          $ref: "#/components/schemas/CycloneDXComponentType"
+        version:
+          description: The version of the component.
+          example: 4.17.21
+          type: string
+      required:
+        - bom-ref
+        - type
+        - name
+        - version
+      type: object
+    CycloneDXComponentType:
+      description: The type of the scanned component.
+      enum:
+        - library
+        - application
+        - operating-system
+      example: library
+      type: string
+      x-enum-varnames:
+        - LIBRARY
+        - APPLICATION
+        - OPERATING_SYSTEM
+    CycloneDXMetadata:
+      description: Metadata about the BOM, including the scanned asset and the scanner tool.
+      properties:
+        component:
+          $ref: "#/components/schemas/CycloneDXMetadataComponent"
+        tools:
+          $ref: "#/components/schemas/CycloneDXMetadataTools"
+      required:
+        - component
+        - tools
+      type: object
+    CycloneDXMetadataComponent:
+      description: The asset that was scanned (for example, a host or container image).
+      properties:
+        bom-ref:
+          description: >-
+            A unique reference identifier for this metadata component. If set, must match a `bom-ref` in `components`.
+          example: host-ref-abc123
+          type: string
+        name:
+          description: The name or identifier of the scanned asset (for example, an instance ID or hostname).
+          example: i-12345
+          type: string
+        type:
+          description: The type of the scanned asset.
+          example: operating-system
+          type: string
+      required:
+        - name
+      type: object
+    CycloneDXMetadataTools:
+      description: Information about the scanner tool that produced this BOM.
+      properties:
+        components:
+          description: The scanner tool components. Must contain exactly one element.
+          items:
+            $ref: "#/components/schemas/CycloneDXToolComponent"
+          type: array
+      required:
+        - components
+      type: object
+    CycloneDXToolComponent:
+      description: A scanner tool component.
+      properties:
+        name:
+          description: The name of the scanner tool.
+          example: my-scanner
+          type: string
+        type:
+          description: The type of the tool component.
+          example: application
+          type: string
+      required:
+        - name
+      type: object
+    CycloneDXVulnerability:
+      description: A security vulnerability affecting one or more components.
+      properties:
+        advisories:
+          description: External advisory references for the vulnerability.
+          items:
+            $ref: "#/components/schemas/CycloneDXVulnerabilityAdvisory"
+          type: array
+        affects:
+          description: >-
+            The components affected by this vulnerability. Must be non-empty. Each `ref` must match a `bom-ref` in `components`.
+          items:
+            $ref: "#/components/schemas/CycloneDXVulnerabilityAffects"
+          type: array
+        analysis:
+          $ref: "#/components/schemas/CycloneDXVulnerabilityAnalysis"
+        cwes:
+          description: CWE identifiers associated with the vulnerability.
+          example: [123, 345]
+          items:
+            format: int64
+            type: integer
+          type: array
+        description:
+          description: A short description of the vulnerability.
+          example: "Sample vulnerability detected in the application."
+          type: string
+        detail:
+          description: Detailed information about the vulnerability.
+          example: "Details about the vulnerability."
+          type: string
+        id:
+          description: The vulnerability identifier (for example, a CVE ID).
+          example: CVE-2021-1234
+          type: string
+        ratings:
+          description: The severity ratings for the vulnerability. Must contain exactly one element.
+          items:
+            $ref: "#/components/schemas/CycloneDXVulnerabilityRating"
+          type: array
+        references:
+          description: External reference identifiers for the vulnerability.
+          items:
+            $ref: "#/components/schemas/CycloneDXVulnerabilityReference"
+          type: array
+      required:
+        - id
+        - ratings
+        - affects
+      type: object
+    CycloneDXVulnerabilityAdvisory:
+      description: An external advisory reference for a vulnerability.
+      properties:
+        url:
+          description: The URL of the advisory.
+          example: "https://example.com/advisory/CVE-2021-1234"
+          type: string
+      type: object
+    CycloneDXVulnerabilityAffects:
+      description: A reference to a component affected by a vulnerability.
+      properties:
+        ref:
+          description: The `bom-ref` of the affected component.
+          example: a3390fca-c315-41ae-ae05-af5e7859cdee
+          type: string
+      required:
+        - ref
+      type: object
+    CycloneDXVulnerabilityAnalysis:
+      description: |-
+        The exploitability analysis for the vulnerability. When `state` is set to `resolved`
+        or `resolved_with_pedigree`, the vulnerability is closed in Datadog.
+        Other state values are accepted but have no effect on the vulnerability status.
+      properties:
+        state:
+          description: The vulnerability analysis state.
+          example: resolved
+          type: string
+      type: object
+    CycloneDXVulnerabilityRating:
+      description: A severity rating for a vulnerability.
+      properties:
+        score:
+          description: The CVSS score.
+          example: 9.0
+          format: double
+          type: number
+        severity:
+          description: The severity level.
+          example: high
+          type: string
+        vector:
+          description: The CVSS vector string.
+          example: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:N"
+          type: string
+      type: object
+    CycloneDXVulnerabilityReference:
+      description: An external reference identifier for a vulnerability.
+      properties:
+        id:
+          description: The identifier of the external reference (for example, a GHSA ID).
+          example: GHSA-35m5-8cvj-8783
+          type: string
+        source:
+          $ref: "#/components/schemas/CycloneDXVulnerabilityReferenceSource"
+      type: object
+    CycloneDXVulnerabilityReferenceSource:
+      description: The source of an external vulnerability reference.
+      properties:
+        url:
+          description: The URL of the reference source.
+          example: "https://example.com"
+          type: string
+      type: object
     DORACustomTags:
       description: A list of user-defined tags. The tags must follow the `key:value` pattern. Up to 100 may be added per event.
       example:
@@ -177425,6 +177668,92 @@ paths:
       x-sunset: "2027-01-01"
       x-unstable: |-
         **Note**: This endpoint is deprecated. See the [List Security Findings endpoint](https://docs.datadoghq.com/api/latest/security-monitoring/#list-security-findings).
+    post:
+      description: |-
+        Import security vulnerabilities from an external scanner in CycloneDX 1.5 format.
+
+        The payload is validated against the CycloneDX 1.5 JSON schema and the following
+        additional constraints:
+
+        - `metadata`, `metadata.component`, and `metadata.component.name` are required.
+        - `metadata.tools.components` must contain exactly one element with a `name` field.
+        - `components` cannot be empty. Each component requires `bom-ref`, `type`, `name`, and `version`.
+        - When `type` is `library`, `purl` is required and must be a valid PURL.
+        - When `type` is `operating-system`, `name` must be one of the supported OS values:
+          `alma`, `alpine`, `amazon`, `azurelinux`, `bottlerocket`, `cbl-mariner`, `chainguard`,
+          `centos`, `debian`, `fedora`, `opensuse`, `opensuse-leap`, `opensuse-tumbleweed`,
+          `oracle`, `photon`, `redhat`, `rocky`, `slem`, `sles`, `ubuntu`, `wolfi`, `windows`, `macos`.
+        - `vulnerabilities` cannot be empty. Each vulnerability requires `id`, exactly one `ratings` entry,
+          and at least one `affects` entry.
+        - Each `affects[].ref` must match a `bom-ref` value in `components`.
+      operationId: ImportSecurityVulnerabilities
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  bomFormat: CycloneDX
+                  components:
+                    - bom-ref: a3390fca-c315-41ae-ae05-af5e7859cdee
+                      name: lodash
+                      purl: "pkg:npm/lodash@4.17.21"
+                      type: library
+                      version: 4.17.21
+                  metadata:
+                    component:
+                      name: i-12345
+                      type: operating-system
+                    tools:
+                      components:
+                        - name: my-scanner
+                          type: application
+                  specVersion: "1.5"
+                  version: 1
+                  vulnerabilities:
+                    - affects:
+                        - ref: a3390fca-c315-41ae-ae05-af5e7859cdee
+                      description: "Sample vulnerability detected in the application."
+                      id: CVE-2021-1234
+                      ratings:
+                        - score: 9.0
+                          severity: high
+                          vector: "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:N"
+            schema:
+              $ref: "#/components/schemas/CycloneDXBom"
+        required: true
+      responses:
+        "200":
+          description: Vulnerabilities accepted successfully.
+        "400":
+          $ref: "#/components/responses/BadRequestResponse"
+        "403":
+          $ref: "#/components/responses/ForbiddenResponse"
+        "429":
+          $ref: "#/components/responses/TooManyRequestsResponse"
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/APIErrorResponse"
+          description: Internal Server Error
+      security:
+        - apiKeyAuth: []
+          appKeyAuth: []
+        - AuthZ:
+            - security_monitoring_findings_write
+      summary: Import security vulnerabilities
+      tags:
+        - Security Monitoring
+      x-codegen-request-body-name: body
+      x-menu-order: 152
+      "x-permission":
+        operator: OR
+        permissions:
+          - security_monitoring_findings_write
+      x-unstable: |-
+        **Note**: This endpoint is in preview and is subject to change.
+        If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/security/vulnerabilities/notification_rules:
     get:
       description: Returns the list of notification rules for security vulnerabilities.
