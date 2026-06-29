@@ -125281,7 +125281,10 @@ paths:
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
   /api/v2/compliance_findings/rule_based_view:
     get:
+      deprecated: true
       description: |-
+        **This endpoint is deprecated.** Use the [Security Monitoring - Search Security Findings](https://docs.datadoghq.com/api/latest/security-monitoring/search-security-findings/) endpoint instead.
+
         Get an aggregated view of compliance rules with their pass, fail, and muted finding counts.
         Supports filtering by compliance framework, framework version, and additional query filters.
       operationId: GetRuleBasedView
@@ -125360,6 +125363,7 @@ paths:
         operator: OR
         permissions:
           - security_monitoring_findings_read
+      x-sunset: "2027-06-26"
       x-unstable: |-
         **Note**: This endpoint is in Preview and subject to change.
         If you have any feedback, contact [Datadog support](https://docs.datadoghq.com/help/).
