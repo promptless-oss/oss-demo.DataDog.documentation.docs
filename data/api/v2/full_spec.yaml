@@ -13940,6 +13940,91 @@ components:
         tags:
           $ref: "#/components/schemas/TagsEventAttribute"
       type: object
+    CIAppPipelineEventFinishedJob:
+      description: Details of a finished CI job.
+      properties:
+        dependencies:
+          description: A list of job IDs that this job depends on.
+          example: ["f7e6a006-a029-46c3-b0cc-742c9d7d363b", "c8a69849-3c3b-4721-8b33-3e8ec2df1ebe"]
+          items:
+            description: A list of job IDs.
+            type: string
+          nullable: true
+          type: array
+        end:
+          description: Time when the job run finished. The time format must be RFC3339.
+          example: "2023-05-31T15:30:00Z"
+          format: date-time
+          type: string
+        error:
+          $ref: "#/components/schemas/CIAppCIError"
+        git:
+          $ref: "#/components/schemas/CIAppGitInfo"
+        id:
+          description: The UUID for the job. It has to be unique within each pipeline execution.
+          example: c865bad4-de82-44b8-ade7-2c987528eb54
+          type: string
+        level:
+          $ref: "#/components/schemas/CIAppPipelineEventJobLevel"
+        metrics:
+          $ref: "#/components/schemas/CIAppPipelineEventMetrics"
+        name:
+          description: The name for the job.
+          example: test
+          type: string
+        node:
+          $ref: "#/components/schemas/CIAppHostInfo"
+        parameters:
+          $ref: "#/components/schemas/CIAppPipelineEventParameters"
+        pipeline_name:
+          description: The parent pipeline name.
+          example: Build
+          type: string
+        pipeline_unique_id:
+          description: The parent pipeline UUID.
+          example: "76b572af-a078-42b2-a08a-cc28f98b944f"
+          type: string
+        queue_time:
+          description: The queue time in milliseconds, if applicable.
+          example: 1004
+          format: int64
+          minimum: 0
+          nullable: true
+          type: integer
+        stage_id:
+          description: The parent stage UUID (if applicable).
+          nullable: true
+          type: string
+        stage_name:
+          description: The parent stage name (if applicable).
+          nullable: true
+          type: string
+        start:
+          description: |-
+            Time when the job run instance started (it should not include any queue time).
+            The time format must be RFC3339.
+          example: "2023-05-31T15:30:00Z"
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/CIAppPipelineEventJobStatus"
+        tags:
+          $ref: "#/components/schemas/CIAppPipelineEventTags"
+        url:
+          description: The URL to look at the job in the CI provider UI.
+          example: https://ci-platform.com/job/your-job-name/build/123
+          type: string
+      required:
+        - level
+        - id
+        - name
+        - pipeline_unique_id
+        - pipeline_name
+        - start
+        - end
+        - status
+        - url
+      type: object
     CIAppPipelineEventFinishedPipeline:
       description: Details of a finished pipeline.
       properties:
@@ -14026,6 +14111,85 @@ components:
         - status
         - partial_retry
       type: object
+    CIAppPipelineEventInProgressJob:
+      description: Details of a running CI job.
+      properties:
+        dependencies:
+          description: A list of job IDs that this job depends on.
+          example: ["f7e6a006-a029-46c3-b0cc-742c9d7d363b", "c8a69849-3c3b-4721-8b33-3e8ec2df1ebe"]
+          items:
+            description: A list of job IDs.
+            type: string
+          nullable: true
+          type: array
+        error:
+          $ref: "#/components/schemas/CIAppCIError"
+        git:
+          $ref: "#/components/schemas/CIAppGitInfo"
+        id:
+          description: The UUID for the job. It must match the ID of the corresponding finished job.
+          example: c865bad4-de82-44b8-ade7-2c987528eb54
+          type: string
+        level:
+          $ref: "#/components/schemas/CIAppPipelineEventJobLevel"
+        metrics:
+          $ref: "#/components/schemas/CIAppPipelineEventMetrics"
+        name:
+          description: The name for the job.
+          example: test
+          type: string
+        node:
+          $ref: "#/components/schemas/CIAppHostInfo"
+        parameters:
+          $ref: "#/components/schemas/CIAppPipelineEventParameters"
+        pipeline_name:
+          description: The parent pipeline name.
+          example: Build
+          type: string
+        pipeline_unique_id:
+          description: The parent pipeline UUID.
+          example: "76b572af-a078-42b2-a08a-cc28f98b944f"
+          type: string
+        queue_time:
+          description: The queue time in milliseconds, if applicable.
+          example: 1004
+          format: int64
+          minimum: 0
+          nullable: true
+          type: integer
+        stage_id:
+          description: The parent stage UUID (if applicable).
+          nullable: true
+          type: string
+        stage_name:
+          description: The parent stage name (if applicable).
+          nullable: true
+          type: string
+        start:
+          description: |-
+            Time when the job run instance started (it should not include any queue time).
+            The time format must be RFC3339.
+          example: "2023-05-31T15:30:00Z"
+          format: date-time
+          type: string
+        status:
+          $ref: "#/components/schemas/CIAppPipelineEventJobInProgressStatus"
+        tags:
+          $ref: "#/components/schemas/CIAppPipelineEventTags"
+        url:
+          description: The URL to look at the job in the CI provider UI.
+          example: https://ci-platform.com/job/your-job-name/build/123
+          type: string
+      required:
+        - level
+        - id
+        - name
+        - pipeline_unique_id
+        - pipeline_name
+        - start
+        - status
+        - url
+      type: object
     CIAppPipelineEventInProgressPipeline:
       description: Details of a running pipeline.
       properties:
@@ -14107,87 +14271,15 @@ components:
       type: object
     CIAppPipelineEventJob:
       description: Details of a CI job.
-      properties:
-        dependencies:
-          description: A list of job IDs that this job depends on.
-          example: ["f7e6a006-a029-46c3-b0cc-742c9d7d363b", "c8a69849-3c3b-4721-8b33-3e8ec2df1ebe"]
-          items:
-            description: A list of job IDs.
-            type: string
-          nullable: true
-          type: array
-        end:
-          description: Time when the job run finished. The time format must be RFC3339.
-          example: "2023-05-31T15:30:00Z"
-          format: date-time
-          type: string
-        error:
-          $ref: "#/components/schemas/CIAppCIError"
-        git:
-          $ref: "#/components/schemas/CIAppGitInfo"
-        id:
-          description: The UUID for the job. It has to be unique within each pipeline execution.
-          example: c865bad4-de82-44b8-ade7-2c987528eb54
-          type: string
-        level:
-          $ref: "#/components/schemas/CIAppPipelineEventJobLevel"
-        metrics:
-          $ref: "#/components/schemas/CIAppPipelineEventMetrics"
-        name:
-          description: The name for the job.
-          example: test
-          type: string
-        node:
-          $ref: "#/components/schemas/CIAppHostInfo"
-        parameters:
-          $ref: "#/components/schemas/CIAppPipelineEventParameters"
-        pipeline_name:
-          description: The parent pipeline name.
-          example: Build
-          type: string
-        pipeline_unique_id:
-          description: The parent pipeline UUID.
-          example: "76b572af-a078-42b2-a08a-cc28f98b944f"
-          type: string
-        queue_time:
-          description: The queue time in milliseconds, if applicable.
-          example: 1004
-          format: int64
-          minimum: 0
-          nullable: true
-          type: integer
-        stage_id:
-          description: The parent stage UUID (if applicable).
-          nullable: true
-          type: string
-        stage_name:
-          description: The parent stage name (if applicable).
-          nullable: true
-          type: string
-        start:
-          description: Time when the job run instance started (it should not include any queue time). The time format must be RFC3339.
-          example: "2023-05-31T15:30:00Z"
-          format: date-time
-          type: string
-        status:
-          $ref: "#/components/schemas/CIAppPipelineEventJobStatus"
-        tags:
-          $ref: "#/components/schemas/CIAppPipelineEventTags"
-        url:
-          description: The URL to look at the job in the CI provider UI.
-          example: https://ci-platform.com/job/your-job-name/build/123
-          type: string
-      required:
-        - level
-        - id
-        - name
-        - pipeline_unique_id
-        - pipeline_name
-        - start
-        - end
-        - status
-        - url
-      type: object
+      oneOf:
+        - $ref: "#/components/schemas/CIAppPipelineEventFinishedJob"
+        - $ref: "#/components/schemas/CIAppPipelineEventInProgressJob"
+    CIAppPipelineEventJobInProgressStatus:
+      description: The in-progress status of the job.
+      enum: ["running"]
+      example: running
+      type: string
+      x-enum-varnames: ["RUNNING"]
     CIAppPipelineEventJobLevel:
       default: job
       description: Used to distinguish between pipelines, stages, jobs, and steps.
