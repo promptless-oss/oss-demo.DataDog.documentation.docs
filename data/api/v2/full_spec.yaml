@@ -65775,6 +65775,9 @@ components:
             description: The ID of a component whose output is used as input for this destination.
             type: string
           type: array
+        tls:
+          $ref: "#/components/schemas/ObservabilityPipelineTls"
+          description: Configuration for TLS encryption.
         type:
           $ref: "#/components/schemas/ObservabilityPipelineCloudPremDestinationType"
       required:
