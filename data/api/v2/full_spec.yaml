@@ -176861,7 +176861,7 @@ paths:
           schema:
             default: true
             type: boolean
-        - description: Filter indicators whose triage state was updated by a specific user UUID.
+        - description: Filter indicators whose triage state was updated by a specific user identified by their handle.
           in: query
           name: worked_by
           required: false
