@@ -87767,6 +87767,10 @@ components:
           type: integer
         creator:
           $ref: "#/components/schemas/SecurityMonitoringUser"
+        description:
+          description: A description of the critical asset.
+          example: Production database servers handling PII
+          type: string
         enabled:
           description: Whether the critical asset is enabled.
           example: true
@@ -87811,6 +87815,10 @@ components:
     SecurityMonitoringCriticalAssetCreateAttributes:
       description: Object containing the attributes of the critical asset to be created.
       properties:
+        description:
+          description: A description of the critical asset.
+          example: Production database servers handling PII
+          type: string
         enabled:
           default: true
           description: Whether the critical asset is enabled. Defaults to `true` if not specified.
@@ -87903,6 +87911,10 @@ components:
     SecurityMonitoringCriticalAssetUpdateAttributes:
       description: The critical asset properties to be updated.
       properties:
+        description:
+          description: A description of the critical asset.
+          example: Production database servers handling PII
+          type: string
         enabled:
           description: Whether the critical asset is enabled.
           example: true
