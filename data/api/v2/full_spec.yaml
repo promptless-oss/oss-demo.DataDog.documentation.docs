@@ -12749,9 +12749,25 @@ components:
                 - id: row_id_2
                   type: row
           type: reference-tables-batch-rows-query
+        included:
+          - attributes:
+              values:
+                ip_address: 102.130.113.9
+            id: row_id_1
+            type: row
+          - attributes:
+              values:
+                ip_address: 102.130.113.10
+            id: row_id_2
+            type: row
       properties:
         data:
           $ref: "#/components/schemas/BatchRowsQueryResponseData"
+        included:
+          description: Full row resources matching the query, included alongside the relationship references in `data`.
+          items:
+            $ref: "#/components/schemas/TableRowResourceData"
+          type: array
       type: object
     BatchRowsQueryResponseData:
       description: Data object for a batch rows query response.
@@ -57609,6 +57625,9 @@ components:
         links:
           first: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Blimit%5D=100"
           self: "/api/v2/reference-tables/tables/00000000-0000-0000-0000-000000000000/rows/list?page%5Bcontinuation_token%5D=eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ%3D%3D&page%5Blimit%5D=100"
+        meta:
+          page:
+            next_continuation_token: eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ==
       properties:
         data:
           description: The rows.
@@ -57617,6 +57636,8 @@ components:
           type: array
         links:
           $ref: "#/components/schemas/ListRowsResponseLinks"
+        meta:
+          $ref: "#/components/schemas/ListRowsResponseMeta"
       required:
         - data
         - links
@@ -57639,6 +57660,20 @@ components:
       required:
         - self
         - first
+      type: object
+    ListRowsResponseMeta:
+      description: Contains pagination details, including the continuation token for fetching additional rows.
+      properties:
+        page:
+          $ref: "#/components/schemas/ListRowsResponseMetaPage"
+      type: object
+    ListRowsResponseMetaPage:
+      description: Contains the continuation token for navigating to the next page of rows.
+      properties:
+        next_continuation_token:
+          description: Opaque token to pass as the `page[continuation_token]` query parameter to fetch the next page of results. Only present when more rows are available.
+          example: eyJzaWQiOjEyMzQ1LCJwayI6ImV4YW1wbGVfcGsifQ==
+          type: string
       type: object
     ListRulesResponse:
       description: Scorecard rules response.
