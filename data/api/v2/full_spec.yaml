@@ -58505,19 +58505,35 @@ components:
         - client_email
       type: object
     LogsArchiveIntegrationS3:
-      description: The S3 Archive's integration destination.
+      description: >-
+        The S3 Archive's integration destination. You must provide one of the following: `access_key_id` alone, or both `account_id` and `role_name` together.
+      oneOf:
+        - $ref: "#/components/schemas/LogsArchiveIntegrationS3AccessKey"
+        - $ref: "#/components/schemas/LogsArchiveIntegrationS3Role"
+    LogsArchiveIntegrationS3AccessKey:
+      description: The S3 Archive's integration destination using an access key.
+      properties:
+        access_key_id:
+          description: The access key ID for the integration.
+          example: AKIAIOSFODNN7EXAMPLE
+          type: string
+      required:
+        - access_key_id
+      type: object
+    LogsArchiveIntegrationS3Role:
+      description: The S3 Archive's integration destination using an IAM role.
       properties:
         account_id:
           description: The account ID for the integration.
           example: "123456789012"
           type: string
         role_name:
-          description: The path of the integration.
+          description: The name of the role to assume for the integration.
           example: role-name
           type: string
       required:
-        - role_name
         - account_id
+        - role_name
       type: object
     LogsArchiveOrder:
       description: A ordered list of archive IDs.
@@ -152516,6 +152532,18 @@ paths:
                         - team:intake
                         - team:app
                     type: archives
+              s3_access_key_id:
+                value:
+                  data:
+                    attributes:
+                      destination:
+                        bucket: my-bucket
+                        integration:
+                          access_key_id: AKIAIOSFODNN7EXAMPLE
+                        type: s3
+                      name: Nginx Archive
+                      query: source:nginx
+                    type: archives
             schema:
               $ref: "#/components/schemas/LogsArchiveCreateRequest"
         description: The definition of the new archive.
@@ -152534,6 +152562,21 @@ paths:
                           integration:
                             account_id: "123456789012"
                             role_name: my-role
+                          type: s3
+                        include_tags: false
+                        name: Nginx Archive
+                        query: source:nginx
+                        state: WORKING
+                      id: 00000000-0000-0000-0000-000000000002
+                      type: archives
+                s3_access_key_id:
+                  value:
+                    data:
+                      attributes:
+                        destination:
+                          bucket: my-bucket
+                          integration:
+                            access_key_id: AKIAIOSFODNN7EXAMPLE
                           type: s3
                         include_tags: false
                         name: Nginx Archive
@@ -152693,6 +152736,18 @@ paths:
                         - team:intake
                         - team:app
                     type: archives
+              s3_access_key_id:
+                value:
+                  data:
+                    attributes:
+                      destination:
+                        bucket: my-bucket
+                        integration:
+                          access_key_id: AKIAIOSFODNN7EXAMPLE
+                        type: s3
+                      name: Nginx Archive
+                      query: source:nginx
+                    type: archives
             schema:
               $ref: "#/components/schemas/LogsArchiveCreateRequest"
         description: New definition of the archive.
@@ -152711,6 +152766,21 @@ paths:
                           integration:
                             account_id: "123456789012"
                             role_name: my-role
+                          type: s3
+                        include_tags: false
+                        name: Nginx Archive
+                        query: source:nginx
+                        state: WORKING
+                      id: 00000000-0000-0000-0000-000000000004
+                      type: archives
+                s3_access_key_id:
+                  value:
+                    data:
+                      attributes:
+                        destination:
+                          bucket: my-bucket
+                          integration:
+                            access_key_id: AKIAIOSFODNN7EXAMPLE
                           type: s3
                         include_tags: false
                         name: Nginx Archive
