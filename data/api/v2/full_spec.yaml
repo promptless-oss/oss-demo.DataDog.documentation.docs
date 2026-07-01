@@ -68530,6 +68530,10 @@ components:
         The `parse_grok` processor extracts structured fields from unstructured log messages using Grok patterns.
 
         **Supported pipeline types:** logs
+      example:
+        id: "parse-grok-processor"
+        include: "service:my-service"
+        type: "parse_grok"
       properties:
         disable_library_rules:
           default: false
@@ -68542,6 +68546,11 @@ components:
           description: Indicates whether the processor is enabled.
           example: true
           type: boolean
+        field:
+          default: "message"
+          description: The log field to parse with the Grok rules.
+          example: "message"
+          type: string
         id:
           description: A unique identifier for this processor.
           example: "parse-grok-processor"
@@ -68551,9 +68560,9 @@ components:
           example: "service:my-service"
           type: string
         rules:
-          description: The list of Grok parsing rules. If multiple matching rules are provided, they are evaluated in order. The first successful match is applied.
+          description: The list of Grok parsing rules selected by either source field or include query.
           items:
-            $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessorRule"
+            $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessorRuleItem"
           type: array
         type:
           $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessorType"
@@ -68565,6 +68574,37 @@ components:
         - enabled
       type: object
       x-pipeline-types: [logs]
+    ObservabilityPipelineParseGrokProcessorIncludeRule:
+      description: |-
+        A Grok parsing rule selected using the `include` query. Each rule defines how to extract structured fields
+        from logs matching a Datadog search query.
+      properties:
+        include:
+          description: A Datadog search query used to determine which logs this Grok rule targets.
+          example: "service:my-service"
+          type: string
+        match_rules:
+          description: |-
+            A list of Grok parsing rules that define how to extract fields from matching logs.
+            Each rule must contain a name and a valid Grok pattern.
+          example:
+            - name: "MyParsingRule"
+              rule: '%{word:user} connected on %{date("MM/dd/yyyy"):date}'
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessorRuleMatchRule"
+          type: array
+        support_rules:
+          description: A list of Grok helper rules that can be referenced by the parsing rules.
+          example:
+            - name: "user"
+              rule: "%{word:user.name}"
+          items:
+            $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessorRuleSupportRule"
+          type: array
+      required:
+        - include
+        - match_rules
+      type: object
     ObservabilityPipelineParseGrokProcessorRule:
       description: |-
         A Grok parsing rule used in the `parse_grok` processor. Each rule defines how to extract structured fields
@@ -68597,6 +68637,11 @@ components:
         - source
         - match_rules
       type: object
+    ObservabilityPipelineParseGrokProcessorRuleItem:
+      description: A single Grok parsing rule, selected by either source field or include query.
+      oneOf:
+        - $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessorRule"
+        - $ref: "#/components/schemas/ObservabilityPipelineParseGrokProcessorIncludeRule"
     ObservabilityPipelineParseGrokProcessorRuleMatchRule:
       description: |-
         Defines a Grok parsing rule, which extracts structured fields from log content using named Grok patterns.
