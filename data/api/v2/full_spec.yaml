@@ -20103,10 +20103,14 @@ components:
         - CONTAINER
         - CALLOUTVALUE
     Condition:
-      description: Targeting condition details.
+      description: |-
+        Targeting condition details. A condition is either an inline
+        predicate with `operator`, `attribute`, and `value`, or a reference to a
+        saved filter with `saved_filter_id`. The inline fields are omitted for saved-filter
+        references.
       properties:
         attribute:
-          description: The user or request attribute to evaluate.
+          description: The user or request attribute to evaluate. Omitted for saved-filter references.
           example: "country"
           type: string
         created_at:
@@ -20121,13 +20125,19 @@ components:
           type: string
         operator:
           $ref: "#/components/schemas/ConditionOperator"
+        saved_filter_id:
+          description: The ID of the saved filter referenced by this condition, or null for inline conditions.
+          example: "550e8400-e29b-41d4-a716-446655440090"
+          format: uuid
+          nullable: true
+          type: string
         updated_at:
           description: The timestamp when the condition was last updated.
           example: "2024-01-01T12:00:00Z"
           format: date-time
           type: string
         value:
-          description: Values used by the selected operator.
+          description: Values used by the selected operator. Omitted for saved-filter references.
           example: ["US", "CA"]
           items:
             description: Target value for the selected operator.
@@ -20135,9 +20145,6 @@ components:
           type: array
       required:
         - id
-        - operator
-        - attribute
-        - value
         - created_at
         - updated_at
       type: object
@@ -20168,25 +20175,32 @@ components:
         - IS_NULL
         - EQUALS
     ConditionRequest:
-      description: Condition request payload for targeting rules.
+      description: |-
+        Condition request payload for targeting rules. A condition is either an inline
+        predicate with `operator`, `attribute`, and `value`, or a reference to a
+        saved filter with `saved_filter_id`. The two shapes are mutually exclusive.
       properties:
         attribute:
-          description: The user or request attribute to evaluate.
+          description: The user or request attribute to evaluate. Required for inline conditions; omit when `saved_filter_id` is set.
           example: "user_tier"
           type: string
         operator:
           $ref: "#/components/schemas/ConditionOperator"
+        saved_filter_id:
+          description: |-
+            The ID of a saved filter to reference as this condition. Mutually exclusive
+            with `operator`, `attribute`, and `value`. When set, the saved filter's
+            targeting rules are evaluated in place of an inline predicate.
+          example: "550e8400-e29b-41d4-a716-446655440090"
+          format: uuid
+          type: string
         value:
-          description: Values used by the selected operator.
+          description: Values used by the selected operator. Required for inline conditions; omit when `saved_filter_id` is set.
           example: ["premium", "enterprise"]
           items:
             description: Target value for the selected operator.
             type: string
           type: array
-      required:
-        - operator
-        - attribute
-        - value
       type: object
     ConfigCatCredentials:
       description: The definition of the `ConfigCatCredentials` object.
