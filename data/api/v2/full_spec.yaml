@@ -37113,7 +37113,11 @@ components:
         attributes:
           $ref: "#/components/schemas/FlakyTestAttributes"
         id:
-          description: Test's ID. This ID is the hash of the test's Fully Qualified Name and Git repository ID. On the Test Runs UI it is the same as the `test_fingerprint_fqn` tag.
+          description: |-
+            Test's ID. This ID is the hash of the test's Fully Qualified Name and Git repository ID. It is the
+            value of the `@test.fingerprint_fqn` facet on test events, which you can search on in the Test
+            Optimization Explorer to locate a specific test. To filter search results by this ID, use the
+            `fingerprint_fqn` search key.
           type: string
         type:
           $ref: "#/components/schemas/FlakyTestType"
@@ -37495,6 +37499,9 @@ components:
             - `@git.branch`
             - `@test.codeowners`
             - `env`
+            - `fingerprint_fqn`
+
+            Use `fingerprint_fqn` to filter by a test's stable Fingerprint FQN (the same value as the test's `id`).
           example: 'flaky_test_state:active @git.repository.id_v2:"github.com/datadog/shopist"'
           type: string
       type: object
@@ -107953,7 +107960,11 @@ components:
       description: Details of what tests to update and their new attributes.
       properties:
         id:
-          description: The ID of the flaky test. This is the same ID returned by the Search flaky tests endpoint and corresponds to the test_fingerprint_fqn field in test run events.
+          description: |-
+            The ID of the flaky test. This is the same ID returned by the Search flaky tests endpoint and is the
+            value of the `@test.fingerprint_fqn` facet on test events. You can find it by searching on
+            `@test.fingerprint_fqn` in the Test Optimization Explorer, or by filtering the Search flaky tests
+            endpoint with the `fingerprint_fqn` key.
           example: 4eb1887a8adb1847
           type: string
         new_state:
@@ -108023,7 +108034,10 @@ components:
           description: Error message if the update failed.
           type: string
         id:
-          description: The ID of the flaky test from the request. This is the same ID returned by the Search flaky tests endpoint and corresponds to the test_fingerprint_fqn field in test run events.
+          description: |-
+            The ID of the flaky test from the request. This is the value of the `@test.fingerprint_fqn` facet
+            on test events, the same ID accepted by the update request and returned by the Search flaky tests
+            endpoint.
           example: 4eb1887a8adb1847
           type: string
         success:
