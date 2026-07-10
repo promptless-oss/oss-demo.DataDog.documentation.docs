@@ -9972,6 +9972,11 @@ menu:
       parent: pa_experiments_statistics
       identifier: pa_experiments_global_lift
       weight: 3
+    - name: Break Out Metrics by Property
+      url: experiments/metric_property_breakouts
+      parent: pa_experiments
+      identifier: pa_experiments_metric_property_breakouts
+      weight: 6
     - name: Troubleshooting
       url: experiments/troubleshooting
       parent: pa_experiments
