@@ -10022,11 +10022,16 @@ menu:
       parent: pa_experiments_statistics
       identifier: pa_experiments_mde
       weight: 3
+    - name: Multiple Testing Correction
+      url: experiments/statistics/multiple_testing_correction
+      parent: pa_experiments_statistics
+      identifier: pa_experiments_multiple_testing
+      weight: 4
     - name: Global Lift
       url: experiments/statistics/global_lift
       parent: pa_experiments_statistics
       identifier: pa_experiments_global_lift
-      weight: 4
+      weight: 5
     - name: Break Out Metrics by Property
       url: experiments/metric_property_breakouts
       parent: pa_experiments
