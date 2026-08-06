@@ -1,0 +1,10 @@
+extends: capitalization
+message: Rule names should use sentence case
+level: warning
+match: $sentence
+exceptions:
+  - OverlayFS
+  - DNS
+  - TXT
+  - Kubernetes
+  - AWS CLI

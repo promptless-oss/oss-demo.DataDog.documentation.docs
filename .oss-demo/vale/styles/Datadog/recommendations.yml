@@ -1,0 +1,10 @@
+# This file is used to lint passive "it is (not) recommended" phrasing.
+extends: substitution
+message: "Use '%s' instead of '%s'."
+ignorecase: true
+level: warning
+action:
+  name: replace
+swap:
+  "it(?:'s| is) recommended": Datadog recommends
+  "it(?:'s| is) not recommended": Datadog does not recommend
