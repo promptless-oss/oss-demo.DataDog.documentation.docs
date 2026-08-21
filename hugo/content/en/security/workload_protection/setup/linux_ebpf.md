@@ -1,8 +1,9 @@
 ---
-title: Setting up Workload Protection on Linux
-code_lang: linux
-type: multi-code-lang
-code_lang_weight: 80 # a number that represents relative weight.
+title: Setting up Workload Protection on Linux (with eBPF)
+description: Enable Workload Protection on Linux hosts with the eBPF-based Datadog Agent.
+aliases:
+  - /security/workload_protection/setup/agent/linux
+disable_toc: false
 ---
 
 Use the following instructions to enable Workload Protection.
@@ -42,7 +43,7 @@ sbom:
   # Set to true to enable Container Vulnerability Management
   container_image:
     enabled: true
-  # Set to true to enable Host Vulnerability Management  
+  # Set to true to enable Host Vulnerability Management
   host:
     enabled: true
 {{< /code-block >}}
@@ -73,7 +74,7 @@ runtime_security_config:
     enabled: true
 {{< /code-block >}}
 
-**Notes**: 
+**Notes**:
 
 - You can also use the following [Agent install script][5] to automatically enable Misconfigurations and Threat Detection:
 

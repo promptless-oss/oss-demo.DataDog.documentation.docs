@@ -1,8 +1,9 @@
 ---
 title: Setting up Workload Protection on Docker
-code_lang: docker
-type: multi-code-lang
-code_lang_weight: 65 # a number that represents relative weight.
+description: Enable Workload Protection on Docker with the Datadog Agent.
+aliases:
+  - /security/workload_protection/setup/agent/docker
+disable_toc: false
 ---
 
 Use the following instructions to enable Workload Protection.
