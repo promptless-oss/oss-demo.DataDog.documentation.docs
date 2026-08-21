@@ -1,11 +1,14 @@
 ---
 title: Setting up Workload Protection on Kubernetes
-code_lang: kubernetes
-type: multi-code-lang
-code_lang_weight: 60 # a number that represents relative weight.
+description: Enable Workload Protection on Kubernetes with the Datadog Operator, Helm, or a DaemonSet.
+aliases:
+  - /security/workload_protection/setup/agent/kubernetes
+disable_toc: false
 ---
 
 Use the following instructions to enable Workload Protection.
+
+<div class="alert alert-info">To deploy Workload Protection on Amazon EKS configured with the Fargate compute option, see <a href="/security/workload_protection/setup/fargate/">the Fargate deployment page</a>.</div>
 
 {{< partial name="security-platform/WP-billing-note.html" >}}
 
@@ -114,7 +117,7 @@ Use the following instructions to enable Workload Protection.
 
 2. Restart the Agent.
 
-If you experience RBAC issues, you can run the chart with the `clusterRole.allowCreatePodsExec` option enabled for the `clusterRole`: 
+To resolve RBAC issues, run the chart with the `clusterRole.allowCreatePodsExec` option enabled for the `clusterRole`:
 
 ```sh
 helm install datadog-operator datadog/datadog-operator --set clusterRole.allowCreatePodsExec=true
@@ -124,7 +127,7 @@ helm install datadog-operator datadog/datadog-operator --set clusterRole.allowCr
 
 {{% tab "DaemonSet" %}}
 
-1. Add the following settings to the `env` section of `security-agent` and `system-probe` in the `daemonset.yaml` file. Note that the `DD_ADMISSION_CONTROLLER_ENABLED` and `DD_RUNTIME_ADMISSION_CONTROLLER_CWS_INSTRUMENTATION_ENABLED` variables in the `cluster-agent-deployment.yaml` enable event enrichment with Kubernetes user identities (optional).
+1. Add the following settings to the `env` section of `security-agent` and `system-probe` in the `daemonset.yaml` file. To enrich Workload Protection events with Kubernetes user identities, also set the optional `DD_ADMISSION_CONTROLLER_ENABLED` and `DD_RUNTIME_ADMISSION_CONTROLLER_CWS_INSTRUMENTATION_ENABLED` variables in `cluster-agent-deployment.yaml`.
 
     ```bash
       # Source: datadog/templates/daemonset.yaml

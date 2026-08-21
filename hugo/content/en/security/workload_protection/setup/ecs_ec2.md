@@ -1,18 +1,21 @@
 ---
-title: Setting up Workload Protection on ECS EC2
-code_lang: ecs_ec2
-type: multi-code-lang
-code_lang_weight: 70 # a number that represents relative weight.
+title: Setting up Workload Protection on ECS
+description: Enable Workload Protection on Amazon ECS with the EC2 compute option.
+aliases:
+  - /security/workload_protection/setup/agent/ecs_ec2
+disable_toc: false
 ---
 
 Use the following instructions to enable Workload Protection.
 
-{{< partial name="security-platform/WP-billing-note.html" >}}
+<div class="alert alert-info">To deploy Workload Protection on ECS configured with the Fargate compute option, see <a href="/security/workload_protection/setup/fargate/">the Fargate deployment page</a>.</div>
 
+{{< partial name="security-platform/WP-billing-note.html" >}}
 
 ## Prerequisites
 
 - Datadog Agent version `7.46` or later.
+- This page covers the Amazon EC2 compute option for ECS.
 
 ## Installation
 
