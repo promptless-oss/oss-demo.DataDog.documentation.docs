@@ -170,6 +170,28 @@ Choose the tab that matches how you manage the Cluster Agent. Merge the example 
 {{% /tab %}}
 {{< /tabs >}}
 
+#### Tag workloads with the owning team
+
+To attribute GPU usage to the team that owns each workload, tag Kueue workloads with labels from their pod templates. The owning team's label, such as `team`, is usually set on the job's pod template rather than on the Kueue Workload object. Starting with Cluster Agent version `<AGENT_VERSION>`, the Cluster Agent reads the labels and annotations on each pod set template of a Workload. The Agent then adds them as tags on that workload, using the same mappings that turn pod labels and annotations into tags.
+
+To tag workloads with a pod template label, map the label as a tag for pods. For example, to add the `team` label as a `team` tag, add the following to your Helm `datadog-values.yaml` file:
+
+```yaml
+datadog:
+  kubernetesResourcesLabelsAsTags:
+    pods:
+      team: team
+```
+
+For the Datadog Operator, manual configuration, and annotations, see [Kubernetes resources labels as tags][8].
+
+The following rules apply:
+
+- A label or annotation becomes a tag only if every pod set template of the Workload has it with the same value. For example, if a job's driver and worker pod sets have different `team` values, the workload gets no `team` tag. The same applies if one pod set has no `team` label.
+- Tag names come from the `pods` entries in `kubernetesResourcesLabelsAsTags` and `kubernetesResourcesAnnotationsAsTags`. The legacy `podLabelsAsTags` and `podAnnotationsAsTags` options also apply. If both define the same key, the `kubernetesResources*` mapping takes precedence.
+
+This behavior is enabled by default when Kueue metadata collection is enabled. To turn it off, set the `DD_CLUSTER_AGENT_KUEUE_POD_TEMPLATE_TAGS` environment variable to `"false"` on the Cluster Agent, in the same way as `DD_CLUSTER_AGENT_KUEUE_ENABLED`.
+
 ### Verify the setup
 
 After Kueue-managed workloads start running on GPUs:
@@ -221,3 +243,4 @@ Use the {{< ui >}}Workloads{{< /ui >}} tab to check the current state of a workl
 [5]: https://app.datadoghq.com/gpu-monitoring?mConfigure=false&mPage=capacity-planning
 [6]: /metrics/explorer/
 [7]: /containers/troubleshooting/cluster-and-endpoint-checks/
+[8]: /containers/kubernetes/tag/#kubernetes-resources-labels-as-tags
