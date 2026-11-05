@@ -227,6 +227,8 @@ On the backend, Datadog creates the following span tags on spans after ingestion
 
 The **ignore resources** option allows resources to be excluded if the global root span of the trace matches certain criteria. See [Exclude resources from being collected][5]. This option applies to all services that send traces to this particular Datadog Agent. Traces that are dropped because of ignore resources are not included in trace metrics.
 
+If you run the [Datadog Distribution of OpenTelemetry (DDOT) Collector][7], starting with Agent v7.86.0, the `datadog` connector also excludes these traces from the trace metrics it computes. When a trace's root span matches a rule, the connector skips the trace's spans that share the root span's OTLP resource. As a result, ignored traces produce no `trace.*` metrics.
+
 You can specify resources to ignore either in the Agent configuration file, `datadog.yaml`, or with the `DD_APM_IGNORE_RESOURCES` environment variable. See examples below.
 
 Using `datadog.yaml`:
@@ -553,3 +555,4 @@ public class GreetingController {
 [4]: /tracing/trace_ingestion/ingestion_controls
 [5]: /tracing/configure_data_security/?tab=mongodb#exclude-resources-from-being-collected
 [6]: https://golang.org/pkg/regexp/
+[7]: /opentelemetry/setup/ddot_collector/
