@@ -41,6 +41,7 @@ To deploy the runner as a separate binary instead, see [Set up a standalone priv
 
 - A Linux or Windows host with **Datadog Agent 7.81.0 or later**, or a Kubernetes cluster with **Datadog Operator v1.28.0 or later** or the **Datadog Helm chart 3.231.6 or later**.
 - [Remote Configuration][2] enabled for your organization.
+- On a Linux host, an API key with the **Remote Configuration** and **Private Action Runner** capabilities enabled in [Organization Settings > API Keys][9]. This applies whether you enroll the runner as owned or ownerless. See [Runner doesn't start on a Linux host](#runner-doesnt-start-on-a-linux-host).
 - Network access to Datadog at `https://{{< region-param key=dd_site >}}`.
 
 ## Install the runner
@@ -81,7 +82,7 @@ DD_PRIVATE_ACTION_RUNNER_ACTIONS_ALLOWLIST=com.datadoghq.kubernetes.*,com.datado
 bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
 ```
 
-`DD_APP_KEY` enrolls the runner as owned, the same as Fleet Automation. The application key needs the `on_prem_runner_write` scope. `DD_PRIVATE_ACTION_RUNNER_ACTIONS_ALLOWLIST` takes a comma-separated list. Use bundle wildcards to allow the actions a runner in the Datadog Agent can run: `com.datadoghq.kubernetes.*` and `com.datadoghq.remoteaction.*`. To rely on the runner's built-in default actions instead (read-only Remote Action actions, plus a set of read-only Kubernetes actions on the Cluster Agent), leave the allowlist unset.
+`DD_APP_KEY` enrolls the runner as owned, the same as Fleet Automation. The application key needs the `on_prem_runner_write` scope. The API key in `DD_API_KEY` needs the **Remote Configuration** and **Private Action Runner** capabilities: the Agent doesn't start the runner until Datadog confirms both. `DD_PRIVATE_ACTION_RUNNER_ACTIONS_ALLOWLIST` takes a comma-separated list. Use bundle wildcards to allow the actions a runner in the Datadog Agent can run: `com.datadoghq.kubernetes.*` and `com.datadoghq.remoteaction.*`. To rely on the runner's built-in default actions instead (read-only Remote Action actions, plus a set of read-only Kubernetes actions on the Cluster Agent), leave the allowlist unset.
 
 After installation, go to [Private Action Runners][1] to verify your runner appears on the list.
 
@@ -308,6 +309,40 @@ kubectl logs -l app.kubernetes.io/component=cluster-agent --tail=1000 | grep pri
 {{% /tab %}}
 {{< /tabs >}}
 
+## Runner doesn't start on a Linux host
+
+On a Linux host, the Agent starts the runner only after it confirms that:
+
+- Remote Configuration is enabled for your organization.
+- The Agent's API key has the **Remote Configuration** capability.
+- The Agent's API key has the **Private Action Runner** capability.
+
+Until those checks pass, the runner doesn't start and doesn't appear on the [Private Action Runners][6] list. The Agent keeps checking, so after you fix the organization or API key settings, the runner starts without an Agent restart.
+
+To see why the runner hasn't started, run the Agent status command:
+
+```bash
+sudo datadog-agent status
+```
+
+The **Private Action Runner** section shows the startup check's state and reason, and the time of the next check:
+
+```text
+  Status: Enabled
+  Startup gate: waiting (missing_enrollment_scope)
+  Next gate check: 2026-11-05T22:40:00Z
+```
+
+The state is `waiting` while the Agent rechecks, `blocked` when the Agent stopped trying, and `handed_off` after the Agent started the runner. Common reasons:
+
+| Reason | Fix |
+|---|---|
+| `rc_org_disabled` | [Enable Remote Configuration][10] for your organization. |
+| `rc_key_unauthorized` | Enable the **Remote Configuration** capability on the Agent's API key. |
+| `rc_locally_disabled` | Set `remote_configuration.enabled: true` in `datadog.yaml`, then restart the Agent. |
+| `missing_enrollment_scope` | Enable the **Private Action Runner** capability on the Agent's API key. |
+| `invalid_credentials` | Check that `api_key` in `datadog.yaml` is a valid API key for your Datadog site. |
+
 ## Update the runner
 
 Update the runner in the Datadog Agent to stay update to date with any Agent upgrades.
@@ -448,3 +483,5 @@ terraform apply -var="datadog_api_key=<YOUR_API_KEY>" -var="datadog_app_key=<YOU
 [6]: https://app.datadoghq.com/actions/action-catalog
 [7]: /actions/private_actions/reference/
 [8]: /actions/private_actions/enroll_runner/
+[9]: https://app.datadoghq.com/organization-settings/api-keys
+[10]: /remote_configuration/#enable-remote-configuration
