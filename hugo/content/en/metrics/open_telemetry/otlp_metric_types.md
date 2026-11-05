@@ -85,6 +85,40 @@ The default mapping for both histogram temporality types is as follows:
 
 Percentile aggregations are computed directly from the native bucket structure. Min and max are stored when provided; if not present in the original data, they are derived from the bucket boundaries.
 
+#### Send histograms with their bucket structure from the DDOT Collector
+
+By default, the Datadog Distribution of OpenTelemetry (DDOT) Collector converts histograms to DDSketch distributions. To send explicit bucket and exponential histograms with their original bucket structure instead, enable the `datadog.serializerexporter.NativeOTelHistograms` feature gate. This feature gate is in alpha and is disabled by default.
+
+```shell
+--feature-gates=+datadog.serializerexporter.NativeOTelHistograms
+```
+
+With the Datadog Helm chart, set the feature gate with `datadog.otelCollector.featureGates`:
+
+```shell
+helm upgrade -i <RELEASE_NAME> datadog/datadog \
+  -f datadog-values.yaml \
+  --set datadog.otelCollector.featureGates="datadog.serializerexporter.NativeOTelHistograms"
+```
+
+With the feature gate enabled, DDOT sends histograms and monotonic sums only when they use delta temporality. The `cumulativetodelta` processor, which DDOT adds automatically, converts cumulative metrics to delta. The Helm and Datadog Operator gateway deployments don't add this processor, so the gateway drops cumulative histograms and monotonic sums. In those deployments, configure the applications and collectors that send to the gateway to [produce delta temporality metrics][3].
+
+These histograms require the v3 distributions intake, which Datadog destinations use by default. DDOT fails to start if any metrics destination uses the v2 intake. This check includes the multi-region failover destination, even when failover is off. A destination uses the v2 intake when any of the following apply:
+
+- It's a non-Datadog URL, such as a proxy or an `additional_endpoints` entry, that isn't set to `true` under `use_v3_api.distributions.endpoints`.
+- `use_v3_api.distributions.enabled` is set to `false`.
+- The Agent uses zlib compression for metrics.
+- The Agent sends metrics to Observability Pipelines Worker.
+
+To use the v3 intake with a proxy or additional endpoint, set its URL to `true` in `datadog.yaml`:
+
+```yaml
+use_v3_api:
+  distributions:
+    endpoints:
+      "https://my-proxy.example.com": true
+```
+
 [3]: /opentelemetry/guide/otlp_delta_temporality/
 
 {{% /tab %}}
