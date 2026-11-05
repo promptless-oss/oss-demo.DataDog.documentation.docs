@@ -292,6 +292,103 @@ fmt.Printf("Error: %v\n", details.Error())
 
 Flag details help you debug evaluation behavior and understand why a user received a given value.
 
+## Exposures
+
+For flags whose allocation logs exposures, such as experiment flags, the Datadog provider records an exposure after each successful evaluation. It sends the exposure to Datadog from an OpenFeature provider hook that runs when the evaluation finishes. An evaluation that returns an error, including one that an application `After` hook rejects, is not an exposure.
+
+For each flag and subject, the provider remembers the last exposure it recorded. It records another exposure only when the allocation, variant, or split serial ID changes, so repeated evaluations for the same subject do not send duplicates.
+
+Provider hooks run only when you evaluate flags through an OpenFeature client. Register the Datadog provider directly with OpenFeature, as shown in the [Initialize the SDK](#initialize-the-sdk) section. Inside an OpenFeature `MultiProvider` or a custom provider wrapper, flags still evaluate. However, the provider logs a warning and records no exposures.
+
+<div class="alert alert-warning">Earlier versions of <code>dd-trace-go</code> attempted to send exposures from inside a <code>MultiProvider</code>. Starting with version <strong>X.Y.Z</strong>, the provider sends no exposures there. To keep sending exposures, register the Datadog provider directly.</div>
+
+To reject a flag result in an application `After` hook, return an error instead of panicking. When an `After` hook panics, OpenFeature still completes the evaluation hooks, so the provider can record an exposure for a result your application rejected.
+
+### Record exposures in your own data store
+
+To record exposures in your own data store or analytics pipeline in addition to Datadog, register a hook created with `NewExposureHook`. The hook receives every completed evaluation, including errors, non-exposures, and repeats, along with the same exposure decision that the provider uses for Datadog. `NewExposureHook` requires `dd-trace-go` version **X.Y.Z** or later.
+
+The following example copies each new exposure to a channel that a background goroutine writes to the data store. `exposureRecord` stands for your own record type:
+
+{{< code-block lang="go" >}}
+package main
+
+import (
+    ddopenfeature "github.com/DataDog/dd-trace-go/v2/openfeature"
+    "github.com/open-feature/go-sdk/openfeature"
+)
+
+type exposureRecord struct {
+    FlagKey         string
+    Variant         string
+    Subject         string
+    Allocation      string
+    HoldoutKey      any
+    AssignmentGroup any
+}
+
+func registerExposureHook(client *openfeature.Client, records chan<- exposureRecord) {
+    client.AddHooks(ddopenfeature.NewExposureHook(func(e ddopenfeature.ExposureEvaluation) {
+        // Skip evaluations that are not new exposures
+        if !e.ShouldSend() {
+            return
+        }
+        allocation, _ := e.AllocationKey()
+        features := e.Features()
+        record := exposureRecord{
+            FlagKey:         e.Details.FlagKey,
+            Variant:         e.Details.Variant,
+            Subject:         e.Context.TargetingKey(),
+            Allocation:      allocation,
+            HoldoutKey:      features["holdout.key"],
+            AssignmentGroup: features["holdout.assignment_group"],
+        }
+        // The callback runs on the evaluating goroutine: hand off the record and return
+        select {
+        case records <- record:
+        default:
+            // Queue is full: drop the record or count it
+        }
+    }))
+}
+{{< /code-block >}}
+
+You can also register the hook globally with `openfeature.AddHooks`, or for a single evaluation with `openfeature.WithHooks`. Create the hook once and reuse it.
+
+The callback runs on the goroutine that evaluates the flag, and several evaluations can call it at the same time. Do not write to the data store from the callback. Copy the data you need and hand it to a background queue. Treat `Details.Value` as read-only, because object flag values can share state with the provider. If the callback panics, the hook recovers, logs a warning, and returns the flag result unchanged.
+
+Each `ExposureEvaluation` that the callback receives provides these fields and methods:
+
+| Field or method | Returns |
+|---|---|
+| `ShouldSend()` | `true` for a new or changed exposure. The evaluation succeeded, its allocation logs exposures, and the subject was not yet exposed to the same allocation, variant, and split serial ID. |
+| `IsExposure()` | `true` for every successful evaluation of an allocation that logs exposures, including repeats. |
+| `IsCacheHit()` | `true` when the exposure repeats one already recorded for the subject, with the same allocation, variant, and split serial ID. |
+| `Features()` | The features of the selected split that Datadog routes to hooks. Values are a `string`, `bool`, or `float64`. Returns `nil` when the split has no such features. |
+| `AllocationKey()` | The selected allocation key, and whether it is present. |
+| `SplitSerialID()` | The selected split's serial ID, and whether it is present. A serial ID of `0` is different from an absent serial ID. |
+| `Details` | The OpenFeature `InterfaceEvaluationDetails` for the evaluation. |
+| `Context` | The evaluation context. |
+
+Every exposure hook receives the same decision, so one hook does not consume an exposure before another. `ShouldSend()` reports what the provider recorded, not whether your pipeline delivered it. Your application owns queueing, retries, and flushing on shutdown. If you need delivery guarantees independent of the provider, use `IsExposure()` and deduplicate exposures in your own pipeline.
+
+Splits in a holdout carry these features:
+
+| Feature | Value |
+|---|---|
+| `holdout.key` | The holdout key |
+| `holdout.assignment_group` | The holdout assignment group of the subject |
+
+### Send exposures only to your own data store
+
+To stop sending exposures to Datadog while you record them with an exposure hook, set the following environment variable before the application starts:
+
+{{< code-block lang="bash" >}}
+DD_FEATURE_FLAGS_EXPOSURES_DATADOG_LOGGING_ENABLED=false
+{{< /code-block >}}
+
+The default is `true`. The provider reads this setting when it is created. With the setting set to `false`, exposure hooks and exposure deduplication keep working, and flag values, flag evaluation metrics, and APM trace enrichment are unchanged.
+
 ## Testing
 
 You can test against a dedicated Datadog test environment with the real `DatadogProvider`, or swap it for OpenFeature's in-memory provider to control flag values directly in test code. This section shows the in-memory approach, which keeps tests hermetic and offline. The in-memory provider ships in the upstream `go-sdk` module under `github.com/open-feature/go-sdk/openfeature/memprovider`, so no additional dependency is required.
