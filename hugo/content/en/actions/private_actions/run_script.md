@@ -17,6 +17,8 @@ further_reading:
 
 The private action runner can run **predefined scripts**, which are shell commands, command-line tools, and scripts you declare ahead of time in a script configuration file. Only what you predefine can run, so the runner never runs arbitrary inline commands from a workflow or app.
 
+The runner can also run scripts that Datadog writes and publishes. See the [Datadog-authored script actions](#datadog-authored-script-actions) section.
+
 <div class="alert alert-warning">You decide which commands and binaries the runner is allowed to run. Review every command you add to the script configuration, especially those that accept parameters, grant the runner only the privileges it needs, and carefully review the permissions you share through connections. See <a href="/actions/connections/#connection-security-considerations">connection security considerations</a>.</div>
 
 ## Use cases
@@ -344,6 +346,54 @@ In your workflow or app, configure the action to use the script name you defined
 There are two levels of variable resolution: one at the workflow level and one at the action level
 inside the runner.
 
+## Datadog-authored script actions
+
+<div class="alert alert-info">Datadog-authored script actions are in Preview.</div>
+
+Datadog-authored script actions run scripts that Datadog writes and publishes, so you don't write or maintain a script configuration file for them. These actions use the `com.datadoghq.authoredscripts` prefix and run on Agent-based runners on Linux and Windows hosts.
+
+When a workflow or app runs one of these actions, the runner:
+
+1. Looks up the action's versioned package in the Datadog catalog, which the runner receives through Remote Configuration.
+1. Downloads the package and keeps it in a local cache.
+1. Runs the package's entrypoint in a temporary directory that the runner deletes after the run.
+
+### Prerequisites
+
+- An Agent-based runner on a Linux or Windows host. See [Set up a private action runner in the Datadog Agent][1]. Windows support requires Datadog Agent `<AGENT_VERSION>` or later.
+- The authored-script actions in the runner's actions allowlist. Datadog-authored script actions are not part of the default allowlist.
+
+### Allow Datadog-authored script actions
+
+To allow every Datadog-authored script action, add `com.datadoghq.authoredscripts.*` to the `private_action_runner.actions_allowlist` section of `datadog.yaml`:
+
+```yaml
+private_action_runner:
+  enabled: true
+  actions_allowlist:
+    - "com.datadoghq.authoredscripts.*"
+```
+
+To allow fewer actions, list each action's full name instead of the wildcard. To apply the change, restart the Agent as described in [Change the allowlist][6].
+
+### How scripts run on Windows
+
+On Windows, the runner applies these rules to Datadog-authored script actions:
+
+- **Entrypoints**: The runner accepts packages whose entrypoint is a PowerShell script (`.ps1`) or a native executable (`.exe` or `.com`), and rejects any other entrypoint type.
+- **PowerShell**: The runner starts `.ps1` entrypoints with Windows PowerShell from `%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe`, using the `-NoProfile`, `-NonInteractive`, and `-ExecutionPolicy Bypass` options. The host's PowerShell execution policy doesn't block these scripts, and PowerShell profiles on the host don't run.
+- **Files**: The runner caches packages in `C:\ProgramData\Datadog\run\dd-authored-script`. Each run gets its own temporary directory under `C:\ProgramData\Datadog\run`, and `USERPROFILE`, `HOME`, `APPDATA`, `LOCALAPPDATA`, `TEMP`, and `TMP` point inside that directory. Scripts can't read or keep state in the runner user's profile between runs.
+- **Cancellation**: When an action times out or is canceled, the runner stops the script and every process the script started.
+
+### Troubleshooting Datadog-authored script actions
+
+**The host denies execution of the script**
+
+Application control on the host can block the runner from starting the package's entrypoint. Check the following:
+
+- On Windows, confirm that file permissions, AppLocker, and Windows Defender Application Control (WDAC) policies let the runner user run files from `C:\ProgramData\Datadog\run`, and let it start `powershell.exe`.
+- On Linux, confirm that file permissions and application allowlisting tools such as `fapolicyd` let the runner user run files from its cache directory.
+
 ## Further reading
 
 {{< partial name="whats-next/whats-next.html" >}}
@@ -353,3 +403,4 @@ inside the runner.
 [3]: /actions/private_actions/execution_policies/
 [4]: /actions/connections/private_action_credentials/
 [5]: /actions/connections/
+[6]: /actions/private_actions/set_up_agent_based/#change-the-allowlist
