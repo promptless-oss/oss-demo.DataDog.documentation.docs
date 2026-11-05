@@ -23,9 +23,14 @@ further_reading:
 
 ## Overview
 
-In a Kubernetes environment, use Single Step Instrumentation (SSI) for APM to install the Datadog Agent and [instrument][3] your applications with the Datadog SDKs in one step.
+Use Single Step Instrumentation (SSI) for APM to install the Datadog Agent and [instrument][3] your Kubernetes applications with the Datadog SDKs.
 
-{{% dd-apm-skill %}}
+{{< skill-callout
+    title="Set up APM with an agent"
+    text="Install the `dd-apm` skill in your AI coding agent for guided APM setup."
+    action_name="copy_dd_apm_skill_install_cmd" >}}
+npx skills add https://github.com/datadog-labs/agent-skills --skill dd-apm --full-depth -y
+{{< /skill-callout >}}
 
 ## Requirements
 
@@ -39,20 +44,134 @@ In a Kubernetes environment, use Single Step Instrumentation (SSI) for APM to in
 
 <div class="alert alert-info">Single Step Instrumentation does not instrument applications in the namespace where the Datadog Agent is installed. Install the Agent in a separate namespace where you do not run your applications.</div>
 
-Follow these steps to enable Single Step Instrumentation across your entire cluster. This automatically sends traces from all applications written in supported languages.
+Enabling Single Step Instrumentation across your cluster automatically sends traces from all applications written in supported languages.
 
 **Note:** To instrument only specific namespaces or pods, see workload targeting in [Advanced options](#advanced-options).
 
-1. In Datadog, go to the [Install the Datadog Agent on Kubernetes][11] page.
-1. Follow the on-screen instructions to choose your installation method, select an API key, and set up the Operator or Helm repository.
-1. In the {{< ui >}}Configure `datadog-agent.yaml`{{< /ui >}} section, go to {{< ui >}}Additional configuration{{< /ui >}} > {{< ui >}}Application Observability{{< /ui >}}, and turn on {{< ui >}}APM Instrumentation{{< /ui >}}.
+Use the following commands to enable SSI, replacing:
 
-   {{< img src="tracing/trace_collection/k8s-apm-instrumentation-toggle.jpg" alt="The configuration block for installing the Datadog Agent on Kubernetes through the Datadog app" style="width:100%;" >}}
+- `<YOUR_DD_API_KEY>` with your [Datadog API key][40]
+- `<YOUR_CLUSTER_NAME>` with your cluster name
+- `<DATADOG_SITE>` with your [Datadog site][43]: {{< region-param key="dd_site" code="true" >}}
 
-1. Deploy the Agent using the generated configuration file.
-1. Restart your applications.
+The examples enable SSI with `apm.instrumentation.enabled: true` and use the `datadog` namespace. Replace the namespace if your Agent is installed elsewhere.
+
+{{< tabs >}}
+{{% tab "Datadog Operator" %}}
+
+1. Install the Datadog Operator and create a secret that holds your API key:
+
+   ```shell
+   helm repo add datadog https://helm.datadoghq.com
+   helm repo update
+   helm install datadog-operator datadog/datadog-operator --namespace datadog --create-namespace
+   kubectl create secret generic datadog-secret --from-literal api-key=<YOUR_DD_API_KEY> -n datadog
+   ```
+
+1. Create a `datadog-agent.yaml` file that enables APM instrumentation:
+
+   ```yaml
+   kind: "DatadogAgent"
+   apiVersion: "datadoghq.com/v2alpha1"
+   metadata:
+     name: "datadog"
+     namespace: "datadog"
+   spec:
+     global:
+       clusterName: "<YOUR_CLUSTER_NAME>"
+       site: "<DATADOG_SITE>"
+       credentials:
+         apiSecret:
+           secretName: "datadog-secret"
+           keyName: "api-key"
+     features:
+       apm:
+         instrumentation:
+           enabled: true
+   ```
+
+   To pin specific SDK versions instead of installing the latest, add a `targets` block with `ddTraceVersions`. See [Target specific workloads](#target-specific-workloads) for the full schema.
+
+1. Deploy the Agent:
+
+   ```shell
+   kubectl apply -f datadog-agent.yaml
+   ```
+
+To update an existing Operator installation, add the SSI configuration to your `datadog-agent.yaml` and reapply it with `kubectl -n datadog apply -f datadog-agent.yaml`.
+
+{{% /tab %}}
+{{% tab "Helm" %}}
+
+1. Add the Datadog Helm repository, create the `datadog` namespace, and create a secret that holds your API key:
+
+   ```shell
+   helm repo add datadog https://helm.datadoghq.com
+   helm repo update
+   kubectl create namespace datadog
+   kubectl -n datadog create secret generic datadog-secret --from-literal api-key=<YOUR_DD_API_KEY>
+   ```
+
+1. Create a `datadog-values.yaml` file that enables APM instrumentation:
+
+   ```yaml
+   datadog:
+     site: "<DATADOG_SITE>"
+     clusterName: "<YOUR_CLUSTER_NAME>"
+     apiKeyExistingSecret: "datadog-secret"
+     apm:
+       instrumentation:
+         enabled: true
+   ```
+
+   To pin specific SDK versions instead of installing the latest, add a `targets` block with `ddTraceVersions`. See [Target specific workloads](#target-specific-workloads) for the full schema.
+
+1. Deploy the Agent:
+
+   ```shell
+   helm install datadog-agent -f datadog-values.yaml datadog/datadog --namespace datadog
+   ```
+
+To update an existing Helm installation, add the SSI configuration to your `datadog-values.yaml` and run `helm upgrade -n datadog -f datadog-values.yaml <RELEASE_NAME> datadog/datadog`.
+
+{{% /tab %}}
+{{< /tabs >}}
+
+After you deploy the Agent, restart your applications.
 
 <div class="alert alert-info">SSI adds a small amount of startup time to instrumented applications. If this overhead is not acceptable for your use case, contact <a href="/help/">Datadog Support</a>.</div>
+
+### Generate the configuration from Datadog
+
+To generate the configuration through the UI, go to the [Install the Datadog Agent on Kubernetes][11] page and follow the on-screen instructions to choose your installation method and API key. In the {{< ui >}}Configure `datadog-agent.yaml`{{< /ui >}} section, go to {{< ui >}}Additional configuration{{< /ui >}} > {{< ui >}}Application Observability{{< /ui >}}, and turn on {{< ui >}}APM Instrumentation{{< /ui >}}. Then deploy the Agent using the generated configuration file.
+
+{{< img src="tracing/trace_collection/k8s-apm-instrumentation-toggle.jpg" alt="The configuration block for installing the Datadog Agent on Kubernetes through the Datadog app" style="width:100%;" >}}
+
+## Verify the installation
+
+1. Confirm the Agent pods are running:
+
+   ```shell
+   kubectl get pods -n datadog
+   ```
+
+1. Confirm the Agent is healthy and the APM Agent is running. Replace `<AGENT_POD>` with the name of a node Agent pod:
+
+   ```shell
+   kubectl exec <AGENT_POD> -n datadog -- agent status
+   ```
+
+   Check the **APM Agent** section of the output.
+
+1. Confirm that injection reached an instrumented application pod. Replace `<APP_POD>` and `<APP_NAMESPACE>` with one of your application pods and its namespace:
+
+   ```shell
+   kubectl get pod <APP_POD> -n <APP_NAMESPACE> -o jsonpath='{.spec.initContainers[*].name}'
+   ```
+
+   The output includes `datadog-init-apm-inject` and a `datadog-lib-<language>-init` container for each instrumented language.
+
+1. After your applications receive traffic, confirm your services appear on the [APM Services page][42]. If they don't appear within a few minutes, follow the [SSI troubleshooting guide][35].
 
 ## Configure Unified Service Tags
 
@@ -150,9 +269,9 @@ After SSI loads the Datadog SDK into your applications and enables distributed t
 
 Use one of the following setup methods:
 
-- **[Configure with workload targeting (recommended)](#target-specific-workloads)**:
+- **[Configure with Agent targeting rules](?tab=targetingrulesv764#target-specific-workloads)**:
 
-  By default, Single Step Instrumentation instruments all services in all namespaces. Use workload targeting to limit instrumentation to specific namespaces, pods, or workloads, and apply custom configurations.
+  Use `ddTraceConfigs` in Agent-configured targets to enable products for groups of namespaces or pods.
 
 - **[Set environment variables][7]**:
 
@@ -169,10 +288,11 @@ SSI supports multiple injection modes, which control how the injector and APM li
 
 | Mode | Description | Requirements |
 |------|-------------|--------------|
+| `auto` | **Default.** The Cluster Agent selects the best injection mode for your cluster and workloads. The selection logic can change between Agent versions. | Agent 7.76.0+ |
 | `init_container` | Uses init containers to copy injector and APM library files into application containers. | Agent deployed with Helm Chart or Datadog Operator |
 | `csi` | **In Preview.** Mounts injector and APM library files using the [Datadog CSI driver][37]. Reduces pod startup time compared to init container mode. | Agent 7.76.0+, CSI driver 1.2.0+, Helm Chart 3.178.1+ or Datadog Operator 1.25.0+ |
 
-Before using `csi` mode, install and activate the Datadog CSI driver. If you are deploying with Helm, also set `datadog.csi.enabled: true` in your `datadog-values.yaml`. See the [CSI driver documentation][37] for installation steps and environment-specific requirements such as GKE Autopilot.
+Before using `csi` mode, install and activate the Datadog CSI driver. If you are deploying with Helm, also set `datadog.csi.enabled: true` in your `datadog-values.yaml`. See the [CSI driver documentation][37] for installation steps and environment-specific requirements such as GKE Autopilot. In `auto` mode, the Cluster Agent selects the CSI driver only when it is installed and safe to use in your cluster.
 
 #### Configure injection mode globally
 
@@ -188,7 +308,7 @@ datadog:
       injectionMode: <mode>
 ```
 
-Supported values: `init_container`, `csi`.
+Supported values: `auto` (default), `init_container`, `csi`.
 
 {{% /tab %}}
 {{% tab "Datadog Operator" %}}
@@ -202,7 +322,7 @@ features:
       injectionMode: <mode>
 ```
 
-Supported values: `init_container`, `csi`.
+Supported values: `auto` (default), `init_container`, `csi`.
 
 If you are using Datadog Operator earlier than 1.25.0, use the [pod annotation](#configure-injection-mode-per-pod) to override the injection mode for specific pods.
 
@@ -219,15 +339,14 @@ metadata:
     admission.datadoghq.com/apm-inject.injection-mode: "<mode>"
 ```
 
-Supported values: `init_container`, `csi`.
+Supported values: `auto`, `init_container`, `csi`.
 
 ### Target specific workloads
 
 By default, SSI instruments all services in all namespaces in your cluster. Depending on your Agent version, use one of the following configuration methods to refine which services are instrumented and how.
 
 {{< tabs >}}
-
-{{% tab "Agent v7.64+ (Recommended)" %}}
+{{% tab "Targeting Rules (v7.64+)" %}}
 
 Create targeting blocks with the `targets` label to specify which workloads to instrument and what configurations to apply.
 
@@ -251,7 +370,7 @@ The file you need to configure depends on how you enabled Single Step Instrument
 
 Review the following examples demonstrating how to select specific services:
 
-{{< collapse-content title="Example 1: Enable all namespaces except one" level="h4" >}}
+{{< collapse-content title="Example 1: Enable all namespaces except one" level="h5" >}}
 
 This configuration:
 - enables APM for all namespaces except the `jenkins` namespace.
@@ -273,7 +392,7 @@ This configuration:
 
 {{< /collapse-content >}}
 
-{{< collapse-content title="Example 2: Instrument a subset of namespaces, matching on names and labels" level="h4" >}}
+{{< collapse-content title="Example 2: Instrument a subset of namespaces, matching on names and labels" level="h5" >}}
 
 This configuration creates two targets blocks:
 
@@ -309,7 +428,7 @@ This configuration creates two targets blocks:
 
 {{< /collapse-content >}}
 
-{{< collapse-content title="Example 3: Instrument different workloads with different tracers" level="h4" >}}
+{{< collapse-content title="Example 3: Instrument different workloads with different tracers" level="h5" >}}
 
 This configuration does the following:
 - enables APM for pods with the following labels:
@@ -342,7 +461,7 @@ This configuration does the following:
 
 {{< /collapse-content >}}
 
-{{< collapse-content title="Example 4: Instrument a pod within a namespace" level="h4" >}}
+{{< collapse-content title="Example 4: Instrument a pod within a namespace" level="h5" >}}
 
 This configuration:
 - enables APM for pods labeled `app:password-resolver` inside the `login-service` namespace.
@@ -370,7 +489,7 @@ This configuration:
 
 {{< /collapse-content >}}
 
-{{< collapse-content title="Example 5: Instrument a subset of pods using <code>matchExpressions</code>" level="h4" >}}
+{{< collapse-content title="Example 5: Instrument a subset of pods using <code>matchExpressions</code>" level="h5" >}}
 
 This configuration enables APM for all pods except those that have either of the labels `app=app1` or `app=app2`.
 
@@ -391,7 +510,7 @@ This configuration enables APM for all pods except those that have either of the
 
 {{< /collapse-content >}}
 
-{{< collapse-content title="Example 6: Enable additional products with <code>ddTraceConfigs</code>" level="h4" >}}
+{{< collapse-content title="Example 6: Enable additional products with <code>ddTraceConfigs</code>" level="h5" >}}
 
 This configuration enables [App and API Protection (AAP)][12] and [Continuous Profiler][11] for services in the `web-apps` namespace, using `ddTraceConfigs` to set the required environment variables:
 
@@ -427,7 +546,88 @@ For a full list of products you can enable through SSI, see [Enable SDK-dependen
 
 {{% /tab %}}
 
-{{% tab "Agent <=v7.63 (Legacy)" %}}
+{{% tab "DatadogInstrumentation CRD (v7.85+)" %}}
+
+Use a `DatadogInstrumentation` custom resource to enable SSI and configure SDKs for a specific set of workloads.
+
+This method requires Datadog Agent and Cluster Agent **v7.85.0 or later**, with the `DatadogInstrumentation` CRD installed using either:
+
+- Datadog Operator **v1.31.0 or later**.
+- Datadog Helm chart **v3.255.0 or later**.
+
+##### Create a resource targeting your workload
+
+Create and apply a `DatadogInstrumentation` resource in the same namespace of the workload you wish to target. This example instruments the `checkout` Deployment in the `apps` namespace with the default Java SDK:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: checkout-apm
+  namespace: apps
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: checkout
+  config:
+    apm:
+      ddTraceVersions:
+        java: "default"
+      ddTraceConfigs:
+        - name: DD_SERVICE
+          value: checkout
+        - name: DD_ENV
+          value: production
+```
+
+Replace the workload name, namespace, tracer language, and service tags with the correct values for your application. `targetRef` identifies the workload by its API version, kind, and name. Only one `DatadogInstrumentation` custom resource can target a given workload at a time. If a resource already exists for that workload, add `config.apm` to that resource.
+Once applied, new pods part of the targeted workload will be instrumented with the tracer and config defined in your resource.
+
+Supported target kinds are `Deployment`, `StatefulSet`, `DaemonSet`, `Job`, `CronJob`, and Argo `Rollout`.
+
+##### Configuration settings
+
+Set the following fields under `spec.config.apm`:
+
+| Field | Description |
+|-------|-------------|
+| `enabled` | Set to `false` to [disable instrumentation for the workload](#disable-instrumentation-with-datadoginstrumentation). |
+| `ddTraceVersions` | Maps SDK language identifiers to versions. Specify `java`, `js` (Node.js), `python`, `dotnet`, `ruby`, `php`, or `c`, subject to [SSI compatibility requirements][36]. Only the listed SDKs are injected. Use `"default"` for the Agent's default SDK version, or pin a specific version. If omitted, the Agent uses its default set of supported SDKs. |
+| `ddTraceConfigs` | A list of SDK environment variables. Each `name` must start with `DD_`. Use `value` for a literal string or `valueFrom` for a Kubernetes environment variable reference. |
+
+For example, add these entries to `ddTraceConfigs` to enable Continuous Profiler and read the service name from a pod label:
+
+```yaml
+ddTraceConfigs:
+  - name: DD_PROFILING_ENABLED
+    value: "auto"
+  - name: DD_SERVICE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.labels['app.kubernetes.io/name']
+```
+
+The referenced label must exist on the application pods. For more SDK options, see [Library configuration][7].
+
+##### Configuration precedence
+
+For pods eligible for admission, the Cluster Agent selects APM configuration in this order, from highest to lowest precedence:
+
+1. Pod annotations such as `admission.datadoghq.com/java-lib.version`.
+1. The workload's `DatadogInstrumentation` APM configuration.
+1. Remote Configuration instrumentation policies, if enabled.
+1. Agent-configured `apm.instrumentation.targets` or `enabledNamespaces`.
+1. Cluster-wide instrumentation, when enabled without targeting rules.
+
+A matching DDI configuration takes precedence over lower-priority sources, including when `spec.config.apm.enabled` is `false`. Pod SDK annotations can override it. To manage a workload only with  DDI, remove conflicting annotations from the pod spec.
+
+[7]: /tracing/trace_collection/library_config/
+[36]: /tracing/trace_collection/automatic_instrumentation/single-step-apm/compatibility/
+
+{{% /tab %}}
+
+{{% tab "Legacy (<=v7.63)" %}}
 
 #### Enable or disable instrumentation for namespaces
 
@@ -550,7 +750,7 @@ If you don't enable automatic instrumentation for specific pods using annotation
 
 The file you need to configure depends on if you enabled Single Step Instrumentation with Datadog Operator or Helm:
 
-{{< collapse-content title="Datadog Operator" level="h5" >}}
+{{< collapse-content title="Datadog Operator" level="h6" >}}
 
 For example, to instrument .NET, Python, and Node.js applications, add the following configuration to your `datadog-agent.yaml` file:
 
@@ -567,7 +767,7 @@ For example, to instrument .NET, Python, and Node.js applications, add the follo
 
 {{< /collapse-content >}}
 
-{{< collapse-content title="Helm" level="h5" >}}
+{{< collapse-content title="Helm" level="h6" >}}
 
 For example, to instrument .NET, Python, and Node.js applications, add the following configuration to your `datadog-values.yaml` file:
 
@@ -638,7 +838,8 @@ To use SSI with a private container registry:
 2. Tag the images according to your configuration.
 
    The versions you mirror must match the versions configured in your workloads, which might be set in one of the following ways:
-   - globally in the Agent config using `ddTraceVersions`, or
+   - per-workload in `spec.config.apm.ddTraceVersions` in a DDI resource,
+   - in Agent-configured targets using `ddTraceVersions`, or
    - per-pod using annotations like `admission.datadoghq.com/java-lib.version`.
 
    If no version is explicitly configured, the default version (`0`) is used.
@@ -691,7 +892,29 @@ If you don't want to collect trace data for a particular service, host, VM, or c
 
 To remove APM instrumentation and stop sending traces from a specific service, you can do one of the following:
 
-#### Use instrumentation rules to target specific workloads (recommended)
+#### Disable instrumentation with DatadogInstrumentation
+
+Set `spec.config.apm.enabled` to `false` in the workload's DDI resource, keeping its `targetRef` and any checks or logs configuration:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: checkout-apm
+  namespace: apps
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: checkout
+  config:
+    apm:
+      enabled: false
+```
+
+Apply the resource, confirm its status reflects the change, and restart the workload. Existing pods remain instrumented until replaced.
+
+#### Use instrumentation rules to target specific workloads
 
 With instrumentation rules (available for Agent v7.64+), you can enable and disable tracing for specific applications. [See configuration details here](#advanced-options).
 
@@ -717,7 +940,12 @@ As an alternative, or for a version of the agent that does not support instrumen
 
 ### Remove APM for all services on the infrastructure
 
-To stop producing traces, uninstall APM and restart the infrastructure:
+To stop SSI across the cluster:
+
+1. Set `spec.config.apm.enabled: false` in each DDI resource, or remove its APM section.
+1. Remove pod SDK-selection annotations and disable any Remote Configuration instrumentation policies.
+1. Disable Agent-configured instrumentation as shown below.
+1. Replace the application pods after applying the configuration changes.
 
 The file you need to configure depends on if you enabled Single Step Instrumentation with Datadog Operator or Helm:
 
@@ -757,9 +985,9 @@ The file you need to configure depends on if you enabled Single Step Instrumenta
 
 ## Best practices
 
-After you enable SSI, all supported processes in the cluster are automatically instrumented and begin producing traces within minutes.
+For precise control over APM enablement, use [DatadogInstrumentation (DDI)](#target-specific-workloads) to instrument specific workloads. Start with a few workloads, verify traces, then expand to additional workloads.
 
-To control where APM is activated and reduce overhead, consider the following best practices.
+If you use Agent-configured targeting rules, the following examples show how to control instrumentation with labels and namespace selectors.
 
 {{% collapse-content title="Use opt-in labels for controlled APM rollout" level="h3" expanded=false id="opt-in-labels-controlled-apm-rollout" %}}
 
@@ -867,7 +1095,7 @@ If you encounter problems enabling APM with SSI, see the [SSI troubleshooting gu
 [1]: https://v3.helm.sh/docs/intro/install/
 [2]: https://kubernetes.io/docs/tasks/tools/install-kubectl/
 [3]: /tracing/glossary/#instrumentation
-[4]: /tracing/trace_collection/automatic_instrumentation/single-step-apm/kubernetes/?tab=agentv764recommended#configure-instrumentation-for-namespaces-and-pods
+[4]: /tracing/trace_collection/single-step-apm/kubernetes/#target-specific-workloads
 [5]: /getting_started/tagging/unified_service_tagging/?tab=kubernetes#containerized-environment
 [7]: /tracing/trace_collection/library_config/
 [11]: https://app.datadoghq.com/fleet/install-agent/latest?platform=kubernetes
@@ -897,4 +1125,7 @@ If you encounter problems enabling APM with SSI, see the [SSI troubleshooting gu
 [35]: /tracing/trace_collection/automatic_instrumentation/single-step-apm/troubleshooting
 [36]: /tracing/trace_collection/automatic_instrumentation/single-step-apm/compatibility/
 [37]: /containers/kubernetes/csi_driver/
+[40]: https://app.datadoghq.com/organization-settings/api-keys
+[42]: https://app.datadoghq.com/apm/services
 [41]: /tracing/guide/injectors/
+[43]: /getting_started/site/

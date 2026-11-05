@@ -35,7 +35,7 @@ The [User Profiles][7] page lists the users who are interacting with your applic
 Each profile has attributes to help you better segment your users. You can conduct a full-text search or sort and filter based on any of these attributes. You can also customize this page with attributes relevant to your analytic needs. See the [Custom Attributes section](#use-custom-attributes-to-enrich-profiles) to learn how.
 
 
-{{% collapse-content title="List of user profile attributes" level="h5" expanded=true id="user-profile-attributes" %}}
+{{% collapse-content title="List of user profile attributes" level="h4" expanded=true id="user-profile-attributes" %}}
 
 <!-- #### User attributes  -->
 User ID `REQUIRED`
@@ -165,7 +165,7 @@ To import attributes from a reference table or from an integration such as Sales
 {{< img src="product_analytics/add_table_and_key3.png" alt="select the data to be merged with your profiles." style="width:80%;" >}}
 
 
-3. Select the {{< ui >}}join key{{< /ui >}} and the {{< ui >}}Product Analytics key{{< /ui >}} to merge the table with your profiles. Then, select which {{< ui >}}attributes{{< /ui >}} from the list to add to your profiles.
+3. Select the {{< ui >}}join key{{< /ui >}} and the {{< ui >}}Product Analytics key{{< /ui >}} to merge the table with your profiles. Then, select which {{< ui >}}attributes{{< /ui >}} from the list to add to your profiles. Each row needs a value in the join key column to match a profile, and rows without one are skipped. If no rows have a join key value, the scheduled sync completes successfully but imports no attributes. If this happens, verify that the join key is set to the correct column in your table.
 
 {{< img src="product_analytics/select_integration_attributes5.png" alt="The Configure import modal for Snowflake, showing the join key configuration and a list of selectable attributes with column names, types, and sample values." style="width:80%;" >}}
 

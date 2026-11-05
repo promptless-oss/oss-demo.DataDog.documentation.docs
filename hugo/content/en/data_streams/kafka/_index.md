@@ -1,21 +1,26 @@
 ---
-title: Kafka Monitoring
-description: Monitor Kafka cluster health, connect services to topics, and inspect schemas and messages with Data Streams Monitoring's Kafka Monitoring.
+title: Kafka Console
+description: Monitor Kafka cluster health, connect services to topics, and inspect schemas and messages with Kafka Console.
 aliases:
   - /data_streams/live_messages
   - /data_streams/messages
   - /data_streams/kafka/messages
+further_reading:
+- link: "https://www.datadoghq.com/blog/kafka-console/"
+  tag: "Blog"
+  text: "Troubleshoot Kafka issues across every layer of your stack with Kafka Console"
 ---
 
-With Data Streams Monitoring's Kafka Monitoring, a Datadog Agent check connects to your Kafka cluster and starts collecting health and performance metrics. Kafka Monitoring allows you to:
+With Data Streams Monitoring's Kafka Console, a Datadog Agent check connects to your Kafka cluster and starts collecting health and performance metrics. Kafka Console allows you to:
 
 - **Monitor Kafka health**: See cluster, broker, topic, and partition health with throughput, lag, and replication metrics
 - **Pinpoint root cause**: Correlate configuration and schema changes with lag, throughput, and errors, and trace issues to the exact topic, schema version, or configuration change
 - **Connect services to topics**: See which producers and consumers interact with each topic, with linked owners, repos, on-call rotations, traces, and error logs
 - **Inspect topic schemas and messages**: View schemas, compare versions, and access messages to debug poison payloads or explore the topic
+- **Manage topics**: Create and delete topics directly from Kafka Console
 - **Alert and automate responses**: Use [recommended monitor templates][4] and trigger Workflow Automation or webhooks when a Kafka condition fires
 
-To get started, see [Kafka Monitoring Setup][2].
+To get started, see [Kafka Console Setup][2].
 
 ## Workflows
 
@@ -23,7 +28,7 @@ To get started, see [Kafka Monitoring Setup][2].
 
 The {{< ui >}}Clusters{{< /ui >}}, {{< ui >}}Topics{{< /ui >}}, and {{< ui >}}Brokers{{< /ui >}} tabs display health status across your entire Kafka infrastructure. For each topic, you can see partition count, under-replicated and offline partitions, message throughput, and consumer lag.
 
-{{< img src="data_streams/kafka_clusters_overview-2.png" alt="The Kafka Monitoring clusters view showing cluster list with broker counts, topic names, replication status, and messages-in rate" >}}
+{{< img src="data_streams/kafka_clusters_overview-2.png" alt="The Kafka Console clusters view showing cluster list with broker counts, topic names, replication status, and messages-in rate" >}}
 
 Click into any topic to see a detailed summary, including incoming message rate, maximum lag across all partitions, and whether current lag is approaching the retention limit.
 
@@ -53,10 +58,18 @@ Use this information to contact the right team when a consumer is lagging or a p
 
 The {{< ui >}}Schema{{< /ui >}} section shows the current schema for a topic's key or value, with version history. Use the version selector to compare schemas across versions.
 
-The {{< ui >}}Messages{{< /ui >}} section lets you retrieve messages by partition and offset to inspect payloads directly. This is useful for debugging poison payloads or verifying message structure after a schema change. See [Enable message inspection][3] for the additional prerequisites and permissions required to retrieve messages.
+The {{< ui >}}Messages{{< /ui >}} section lets you retrieve messages by partition and offset to inspect payloads directly. This is useful for debugging poison payloads or verifying message structure after a schema change. See [Enable Kafka actions][3] for the additional prerequisites and permissions required to retrieve messages.
 
 {{< img src="data_streams/kafka_schema_messages.png" alt="Topic schema and messages view showing a Protobuf schema definition and a table of recent messages with date, partition, offset, and message value" >}}
 
+### Create and delete topics
+
+Create a topic on a cluster, or delete a topic you no longer need. You can do both from the same place you monitor a topic's health, lag, and owners, without switching to a separate Kafka admin tool. For the required setup and permissions, see [Enable Kafka actions][3].
+
 [2]: /data_streams/kafka/setup/
-[3]: /data_streams/kafka/setup/#enable-message-inspection
+[3]: /data_streams/kafka/setup/#enable-kafka-actions
 [4]: /data_streams/kafka/monitors_and_automation/
+
+## Further reading
+
+{{< partial name="whats-next/whats-next.html" >}}

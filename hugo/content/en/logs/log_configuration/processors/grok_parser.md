@@ -9,13 +9,19 @@ further_reading:
 - link: "/logs/log_configuration/parsing"
   tag: "Documentation"
   text: "Learn more about parsing"
+- link: "https://www.datadoghq.com/blog/detect-http2-abuse-apache-web-server-logs/"
+  tag: "Blog"
+  text: "How to detect HTTP/2 abuse in Apache web server logs"
+- link: "https://www.datadoghq.com/blog/tap-to-parse-logs/"
+  tag: "Blog"
+  text: "Find answers in your logs faster with Datadog’s Tap to Parse"
 ---
 
 ## Overview
 
 Create custom grok rules to parse the full message or a specific attribute of your raw event. As a best practice, limit your grok parser to 10 parsing rules. For more information on Grok syntax and parsing rules, see [Parsing][1].
 
-{{< img src="/logs/processing/processors/define_parsing_rules_syntax_suggestions.png" alt="Grok parser syntax suggestions in the UI" style="width:90%;" >}}
+{{< img src="/logs/processing/processors/ai-grok-rules.png" alt="Grok parser configuration" style="width:90%;" >}}
 
 ## Use cases
 
@@ -28,21 +34,31 @@ After creating a grok rule, the parser can write the IP address, user, request t
 
 Define the Grok processor on the [{{< ui >}}Pipelines{{< /ui >}} page][2]. To configure Grok parsing rules:
 
-1. Click {{< ui >}}Parse my logs{{< /ui >}} to automatically generate a set of three parsing rules based on the logs flowing through the pipeline.
-   **Note**: This feature requires that the corresponding logs are indexed and actively flowing in. You can temporarily deactivate or sample down exclusion filters to allow the feature to detect logs.
-1. {{< ui >}}Log Samples{{< /ui >}}: Add up to five sample logs (up to 5000 characters each) to test your parsing rules.
-1. {{< ui >}}Define parsing rules{{< /ui >}}: Write your parsing rules in the rule editor. As you define rules, the Grok parser provides syntax assistance:
-   - **Matcher suggestions**: Type a rule name followed by `%{`. A dropdown appears with available matchers (such as `word`, `integer`, `ip`, `date`). Select a matcher from the list to insert it into your rule.<br>
-     ```
-     MyParsingRule %{
-     ```
-   - **Filter suggestions**: When adding a filter with `:`, a dropdown shows compatible filters for the selected matcher.
-1. {{< ui >}}Test your rules{{< /ui >}}: Select a sample by clicking on it to trigger its evaluation against the parsing rule and display the result at the bottom of the screen. All samples show a status (`match` or `no match`), which highlights if one of the parsing rules of the grok parser matches the sample.
+1. Expand a pipeline and click {{< ui >}}Add...{{< /ui >}} > {{< ui >}}Grok Parser{{< /ui >}}.
+1. Enter a name in {{< ui >}}Name the processor{{< /ui >}}.
+1. Under {{< ui >}}Define parsing rules{{< /ui >}} > {{< ui >}}Log samples{{< /ui >}}, review the log samples, or click {{< ui >}}Add a new sample{{< /ui >}} to add your own (up to 10 total, 5000 characters each).
+
+    **Note**: Datadog pulls the sample logs from the five highest-volume log patterns matching your pipeline filter.
+1. Under {{< ui >}}Define parsing rules{{< /ui >}} > {{< ui >}}Parsing rules{{< /ui >}}, click {{< ui >}}Tap to Parse{{< /ui >}} to generate rules that match your samples. You can also write your own rules. For Grok syntax, see [Parsing][1].
+   <div class="alert alert-info">Tap to Parse does not consume <a href="/account_management/billing/ai_credits/">AI Credits</a>.</div>
+   {{< site-region region="gov,gov2" >}}
+   <div class="alert alert-info">Tap to Parse is not available for your selected <a href="/getting_started/site">Datadog site</a> ({{< region-param key="dd_site_name" >}}).</div>
+   {{< /site-region >}}
+1. (Optional) Expand {{< ui >}}Advanced Settings{{< /ui >}} to parse a specific attribute instead of the default `message` attribute, or define helper rules. See [Advanced settings][4].
+1. Select a sample to evaluate it against your parsing rules and display the result in the {{< ui >}}Preview parsing{{< /ui >}} panel. 
+
+   Each sample displays one of the following results:
+
+   - {{< ui >}}Match{{< /ui >}}: A rule matches the sample and extracts fields.
+   - {{< ui >}}Match{{< /ui >}} with a warning: A rule matches the sample but extracts no fields.
+   - {{< ui >}}No Match{{< /ui >}}: No rule matches the sample. 
+   
+1. Click {{< ui >}}Create{{< /ui >}}.
 
 
 ## Before and after state of logs
 
-{{% collapse-content title="Example: Parsing nginx access logs" level="h4" %}}
+{{% collapse-content title="Example: Parsing nginx access logs" level="h3" %}}
 
 **Before (raw log):**
 
@@ -116,3 +132,4 @@ Use the [Datadog Log Pipeline API endpoint][3] with the following Grok parser JS
 [1]: /logs/log_configuration/parsing/?tab=matchers
 [2]: https://app.datadoghq.com/logs/pipelines
 [3]: /api/v1/logs-pipelines/
+[4]: /logs/log_configuration/parsing/#advanced-settings

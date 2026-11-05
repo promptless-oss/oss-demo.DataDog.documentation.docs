@@ -29,6 +29,21 @@ further_reading:
 - link: "https://www.datadoghq.com/blog/cloud-cost-management-ai-costs/"
   tag: "Blog"
   text: "Attribute AI costs across providers with Datadog Cloud Cost Management"
+- link: "https://www.datadoghq.com/blog/making-agentic-token-costs-visible-in-production/"
+  tag: "Blog"
+  text: "Making agentic token costs visible in production"
+- link: "https://www.datadoghq.com/blog/cloud-cost-skill-bits-chat/"
+  tag: "Blog"
+  text: "Answer any cost question faster with the Cloud Cost skill in Bits Chat"
+- link: "https://www.datadoghq.com/blog/how-datadog-saves-money-by-optimizing-ai-usage/"
+  tag: "Blog"
+  text: "How Datadog saves over $1 million each month by optimizing AI usage"
+- link: "https://www.datadoghq.com/blog/federal-agencies-ai-spend-cloud-cost-management/"
+  tag: "Blog"
+  text: "Beyond the $1 AI era: How federal agencies can build the evidence for FY27 renewals"
+- link: "https://www.datadoghq.com/blog/cursor-cloud-cost-management/"
+  tag: "Blog"
+  text: "Manage Cursor costs with Datadog Cloud Cost Management"
 ---
 
 
@@ -43,13 +58,15 @@ To use AI Costs, you must have at least one of the following supported providers
 | AI provider | Setup method |
 |---|---|
 | Amazon Bedrock | [AWS integration][2] |
+| Amazon SageMaker | [AWS integration][2] |
 | Anthropic   | [SaaS integration][3] |
-| Azure Foundry Models   | [Azure integration][18] |
+| Azure Foundry   | [Azure integration][18] |
 | Google Gemini  | [Google Cloud integration][4] |
-| OpenAI     | [SaaS integration][5] |
+| OpenAI (Platform only)     | [SaaS integration][5] |
 | Vertex AI  | [Google Cloud integration][4] |
 | GitHub Copilot | [GitHub Copilot][15] |
 | Cursor | [Cursor][16] |
+| Databricks Mosaic AI     | [SaaS integration][19] |
 
 ## AI cost summary
 
@@ -153,3 +170,4 @@ After mapping, attributed spend appears in provider-specific dashboards and [Cos
 [16]: /cloud_cost_management/setup/saas_costs/?tab=cursor#configure-your-saas-accounts
 [17]: /cloud_cost_management/recommendations
 [18]: /cloud_cost_management/setup/azure/?tab=terraform
+[19]: /cloud_cost_management/setup/saas_costs/?tab=databricks#configure-your-saas-accounts

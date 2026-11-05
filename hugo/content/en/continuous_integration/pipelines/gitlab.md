@@ -26,13 +26,13 @@ Set up CI Visibility for GitLab to collect data on your pipeline executions, ana
 |---|---|---|
 | [Running pipelines][24] | Running pipelines | View pipeline executions that are running. Queued or waiting pipelines show with status "Running" on Datadog. |
 | [Running jobs][32] | Running jobs | View job executions that are currently running. |
-| [CI jobs failure analysis][28] | CI jobs failure analysis | Uses LLM models on relevant logs to analyze the root cause of failed CI jobs. |
+| [Logs Analysis][28] | Logs Analysis | Uses LLM models on relevant logs to analyze the root cause of failed CI jobs. |
+| Logs correlation | Logs correlation | Correlate pipeline spans to logs. Requires [Logs Storage][12]. |
 | [Filter CI Jobs on the critical path][29] | Filter CI Jobs on the critical path | Filter by jobs on the critical path. |
 | [Partial retries][19] | Partial pipelines | View partially retried pipeline executions. |
 | [Automatic job retries][31] | Automatic job retries | Datadog retries failed jobs classified as transient by its AI error model. |
 | [Manual steps][20] | Manual steps | View manually triggered pipelines. |
 | [Queue time][21] | Queue time | View the amount of time pipeline jobs sit in the queue before processing. |
-| Logs correlation | Logs correlation | Correlate pipeline spans to logs and enable [job log collection][12]. |
 | Infrastructure metric correlation | Infrastructure metric correlation | Correlate jobs to [infrastructure host metrics][14] for self-hosted GitLab runners. |
 | Custom pre-defined tags | Custom pre-defined tags | Set [custom tags][10] to all generated pipeline, stages, and job spans. |
 | [Custom tags][15] [and measures at runtime][16] | Custom tags and measures at runtime | Configure [custom tags and measures][13] at runtime. |
@@ -250,6 +250,30 @@ If a key:value pair contains any commas, surround it with quotes. For example, t
 
 ## Advanced configuration
 
+### Set a pipeline name
+
+By default, Datadog uses your GitLab project's path as the pipeline name. As a result, every downstream (child) pipeline triggered with the [`trigger`][33] keyword from the same project appears under the same name in Datadog.
+
+To give a pipeline a more meaningful name, use GitLab's [`workflow:name`][34] keyword in your `.gitlab-ci.yml`. For example, to name a downstream pipeline after the job that triggered it:
+
+```yaml
+trigger-job:
+  trigger:
+    include:
+      - local: path/to/child-pipeline.yml
+  variables:
+    CHILD_PIPELINE_NAME: $CI_JOB_NAME
+```
+
+In the child pipeline's `.gitlab-ci.yml` (or a file it includes), use the forwarded variable to set the pipeline name:
+
+```yaml
+workflow:
+  name: '$CHILD_PIPELINE_NAME'
+```
+
+**Note**: The example above uses variable expansion in the pipeline name, which requires GitLab 16.3 or later. `workflow:name` itself is available starting with GitLab 15.11 for plain string names. The pipeline name is only visible in Datadog starting with GitLab 16.1, when it was added to the pipeline webhook payload.
+
 ### Set custom tags
 
 You can set custom tags for all pipeline and job spans from your GitLab projects to improve traceability. For more information, see [Custom Tags and Measures][13].
@@ -300,10 +324,10 @@ CI Visibility supports Infrastructure metrics for "Instance" executors through l
 {{% tab "Kubernetes" %}}
 CI Visibility supports Infrastructure metrics for the Kubernetes executor. For this, it is necessary to have the Datadog Agent monitoring the Kubernetes Gitlab infrastructure. See [Install the Datadog Agent on Kubernetes][1] to install the Datadog Agent in a Kubernetes cluster.
 
-Due to limitations in the Datadog Agent, jobs shorter than the minimum collection interval of the Datadog Agent might not always display infrastructure correlation metrics. To adjust this value, see [Datadog Agent configuration template][2] and adjust the variable `min_collection_interval` to be less than 15 seconds.
+Due to limitations in the Datadog Agent, jobs shorter than the minimum collection interval of the Datadog Agent might not always display infrastructure correlation metrics. To adjust this value, set `min_collection_interval` to less than 15 seconds in your [Agent configuration file][2].
 
 [1]: /containers/kubernetes/installation/?tab=datadogoperator
-[2]: https://github.com/DataDog/datadog-agent/blob/main/pkg/config/config_template.yaml
+[2]: /agent/configuration/agent-configuration-files/
 {{% /tab %}}
 
 {{% tab "Other executors" %}}
@@ -317,14 +341,6 @@ CI Visibility does not support Infrastructure metrics for other executors.
 For failed GitLab pipeline executions, each error under the {{< ui >}}Errors{{< /ui >}} tab within a specific pipeline execution displays a message associated with the error type from GitLab.
 
 {{< img src="ci/ci_gitlab_failure_reason_new.png" alt="GitLab Failure Reason" style="width:100%;">}}
-
-#### CI jobs failure analysis
-
-If job logs collection is enabled, CI Visibility uses LLM models to analyze failed CI jobs based on relevant logs coming from GitLab.
-
-You can also add job failure analysis to a PR comment. See the guide on [using PR comments][30].
-
-For a full explanation, see the guide on [using CI jobs failure analysis][28].
 
 #### Errors provided by GitLab
 
@@ -367,17 +383,27 @@ The following table describes the message and domain correlated with each error 
 | `reached_max_descendant_pipelines_depth` | user   | Reached max descendant pipelines.                        |
 | `ip_restriction_failure`          | provider     | IP restriction failure.                                    |
 
-### Collect job logs
+### Manage job logs
 
-The following GitLab versions support collecting job logs:
+#### Logs Analysis
+
+Logs Analysis uses LLM models to classify job failures by root cause based on relevant logs coming from GitLab.
+
+For a full explanation, see the guide on [using Logs Analysis][28].
+
+Logs Analysis is enabled by default in Datadog, but requires job log forwarding to be configured, as described below.
+
+You can also add Logs Analysis to a PR comment. See the guide on [using PR comments][30].
+
+Logs Analysis being enabled is also a prerequisite for [automatic job retries][31].
+
+The following GitLab versions support forwarding job logs to Datadog:
 
 * GitLab.com (SaaS)
 * GitLab >= 15.3 (self-hosted) only if you are using [object storage to store job logs][7]
 * GitLab >= 14.8 (self-hosted) by enabling the `datadog_integration_logs_collection` feature flag
 
-Job logs are collected in [Log Management][9] and are automatically correlated with the GitLab pipeline in CI Visibility. Log files larger than one GiB are truncated.
-
-To enable collection of job logs:
+To enable job log forwarding from GitLab:
 
 {{< tabs >}}
 {{% tab "GitLab.com" %}}
@@ -408,7 +434,13 @@ The <a href="https://docs.gitlab.com/ee/administration/object_storage.html#amazo
 {{% /tab %}}
 {{< /tabs >}}
 
-Logs are billed separately from CI Visibility. Log retention, exclusion, and indexes are configured in [Log Management][6]. Logs for GitLab jobs can be identified by the `datadog.product:cipipeline` and `source:gitlab` tags.
+#### Logs Storage
+
+After completing the steps for your GitLab version, go to [CI/CD Repository settings][35] and enable Logs Storage at the Datadog organization level or for the desired repositories.
+
+Logs Storage is billed separately from CI Visibility. Log retention, exclusion, and indexes are configured in [Log Management][6]. Logs for GitLab jobs can be identified by the `datadog.product:cipipeline` and `source:gitlab` tags.
+
+Job logs are collected in [Log Management][9] and are automatically correlated with the GitLab pipeline in CI Visibility. Log files larger than one GiB are truncated.
 
 For more information about processing job logs collected from the GitLab integration, see the [Processors documentation][17].
 
@@ -449,7 +481,7 @@ The {{< ui >}}CI Pipeline List{{< /ui >}} page shows data for only the default b
 [9]: /logs/
 [10]: /continuous_integration/pipelines/gitlab/?tab=gitlabcom#set-custom-tags
 [11]: /continuous_integration/pipelines/gitlab/?tab=gitlabcom#partial-and-downstream-pipelines
-[12]: /continuous_integration/pipelines/gitlab/#enable-job-log-collection
+[12]: /continuous_integration/pipelines/gitlab/#logs-storage
 [13]: /continuous_integration/pipelines/custom_tags_and_measures/?tab=linux
 [14]: /continuous_integration/pipelines/gitlab/?tab=gitlabcom#correlate-infrastructure-metrics-to-jobs
 [15]: /continuous_integration/pipelines/gitlab/?tab=gitlabcom#view-error-messages-for-pipeline-failures
@@ -470,3 +502,6 @@ The {{< ui >}}CI Pipeline List{{< /ui >}} page shows data for only the default b
 [30]: /continuous_integration/guides/use_ci_jobs_failure_analysis/#using-pr-comments
 [31]: /continuous_integration/pipelines/automatic_retries/
 [32]: /glossary/#running-job
+[33]: https://docs.gitlab.com/ee/ci/yaml/#trigger
+[34]: https://docs.gitlab.com/ee/ci/yaml/#workflowname
+[35]: https://app.datadoghq.com/ci/settings/ci-cd/repositories

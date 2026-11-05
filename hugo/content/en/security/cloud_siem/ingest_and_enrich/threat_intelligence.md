@@ -11,9 +11,15 @@ further_reading:
 - link: /security/cloud_siem/triage_and_investigate/ioc_explorer/
   tag: documentation
   text: IOC Explorer
+- link: "/security/cloud_siem/guide/ingest-stix-threat-intelligence/"
+  tag: "Documentation"
+  text: "Ingest STIX Threat Intelligence"
 - link: "https://www.datadoghq.com/blog/recorded-future-content-pack/"
   tag: "Blog"
   text: "Integrate Recorded Future threat intelligence with Datadog Cloud SIEM"
+- link: "/security/cloud_siem/ingest_and_enrich/muted_indicators/"
+  tag: "Documentation"
+  text: "Mute benign indicators in Cloud SIEM"
 ---
 
 ## Overview
@@ -21,6 +27,8 @@ further_reading:
 Datadog provides built-in [threat intelligence][1] for Cloud SIEM logs. This article explains how to extend that functionality by enriching logs with your own custom threat intelligence feeds.
 
 Cloud SIEM supports enriching and searching logs using threat intelligence indicators of compromise (IOCs) stored in Datadog reference tables. [Reference Tables][7] allow you to combine metadata with information already in Datadog.
+
+<div class="alert alert-info">You can also push indicators programmatically as STIX 2.1 bundles instead of uploading CSVs. See <a href="/security/cloud_siem/guide/ingest-stix-threat-intelligence/">Ingest STIX Threat Intelligence</a>.</div>
 
 ### How bring your own threat intelligence works
 
@@ -49,6 +57,8 @@ When Cloud SIEM processes a log, the log's IP, domain, hash, AWS account ID, con
 - Cloud SIEM evaluates logs in real time and uses both [Datadog-curated threat intelligence][10] and your own reference tables.
 - Reference tables are the mechanism for storing and joining your custom IoCs with logs and detections.
 
+Muting an indicator in Cloud SIEM does not change ratings from your own threat intelligence. To mark indicators from Datadog's built-in feeds as benign for your organization, see [Muted Indicators][12].
+
 ### Store indicators of compromise in reference tables
 
 Threat intelligence is supported in the CSV format. It requires a table for each Indicator type (for example, IP address, domain, SHA256 hash, AWS account ID, container image name) and requires the following columns:
@@ -63,7 +73,7 @@ Threat intelligence is supported in the CSV format. It requires a table for each
 | intention       | text | The threat intel [intent][9]. This is used by some out-of-the-box detection rules.       | true     | malicious                                                                 |
 | source          | text | The name of the source and the link to its site, such as your team and your team's wiki. | true     | `{"name":"internal_security_team", "url":"https://teamwiki.example.org"}` |
 
-<div class="alert alert-info">JSON in a CSV requires double quoting. The following is an example CSV:</div>
+<div class="alert alert-info">JSON in a CSV requires double quoting. The following is an example CSV:
 
 ```
 ip_address,additional_data,category,intention,source
@@ -71,6 +81,7 @@ ip_address,additional_data,category,intention,source
 192.0.2.2,"{""ref"":""hxxp://example.org""}",scanner,suspicious,"{""name"":""internal_security_team"", ""url"":""https://teamwiki.example.org""}"
 192.0.2.3,"{""ref"":""hxxp://example.org""}",scanner,suspicious,"{""name"":""internal_security_team"", ""url"":""https://teamwiki.example.org""}"
 ```
+</div>
 
 #### CSV structure for domains
 
@@ -135,6 +146,7 @@ AWS account ID feeds are useful for tracking compromised or suspicious AWS accou
 | `source`          | json | The name of the source and the link to its site, such as your team and your team's wiki. | true     | `{"name":"internal_security_team", "url":"https://teamwiki.example.org"}` |
 
 <div class="alert alert-info">JSON in a CSV requires double quoting. The following is an example CSV:
+
 ```
 aws_account_id,additional_data,category,intention,source
 123456789012,"{""ref"":""hxxp://example.org""}",scanner,suspicious,"{""name"":""internal_security_team"", ""url"":""https://teamwiki.example.org""}"
@@ -295,3 +307,4 @@ You can view your threat intelligence data in the [IOC Explorer][11].
 [9]: /security/threat_intelligence/#threat-intelligence-intents
 [10]: /security/threat_intelligence#threat-intelligence-sources
 [11]: /security/cloud_siem/triage_and_investigate/ioc_explorer/
+[12]: /security/cloud_siem/ingest_and_enrich/muted_indicators/
