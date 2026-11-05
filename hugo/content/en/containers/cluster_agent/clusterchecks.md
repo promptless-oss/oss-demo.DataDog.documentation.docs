@@ -159,7 +159,9 @@ The [Datadog Helm Chart][3] and the [Datadog Operator][4] additionally offer the
 
 ### Advanced dispatching
 
-The Cluster Agent can use an advanced dispatching logic for cluster checks, which takes into account the execution time and metric samples from check instances. This logic enables the Cluster Agent to optimize dispatching and distribution between cluster check runners.
+With advanced dispatching, the Cluster Agent balances cluster checks between cluster check runners based on how busy each runner's workers are. This helps keep a runner from running out of free workers while other runners have spare capacity.
+
+The Cluster Agent estimates how much of a worker each check needs by dividing the check's average execution time by its collection interval. For example, a check that takes 3 seconds to run every 15 seconds needs about 0.2 workers. The Cluster Agent periodically rebalances checks so that runners have similar worker utilization. It moves checks only when the new distribution is significantly more balanced than the current one.
 
 To configure advanced dispatching logic, set the `DD_CLUSTER_CHECKS_ADVANCED_DISPATCHING_ENABLED` environment variable to `true` for the Cluster Agent. See [Cluster Agent environment variables][15] for how to set environment variables in your Datadog Operator manifest or Helm chart.
 
