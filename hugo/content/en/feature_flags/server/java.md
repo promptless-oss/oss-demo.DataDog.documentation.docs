@@ -343,6 +343,7 @@ Use [Server SDK Configuration Sources][9] as the canonical reference for source 
 - [Use a custom agentless endpoint][10] for advanced testing, local development, or an operator-managed proxy
 - [Use Agent Remote Configuration][13] to retain Agent-managed delivery
 - [Migrate an existing Remote Configuration setup][11] and remove the deprecated `DD_EXPERIMENTAL_FLAGGING_PROVIDER_ENABLED` setting
+- [Start the Agent before the application][19] when you use Agent Remote Configuration
 
 In agentless mode, Java prefers a compatible local telemetry relay for experiment exposure and aggregated flag evaluation events. It sends both event types directly when no compatible relay is available. The direct path uses the application `DD_API_KEY` and `DD_SITE` settings. For no-Agent serverless environments, you can use [`serverless-init`][17] as the local telemetry relay.
 
@@ -377,7 +378,7 @@ client.on(ProviderEvent.PROVIDER_CONFIGURATION_CHANGED, (event) -> {
 });
 {{< /code-block >}}
 
-`PROVIDER_CONFIGURATION_CHANGED` is an optional OpenFeature event. Check the Datadog provider documentation to verify this event is supported in your version.
+After the provider is ready, it emits `PROVIDER_CONFIGURATION_CHANGED` for each new flag configuration that it receives.
 
 ### Multiple clients
 
@@ -739,9 +740,10 @@ When the selected configuration path supports exposures, exposures appear only f
 
 1. Verify the flag is associated with an experiment in the Datadog UI.
 2. Verify the Agent API key and connectivity.
-3. Confirm that `DD_FEATURE_FLAGS_EXPOSURES_DATADOG_LOGGING_ENABLED` is unset or set to `true`.
-4. Confirm that the application evaluates flags through an OpenFeature client. If the Datadog provider runs inside a `MultiProvider`, confirm that the OpenFeature SDK is version 1.23.0 or later.
-5. Check the evaluation details for an error code. The provider sends no exposure for an evaluation that fails. See the [Exposures](#exposures) section.
+3. If you use Agent Remote Configuration, verify that the Agent was available when the application started. If it was not, restart the application. See [Agent availability][19].
+4. Confirm that `DD_FEATURE_FLAGS_EXPOSURES_DATADOG_LOGGING_ENABLED` is unset or set to `true`.
+5. Confirm that the application evaluates flags through an OpenFeature client. If the Datadog provider runs inside a `MultiProvider`, confirm that the OpenFeature SDK is version 1.23.0 or later.
+6. Check the evaluation details for an error code. The provider sends no exposure for an evaluation that fails. See the [Exposures](#exposures) section.
 
 ## Further reading
 
@@ -764,3 +766,4 @@ When the selected configuration path supports exposures, exposures appear only f
 [16]: /serverless/google_cloud_run/containers/in_container/java/
 [17]: /feature_flags/implementation_patterns/serverless/#send-feature-flag-telemetry
 [18]: /feature_flags/guide/apm_trace_enrichment/
+[19]: /feature_flags/concepts/configuration_sources/#agent-availability
