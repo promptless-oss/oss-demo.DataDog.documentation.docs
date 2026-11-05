@@ -236,6 +236,36 @@ agent diagnose show-metadata agent-telemetry
 | **APM**                                     |                                                                                                                        |
 | trace.enabled                               | Whether the trace-agent process is running.                                                                            |
 | trace.working                               | Whether the trace-agent process is receiving and sending traces.                                                       |
+| **APM Single Step Instrumentation (Windows)** |                                                                                                                        |
+| injector.processes_added_to_injection_tracker | Number of processes added to the injection tracker                                                                     |
+| injector.processes_removed_from_injection_tracker | Number of processes removed from the injection tracker                                                                 |
+| injector.processes_skipped_subsystem        | Number of subsystem processes skipped                                                                                  |
+| injector.processes_skipped_container        | Number of container processes skipped                                                                                  |
+| injector.processes_skipped_protected        | Number of protected processes skipped                                                                                  |
+| injector.processes_skipped_system           | Number of system processes skipped                                                                                     |
+| injector.processes_skipped_excluded         | Number of processes skipped because they are excluded                                                                  |
+| injector.processes_skipped_default          | Number of processes skipped because of the default skip list                                                           |
+| injector.processes_skipped_custom           | Number of processes skipped because of the custom skip list                                                            |
+| injector.processes_skipped_crash_recovery   | Number of processes skipped because of the crash recovery skip list                                                    |
+| injector.processes_automatically_added_to_skip_list | Number of processes that crash recovery added to the skip list                                                         |
+| injector.processes_skipped_signature_policy | Number of processes skipped because of a binary signature policy                                                       |
+| injector.processes_signature_policy_unknown | Number of processes whose binary signature policy could not be determined                                              |
+| injector.processes_skipped_short_name       | Number of processes skipped because their image path uses an 8.3 short name                                            |
+| injector.injection_attempts                 | Number of injection attempts                                                                                           |
+| injector.injection_attempt_failures         | Number of failed injection attempts                                                                                    |
+| injector.injection_successes                | Number of successful injections                                                                                        |
+| injector.injection_failures                 | Number of failed injections                                                                                            |
+| injector.injection_max_time_us              | Maximum injection time in microseconds                                                                                 |
+| injector.pe_caching_failures                | Number of PE caching failures                                                                                          |
+| injector.import_directory_restoration_failures | Number of import directory restoration failures                                                                        |
+| injector.pe_memory_allocation_failures      | Number of PE memory allocation failures                                                                                |
+| injector.pe_injection_context_allocated     | Number of PE injection contexts allocated                                                                              |
+| injector.pe_injection_context_cleanedup     | Number of PE injection contexts cleaned up                                                                             |
+| injector.crashes_during_injection           | Number of crashes observed during injection                                                                            |
+| injector.crashes_post_injection             | Number of crashes observed after injection                                                                             |
+| injector.boot_recovery_crash_boots_detected | Number of crash boots detected by boot recovery                                                                        |
+| injector.boot_recovery_driver_self_disabled | Number of times the driver disabled itself through boot recovery                                                       |
+| injector.boot_recovery_stability_timer_fired | Number of times the boot recovery stability timer fired                                                                |
 | **Synthetic Monitoring**                              |                                                                                                                        |
 | synthetics_agent.checks_received            | Number of tests received                                                                                               |
 | synthetics_agent.checks_processed           | Number of tests executed                                                                                               |
@@ -291,6 +321,8 @@ agent diagnose show-metadata agent-telemetry
 | datadog_csi_driver.library_volume_links           | Number of volumes linked to a library, per library                                                              |
 
 Only applicable metrics are emitted. For example, if DBM is not enabled, none of the database related metrics are emitted.
+
+The APM Single Step Instrumentation (Windows) metrics are tagged with `ddinjector_version`, the version of the installed `ddinjector` driver.
 
 ### Troubleshooting metrics
 
