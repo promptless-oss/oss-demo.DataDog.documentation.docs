@@ -855,6 +855,10 @@ To trace an agent execution, use the function decorator `ddtrace.llmobs.decorato
 `ml_app`
 : optional - _string_
 <br/>The name of the ML application that the operation belongs to. See [Tracing multiple applications](#tracing-multiple-applications) for more information.
+
+`version`
+: optional - _string_
+<br/>The version of the agent, such as `v3`. The SDK sets this value as the `agent_version` tag on the agent span. Child spans of the agent don't receive the tag. Only the `agent()` decorator accepts `version`; other decorators ignore it and log a warning.
 {{% /collapse-content %}}
 
 #### Example
@@ -866,6 +870,34 @@ from ddtrace.llmobs.decorators import agent
 def react_agent():
     ... # user application logic
     return
+{{< /code-block >}}
+
+#### Track versions
+
+To record which version of your agent produced each trace, pass `version` when you start the agent span. Use the `agent()` decorator or the `LLMObs.agent()` inline method:
+
+{{< code-block lang="python" >}}
+from ddtrace.llmobs import LLMObs
+from ddtrace.llmobs.decorators import agent
+
+@agent(version="v3")
+def react_agent():
+    ... # user application logic
+    return
+
+def support_agent():
+    with LLMObs.agent(name="support_agent", version="v3"):
+        ... # user application logic
+    return
+{{< /code-block >}}
+
+When an auto-instrumented framework creates the agent span, set the version with `LLMObs.annotation_context(agent={"version": "..."})` instead. The SDK tags only the agent spans started within the context. For details, see the [Annotating auto-instrumented spans](#annotating-auto-instrumented-spans) section.
+
+{{< code-block lang="python" >}}
+from ddtrace.llmobs import LLMObs
+
+with LLMObs.annotation_context(agent={"version": "v3"}):
+    result = framework_agent.run(user_question) # agent from an auto-instrumented framework
 {{< /code-block >}}
 
 {{% /tab %}}
@@ -1397,6 +1429,10 @@ The `LLMObs.annotate()` method accepts the following arguments:
 : optional - _list of strings_
 <br />A list of tag keys (already set with `tags` or annotated previously on the same span) to propagate as custom tags on the generated LLM cost and token metrics. Entries that don't reference an existing tag key are skipped. See [Cost monitoring](#cost-monitoring) for details.
 
+`agent`
+: optional - _dictionary_
+<br />A dictionary with the form `{"version": "..."}` that declares the version of the agent the span represents. You can also import the `Agent` object from `ddtrace.llmobs` and pass it in as the `agent` argument. The SDK sets the version as the `agent_version` tag. **Note**: This argument only applies to agent spans.
+
 {{% /collapse-content %}}
 
 #### Example
@@ -1892,6 +1928,10 @@ The `LLMObs.annotation_context()` method accepts the following arguments:
 `cost_tags`
 : optional - _list of strings_
 <br />A list of tag keys to propagate as custom tags on the generated LLM cost and token metrics. Each entry must reference a key present in `tags` at span start (supplied to the same context or a parent context); tag keys added later with `LLMObs.annotate()` are not retained. See [Cost monitoring](#cost-monitoring) for details.
+
+`agent`
+: optional - _dictionary_
+<br />A dictionary with the form `{"version": "..."}` that declares the version of the agent running in the annotation context. You can also import the `Agent` object from `ddtrace.llmobs` and pass it in as the `agent` argument. The SDK sets the version as the `agent_version` tag on agent spans started within the context, including agent spans that auto-instrumented frameworks create. **Note**: Other span kinds in the context don't receive the tag.
 
 {{% /collapse-content %}}
 
