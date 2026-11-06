@@ -61,6 +61,25 @@ unable to mount containerd image, err: unable to scan image named: {image-name},
 
 The workaround for this issue is to disable image streaming in GKE. For more information, see the [Disable Image streaming][5] section of the GKE docs.
 
+### Unreadable image layers with overlayfs direct scan
+
+When `sbom.container_image.overlayfs_direct_scan` is enabled, the Agent reads each image layer directly from the container runtime's storage on the host. If the Agent can't open or list a layer directory, the scan fails. The Agent doesn't report an SBOM that is missing that layer's packages. This failure has two common causes:
+
+- The runtime's storage directory isn't mounted into the Agent container.
+- The Agent's user doesn't have read access to the storage directory.
+
+The Agent drops the scan and logs a message similar to the following:
+
+```sh
+dropping unsupported SBOM scan for '<IMAGE_ID>': sbom scan not supported for this image: cannot read image layer: open /host/var/lib/containerd/<LAYER_PATH>: no such file or directory
+```
+
+To fix this issue:
+
+1. Mount the container runtime's storage directory from the host into the Agent container under `/host`. If you set `HOST_ROOT`, mount it under that path instead. For example, mount `/var/lib/containerd` for containerd, `/var/lib/containers/storage` for CRI-O, or `/var/lib/docker` for Docker.
+2. Give the Agent's user read access to the mounted directory.
+3. Restart the Agent so it scans the image again.
+
 ## Disable Cloud Security Vulnerabilities
 
 In the `datadog-values.yaml` file for the Agent, set the following configuration settings to `false`:
