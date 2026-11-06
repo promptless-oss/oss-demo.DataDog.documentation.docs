@@ -49,8 +49,8 @@ The Agent can autodiscover and attach tags to all data emitted by containers. Th
 | `nomad_task`         | Low          | Nomad environment                           |
 | `nomad_job`          | Low          | Nomad environment                           |
 | `nomad_group`        | Low          | Nomad environment                           |
-| `git.commit.sha`     | Low          | [org.opencontainers.image.revision][3] used |
-| `git.repository_url` | Low          | [org.opencontainers.image.source][3] used   |
+| `git.commit.sha`     | Low          | `org.opencontainers.image.revision` [image label or annotation][3] used |
+| `git.repository_url` | Low          | `org.opencontainers.image.source` [image label or annotation][3] used |
 
 ### Unified service tagging
 
