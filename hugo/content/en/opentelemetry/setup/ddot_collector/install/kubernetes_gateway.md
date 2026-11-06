@@ -860,6 +860,21 @@ To ensure APM Stats are calculated on 100% of your traces before sampling, the <
 {{% /tab %}}
 {{< /tabs >}}
 
+### Convert cumulative metrics to delta on the DaemonSet
+
+Datadog works best with [delta temporality metrics][13]. When the gateway runs several replicas, the gateway Service can spread the points of one cumulative metric series across different gateway pods. Each pod then computes deltas from only part of the series, which produces incorrect values. Converting cumulative metrics to delta on the DaemonSet Collector, before they reach the gateway, keeps the delta values correct.
+
+<div class="alert alert-info">This behavior requires Datadog Agent version 7.XX.0 or later.</div>
+
+The DaemonSet Collector adds the `cumulativetodelta` processor to its metrics pipelines when both of the following settings apply to its `otel-agent` container:
+
+- **`DD_OTELCOLLECTOR_GATEWAY_DAEMONSET`** (`otelcollector.gateway.daemonset`): Set to `true`. Defaults to `false`.
+- **`DD_OTELCOLLECTOR_CONVERTER_FEATURES`** (`otelcollector.converter.features`): Includes `cumulativetodelta`.
+
+The processor is added to the end of the `processors` list of each metrics pipeline that exports to an `otlp`, `otlp_grpc`, `otlphttp`, `otlp_http`, or `loadbalancing` exporter, including named instances such as `otlphttp/gateway`. A pipeline that already defines a `cumulativetodelta` processor keeps its own configuration.
+
+Collector processors apply to every exporter in a pipeline. If a metrics pipeline also exports to another exporter, such as `debug`, that exporter also receives delta metrics, and the Collector logs a warning. To keep cumulative metrics for that exporter, move it to a separate metrics pipeline.
+
 ### Using a custom Collector image
 
 To use a custom-built Collector image for your gateway, specify the image repository and tag. If you need instructions on how to build the custom images, see [Use Custom OpenTelemetry Components][5].
@@ -1377,3 +1392,4 @@ To view your gateway pods:
 [10]: /containers/guide/cluster_agent_autoscaling_metrics/?tab=helm
 [11]: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/datadogextension
 [12]: /opentelemetry/config/hostname_tagging/#collector-exporting-through-a-gateway
+[13]: /opentelemetry/guide/otlp_delta_temporality/
