@@ -25,6 +25,8 @@ Datadog provides monitoring and log collection for Cloud Run through the [Google
 
 Datadog also provides a solution for instrumenting your Cloud Run applications with a Serverless Agent to enable tracing, enhanced metrics, custom metrics, and direct log collection. [Enhanced metrics][2] are distinguished with the `gcp.run.container.enhanced.*` and `gcp.run.job.enhanced.*` namespaces.
 
+The enhanced instance metric, `gcp.run.container.enhanced.instance`, carries the `service`, `env`, and `version` tags from the `DD_SERVICE`, `DD_ENV`, and `DD_VERSION` environment variables, so you can group dashboards and alerts on it by service. It doesn't receive tags set with `DD_TAGS`.
+
 For instrumentation, select your workload below for instructions.
 
 ## Choose your workload

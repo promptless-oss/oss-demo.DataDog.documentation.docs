@@ -20,7 +20,7 @@ content_filters:
 | `DD_VERSION`             | See [Unified Service Tagging](/getting_started/tagging/unified_service_tagging/). | Both containers |
 | `DD_ENV`                 | See [Unified Service Tagging](/getting_started/tagging/unified_service_tagging/). | Both containers |
 | `DD_SOURCE`              | Set the log source to enable a [Log Pipeline](/logs/log_configuration/pipelines) for advanced parsing. To automatically apply language-specific parsing rules, set it to your application language (`python`, `nodejs`, `go`, `java`, `csharp`, `ruby`, or `php`), or use your custom pipeline. Defaults to `containerapp`. | Sidecar container |
-| `DD_TAGS`                | Add custom tags to your logs, metrics, and traces. Tags should be comma separated in key/value format (for example: `key1:value1,key2:value2`). The enhanced replica metric, `azure.app_containerapps.enhanced.replica`, doesn't receive these tags. To group or alert on that metric by service, set `DD_SERVICE`, `DD_ENV`, and `DD_VERSION`, which it receives as `service`, `env`, and `version` tags. | Sidecar container |
+| `DD_TAGS`                | Add custom tags to your logs, metrics, and traces. Tags should be comma separated in key/value format (for example: `key1:value1,key2:value2`). | Sidecar container |
 
 <!-- Java -->
 {% if equals($prog_lang, "java") %}
