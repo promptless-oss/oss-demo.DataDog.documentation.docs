@@ -797,21 +797,40 @@ network_path:
 
 <div class="alert alert-info">Source public IP resolution is available in Agent v7.75+.</div>
 
-Network Path resolves the source host's public IP address to provide accurate path visualization for internet-bound traffic. The Agent contacts external IP check services over HTTPS to determine the public IP of the host.
+Network Path resolves the source host's public IP address to provide accurate path visualization for internet-bound traffic. To determine the public IP of the host, the Agent contacts external IP check services over HTTPS (port 443). It tries each service in order and uses the first successful response.
 
 This feature is **not required** for Network Path to function. If these services are unreachable, Network Path continues to operate normally, but the source public IP is not resolved and path visualizations do not display source IP metadata.
 
-If your network restricts outbound traffic and you want source public IP resolution, add the following URLs to your firewall allowlist:
+If your network restricts outbound traffic and you want source public IP resolution, add at least one of the following URLs to your firewall allowlist:
 
 | URL | Provider |
 |-----|----------|
-| `https://icanhazip.com` | Cloudflare |
-| `https://ipinfo.io/ip` | IPinfo |
 | `https://checkip.amazonaws.com` | Amazon |
-| `https://api.ipify.org` | ipify |
 | `https://whatismyip.akamai.com` | Akamai |
+| `https://icanhazip.com` | Cloudflare |
 
-The Agent tries each service in order and uses the first successful response. All requests are made over HTTPS (port 443).
+**Note**: Agent v7.86 and earlier also contact `https://ipinfo.io/ip` and `https://api.ipify.org`, and try the services in a different order.
+
+#### Disable source public IP resolution
+
+To stop the Agent from contacting IP check services, turn off source public IP resolution for each type of test you run:
+
+- **Dynamic tests**: For dynamic tests, basic dynamic tests, and Dynamic Tests for NetFlow, set `network_path.collector.disable_source_public_ip_collection` to `true` in the `datadog.yaml` file:
+
+  ```yaml
+  network_path:
+    collector:
+      disable_source_public_ip_collection: true
+  ```
+
+- **Scheduled tests**: Set `disable_source_public_ip_collection` to `true` in the `conf.d/network_path.d/conf.yaml` file. Set it under `init_config` to apply it to all instances, or under an individual instance to apply it to that destination only:
+
+  ```yaml
+  init_config:
+    disable_source_public_ip_collection: true
+  instances:
+    - hostname: api.datadoghq.com
+  ```
 
 ## Troubleshooting
 
