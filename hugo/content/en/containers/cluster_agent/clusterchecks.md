@@ -511,16 +511,28 @@ In addition, each Pod should be monitored with the [NGINX check][12], as it enab
 
 ## Validation
 
-The Datadog Cluster Agent dispatches each cluster check to a Node Agent to run. Run the [Datadog Cluster Agent's `clusterchecks` subcommand][13] to show the check dispatching. This shows the node running the cluster check, the resolved check configuration, and all associated tags.
+The Datadog Cluster Agent dispatches each cluster check to a Node Agent to run. Run the [Datadog Cluster Agent's `clusterchecks` subcommand][13] to show the check dispatching. The output lists the Agents reporting to the Cluster Agent. For each node, it then shows one line for each check instance, with its average execution time, last run, and status. A `-` in those columns means the node hasn't reported stats for that instance to the Cluster Agent. To show only one check, add `--check <CHECK_NAME>`.
 
 ```
 # kubectl exec <CLUSTER_AGENT_POD_NAME> -- agent clusterchecks
-=== 2 agents reporting ===
+...
+=== 2 agent(s) reporting ===
+Name                             Type         Group     Workers   Utilization   Running checks   Last seen
+example-node-1-my-cluster-name   node-agent   general   -         -             0                4s ago
+example-node-2-my-cluster-name   node-agent   general   -         -             1                7s ago
 
-Name                              Running checks
-example-node-1-my-cluster-name    0
-example-node-2-my-cluster-name    1
+===== Checks on example-node-2-my-cluster-name =====
+Check        Instance ID                                    Avg exec   Last run   Status
+http_check   http_check:My Nginx Service:be58da251c066dba   -          -          -
 
+Use --verbose to print the full check configurations.
+```
+
+To see the resolved check configuration and all associated tags, add `--verbose`:
+
+```
+# kubectl exec <CLUSTER_AGENT_POD_NAME> -- agent clusterchecks --verbose
+...
 ===== Checks on example-node-2-my-cluster-name =====
 
 === http_check check ===
