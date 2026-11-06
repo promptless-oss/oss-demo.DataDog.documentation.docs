@@ -43,6 +43,10 @@ You can use the following template variables to dynamically assign your containe
 * For the `"%%host%%"` template variable: in case the Agent is not able to find the IP, this template variable falls back to the `bridge` network IP.
 * For the `"%%host_<NETWORK NAME>%%"`: if the `<NETWORK_NAME>` specified is not found, this template variable behaves like `"%%host%%"`.
 
+**Containers with several IP addresses on containerd**:
+
+Some containerd containers have more than one IP address, such as tasks in ECS `awsvpc` mode. For these containers, `"%%host%%"` resolves to an address outside the link-local range (`169.254.0.0/16`) when one exists. The Agent picks the same address every time, so checks that use `"%%host%%"` keep a stable target.
+
 Depending on your platform, not all template variables are supported:
 
 | Platform    | Auto-discovery identifiers  | Host | Port | Tag | Pid | Env | Hostname | Kube Namespace | Pod Name | Pod UID |
