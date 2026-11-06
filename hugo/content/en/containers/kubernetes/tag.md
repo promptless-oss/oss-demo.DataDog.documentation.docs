@@ -226,6 +226,27 @@ The list of automatically-assigned tags depends on the Agent's [cardinality conf
 **Source**: Pod Quality of Service class<br>
 **Requirement**: N/A
 
+`inference_workload`
+: **Cardinality**: Low<br>
+**Source**: Pod labels or ownerref set by a supported inference framework. See [Inference workload tags](#inference-workload-tags).<br>
+**Requirement**: Pod must be deployed by a supported inference framework
+
+`inference_workload_component`
+: **Cardinality**: Low<br>
+**Source**: Pod labels or ownerref set by a supported inference framework. See [Inference workload tags](#inference-workload-tags).<br>
+**Requirement**: Pod must be deployed by a supported inference framework
+
+### Inference workload tags
+
+The Agent adds the `inference_workload` and `inference_workload_component` tags to pods, and their containers, that the following inference frameworks deploy. Use `inference_workload` to group all pods that serve the same model deployment, and `inference_workload_component` to tell apart the roles within it, such as `decode` and `prefill` workers. You don't need to add custom labels or annotations.
+
+| Framework | Pod requirement | `inference_workload` value | `inference_workload_component` value |
+|-----------|-----------------|----------------------------|--------------------------------------|
+| NVIDIA Dynamo | Pod label `nvidia.com/dynamo-graph-deployment-name` | Value of the `nvidia.com/dynamo-graph-deployment-name` label | Value of the `nvidia.com/dynamo-sub-component-type` label, or the `nvidia.com/dynamo-component-type` label if the sub-component label is absent |
+| KServe | Pod label `app.kubernetes.io/part-of` set to `llminferenceservice` | Value of the `app.kubernetes.io/name` label | Value of the `app.kubernetes.io/component` label |
+| KubeRay | Pod label `ray.io/serve` with any value, and the first container's image repository name contains `ray-llm` or `vllm` | Value of the `ray.io/cluster` label, without the five-character suffix that Kubernetes generates | `head` for head pods. For worker pods, the value of the `ray.io/group` label, or `worker` if that label is absent. |
+| KubeAI | Pod ownerref to a `Model` resource in the `kubeai.org` API group | Name of the owning `Model` resource | `inference` |
+
 
 ### Host tag
 
