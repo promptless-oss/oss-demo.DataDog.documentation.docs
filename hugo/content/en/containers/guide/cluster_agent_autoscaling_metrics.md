@@ -438,6 +438,20 @@ The four conditions give you insights on the current state of your `DatadogMetri
 
 The `currentValue` is the value gathered from Datadog and returned to the HPAs.
 
+### DatadogMetric query returns no data
+
+When a `DatadogMetric` query returns no series or only null values, the `DatadogMetric` is not valid, and its `Error` condition contains one of the following messages:
+
+- `no serie was found for this query in API Response`
+- `only null values found in API response`
+
+For these errors, the Cluster Agent external metrics provider responds to metric requests with HTTP status `422 Unprocessable Entity`. Clients that handle unavailable metrics, such as KEDA, can use this response to apply their configured fallback values. Other errors, such as a failed request to the Datadog API, return HTTP status `500 Internal Server Error`.
+
+To resolve a no-data error:
+
+1. Run the query in Datadog over the last five minutes and confirm that it returns data.
+2. If the query relies on cloud integration metrics, increase the time window the Cluster Agent queries. See the [Cluster Agent querying](#cluster-agent-querying) section.
+
 ### Value vs AverageValue for the target metric
 The HPAs in these example use the target type of `Value` instead of `AverageValue`. Both options are supported. Adjust your Datadog metric queries accordingly.
 
