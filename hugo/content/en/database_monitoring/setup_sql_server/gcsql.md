@@ -53,6 +53,10 @@ CREATE USER datadog FOR LOGIN datadog;
 
 This is required because Google Cloud SQL does not permit granting `CONNECT ANY DATABASE`. The Datadog Agent needs to connect to each database to collect database-specific file I/O statistics.
 
+### Create the column statistics procedure
+
+Column statistics collection is optional and requires SQL Server 2017 or later. To collect column statistics, create the `datadog.column_statistics` procedure in every database you want statistics from, then enable `collect_column_statistics` in the instance configuration. For the script and options, see [Create the column statistics procedure][3] in the self-hosted setup instructions.
+
 ## Install and configure the Agent
 
 Google Cloud does not grant direct host access, meaning the Datadog Agent must be installed on a separate host where it is able to talk to the SQL Server host. There are several options for installing and running the Agent.
@@ -419,3 +423,4 @@ To collect more comprehensive database metrics from Google Cloud SQL, install th
 
 [1]: https://cloud.google.com/sql/docs/sqlserver/create-manage-users#creating
 [2]: /integrations/google_cloudsql
+[3]: /database_monitoring/setup_sql_server/selfhosted/#create-the-column-statistics-procedure

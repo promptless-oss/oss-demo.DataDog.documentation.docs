@@ -134,6 +134,10 @@ For [SQL Server on Windows Azure VM][1] follow the [Setting Up Database Monitori
 
 {{< /tabs >}}
 
+### Create the column statistics procedure
+
+Column statistics collection is optional and requires SQL Server 2017 or later. To collect column statistics, create the `datadog.column_statistics` procedure in every database you want statistics from, then enable `collect_column_statistics` in the instance configuration. For the script and options, see [Create the column statistics procedure][2] in the self-hosted setup instructions. For Azure SQL Database, connect to each database directly and omit the `USE` statement from the script.
+
 ### Securely store your password
 {{% dbm-secret %}}
 
@@ -500,3 +504,4 @@ To collect more comprehensive database metrics and logs from Azure, install the 
 {{< partial name="whats-next/whats-next.html" >}}
 
 [1]: /integrations/azure
+[2]: /database_monitoring/setup_sql_server/selfhosted/#create-the-column-statistics-procedure
