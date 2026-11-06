@@ -1,6 +1,6 @@
 ---
 title: Private Action Runner Reference
-description: Reference tables for private action runner configuration settings, supported actions and integrations, and credential file formats.
+description: Reference tables for private action runner configuration settings, supported actions and integrations, credential file formats, and named runner credentials.
 further_reading:
 - link: "/actions/private_actions/"
   tag: "Documentation"
@@ -18,7 +18,7 @@ further_reading:
 
 ## Overview
 
-This page is the reference for private action runners and covers the configuration settings, the actions and integrations each runner supports, and credential file formats. To learn more about Private Actions concepts and setup, see [Private Actions Overview][1].
+This page covers private action runner configuration settings, the actions and integrations each runner supports, credential file formats, and named runner credentials. To learn more about Private Actions concepts and setup, see [Private Actions Overview][1].
 
 ## Runner configuration
 
@@ -67,6 +67,46 @@ Some integrations, such as HTTP, Jenkins, PostgreSQL, MongoDB, and Temporal, req
 
 For the full set of credential file formats and examples, see [Handling private action credentials][7].
 
+## Named runner credentials
+
+The runner in the Agent can also read credentials from the Agent configuration. Define each credential by name under `private_action_runner.credentials.values`. A connection token that references a runner credential uses this name, and the runner substitutes the value when it prepares the task. To keep the value out of the configuration file, reference a secret with the `ENC[<secret_id>]` notation from [Agent secrets management][9].
+
+Restrict each credential to the actions and HTTP destinations that need it. Otherwise, any allowed action whose connection references the credential name can use it.
+
+{{< code-block lang="yaml" filename="datadog.yaml" disable_copy="false" >}}
+private_action_runner:
+  credentials:
+    values:
+      api_token:
+        value: ENC[api_token]
+        allowed_actions:
+          - com.datadoghq.http.*
+        allowed_http_domains:
+          - api.example.com
+      mongodb_password:
+        value: ENC[mongodb_password]
+        allowed_actions:
+          - com.datadoghq.mongodb.*
+{{< /code-block >}}
+
+In this example, `api_token` works only for HTTP actions that send requests to `api.example.com`, and `mongodb_password` works only for MongoDB actions.
+
+| Field | Required | Description |
+|---|---|---|
+| `value` | Yes | The credential value. Supports `ENC[<secret_id>]` secret references. |
+| `allowed_actions` | No | Actions that can use the credential. Each entry is a fully qualified action name, such as `com.datadoghq.http.request`, or a trailing wildcard for an integration or sub-bundle, such as `com.datadoghq.mongodb.*`. Entries are case-sensitive. A wildcard for the whole `com.datadoghq` namespace isn't accepted. |
+| `allowed_http_domains` | No | HTTP destinations the credential can be sent to. Each entry is a hostname, an IP address, or a subdomain pattern such as `*.example.com`. Entries are case-insensitive and can't include a scheme, port, or path. A subdomain pattern matches `api.example.com` but not `example.com`. Setting this field limits the credential to HTTP actions. |
+
+### How restrictions are applied
+
+- **Omitted, empty, and null lists**: Omit a restriction field to leave that dimension unrestricted. Set it to an empty list (`[]`) to block every action or destination. A `null` value or a non-list value is invalid configuration.
+- **Multiple credentials**: When a connection references several named credentials, every referenced credential must allow the action and the destination.
+- **Actions allowlist**: Credential restrictions narrow access and never expand it. The runner rejects actions that aren't in its `actions_allowlist` before it resolves any credentials.
+- **HTTP destination**: The runner checks the hostname of the URL in the task (`http` or `https` only) for the `request` and `getChecksumFromURL` actions. For `testConnection`, it checks the connection's base URL combined with its test path. Hostnames are compared as written, without DNS resolution.
+- **Failed checks**: If a check fails, the task fails before the runner sends any request with the credential.
+
+<div class="alert alert-warning">Restrictions are checked when the runner resolves credentials for a task. <code>allowed_http_domains</code> applies to the initial request destination only, not to redirects the action follows. Restrictions don't change how the Agent loads or refreshes secrets.</div>
+
 ## Further reading
 
 {{< partial name="whats-next/whats-next.html" >}}
@@ -79,3 +119,4 @@ For the full set of credential file formats and examples, see [Handling private 
 [6]: /actions/connections/
 [7]: /actions/connections/private_action_credentials/
 [8]: /agent/guide/rshell/
+[9]: /agent/configuration/secrets-management/
