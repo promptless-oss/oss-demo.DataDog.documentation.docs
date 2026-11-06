@@ -55,6 +55,34 @@ To install the Agent on AIX, follow the [in-app instructions in Fleet Automation
 
 {{< img src="/agent/basic_agent_usage/aix_agent7_install.png" alt="In-app installation steps for the Datadog Agent on an AIX host." style="width:90%;">}}
 
+### Memory limit for the dd-agent user
+
+The Agent runs as the `dd-agent` user. On busy hosts, the Agent can use more memory than the AIX default data-segment limit of 128 MiB. When that happens, memory allocations fail and the Agent restarts repeatedly.
+
+To prevent these failures, the installer sets the `data` limit for `dd-agent` in `/etc/security/limits` to `1048576` (512 MiB, in 512-byte blocks) when the limit is unset or lower. The installer reads the limit from the `dd-agent` stanza, or from the `default` stanza when `dd-agent` has no `data` value. An unlimited (`-1`) or higher limit stays unchanged.
+
+The installer can't set `data` above the hard limit, `data_hard`. If `data_hard` is lower than 512 MiB, the installer prints this warning and continues the installation:
+
+```text
+datadog-agent: failed to raise the dd-agent data limit to 512MiB (check data_hard in /etc/security/limits)
+```
+
+To resolve the warning:
+
+1. Increase both limits for `dd-agent`:
+   ```shell
+   chuser data_hard=1048576 data=1048576 dd-agent
+   ```
+2. Restart the Agent so its processes use the new limits:
+   ```shell
+   stopsrc -g datadog-agent
+   startsrc -g datadog-agent
+   ```
+3. Confirm the limits:
+   ```shell
+   lsuser -a data data_hard dd-agent
+   ```
+
 ## Commands
 
 | Description              | Command                     |
