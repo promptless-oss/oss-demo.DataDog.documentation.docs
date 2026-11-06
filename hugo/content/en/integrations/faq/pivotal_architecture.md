@@ -43,6 +43,8 @@ All metadata collected appears as host VM and container tags. The host VM monito
 
 The [DCA][4] provides a streamlined, centralized approach to collecting cluster-level monitoring data. It performs similarly to the DCA in a Kubernetes environment. The DCA reduces the load on the Cloud Controller API (CAPI) as it queries the CAPI on behalf of all the singular Node Agents. It relays the cluster-level metadata to the Node Agents, allowing enrichment of the locally-collected metrics. The Node Agents periodically poll an internal API endpoint on the DCA for cluster metadata, and assign it to the corresponding containers within the VM.
 
+The DCA uses only version 3 of the CAPI, so it keeps collecting metadata on deployments that disable the deprecated v2 API. In the Cloud Controller access logs, DCA requests appear with the `datadog-cluster-agent` user agent. Each DCA request to the CAPI times out after 15 minutes.
+
 #### Metadata Collected
 
    - Cluster-level metadata (for example, `org_id`, `org_name`, `space_id`, `space_name`).
