@@ -131,6 +131,16 @@ Write redirections to any target other than `/dev/null` are blocked.
 
 Arithmetic expansion `$(( ))`, array assignment, append assignment (`+=`), and parameter expansion operations such as `${var:-default}` are not supported.
 
+## Script size limit
+
+A command script can be up to 5 MiB (5,242,880 bytes). rshell checks the size before it parses the script, so an oversized script fails without running any part of it. The action returns an error similar to the following:
+
+```text
+failed to parse command: script size 5242881 bytes exceeds maximum of 5242880 bytes (5 MiB); split the script into smaller pieces
+```
+
+To run a longer workload, split it into several smaller commands.
+
 ## Restrict file access
 
 By default, file read commands are gated by a path allowlist managed from the Datadog backend. You can further restrict which paths and commands rshell can access in your Agent configuration.
