@@ -192,6 +192,8 @@ If the `container.id` resource attribute is not present on the input, the proces
 | `datadog.container.cgroup_inode` (int)           | Based on container's cgroup inode |
 | `k8s.pod.uid` (str) + `k8s.container.name` (str) | Based on container's pod and name |
 
+The pod and name method finds regular, ephemeral, and init containers, including Kubernetes native sidecars (init containers with `restartPolicy: Always`).
+
 If your telemetry does not provide attributes for any of these detection methods, the processor cannot look up the corresponding Kubernetes metadata.
 
 **Resolution**:
