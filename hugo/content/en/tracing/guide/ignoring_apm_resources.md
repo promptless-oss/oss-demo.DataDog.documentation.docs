@@ -47,6 +47,8 @@ If none of the options in this guide meet your requirements, consider adding a <
 
 Starting with Datadog Agent 6.27.0/7.27.0, the **filter tags** option drops traces with root spans that match specified span tags. This option applies to all services that send traces to this Datadog Agent. Traces that are dropped because of filter tags are not included in trace metrics.
 
+If you run the [Datadog Distribution of OpenTelemetry (DDOT) Collector][7], starting with Agent v7.87.0, the `datadog` connector also excludes these traces from the trace metrics it computes. The connector applies both the exact-match and the regular expression rules. When a trace's root span fails a rule, the connector skips the trace's spans that share the root span's OTLP resource. As a result, filtered traces produce no `trace.*` metrics.
+
 <div class="alert alert-info">
 Individual spans within a trace cannot be selectively dropped; if the root span matches the filter criteria, the complete trace is discarded.
 </div>
@@ -553,3 +555,4 @@ public class GreetingController {
 [4]: /tracing/trace_ingestion/ingestion_controls
 [5]: /tracing/configure_data_security/?tab=mongodb#exclude-resources-from-being-collected
 [6]: https://golang.org/pkg/regexp/
+[7]: /opentelemetry/setup/ddot_collector/
