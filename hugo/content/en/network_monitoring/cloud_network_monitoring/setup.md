@@ -80,6 +80,54 @@ CNM supports Istio v1.6.4+ with [Datadog Agent v7.24.1+][1].
 
 To learn more about monitoring your Istio environment with Datadog, [see the Istio blog][10].
 
+##### Istio ambient mode
+
+<!-- Writer: add the minimum Agent version for this setting after the Agent change ships. -->
+
+In Istio ambient mode, the node-level `ztunnel` proxy opens mesh tunnel sockets inside the network namespace of each enrolled pod. By default, CNM attributes that traffic to the `ztunnel` container instead of to the application pod that sends or receives it. To attribute mesh tunnel traffic to the application pod, enable network namespace container attribution in system-probe. This setting is disabled by default and is available on Linux only.
+
+{{< tabs >}}
+{{% tab "Helm" %}}
+
+Add the environment variable to the system-probe container in `datadog-values.yaml`:
+
+```yaml
+agents:
+  containers:
+    systemProbe:
+      env:
+        - name: DD_NETWORK_CONFIG_ENABLE_NETNS_CONTAINER_ATTRIBUTION
+          value: "true"
+```
+
+{{% /tab %}}
+{{% tab "system-probe.yaml" %}}
+
+```yaml
+network_config:
+  enabled: true
+  enable_netns_container_attribution: true
+```
+
+{{% /tab %}}
+{{< /tabs >}}
+
+After you enable the setting, CNM handles `ztunnel` connections as follows:
+
+- Only connections on a mesh tunnel port move to the pod. The default is `15008`, the Istio HBONE port. The proxy's other connections inside the pod duplicate the application's own connections, so they stay attributed to `ztunnel`.
+- A moved connection takes the pod container's tags and drops the proxy's `service`, `env`, `version`, and process tags. The `process_name` tag keeps the proxy's process name, such as `ztunnel`, so you can filter on it to find proxied traffic.
+- A connection moves only when the pod has exactly one application container. Connections in pods with several application containers stay attributed to `ztunnel`. Helper containers in the ignored list don't count as application containers.
+
+The setting requires process event monitoring (`event_monitoring_config.network_process.enabled`), which is enabled by default. If process event monitoring is disabled, system-probe logs a warning and doesn't change attribution.
+
+Optionally, adjust the following `network_config` settings:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `netns_container_attribution_ports` | `[15008]` | Local or remote ports of the mesh tunnel. Only connections on these ports move to the pod. If the list is empty or has no valid ports (1 to 65535), system-probe uses the default. |
+| `netns_container_attribution_owner_images` | `["ztunnel"]` | Short image names of the proxy containers whose connections can move to the pod. |
+| `netns_container_attribution_ignored_containers` | `["vault-agent", "vault-agent-init", "cloud-sql-proxy"]` | Kubernetes container names of helper containers that don't count as application containers. If a helper is the only container in its pod, connections move to the helper. Connections that a helper opens itself keep the helper's container. |
+
 #### Cilium
 
 Cloud Network Monitoring is compatible with **Cilium** installations, provided the following requirements are met:
