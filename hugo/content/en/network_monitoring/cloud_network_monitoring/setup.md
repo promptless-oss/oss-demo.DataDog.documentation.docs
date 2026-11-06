@@ -101,7 +101,19 @@ Cloud Network Monitoring is designed to analyze traffic _between_ network endpoi
 {{< tabs >}}
 {{% tab "Agent (Linux)" %}}
 
-To enable Cloud Network Monitoring with the Datadog Agent, use the following configurations:
+Enable Cloud Network Monitoring when you install the Agent, or later by editing the system-probe configuration file.
+
+### Enable during installation
+
+With Agent v7.XX.0 or later, add `DD_SYSTEM_PROBE_NETWORK_ENABLED=true` to the [Agent install script][4] command. The script writes `network_config.enabled: true` to `/etc/datadog-agent/system-probe.yaml` before it installs and starts the Agent, so no restart is needed:
+
+```shell
+DD_SYSTEM_PROBE_NETWORK_ENABLED=true DD_API_KEY=<DATADOG_API_KEY> DD_SITE="{{< region-param key="dd_site" >}}" bash -c "$(curl -L https://install.datadoghq.com/scripts/install_script_agent7.sh)"
+```
+
+The variable accepts Boolean values such as `true` and `false`. Any other value stops the installation with an error.
+
+### Enable in the configuration file
 
 1. **If you are using an Agent older than v6.14**, enable [live process collection][1] first, otherwise skip this step.
 
@@ -189,12 +201,26 @@ If these utilities do not exist in your distribution, follow the same procedure 
 [1]: /infrastructure/process/?tab=linuxwindows#installation
 [2]: /agent/configuration/agent-commands/#restart-the-agent
 [3]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/selinux/system_probe_policy.te
+[4]: /getting_started/agent/#installation
 {{% /tab %}}
 {{% tab "Agent (Windows)" %}}
 
 Data collection for Windows relies on a filter driver for collecting network data.
 
-To enable Cloud Network Monitoring for Windows hosts:
+Enable Cloud Network Monitoring for Windows hosts when you install the Agent, or later by editing the system-probe configuration file.
+
+### Enable during installation
+
+With Agent v7.XX.0 or later, pass `DD_SYSTEM_PROBE_NETWORK_ENABLED=true` to the [`msiexec` command][1]. The installer writes `network_config.enabled: true` to `C:\ProgramData\Datadog\system-probe.yaml` before it starts the Agent services, so no restart is needed:
+
+```powershell
+$p = Start-Process -Wait -PassThru msiexec -ArgumentList '/qn /i "https://windows-agent.datadoghq.com/datadog-agent-7-latest.amd64.msi" /log C:\Windows\SystemTemp\install-datadog.log APIKEY="<DATADOG_API_KEY>" SITE="{{< region-param key="dd_site" >}}" DD_SYSTEM_PROBE_NETWORK_ENABLED=true'
+if ($p.ExitCode -ne 0) {
+  Write-Host "msiexec failed with exit code $($p.ExitCode). Check the logs at C:\Windows\SystemTemp\install-datadog.log" -ForegroundColor Red
+}
+```
+
+### Enable in the configuration file
 
 1. Install the [Datadog Agent][1] (version 7.27.1 or above) with the network driver component enabled.
 
