@@ -768,6 +768,30 @@ To apply later changes, run `helm upgrade node-collector open-telemetry/opentele
 {{% /tab %}}
 {{< /tabs >}}
 
+### Hostname resolution
+
+Datadog identifies each node by the hostname that its Collector reports. If `DD_HOSTNAME` isn't set and the cloud provider doesn't supply a hostname (Google Compute Engine and Azure do), the standalone DDOT Collector names the host `<NODE_NAME>-<CLUSTER_NAME>`. If the Collector finds no cluster name, the hostname is `<NODE_NAME>`.
+
+Beginning with Agent version X.Y.Z, the Collector resolves this hostname without querying the kubelet. Hostname resolution doesn't need kubelet API permissions or kubelet settings such as `DD_KUBERNETES_KUBELET_HOST`.
+
+- **`<NODE_NAME>`**: The Collector reads the node name from the first of these environment variables that is set: `K8S_NODE_NAME`, `DD_KUBERNETES_KUBELET_NODENAME`, or `OTEL_K8S_NODE_NAME`. The OpenTelemetry Operator sets `K8S_NODE_NAME`, and the OpenTelemetry Collector Helm chart sets `OTEL_K8S_NODE_NAME`. If none of these variables is set, the Collector gets the node name from the kubelet, unless `use_kubelet_collector` is `false` in the `dogtel` extension.
+- **`<CLUSTER_NAME>`**: The Collector uses the first cluster name it finds, in this order:
+  1. The `DD_CLUSTER_NAME` environment variable
+  1. The cloud provider's API on GKE, AKS, and EKS
+  1. The node's labels, when the Collector can read them through the Datadog Cluster Agent
+  1. The `k8s.cluster.name` attribute in `service.telemetry.resource` of the Collector configuration
+  1. The `k8s.cluster.name` attribute in the `OTEL_RESOURCE_ATTRIBUTES` environment variable
+
+  The Collector converts a cluster name from the `k8s.cluster.name` attribute to lowercase and replaces each underscore (`_`) with a hyphen (`-`). The complete configurations on this page set `k8s.cluster.name` in `service.telemetry.resource` to the value of `K8S_CLUSTER_NAME`. To use a cluster name instead of the one from the cloud provider's API, set `DD_CLUSTER_NAME`.
+
+To read the node name from other environment variables, set `node_from_env_var` in the `dogtel` extension to a comma-separated list of variable names. Add the extension settings under `spec.config` for the Operator, or under `config` for Helm:
+
+{{< code-block lang="yaml" filename="collector-config.yaml" collapsible="false" >}}
+extensions:
+  dogtel:
+    node_from_env_var: <ENV_VAR_1>,<ENV_VAR_2>
+{{< /code-block >}}
+
 ## Install the core Datadog Agent alongside DDOT
 
 If you want to run the core Datadog Agent on the same nodes as the standalone DDOT Collector—for example, to collect infrastructure metrics, APM, or logs through the core Agent while DDOT handles OTLP ingestion—you can install it separately using the [Datadog Operator][57].
