@@ -164,9 +164,6 @@ agent diagnose show-metadata agent-telemetry
 | dogstatsd_client.bytes_dropped_queue        | Total bytes dropped because a DogStatsD client sender queue is full                                                    |
 | dogstatsd_client.bytes_dropped_writer       | Total bytes dropped because a DogStatsD client writer cannot send them                                                 |
 | logs.auto_multi_line_aggregator_flush       | Number of multi-line logs aggregated by the Agent                                                                       |
-| logs.auto_multi_line_default_total_lines    | Total log lines processed by the detecting aggregator for sources relying on the auto multi-line detection default           |
-| logs.auto_multi_line_default_would_combine  | Number of lines that would be combined if auto multi-line detection were enabled by default                              |
-| logs.auto_multi_line_default_would_truncate | Number of lines in groups that would be truncated if auto multi-line detection were enabled by default                   |
 | logs.bytes_missed                           | Total number of bytes lost before they could be consumed by the Agent, for example, after log rotation                 |
 | logs.bytes_sent                             | Total number of bytes sent before encoding, if applicable                                                              |
 | logs.decoded                                | Total number of decoded logs                                                                                           |
