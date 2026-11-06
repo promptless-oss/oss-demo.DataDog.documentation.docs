@@ -144,6 +144,12 @@ Some options have flags and options detailed under `--help`. For example, use he
 | `stopservice`     | Stop the Agent within the service control manager. Windows only.            |
 | `version`         | Print version info.                                                         |
 
+In the Agent and the Cluster Agent, the `configcheck`, `health`, `tagger-list`, and `workload-list` sub-commands don't print internal logs. They ignore `DD_LOG_LEVEL`. To show these logs for debugging, add the `--log_level` flag:
+
+```shell
+<AGENT_BINARY> configcheck --log_level debug
+```
+
 ## Further Reading
 
 {{< partial name="whats-next/whats-next.html" >}}
