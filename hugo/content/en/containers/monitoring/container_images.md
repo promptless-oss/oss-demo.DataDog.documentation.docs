@@ -219,6 +219,12 @@ sbom:
 {{% /tab %}}
 {{< /tabs >}}
 
+Starting with Agent v7.XX, the Agent reads image layers in place from the container runtime's storage. It supports the Docker `overlay2` storage driver, the containerd snapshotter, and CRI-O. A containerized Agent looks for this storage under `/host`, or under `HOST_ROOT` if set. Mount the storage there read-only. For example, mount `/var/lib/containerd` at `/host/var/lib/containerd`. The Datadog Operator and the Helm chart mount the storage when `uncompressedLayersSupport` is enabled. The Helm chart enables it by default. SBOMs from these scans carry the `scan_method:overlayfs` tag.
+
+If the Agent can't read the layers of a Docker or containerd image, it exports the image to a temporary file and scans the export. It logs a warning the first time. Exports need free disk space; see [Disk space requirements][11]. CRI-O images can only be scanned in place.
+
+To export every Docker and containerd image instead, set `sbom.container_image.overlayfs_direct_scan` to `false` in `datadog.yaml`. Alternatively, set the `DD_SBOM_CONTAINER_IMAGE_OVERLAYFS_DIRECT_SCAN` environment variable to `false`. SBOMs from exported images carry the `scan_method:tarball` tag.
+
 #### Enable ECR metadata collection
 
 Set up [Datadog's AWS integration][7] and enable [resource collection][8] to collect container image metadata from Amazon ECR.
@@ -251,3 +257,4 @@ To tag your container images, see [Kubernetes Tag Extraction][9] or [Docker Tag 
 [8]: /integrations/amazon_web_services/#resource-collection
 [9]: /containers/kubernetes/tag/
 [10]: /containers/docker/tag/
+[11]: /security/cloud_security_management/troubleshooting/vulnerabilities/#disk-space-requirements

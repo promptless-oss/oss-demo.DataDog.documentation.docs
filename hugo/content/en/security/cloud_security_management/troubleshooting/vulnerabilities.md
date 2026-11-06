@@ -22,17 +22,25 @@ If you experience issues with Cloud Security Vulnerabilities, use the following 
 
 ### Disk space requirements
 
-Ensure your free disk space is equal to the size of your largest container image. This space is needed for the Datadog Agent to scan the container image for vulnerabilities (1 GB by default).
+Before each container image scan, the Agent checks that its root file system has at least the free space set by `sbom.container_image.min_available_disk` (10 MB by default). If it doesn't, the scan fails with an error similar to the following:
 
-The resulting error appears as:
 ```sh
-Error: failed to check current disk usage: not enough disk space to safely collect sbom, 192108482560 available, 1073741824000 required
+failed to check current disk usage: not enough disk space to safely collect sbom, 5242880 available, 10485760 required
 ```
 
-Workaround: 
+Sometimes the Agent can't read an image's layers in place and exports the image to a temporary file instead. Before the export, it checks that the file system of its temporary directory has 20% more free space than the size of the image. If it doesn't, the scan fails with an error similar to the following:
 
-- Increase the available disk space to at least 1 GB. If your images are larger than 1 GB, increase your disk space accordingly.
-- If all of your images are smaller than 1 GB, you can decrease the default Agent request disk space with the environment variable: `DD_SBOM_CONTAINER_IMAGE_MIN_AVAILABLE_DISK` (default value 1GB).
+```sh
+not enough disk space to export the image, 1073741824 available, 1288490188 required
+```
+
+Scans that read the image layers in place skip this second check.
+
+Workaround:
+
+- Increase the free disk space on the Agent's root file system. For exports, the file system of the Agent's temporary directory needs 20% more free space than your largest container image.
+- To lower the minimum free space required before every scan, set `sbom.container_image.min_available_disk`, or the `DD_SBOM_CONTAINER_IMAGE_MIN_AVAILABLE_DISK` environment variable.
+- To avoid exports, mount the container runtime's storage into the Agent container so the Agent can read the image layers in place. See [Enable SBOM collection][6].
 
 ### Uncompressed container image layers
 
@@ -94,3 +102,4 @@ datadog:
 [3]: https://app.datadoghq.com/security/configuration/csm/setup
 [4]: https://app.datadoghq.com/metric/summary
 [5]: https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming#disable
+[6]: /containers/monitoring/container_images/#enable-sbom-collection
