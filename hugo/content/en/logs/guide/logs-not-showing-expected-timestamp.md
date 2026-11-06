@@ -15,7 +15,12 @@ further_reading:
   text: "How to investigate a log parsing issue?"
 ---
 
-By default, when logs are received by the Datadog intake API, a timestamp is generated and appended as a date attribute. However, this default timestamp does not always reflect the actual timestamp that might be contained in the log itself. This guides walks you through how to override the default timestamp with the actual timestamp.
+Every log in Datadog has a default timestamp, which depends on how the log arrives:
+
+- **Logs collected by the Datadog Agent**: The Agent sends each log with the time it read the log. Delays inside the Agent, such as a slow or unavailable intake, don't shift the timestamp. If you set `logs_config.use_container_timestamp` to `true`, logs from container runtimes that record a time for each line, such as Docker JSON logs, use that recorded time instead.
+- **Logs sent without a timestamp**: The Datadog intake API generates a timestamp when it receives the log and appends it as a date attribute.
+
+The default timestamp does not always match the time recorded in the log message itself. This guide walks you through overriding the default timestamp with the actual timestamp.
 
 {{< img src="logs/guide/log_timestamp_1.png" alt="Log panel showing the log timestamp that is different from the timestamp in the message" style="width:70%;">}}
 
