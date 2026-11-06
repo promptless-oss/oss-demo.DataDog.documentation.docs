@@ -468,6 +468,24 @@ To set up GPU Monitoring on a mixed cluster with Helm, create two Helm deploymen
 {{% /tab %}}
 {{< /tabs >}}
 
+## Agent readiness with GPU Monitoring
+
+When GPU Monitoring is enabled, the core Agent on Linux waits for the NVIDIA Management Library (NVML) to initialize before it reports ready. If NVML doesn't initialize within the timeout (one minute by default), the Agent reports ready anyway. After the condition is met, the health probe can take up to 15 more seconds to report the Agent as ready.
+
+The readiness delay has the following effects:
+
+- In Kubernetes, the Agent pod stays in the not-ready state during the delay. Account for this when you set rollout timeouts.
+- Hosts where NVML can't initialize wait for the full timeout every time the Agent restarts. These include hosts without working NVIDIA drivers and hosts with only AMD GPUs.
+- The delay affects only readiness. It doesn't affect liveness or ongoing GPU health checks.
+
+To change the timeout, set `gpu.readiness_timeout` in `datadog.yaml`, or set the `DD_GPU_READINESS_TIMEOUT` environment variable for the Agent. Use a duration such as `30s` or `2m`. To turn off the readiness delay, set the value to `0s`.
+
+```yaml
+gpu:
+  enabled: true
+  readiness_timeout: 2m
+```
+
 ## Further Reading
 
 {{< partial name="whats-next/whats-next.html" >}}
