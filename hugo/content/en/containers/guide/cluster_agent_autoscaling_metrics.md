@@ -394,6 +394,28 @@ The Cluster Agent also queries for the past five minutes of data by default for 
   value: "900"
 ```
 
+### Parallel requests
+
+By default, the Cluster Agent sends up to 10 batched requests to the Datadog metrics API at the same time. Additional batches wait until a request completes. To change this limit, set the following environment variable on the Cluster Agent. The Cluster Agent uses `300` for any value above `300` and for a value of `0` or less.
+
+```yaml
+- name: DD_EXTERNAL_METRICS_PROVIDER_MAX_PARALLEL_QUERIES
+  value: "20"
+```
+
+To see whether batches are waiting on this limit, compare the following Cluster Agent telemetry metrics:
+
+- **`datadog_requests_inflight`**: The number of metric requests to Datadog in progress.
+- **`datadog_requests_parallel_limit`**: The configured maximum number of parallel metric requests.
+
+If `datadog_requests_inflight` regularly reaches `datadog_requests_parallel_limit`, metric queries wait for a free request slot, which can delay the values your HPAs receive. Raising the limit sends more requests to the Datadog API at once, and those requests count toward your organization's rate limits.
+
+To print the current values, run the following command against a Cluster Agent pod:
+
+```shell
+kubectl exec <CLUSTER_AGENT_POD_NAME> -- agent telemetry | grep datadog_requests_
+```
+
 ## Troubleshooting
 
 ### DatadogMetric Status
