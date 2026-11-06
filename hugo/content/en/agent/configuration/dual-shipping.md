@@ -54,6 +54,50 @@ Requires Agent version >= 6.18 or 7.18.
 DD_ADDITIONAL_ENDPOINTS='{\"https://app.{{< region-param key="dd_site">}}\": [\"apikey2\", \"apikey3\"], \"https://app.<DD_SITE>\": [\"apikey4\"]}' # Replace <DD_SITE> with your Datadog site parameter (for example, datadoghq.eu).
 ```
 
+### Send a subset of metrics to an endpoint
+
+<div class="alert alert-warning">Per-endpoint metric allowlists are experimental. The settings under <code>experimental.metrics_endpoint_routing</code> can change in a later Agent version without backward compatibility.</div>
+
+Requires Agent version >= `<AGENT_VERSION>`.
+
+By default, the Agent sends every metric to the primary endpoint and to each additional endpoint. To send only selected metrics to an endpoint, for example only SLO metrics to a second organization, define an allowlist for that endpoint under `experimental.metrics_endpoint_routing`. The allowlists apply to check and DogStatsD metrics, including distributions. They don't apply to service checks or events.
+
+In `datadog.yaml`:
+
+```yaml
+additional_endpoints:
+  "https://app.<DD_SITE>": # Replace <DD_SITE> with the second organization's Datadog site parameter (for example, datadoghq.eu).
+  - apikey2
+
+experimental:
+  metrics_endpoint_routing:
+    metric_allowlist:
+      "https://app.<DD_SITE>":
+      - checkout.slo.latency
+    metric_prefix_allowlist:
+      "https://app.<DD_SITE>":
+      - billing.
+```
+
+With this configuration, the additional endpoint receives `checkout.slo.latency` and every metric whose name starts with `billing.`. The primary endpoint has no allowlist, so it receives all metrics.
+
+To set the allowlists with environment variables, pass the same maps as JSON:
+
+```bash
+DD_EXPERIMENTAL_METRICS_ENDPOINT_ROUTING_METRIC_ALLOWLIST='{"https://app.<DD_SITE>": ["checkout.slo.latency"]}'
+DD_EXPERIMENTAL_METRICS_ENDPOINT_ROUTING_METRIC_PREFIX_ALLOWLIST='{"https://app.<DD_SITE>": ["billing."]}'
+```
+
+The Agent applies the allowlists as follows:
+
+- **Endpoint keys**: Each key must exactly match a key in `additional_endpoints` or the Agent's resolved primary endpoint URL. When the primary endpoint comes from `site`, its URL ends with a dot by default, such as `https://app.datadoghq.com.`. When you set `dd_url`, use that value as written. The Agent doesn't start if a key matches no endpoint.
+- **Matching**: A metric reaches an endpoint if its name matches an entry in the endpoint's `metric_allowlist` or starts with an entry in its `metric_prefix_allowlist`. Prefixes are case-sensitive literal strings, not wildcards or regular expressions. An empty string prefix matches every metric.
+- **Metric names**: The Agent normalizes incoming metric names before matching, for example by replacing `-` with `_`, but uses your entries as written. Write each entry the way the metric name appears in Datadog, such as `my_metric` for a metric submitted as `my-metric`.
+- **Endpoints without an allowlist**: An endpoint that appears in neither map receives all metrics.
+- **Empty allowlists**: An endpoint whose allowlists contain no entries, such as `"https://app.<DD_SITE>": []`, receives no metrics.
+
+The allowlists require `use_v2_api.series`, which is enabled by default. If you disable it while an allowlist is set, the Agent doesn't start. The allowlists don't affect the Multi-Region Failover endpoint. Restart the Agent after you change an allowlist.
+
 ## APM
 
 ### YAML configuration
