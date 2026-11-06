@@ -184,3 +184,22 @@ If the Agent fails to extract the SBOM from the container image, increase the Ag
     ...
 }
 ```
+
+## ECS task ID in events
+
+<!-- Writer: add the first Agent version that includes the ECS task ID after the change ships. -->
+
+Workload Protection events from containers in ECS tasks include the ECS task ID in the `container.ecs_task_id` attribute. Use it to find the task that a process belongs to, and to correlate activity across containers in the same task.
+
+In Agent rules, use `process.container.ecs_task_id` and the related `*.container.ecs_task_id` fields. For example, the following expression matches executions of `curl` in any ECS task:
+
+```text
+exec.file.name == "curl" && process.container.ecs_task_id != ""
+```
+
+The Agent reads the task ID from the cgroup that the ECS container agent creates for each task. The ECS container agent creates these cgroups when task-level CPU and memory limits are enabled, which is the default. If you set `ECS_ENABLE_TASK_CPU_MEM_LIMIT` to `false` in the ECS container agent configuration, events don't include the task ID.
+
+For the full list of fields, see [Linux syntax][1] and [Linux Backend Syntax][2].
+
+[1]: /security/workload_protection/linux_expressions/
+[2]: /security/workload_protection/backend_linux/
