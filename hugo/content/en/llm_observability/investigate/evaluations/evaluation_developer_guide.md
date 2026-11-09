@@ -285,7 +285,8 @@ Use `LLMObs.publish_evaluator()` to push a locally-defined `LLMJudge` configurat
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `evaluator` | `LLMJudge` | Yes | The `LLMJudge` instance to publish. |
-| `ml_app` | `str` | Yes | The LLM application name. |
+| `agent_service` | `str` | Yes, unless `ml_app` is set | The agent service that the evaluator applies to. Requires `ddtrace` `<DDTRACE_VERSION>` or later. |
+| `ml_app` | `str` | No | **Deprecated**: Use `agent_service` instead. If both are set, `agent_service` takes precedence. |
 | `eval_name` | `str` | No | The name to use for the evaluator in Datadog. If omitted, defaults to the `name` set on the `LLMJudge` instance. |
 | `variable_mapping` | `dict[str, str]` | No | Remaps variable names in `user_prompt` to Datadog span field paths in the published evaluator. |
 
@@ -293,7 +294,7 @@ Use `LLMObs.publish_evaluator()` to push a locally-defined `LLMJudge` configurat
 from ddtrace.llmobs import BooleanStructuredOutput, LLMJudge, LLMObs
 
 LLMObs.enable(
-    ml_app="my-ml-app",
+    agent_service="my-agent-service",
     api_key="<DD_API_KEY>",
     app_key="<DD_APP_KEY>",
 )
@@ -313,7 +314,7 @@ judge = LLMJudge(
 
 result = LLMObs.publish_evaluator(
     judge,
-    ml_app="my-ml-app",
+    agent_service="my-agent-service",
     variable_mapping={"input_data": "span_input", "output_data": "span_output"},
 )
 print(result["ui_url"])
@@ -676,7 +677,7 @@ def llm_call(input_text):
     # Submit the result to Datadog
     LLMObs.submit_evaluation(
         span=LLMObs.export_span(),
-        ml_app="chatbot",
+        agent_service="chatbot",
         label=evaluator.name,
         metric_type="score",
         value=result.value,
