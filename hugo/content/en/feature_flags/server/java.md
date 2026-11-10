@@ -37,7 +37,7 @@ For the default agentless setup, you need:
 - **Java 11 or higher**
 - **Datadog Java agent** (`dd-java-agent`, loaded with `-javaagent`): Version **1.66.0** or later
 - **Datadog OpenFeature provider** (`com.datadoghq:dd-openfeature`, added as a build dependency): Version **1.66.0** or later
-- **OpenFeature SDK**: Version **1.20.1** or later
+- **OpenFeature SDK**: Version **1.20.1** or later. To send exposures from a Datadog provider inside an OpenFeature `MultiProvider`, use version **1.23.0** or later. See the [Exposures](#exposures) section.
 - A Datadog [**API key**][7]
 - Your Datadog [**site**][14]
 
@@ -343,7 +343,7 @@ Use [Server SDK Configuration Sources][9] as the canonical reference for source 
 - [Use a custom agentless endpoint][10] for advanced testing, local development, or an operator-managed proxy
 - [Use Agent Remote Configuration][13] to retain Agent-managed delivery
 - [Migrate an existing Remote Configuration setup][11] and remove the deprecated `DD_EXPERIMENTAL_FLAGGING_PROVIDER_ENABLED` setting
-- [Start the Agent before the application][18] when you use Agent Remote Configuration
+- [Start the Agent before the application][19] when you use Agent Remote Configuration
 
 In agentless mode, Java prefers a compatible local telemetry relay for experiment exposure and aggregated flag evaluation events. It sends both event types directly when no compatible relay is available. The direct path uses the application `DD_API_KEY` and `DD_SITE` settings. For no-Agent serverless environments, you can use [`serverless-init`][17] as the local telemetry relay.
 
@@ -403,6 +403,102 @@ boolean enhancedAnalytics = analyticsClient.getBooleanValue(
 {{< /code-block >}}
 
 The `Provider` instance is shared globally. Client names are for organizational purposes only and don't create separate provider instances. All clients use the same underlying Datadog provider and flag configurations.
+
+## Exposures
+
+For flags whose allocation logs exposures, such as experiment flags, the Datadog provider records an exposure after each successful evaluation. It sends the exposure to Datadog from an OpenFeature provider hook that runs when the evaluation finishes. An evaluation that fails, including one that an application `after` hook turns into an error, is not an exposure.
+
+For each flag and subject, the provider remembers the last exposure it sent. It sends another exposure only when the allocation, variant, or split serial ID changes, so repeated evaluations for the same subject do not send duplicates.
+
+Provider hooks run only when you evaluate flags through an OpenFeature client. If you wrap the Datadog provider in an OpenFeature `MultiProvider`, use OpenFeature SDK version 1.23.0 or later. Earlier SDK versions do not run the hooks of providers inside a `MultiProvider`, so the Datadog provider sends no exposures there.
+
+### Record exposures in your own data store
+
+To record exposures in your own data store or analytics pipeline in addition to Datadog, register an `ExposureHook`. The hook receives every completed evaluation, along with the same exposure decision that the provider uses for Datadog. `ExposureHook` requires `dd-openfeature` version **X.Y.Z** or later.
+
+The following example copies each new exposure to a queue that a background thread writes to the data store. `ExposureRecord` stands for your own record type:
+
+{{< code-block lang="java" >}}
+import datadog.trace.api.openfeature.ExposureHook;
+import dev.openfeature.sdk.OpenFeatureAPI;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+BlockingQueue<ExposureRecord> queue = new LinkedBlockingQueue<>(10_000);
+
+OpenFeatureAPI.getInstance().addHooks(new ExposureHook(evaluation -> {
+    // Skip evaluations that are not new exposures
+    if (!evaluation.shouldSend()) {
+        return;
+    }
+    Map<String, Object> features = evaluation.getFeatures();
+    // The callback runs on the evaluation thread: copy the data and return
+    queue.offer(new ExposureRecord(
+        evaluation.getDetails().getFlagKey(),
+        evaluation.getDetails().getVariant(),
+        evaluation.getContext().getTargetingKey(),
+        (String) features.get("holdout.key"),
+        (String) features.get("holdout.assignment_group")));
+}));
+{{< /code-block >}}
+
+The callback runs on the thread that evaluates the flag. Do not write to the data store from the callback. Copy the data you need and hand it to a background queue.
+
+Each evaluation that the callback receives provides these methods:
+
+| Method | Returns |
+|---|---|
+| `shouldSend()` | `true` for a new or changed exposure, which the provider sends to Datadog. The evaluation succeeded, its allocation logs exposures, and the subject was not yet exposed to the same allocation, variant, and split serial ID. |
+| `isExposure()` | `true` for every successful evaluation of an allocation that logs exposures, including repeats. |
+| `isCacheHit()` | `true` when the exposure repeats one already recorded for the subject, with the same allocation, variant, and split serial ID. |
+| `getFeatures()` | The features of the selected split that Datadog routes to hooks. Values are a `String`, `Double`, or `Boolean`. The map is empty when the split has no such features. |
+| `getDetails()` | The OpenFeature `FlagEvaluationDetails` for the evaluation. |
+| `getContext()` | The evaluation context. |
+
+`shouldSend()` returns the same exposures that the provider sends to Datadog only when the provider's own hooks run. Inside a `MultiProvider` with an OpenFeature SDK version earlier than 1.23.0, the provider sends no exposures, and `shouldSend()` returns `true` for every exposure.
+
+Splits in a holdout carry these features:
+
+| Feature | Value |
+|---|---|
+| `holdout.key` | The holdout key |
+| `holdout.assignment_group` | `status_quo` or `all_shipped` |
+
+An exception from the callback does not affect the evaluation. The provider logs the first exception at the warn level and later ones at the debug level.
+
+#### Read exposure data from flag metadata
+
+The provider also adds its exposure decision and the split features to the flag metadata of each evaluation. A hook that uses only the OpenFeature API can read this metadata to record exposures, and `ExposureHook` reads it for you. To read it in your own hook, use the `finallyAfter` stage, where the details match what the application receives. Skip details that have an error code.
+
+| Key | Type | Description |
+|---|---|---|
+| `allocationKey` | String | The selected allocation. |
+| `__dd_do_log` | Boolean | Whether the allocation logs exposures. Present when the allocation logs exposures or [APM trace enrichment][18] is enabled. |
+| `__dd_exposure_cache_hit` | Boolean | Whether the subject was already exposed. Present only when `__dd_do_log` is `true`. |
+| `__dd_split_serial_id` | Integer | The serial ID of the selected split. Present when `__dd_do_log` is present, the split has a serial ID, and the installed `dd-java-agent` supports serial IDs. |
+| `__dd_feature.<KEY>` | String, Double, or Boolean | One entry for each feature of the selected split that Datadog routes to hooks. |
+
+#### Agent version requirements
+
+`dd-openfeature` and `dd-java-agent` ship separately. When the installed `dd-java-agent` lacks a capability, the provider turns that capability off:
+
+| Capability | Requires `dd-java-agent` | With an older agent |
+|---|---|---|
+| Split serial IDs in flag metadata (`__dd_split_serial_id`) | 1.65.0 or later | The key is absent. |
+| Split serial IDs on exposures sent to Datadog | 1.67.0 or later | The provider sends exposures without a serial ID, so Datadog cannot attribute them to a holdout. A changed serial ID does not count as a new exposure. |
+| Flag evaluation events sent to Datadog | 1.66.0 or later | The provider sends no flag evaluation events. |
+| Split features (`getFeatures()` and `__dd_feature.<KEY>`) | 1.68.0 or later | `getFeatures()` is empty. |
+
+### Stop sending exposures to Datadog
+
+To keep exposures out of Datadog, for example when you record them only in your own data store, set the following environment variable:
+
+{{< code-block lang="bash" >}}
+export DD_FEATURE_FLAGS_EXPOSURES_DATADOG_LOGGING_ENABLED=false
+{{< /code-block >}}
+
+The default is `true`. With the setting at `false`, the provider sends no exposures to Datadog, but `ExposureHook` callbacks still receive every evaluation, and `shouldSend()` returns the same result. This setting affects exposures only. Flag evaluation events have a separate setting, `DD_FLAGGING_EVALUATION_COUNTS_ENABLED`.
 
 ## Best practices
 
@@ -644,7 +740,10 @@ When the selected configuration path supports exposures, exposures appear only f
 
 1. Verify the flag is associated with an experiment in the Datadog UI.
 2. Verify the Agent API key and connectivity.
-3. If you use Agent Remote Configuration, verify that the Agent was available when the application started. If it was not, restart the application. See [Agent availability][18].
+3. If you use Agent Remote Configuration, verify that the Agent was available when the application started. If it was not, restart the application. See [Agent availability][19].
+4. Confirm that `DD_FEATURE_FLAGS_EXPOSURES_DATADOG_LOGGING_ENABLED` is unset or set to `true`.
+5. Confirm that the application evaluates flags through an OpenFeature client. If the Datadog provider runs inside a `MultiProvider`, confirm that the OpenFeature SDK is version 1.23.0 or later.
+6. Check the evaluation details for an error code. The provider sends no exposure for an evaluation that fails. See the [Exposures](#exposures) section.
 
 ## Further reading
 
@@ -666,4 +765,5 @@ When the selected configuration path supports exposures, exposures appear only f
 [15]: /serverless/google_cloud_run/functions/java/?tab=maven
 [16]: /serverless/google_cloud_run/containers/in_container/java/
 [17]: /feature_flags/implementation_patterns/serverless/#send-feature-flag-telemetry
-[18]: /feature_flags/concepts/configuration_sources/#agent-availability
+[18]: /feature_flags/guide/apm_trace_enrichment/
+[19]: /feature_flags/concepts/configuration_sources/#agent-availability
