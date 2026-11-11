@@ -39,6 +39,7 @@ The default source does not activate Feature Flags traffic for every tracer inst
 
 | SDK | Recommended agentless version |
 |---|---|
+| Go `dd-trace-go` | 2.11.0 |
 | Java `dd-openfeature` and `dd-java-agent` | 1.66.0 |
 | Node.js `dd-trace` | 6.12.0 |
 | Python `ddtrace` | 4.14.0 |
@@ -47,7 +48,7 @@ The default source does not activate Feature Flags traffic for every tracer inst
 
 Java CDN delivery requires `dd-openfeature` and `dd-java-agent`. It does not require a Datadog Agent for flag configuration.
 
-Agentless delivery changes only the flag configuration source. Java and Node.js support direct exposure delivery. Java, Node.js, and Python can also use a compatible local telemetry relay.
+Agentless delivery changes only the flag configuration source. Go, Java, and Node.js support direct exposure delivery. Go, Java, Node.js, and Python can also use a compatible local telemetry relay.
 
 The listed versions provide the current capabilities described on each language page. .NET 3.54.0 and Ruby 2.46.0 support agentless configuration but require a compatible local telemetry relay for experiment exposures. Ruby also sends aggregated Event Platform Proxy (EVP) flag evaluation events through that relay. Other server SDKs use Agent Remote Configuration.
 

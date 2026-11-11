@@ -21,7 +21,9 @@ further_reading:
 
 ## Overview
 
-This page describes how to instrument your Go application with the Datadog Feature Flags SDK. The Go SDK integrates with [OpenFeature][1], an open standard for feature flag management, and receives flag updates through Remote Configuration in the Datadog Go tracer (`dd-trace-go`).
+This page describes how to instrument your Go application with the Datadog Feature Flags SDK. The Go SDK integrates with [OpenFeature][1], an open standard for feature flag management, and is part of the Datadog Go tracer (`dd-trace-go`).
+
+The SDK evaluates flags locally from flag configuration. By default, it fetches that configuration directly from Datadog over HTTPS, so no Datadog Agent is required. To receive configuration from the Agent instead, see [Receive configuration from the Agent](#receive-configuration-from-the-agent). For a comparison of the two sources, see [Server SDK Configuration Sources][6].
 
 This guide explains how to install and enable the SDK, create an OpenFeature client, and evaluate feature flags in your application.
 
@@ -29,27 +31,60 @@ This guide explains how to install and enable the SDK, create an OpenFeature cli
 
 Before setting up the Go Feature Flags SDK, ensure you have:
 
-- **Datadog Agent** version 7.55 or later with [Remote Configuration][2] enabled
-- **Datadog [API key][3]** configured on the Agent
-- **Datadog Go SDK** `dd-trace-go` version 2.4.0 or later
+- **Datadog Go SDK** `dd-trace-go` version 2.11.0 or later
+- **Datadog [API key][3]** available to the application process
 
-Set the following environment variables:
+Set the following environment variables in the application process:
 
 {{< code-block lang="bash" >}}
-# Required: Enable the feature flags provider
-DD_EXPERIMENTAL_FLAGGING_PROVIDER_ENABLED=true
-
-# Optional: Enable flag evaluation metrics
-DD_METRICS_OTEL_ENABLED=true
+# Required: Agentless flag configuration and event delivery
+DD_API_KEY=<DATADOG_API_KEY>
+DD_SITE={{< region-param key="dd_site" code="true" >}}
 
 # Required: Service identification
 DD_SERVICE=<YOUR_SERVICE_NAME>
 DD_ENV=<YOUR_ENVIRONMENT>
+
+# Optional: Enable flag evaluation metrics
+DD_METRICS_OTEL_ENABLED=true
 {{< /code-block >}}
 
-<div class="alert alert-info">The <code>EXPERIMENTAL_</code> prefix is retained for backwards compatibility; the provider itself is stable.</div>
+No Feature Flags enablement or source setting is required. The SDK starts fetching flag configuration when your application creates the Datadog OpenFeature provider. Starting the tracer alone does not fetch flag configuration.
+
+Store `DD_API_KEY` in a secret manager and expose it only to the application process.
 
 To configure `feature_flag.evaluations`, including the required tracer version and Agent OTLP setup, see [Set Up Server-Side Flag Evaluation Metrics][4]. For more information on available graphing, see [Feature Flag Graphs][5].
+
+### Receive configuration from the Agent
+
+To receive flag configuration from the Datadog Agent through Remote Configuration, you need:
+
+- **Datadog Agent** version 7.55 or later with [Remote Configuration][2] enabled
+- **Datadog [API key][3]** configured on the Agent
+- **Datadog Go SDK** `dd-trace-go` version 2.4.0 or later
+
+Select the source in the application process:
+
+{{< code-block lang="bash" >}}
+# dd-trace-go 2.11.0 or later
+DD_FEATURE_FLAGS_CONFIGURATION_SOURCE=remote_config
+
+# dd-trace-go 2.4.0 through 2.10.x
+DD_EXPERIMENTAL_FLAGGING_PROVIDER_ENABLED=true
+{{< /code-block >}}
+
+`DD_EXPERIMENTAL_FLAGGING_PROVIDER_ENABLED` is deprecated beginning with `dd-trace-go` 2.11.0. If it is set to `true` and `DD_FEATURE_FLAGS_CONFIGURATION_SOURCE` is not set, the SDK stays on Remote Configuration. To move off the deprecated setting, see [Migrate an existing Remote Configuration setup][7].
+
+### Feature flag event delivery
+
+The provider sends exposure events and aggregated flag evaluation events to Datadog. The route depends on the configuration source:
+
+- **Agentless (default)**: The SDK calls `GET /info` on the configured Agent URL to discover a compatible Agent Event Platform Proxy (EVP) endpoint. If it finds one, it sends events through the Agent. Otherwise, it sends events directly to `event-platform-intake.<DD_SITE>` over HTTPS and authenticates with `DD_API_KEY`. If the Agent later becomes unreachable or stops accepting these events, the SDK switches to direct delivery.
+- **Remote Configuration**: The SDK sends events through the Datadog Agent only.
+
+If no compatible Agent is reachable and `DD_API_KEY` is not set, the SDK cannot send events. It retries Agent discovery after 30 seconds. Flag evaluation is not affected.
+
+To stop sending flag evaluation events while keeping exposure events, set `DD_FLAGGING_EVALUATION_COUNTS_ENABLED=false`.
 
 ## Installation
 
@@ -67,9 +102,9 @@ go get github.com/open-feature/go-sdk/openfeature
 
 ## Initialize the SDK
 
-Start the Datadog Go tracer and register the Datadog OpenFeature provider. The tracer must be started first because it enables Remote Configuration, which delivers flag configurations to your application.
+Start the Datadog Go tracer, then create and register the Datadog OpenFeature provider. Starting the tracer first is recommended but not required. With Remote Configuration, the provider reuses the tracer's Remote Configuration subscription when the tracer is already running.
 
-Start the Datadog Agent before the application. If the application starts first, restart it after the Agent is available. See [Agent availability][6].
+If you receive configuration from the Agent through Remote Configuration, start the Datadog Agent before the application. If the application starts first, restart it after the Agent is available. See [Agent availability][8].
 
 ### Blocking initialization
 
@@ -87,7 +122,7 @@ import (
 )
 
 func main() {
-    // Start the Datadog tracer (enables Remote Config)
+    // Start the Datadog tracer (recommended before creating the provider)
     tracer.Start()
     defer tracer.Stop()
 
@@ -139,7 +174,7 @@ import (
 )
 
 func main() {
-    // Start the Datadog tracer (enables Remote Config)
+    // Start the Datadog tracer (recommended before creating the provider)
     tracer.Start()
     defer tracer.Stop()
 
@@ -365,7 +400,9 @@ func TestNewCheckoutFlow(t *testing.T) {
 [3]: /account_management/api-app-keys/#api-keys
 [4]: /feature_flags/guide/server_flag_evaluation_metrics/
 [5]: /feature_flags/concepts/flag_graphs/
-[6]: /feature_flags/concepts/configuration_sources/#agent-availability
+[6]: /feature_flags/concepts/configuration_sources/
+[7]: /feature_flags/concepts/configuration_sources/#migrate-an-existing-remote-configuration-setup
+[8]: /feature_flags/concepts/configuration_sources/#agent-availability
 
 ## Further reading
 
