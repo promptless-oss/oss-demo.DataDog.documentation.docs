@@ -328,6 +328,18 @@ CREATE USER datadog FOR LOGIN datadog;
 GRANT SELECT to datadog;
 ```
 
+### Column statistics are not collected
+
+When `collect_column_statistics` is enabled, the Agent logs a warning for each database where it can't run the `datadog.column_statistics` procedure. The warning starts with `Can't run datadog.column_statistics in database '<DATABASE_NAME>'` and includes the SQL Server error. Fix the error in that database:
+
+| Error in the warning | Fix |
+| --- | --- |
+| `Could not find stored procedure` (error 2812) | Create the procedure in that database, as described in [Create the column statistics procedure][15]. |
+| `EXECUTE permission was denied` (error 229) | Run `GRANT EXECUTE ON datadog.column_statistics TO datadog;` in that database. |
+| `datadog.column_statistics is outdated` | The installed procedure is from an earlier version of these instructions. Run the script in [Create the column statistics procedure][15] again to replace it. |
+
+If the Agent logs `No database to collect column statistics from`, the Agent has no online user database to collect from. Set `database` to a user database, or enable `database_autodiscovery`.
+
 ## Known limitations
 
 ### SQL Server 2012
@@ -378,3 +390,4 @@ Deadlock collection (`collect_deadlocks: enabled: true`) is not supported on SQL
 [12]: https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
 [13]: https://learn.microsoft.com/en-us/sql/connect/oledb/oledb-driver-for-sql-server?view=sql-server-ver16
 [14]: https://github.com/DataDog/integrations-core/blob/master/sqlserver/assets/configuration/spec.yaml#L201-L208
+[15]: /database_monitoring/setup_sql_server/selfhosted/#create-the-column-statistics-procedure

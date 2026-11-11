@@ -75,6 +75,10 @@ CREATE USER datadog FOR LOGIN datadog;
 
 This is required because RDS does not permit granting `CONNECT ANY DATABASE`. The Datadog Agent needs to connect to each database to collect database-specific file I/O statistics.
 
+### Create the column statistics procedure
+
+Column statistics collection is optional and requires SQL Server 2017 or later. To collect column statistics, create the `datadog.column_statistics` procedure in every database you want statistics from, then enable `collect_column_statistics` in the instance configuration. For the script and options, see [Create the column statistics procedure][3] in the self-hosted setup instructions.
+
 ### Securely store your password
 {{% dbm-secret %}}
 
@@ -436,3 +440,4 @@ To collect more comprehensive database metrics and logs from AWS, install the [R
 
 [1]: /integrations/amazon_rds
 [2]: https://app.datadoghq.com/integrations/amazon-web-services
+[3]: /database_monitoring/setup_sql_server/selfhosted/#create-the-column-statistics-procedure
