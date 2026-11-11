@@ -56,19 +56,47 @@ Auto-discovery IDs:
 
 ### Dispatching logic in the Cluster Agent
 
-The `clusterchecks` command allows you to inspect the state of the dispatching logic, including:
+Use the `clusterchecks` command to inspect the state of the dispatching logic, including:
 
 - Which node-based Agents are actively reporting to the Cluster Agent.
-- Which checks are dispatched on each node.
+- Which configurations are unassigned, and why.
+- Which check instances are dispatched on each node, with their average execution time, last run, and status.
 
 ```text
 # kubectl exec <CLUSTER_AGENT_POD_NAME> -- agent clusterchecks
+...
+=== 3 agent(s) reporting ===
+Name                                            Type         Group     Workers   Utilization   Running checks   Last seen
+default-pool-bce5cd34-7g24.c.sandbox.internal   node-agent   general   -         -             0                3s ago
+default-pool-bce5cd34-slx3.c.sandbox.internal   node-agent   general   -         -             2                5s ago
+default-pool-bce5cd34-ttw6.c.sandbox.internal   node-agent   general   -         -             1                2s ago
+...
 
-=== 3 node-agents reporting ===
-Name                                            Running checks
-default-pool-bce5cd34-7g24.c.sandbox.internal   0
-default-pool-bce5cd34-slx3.c.sandbox.internal   2
-default-pool-bce5cd34-ttw6.c.sandbox.internal   1
+===== Checks on default-pool-bce5cd34-ttw6.c.sandbox.internal =====
+Check        Instance ID                              Avg exec   Last run   Status
+http_check   http_check:My service:5b948dee172af830   -          -          -
+
+Use --verbose to print the full check configurations.
+```
+
+The command accepts the following options:
+
+`--check <CHECK_NAME>`
+: Show only the configurations of one check.
+
+`--verbose`
+: Print the full check configurations, including their tags, and the execution stats of each instance when the node reports them.
+
+`--json`
+: Print the cluster check dispatching state as JSON. This output doesn't include endpoint checks.
+
+`--log_level <LEVEL>`
+: Print the command's own logs at the given level, such as `debug`. By default, the command prints no logs, even when `DD_LOG_LEVEL` is set in the Cluster Agent's environment.
+
+To compare the dispatched configuration with the output of `configcheck`, run the command with `--verbose`:
+
+```text
+# kubectl exec <CLUSTER_AGENT_POD_NAME> -- agent clusterchecks --verbose
 ...
 
 ===== Checks on default-pool-bce5cd34-ttw6.c.sandbox.internal =====
