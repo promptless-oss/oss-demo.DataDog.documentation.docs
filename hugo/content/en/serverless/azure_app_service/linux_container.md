@@ -197,7 +197,7 @@ To set up logging in your application, see [Node.js Log Collection][603]. To set
 
 ### Instrumentation
 
-Instrumentation is done using a sidecar container. This sidecar container collects traces, enhanced metrics, custom metrics, and logs from your main application container and sends them to Datadog. [Enhanced metrics][5] are distinguished with the `azure.app_services.enhanced.*` namespace.
+Instrumentation is done using a sidecar container. This sidecar container collects traces, enhanced metrics, custom metrics, and logs from your main application container and sends them to Datadog. [Enhanced metrics][5] are distinguished with the `azure.app_services.enhanced.*` namespace. The enhanced instance metric, `azure.app_services.enhanced.instance`, carries the `service`, `env`, and `version` tags from the `DD_SERVICE`, `DD_ENV`, and `DD_VERSION` environment variables, so you can group dashboards and alerts on it by service. It doesn't receive tags set with `DD_TAGS`.
 
 {{< tabs >}}
 {{% tab "Datadog CLI" %}}
