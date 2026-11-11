@@ -33,6 +33,8 @@ The canonical hostname is chosen according to the following rules. The first mat
 
 If the name is recognized as a common non-unique name (for example, `localhost.localdomain`), the current rule fails and passes through to the next.
 
+On macOS and Windows devices that run the Agent with `infrastructure_mode: end_user_device`, the Agent uses the device name when no hostname is set explicitly. Optionally, the Agent appends the device serial number. See [End User Device Monitoring device hostnames][6].
+
 See [Hostname detection logic][5] for details on how the Agent determines the hostname.
 
 ### AWS hosts
@@ -129,3 +131,4 @@ If you're upgrading from Agent v5 with `gce_updated_hostname` unset or set to fa
 [3]: /api/v1/hosts/
 [4]: https://app.datadoghq.com/infrastructure
 [5]: https://github.com/DataDog/datadog-agent/tree/main/pkg/util/hostname
+[6]: /infrastructure/end_user_device_monitoring/setup/#device-hostnames

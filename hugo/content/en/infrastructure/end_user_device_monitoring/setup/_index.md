@@ -52,6 +52,40 @@ The following permissions apply to the corresponding feature, not to basic End U
     - [macOS][14]
     - [Windows][15]
 
+## Device hostnames
+
+Datadog identifies each device by its Agent hostname, for example when you map devices to end users. On macOS and Windows devices that run the Agent with `infrastructure_mode: end_user_device`, the Agent uses the device name as the hostname:
+
+- **macOS**: The local hostname (`LocalHostName`), without the `.local` suffix. The Agent keeps the name exactly as macOS sets it, including its casing. When two devices on a network share a name, macOS adds a suffix such as `-2`, and the Agent keeps that suffix. To see this name, run `scutil --get LocalHostName` in Terminal.
+- **Windows**: The computer name.
+
+A hostname set explicitly with `hostname` or `hostname_file` in the [Agent configuration file][25] takes precedence over the device name. The following names can also replace the device name:
+
+- A Google Cloud or Azure hostname, on a VM in that cloud
+- An EC2 instance ID, on an AWS VM
+- The fully qualified domain name, when `hostname_fqdn` is enabled
+
+For the full resolution order, see [How does Datadog determine the Agent hostname?][27]
+
+The Agent reads the device name when it starts. If a user renames the device, the new hostname appears after the Agent restarts.
+
+### Add the serial number to the hostname
+
+Many devices share default names. To give each device a distinct hostname, set the Agent to append the device serial number to the device name. This setting is disabled by default.
+
+1. Add the following to the [Agent configuration file][25], or set the `DD_HOSTNAME_USE_SERIAL` environment variable to `true`:
+
+    ```yaml
+    hostname_use_serial: true
+    ```
+
+2. [Restart the Agent][26].
+3. Run the Agent `status` command and confirm that the hostname in the **Hostnames** section has the format `<DEVICE_NAME>-<SERIAL_NUMBER>`.
+
+The Agent converts the serial number to lowercase and replaces each run of characters other than ASCII letters and digits with a hyphen. Some firmware reports a placeholder, such as `Default String`, instead of a serial number. If the serial number is missing or is a placeholder, the Agent logs a warning and falls back to its standard hostname resolution.
+
+<div class="alert alert-warning">Changing the hostname, including by turning <code>hostname_use_serial</code> on or off, changes the device identity in Datadog. Previously collected data stays associated with the previous hostname.</div>
+
 ## Next steps
 
 To collect additional data from monitored devices, enable one or more of the following features or integrations:
@@ -93,3 +127,6 @@ Once devices start populating, start exploring End User Devices by:
 [20]: /integrations/battery/#data-collected
 [23]: /account_management/rbac/permissions/#custom-roles
 [24]: /account_management/rbac/permissions/#end-user-device-monitoring
+[25]: /agent/configuration/agent-configuration-files/#agent-main-configuration-file
+[26]: /agent/configuration/agent-commands/#restart-the-agent
+[27]: /agent/faq/how-datadog-agent-determines-the-hostname/
