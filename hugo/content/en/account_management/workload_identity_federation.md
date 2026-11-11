@@ -467,6 +467,55 @@ delegated_auth:
   org_uuid: <YOUR_ORG_UUID>
 ```
 
+### Dual ship with Workload Identity Federation
+
+When you [dual ship][7] data to another Datadog organization, the Agent can authenticate to it with Workload Identity Federation. To do so, replace the static API key in the additional endpoint with a delegated authentication directive:
+
+```text
+DELA[<ORG_UUID>, aws]
+DELA[<ORG_UUID>, aws, region=<AWS_REGION>]
+```
+
+- `<ORG_UUID>`: The UUID of the organization that receives the dual-shipped data
+- `aws`: The cloud provider. AWS is the only supported provider.
+- `region=<AWS_REGION>` (optional): The AWS region to use for STS authentication. If you omit it, the Agent uses `delegated_auth.aws.region` when set, or detects the region from the environment.
+
+The Agent exchanges the directive for a managed API key for that organization, and it starts sending data to the endpoint after the key resolves. Until then, the Agent sends nothing to that endpoint. If the Agent can't parse a directive, it logs a warning and sends no data to that endpoint. The receiving organization must have an [intake mapping](#configure-aws-intake-mapping-in-datadog) that matches the Agent's AWS role.
+
+You can use a directive in the following settings:
+
+| Setting | Data | Requirements |
+|---|---|---|
+| `additional_endpoints` | Metrics, events, and service checks | Agent version [AGENT_VERSION_TBD] or later |
+| `logs_config.additional_endpoints` | Logs | Agent version [AGENT_VERSION_TBD] or later. Requires HTTP transport, for example `logs_config.force_use_http: true`. With TCP transport, the Agent skips the endpoint. |
+| `process_config.additional_endpoints` | Live Processes and network connections | Agent version [AGENT_VERSION_TBD] or later |
+
+**Example**: Dual ship metrics, logs, and Live Processes data to a second organization:
+
+```yaml
+additional_endpoints:
+  "https://app.<DD_SITE>":
+  - "DELA[<SECOND_ORG_UUID>, aws]"
+
+logs_config:
+  force_use_http: true
+  additional_endpoints:
+  - api_key: "DELA[<SECOND_ORG_UUID>, aws]"
+    host: "agent-http-intake.logs.<DD_SITE>"
+    port: 443
+
+process_config:
+  additional_endpoints:
+    "https://process.<DD_SITE>":
+    - "DELA[<SECOND_ORG_UUID>, aws]"
+```
+
+Replace `<DD_SITE>` with the [Datadog site][8] of the second organization (for example, `datadoghq.eu`), and `<SECOND_ORG_UUID>` with its organization UUID.
+
+To check the Live Processes endpoints, run the Agent `status` command. In the **Process Endpoints** section, an endpoint whose directive hasn't resolved shows `pending` in place of the API key ending.
+
+<div class="alert alert-warning">On Linux and Windows, System Probe sends network connection data directly by default (<code>network_config.direct_send</code>), and it can't resolve delegated authentication directives. If <code>process_config.additional_endpoints</code> contains a directive, the network module of System Probe fails at startup. To use a directive with Cloud Network Monitoring, set <code>network_config.direct_send: false</code> in <code>system-probe.yaml</code> so the Process Agent sends network connection data, or remove the directive.</div>
+
 ## Further reading
 
 {{< partial name="whats-next/whats-next.html" >}}
@@ -477,3 +526,5 @@ delegated_auth:
 [4]: https://app.datadoghq.com/integrations/amazon-web-services
 [5]: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create.html
 [6]: https://app.datadoghq.com/organization-settings/workload-identity-federation
+[7]: /agent/configuration/dual-shipping/
+[8]: /getting_started/site/

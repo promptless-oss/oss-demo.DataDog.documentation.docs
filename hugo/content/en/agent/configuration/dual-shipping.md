@@ -27,6 +27,8 @@ This guide provides examples of Agent configurations for dual shipping different
 
 For a full list of network traffic destinations, see [Network Traffic][2].
 
+To authenticate to the additional organization with cloud credentials instead of a static API key for metrics, logs, or Live Processes, see [Dual ship with Workload Identity Federation][4].
+
 ## Metrics and service checks
 
 You can add the YAML configuration to your `datadog.yaml` or launch the Agent with the appropriate environment variables.
@@ -532,3 +534,4 @@ To avoid exposing your API key(s) in clear text inside the `ConfigMap`, you can 
 [1]: /observability_pipelines/
 [2]: /agent/configuration/network/
 [3]: /getting_started/site/#access-the-datadog-site
+[4]: /account_management/workload_identity_federation/#dual-ship-with-workload-identity-federation
